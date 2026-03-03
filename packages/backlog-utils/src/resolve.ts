@@ -45,10 +45,10 @@ export async function resolveByName<K extends string, T extends { id: number } &
   label: string,
 ): Promise<number> {
   const items = await client<T[]>(endpoint);
-  const item = items.find((i) => i[nameField] === value);
+  const item = items.find((i: T) => i[nameField] === value);
 
   if (!item) {
-    const names = items.map((i) => i[nameField]).join(", ");
+    const names = items.map((i: T) => i[nameField]).join(", ");
     throw new Error(`${label} "${value}" not found. Available: ${names}`);
   }
 
@@ -98,10 +98,10 @@ export async function resolveStatusId(
   name: string,
 ): Promise<number> {
   const items = await client<BacklogStatus[]>(`/projects/${projectKey}/statuses`);
-  const item = items.find((s) => s.name === name);
+  const item = items.find((s: BacklogStatus) => s.name === name);
 
   if (!item) {
-    const names = items.map((s) => s.name).join(", ");
+    const names = items.map((s: BacklogStatus) => s.name).join(", ");
     throw new Error(`Status "${name}" not found in project ${projectKey}. Available: ${names}`);
   }
 
@@ -151,10 +151,10 @@ export async function resolveIssueTypeId(
   name: string,
 ): Promise<number> {
   const items = await client<BacklogIssueType[]>(`/projects/${projectKey}/issueTypes`);
-  const item = items.find((t) => t.name === name);
+  const item = items.find((t: BacklogIssueType) => t.name === name);
 
   if (!item) {
-    const names = items.map((t) => t.name).join(", ");
+    const names = items.map((t: BacklogIssueType) => t.name).join(", ");
     throw new Error(`Issue type "${name}" not found in project ${projectKey}. Available: ${names}`);
   }
 

@@ -176,6 +176,14 @@
       "rules": {
         "import/no-unassigned-import": "off"
       }
+    },
+    {
+      // Test files reference mock functions as unbound methods (e.g., expect(obj.method))
+      // which is safe and expected in Vitest assertions
+      "files": ["**/*.test.ts"],
+      "rules": {
+        "typescript/unbound-method": "off"
+      }
     }
   ],
   "settings": {

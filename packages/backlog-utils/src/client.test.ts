@@ -23,7 +23,7 @@ describe("getClient", () => {
   });
 
   it("creates client with API Key authentication", async () => {
-    vi.mocked(resolveSpace).mockResolvedValue({
+    vi.mocked(resolveSpace).mockReturnValue({
       host: "example.backlog.com",
       auth: { method: "api-key" as const, apiKey: "test-key" },
     });
@@ -38,7 +38,7 @@ describe("getClient", () => {
   });
 
   it("creates client with OAuth authentication", async () => {
-    vi.mocked(resolveSpace).mockResolvedValue({
+    vi.mocked(resolveSpace).mockReturnValue({
       host: "example.backlog.com",
       auth: {
         method: "oauth" as const,
@@ -56,7 +56,7 @@ describe("getClient", () => {
   });
 
   it("passes explicit host to resolveSpace", async () => {
-    vi.mocked(resolveSpace).mockResolvedValue({
+    vi.mocked(resolveSpace).mockReturnValue({
       host: "custom.backlog.com",
       auth: { method: "api-key" as const, apiKey: "key" },
     });
@@ -67,7 +67,7 @@ describe("getClient", () => {
   });
 
   it("prioritizes configured space over BACKLOG_API_KEY", async () => {
-    vi.mocked(resolveSpace).mockResolvedValue({
+    vi.mocked(resolveSpace).mockReturnValue({
       host: "configured.backlog.com",
       auth: { method: "api-key" as const, apiKey: "configured-key" },
     });
@@ -84,7 +84,7 @@ describe("getClient", () => {
   });
 
   it("falls back to BACKLOG_API_KEY and BACKLOG_SPACE env vars", async () => {
-    vi.mocked(resolveSpace).mockResolvedValue(null);
+    vi.mocked(resolveSpace).mockReturnValue(null);
     process.env["BACKLOG_API_KEY"] = "env-api-key";
     process.env["BACKLOG_SPACE"] = "env.backlog.com";
 
@@ -98,7 +98,7 @@ describe("getClient", () => {
   });
 
   it("falls back to BACKLOG_API_KEY with explicit host", async () => {
-    vi.mocked(resolveSpace).mockResolvedValue(null);
+    vi.mocked(resolveSpace).mockReturnValue(null);
     process.env["BACKLOG_API_KEY"] = "env-api-key";
 
     const result = await getClient("explicit.backlog.com");
@@ -111,7 +111,7 @@ describe("getClient", () => {
   });
 
   it("calls process.exit(1) when BACKLOG_API_KEY set but no BACKLOG_SPACE", async () => {
-    vi.mocked(resolveSpace).mockResolvedValue(null);
+    vi.mocked(resolveSpace).mockReturnValue(null);
     process.env["BACKLOG_API_KEY"] = "env-api-key";
     const mockExit = spyOnProcessExit();
 
@@ -122,7 +122,7 @@ describe("getClient", () => {
   });
 
   it("calls process.exit(1) when no space and no env vars configured", async () => {
-    vi.mocked(resolveSpace).mockResolvedValue(null);
+    vi.mocked(resolveSpace).mockReturnValue(null);
     const mockExit = spyOnProcessExit();
 
     await getClient();

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { MockInstance } from "vitest";
 import { filterFields, outputResult, pickFields } from "#/output.js";
 
 describe("pickFields", () => {
@@ -47,7 +48,7 @@ describe("filterFields", () => {
 });
 
 describe("outputResult", () => {
-  let writeSpy: ReturnType<typeof vi.spyOn>;
+  let writeSpy: MockInstance;
   let originalIsTTY: boolean | undefined;
 
   beforeEach(() => {
