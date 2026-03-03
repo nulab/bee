@@ -178,22 +178,13 @@ describe("findSpace", () => {
 
 describe("resolveSpace", () => {
   beforeEach(() => {
-    delete process.env["BACKLOG_SPACE"];
-  });
-
-  it("returns space matching explicit host", () => {
-    const space = makeSpace("explicit.backlog.com");
-    mockLoadConfig.mockReturnValue(makeConfig([space]));
-
-    const result = resolveSpace("explicit.backlog.com");
-
-    expect(result).toEqual(space);
+    delete process.env.BACKLOG_SPACE;
   });
 
   it("returns space matching BACKLOG_SPACE env var", () => {
     const space = makeSpace("env.backlog.com");
     mockLoadConfig.mockReturnValue(makeConfig([space]));
-    process.env["BACKLOG_SPACE"] = "env.backlog.com";
+    process.env.BACKLOG_SPACE = "env.backlog.com";
 
     const result = resolveSpace();
 
@@ -209,17 +200,6 @@ describe("resolveSpace", () => {
     expect(result).toEqual(space);
   });
 
-  it("prioritizes explicit host over env and default", () => {
-    const explicit = makeSpace("explicit.backlog.com");
-    const env = makeSpace("env.backlog.com");
-    mockLoadConfig.mockReturnValue(makeConfig([explicit, env], "env.backlog.com"));
-    process.env["BACKLOG_SPACE"] = "env.backlog.com";
-
-    const result = resolveSpace("explicit.backlog.com");
-
-    expect(result).toEqual(explicit);
-  });
-
   it("returns null when no host is resolvable", () => {
     mockLoadConfig.mockReturnValue(makeConfig([]));
 
@@ -228,35 +208,10 @@ describe("resolveSpace", () => {
     expect(result).toBeNull();
   });
 
-  it("returns null when host is specified but not found", () => {
-    mockLoadConfig.mockReturnValue(makeConfig([]));
-
-    const result = resolveSpace("missing.backlog.com");
-
-    expect(result).toBeNull();
-  });
-
-  it("resolves space with shorthand name", () => {
-    const space = makeSpace("myspace.backlog.com");
-    mockLoadConfig.mockReturnValue(makeConfig([space]));
-
-    const result = resolveSpace("myspace");
-
-    expect(result).toEqual(space);
-  });
-
-  it("throws when shorthand matches multiple spaces", () => {
-    const spaceCom = makeSpace("myspace.backlog.com");
-    const spaceJp = makeSpace("myspace.backlog.jp");
-    mockLoadConfig.mockReturnValue(makeConfig([spaceCom, spaceJp]));
-
-    expect(() => resolveSpace("myspace")).toThrow('Ambiguous space name "myspace"');
-  });
-
   it("resolves shorthand from BACKLOG_SPACE env var", () => {
     const space = makeSpace("envspace.backlog.com");
     mockLoadConfig.mockReturnValue(makeConfig([space]));
-    process.env["BACKLOG_SPACE"] = "envspace";
+    process.env.BACKLOG_SPACE = "envspace";
 
     const result = resolveSpace();
 

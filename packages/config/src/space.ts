@@ -35,7 +35,7 @@ const updateSpaceAuth = (host: string, auth: RcAuth): void => {
   const index = config.spaces.findIndex((space) => space.host === host);
   const space = config.spaces[index];
 
-  if (index === -1 || space === undefined) {
+  if (index === -1) {
     throw new Error(`Space with host "${host}" not found in configuration.`);
   }
 
@@ -54,7 +54,7 @@ const findSpace = (spaces: readonly RcSpace[], host: string): RcSpace | null => 
   const prefixMatches = spaces.filter((s) => s.host.startsWith(`${host}.`));
 
   const [singleMatch] = prefixMatches;
-  if (singleMatch && prefixMatches.length === 1) {
+  if (prefixMatches.length === 1) {
     return singleMatch;
   }
 
@@ -66,9 +66,9 @@ const findSpace = (spaces: readonly RcSpace[], host: string): RcSpace | null => 
   return null;
 };
 
-const resolveSpace = (explicitHost?: string): RcSpace | null => {
+const resolveSpace = (): RcSpace | null => {
   const config = loadConfig();
-  const host = explicitHost ?? process.env["BACKLOG_SPACE"] ?? config.defaultSpace;
+  const host = process.env.BACKLOG_SPACE ?? config.defaultSpace;
 
   if (!host) {
     return null;
