@@ -6,13 +6,16 @@
     "postinstall": "lefthook install",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
+    "lint:type-aware": "oxlint --type-aware",
+    "typecheck": "oxlint --type-aware --type-check",
     "format": "oxfmt",
     "format:check": "oxfmt --check"
   },
   "devDependencies": {
     "lefthook": "^2.1.2",
     "oxfmt": "^0.36.0",
-    "oxlint": "^1.51.0"
+    "oxlint": "^1.51.0",
+    "oxlint-tsgolint": "^0.16.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

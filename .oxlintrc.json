@@ -81,6 +81,30 @@
     // obj.prop instead of obj["prop"]
     "typescript/dot-notation": "warn",
 
+    // ── TypeScript: Type-aware rules (require --type-aware flag) ──
+    // Disallow floating (unhandled) Promises
+    "typescript/no-floating-promises": "error",
+    // Disallow Promises in places not designed to handle them
+    "typescript/no-misused-promises": "error",
+    // Disallow awaiting a value that is not a Thenable
+    "typescript/await-thenable": "error",
+    // Require Promise-like statements to be handled appropriately
+    "typescript/return-await": "warn",
+    // Disallow type assertions that do not change the type of an expression
+    "typescript/no-unnecessary-type-assertion": "warn",
+    // Disallow conditionals where the type is always truthy or always falsy
+    "typescript/no-unnecessary-condition": "warn",
+    // Disallow calling a function with a value with type `any`
+    "typescript/no-unsafe-argument": "warn",
+    // Disallow assigning a value with type `any` to variables and properties
+    "typescript/no-unsafe-assignment": "warn",
+    // Disallow calling a value with type `any`
+    "typescript/no-unsafe-call": "warn",
+    // Disallow member access on a value with type `any`
+    "typescript/no-unsafe-member-access": "warn",
+    // Disallow returning a value with type `any` from a function
+    "typescript/no-unsafe-return": "warn",
+
     // ── Unicorn: Style overrides ────────────────────────────────
     // Don't ban null (external API compatibility)
     "unicorn/no-null": "off",
@@ -122,6 +146,8 @@
     // ── Import: Restriction (individual enable) ──────────────────
     // Named exports only, no default export
     "import/no-default-export": "warn",
+    // Conflicts with no-default-export; disable the opposite rule enabled by categories.style
+    "import/no-named-export": "off",
     // ESM only, no require/module.exports
     "import/no-commonjs": "warn"
   },
