@@ -1,7 +1,7 @@
 import type { $Fetch } from "ofetch";
 import { ofetch } from "ofetch";
 import { joinURL } from "ufo";
-import { BacklogRateLimitError, formatResetTime } from "#/rate-limit.ts";
+import { BacklogRateLimitError, formatResetTime } from "#/rate-limit.js";
 
 export type BacklogClientConfig = {
   host: string;

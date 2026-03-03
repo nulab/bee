@@ -45,6 +45,9 @@ importers:
       '@repo/tsconfigs':
         specifier: workspace:*
         version: link:../tsconfigs
+      '@types/node':
+        specifier: ^22.19.13
+        version: 22.19.13
       unbuild:
         specifier: ^3.5.0
         version: 3.6.1(typescript@6.0.0-dev.20260303)
