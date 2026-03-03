@@ -127,6 +127,16 @@ importers:
         specifier: workspace:*
         version: link:../tsconfigs
 
+  packages/test-utils:
+    dependencies:
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.13)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
+    devDependencies:
+      '@repo/tsconfigs':
+        specifier: workspace:*
+        version: link:../tsconfigs
+
   packages/tsconfigs:
     devDependencies:
       '@tsconfig/node-lts':
