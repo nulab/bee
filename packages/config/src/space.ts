@@ -2,7 +2,7 @@ import type { RcAuth, RcSpace } from "#/schema.js";
 
 import { loadConfig, writeConfig } from "#/config.js";
 
-export const addSpace = (space: RcSpace): void => {
+const addSpace = (space: RcSpace): void => {
   const config = loadConfig();
   const exists = config.spaces.some((s) => s.host === space.host);
 
@@ -16,7 +16,7 @@ export const addSpace = (space: RcSpace): void => {
   });
 };
 
-export const removeSpace = (host: string): void => {
+const removeSpace = (host: string): void => {
   const config = loadConfig();
   const index = config.spaces.findIndex((space) => space.host === host);
 
@@ -30,7 +30,7 @@ export const removeSpace = (host: string): void => {
   writeConfig({ ...config, spaces, defaultSpace });
 };
 
-export const updateSpaceAuth = (host: string, auth: RcAuth): void => {
+const updateSpaceAuth = (host: string, auth: RcAuth): void => {
   const config = loadConfig();
   const index = config.spaces.findIndex((space) => space.host === host);
   const space = config.spaces[index];
@@ -45,7 +45,7 @@ export const updateSpaceAuth = (host: string, auth: RcAuth): void => {
   });
 };
 
-export const findSpace = (spaces: readonly RcSpace[], host: string): RcSpace | null => {
+const findSpace = (spaces: readonly RcSpace[], host: string): RcSpace | null => {
   const exactMatch = spaces.find((s) => s.host === host);
   if (exactMatch) {
     return exactMatch;
@@ -66,7 +66,7 @@ export const findSpace = (spaces: readonly RcSpace[], host: string): RcSpace | n
   return null;
 };
 
-export const resolveSpace = (explicitHost?: string): RcSpace | null => {
+const resolveSpace = (explicitHost?: string): RcSpace | null => {
   const config = loadConfig();
   const host = explicitHost ?? process.env["BACKLOG_SPACE"] ?? config.defaultSpace;
 
@@ -76,3 +76,5 @@ export const resolveSpace = (explicitHost?: string): RcSpace | null => {
 
   return findSpace(config.spaces, host);
 };
+
+export { addSpace, findSpace, removeSpace, resolveSpace, updateSpaceAuth };
