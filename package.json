@@ -8,13 +8,15 @@
     "lint:fix": "oxlint --fix",
     "typecheck": "oxlint --type-aware --type-check --ignore-pattern 'apps/docs'",
     "format": "oxfmt",
-    "format:check": "oxfmt --check"
+    "format:check": "oxfmt --check",
+    "test": "vitest run"
   },
   "devDependencies": {
     "lefthook": "^2.1.2",
     "oxfmt": "^0.36.0",
     "oxlint": "^1.51.0",
-    "oxlint-tsgolint": "^0.16.0"
+    "oxlint-tsgolint": "^0.16.0",
+    "vitest": "^4.0.18"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
