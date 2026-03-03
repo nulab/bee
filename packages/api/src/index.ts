@@ -43,3 +43,10 @@ export type {
   BacklogWikiTag,
 } from "#/types.js";
 export { DEFAULT_PRIORITY_ID, PR_STATUS, PRIORITY, RESOLUTION } from "#/types.js";
+export {
+  type ExchangeAuthorizationCodeParams,
+  type OAuthTokenResponse,
+  type RefreshAccessTokenParams,
+  exchangeAuthorizationCode,
+  refreshAccessToken,
+} from "#/oauth.js";
