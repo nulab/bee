@@ -20,6 +20,17 @@ describe("promptRequired", () => {
     expect(consola.prompt).not.toHaveBeenCalled();
   });
 
+  it("exits with error when existing value is an empty string", async () => {
+    const mockExit = spyOnProcessExit();
+
+    await promptRequired("Label:", "");
+
+    expect(consola.error).toHaveBeenCalledWith("Label is required.");
+    expect(mockExit).toHaveBeenCalledWith(1);
+    expect(consola.prompt).not.toHaveBeenCalled();
+    mockExit.mockRestore();
+  });
+
   it("shows prompt when no existing value is provided", async () => {
     vi.mocked(consola.prompt).mockResolvedValue("user-input" as never);
 

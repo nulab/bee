@@ -6,8 +6,12 @@ const promptRequired = async (
   existing?: string,
   options?: { placeholder?: string },
 ): Promise<string> => {
-  if (existing) {
-    return existing;
+  if (existing !== undefined) {
+    if (existing) {
+      return existing;
+    }
+    consola.error(`${label.replace(/:$/, "")} is required.`);
+    return process.exit(1);
   }
 
   if (isNoInput()) {

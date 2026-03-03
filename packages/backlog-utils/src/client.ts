@@ -86,12 +86,11 @@ const getClient = async (
           consola.error(
             "OAuth session has expired. Run `bl auth login -m oauth` to re-authenticate.",
           );
-        } finally {
-          refreshPromise = null;
         }
       })();
 
       await refreshPromise;
+      refreshPromise = null;
       return succeeded;
     };
 

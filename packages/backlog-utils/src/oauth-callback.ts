@@ -19,6 +19,11 @@ const ERROR_HTML = `<!DOCTYPE html>
 <p>Something went wrong. Please try again.</p>
 </body></html>`;
 
+type CallbackResult = {
+  code: string;
+  state: string;
+};
+
 type CallbackServer = {
   port: number;
   waitForCallback: (expectedState: string) => Promise<string>;
@@ -36,7 +41,7 @@ const respondHtml = (res: ServerResponse, html: string, statusCode = 200): void 
  * Listens on port 5033 (Nulab's stock code).
  */
 const startCallbackServer = (): CallbackServer => {
-  let resolveCode: ((code: string) => void) | null = null;
+  let resolveCode: ((result: CallbackResult) => void) | null = null;
   let rejectCode: ((error: Error) => void) | null = null;
 
   const server: Server = createServer((req, res) => {
@@ -64,7 +69,7 @@ const startCallbackServer = (): CallbackServer => {
       return;
     }
 
-    resolveCode?.(`${code}:${state}`);
+    resolveCode?.({ code, state });
     respondHtml(res, SUCCESS_HTML);
   });
 
@@ -79,13 +84,10 @@ const startCallbackServer = (): CallbackServer => {
           server.close();
         }, CALLBACK_TIMEOUT_MS);
 
-        resolveCode = (codeAndState: string) => {
+        resolveCode = (result: CallbackResult) => {
           clearTimeout(timeout);
-          const separatorIndex = codeAndState.indexOf(":");
-          const code = codeAndState.slice(0, separatorIndex);
-          const state = codeAndState.slice(separatorIndex + 1);
-          if (state === expectedState) {
-            resolve(code);
+          if (result.state === expectedState) {
+            resolve(result.code);
           } else {
             reject(new Error("OAuth state mismatch — possible CSRF attack"));
           }
