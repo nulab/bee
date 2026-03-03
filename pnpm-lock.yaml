@@ -42,6 +42,9 @@ importers:
         specifier: ^1.5.4
         version: 1.6.3
     devDependencies:
+      '@repo/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@repo/tsconfigs':
         specifier: workspace:*
         version: link:../tsconfigs
@@ -89,6 +92,9 @@ importers:
         specifier: ^1.0.0
         version: 1.2.0(typescript@5.9.3)
     devDependencies:
+      '@repo/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@repo/tsconfigs':
         specifier: workspace:*
         version: link:../tsconfigs
@@ -123,6 +129,16 @@ importers:
       '@hey-api/openapi-ts':
         specifier: ^0.93.1
         version: 0.93.1(magicast@0.5.2)(typescript@6.0.0-dev.20260303)
+      '@repo/tsconfigs':
+        specifier: workspace:*
+        version: link:../tsconfigs
+
+  packages/test-utils:
+    dependencies:
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.13)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
+    devDependencies:
       '@repo/tsconfigs':
         specifier: workspace:*
         version: link:../tsconfigs
