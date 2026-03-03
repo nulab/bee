@@ -2,12 +2,20 @@
   "private": true,
   "license": "MIT",
   "repository": "nulab/backlog-cli",
-  "pnpm": {
-    "onlyBuiltDependencies": ["lefthook"]
+  "scripts": {
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
   },
   "devDependencies": {
     "lefthook": "^2.1.2",
     "oxfmt": "^0.36.0",
     "oxlint": "^1.51.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "lefthook"
+    ]
   }
 }
