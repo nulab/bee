@@ -3,6 +3,7 @@
   "license": "MIT",
   "repository": "nulab/backlog-cli",
   "scripts": {
+    "postinstall": "lefthook install",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
