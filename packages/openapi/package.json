@@ -1,5 +1,5 @@
 {
-  "name": "@repo/api-spec",
+  "name": "@repo/openapi",
   "version": "0.0.0",
   "private": true,
   "description": "Backlog API v2 TypeSpec definitions",

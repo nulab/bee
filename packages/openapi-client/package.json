@@ -1,0 +1,25 @@
+{
+  "name": "@repo/openapi-client",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Generated TypeScript client for Backlog API v2",
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "openapi-ts",
+    "clean": "rm -rf src/generated"
+  },
+  "dependencies": {
+    "@repo/openapi": "workspace:*",
+    "valibot": "^1.2.0"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "^0.93.1",
+    "@repo/tsconfigs": "workspace:*"
+  }
+}
