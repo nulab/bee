@@ -138,3 +138,9 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# Claude Code plans
+.claude/plans/
+
+# Lefthook local overrides
+lefthook-local.yml
+
