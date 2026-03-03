@@ -108,3 +108,4 @@ Plan files (implementation plans, design docs, etc.) go in `.claude/plans/`.
 - **Commits**: Always in English, following [Conventional Commits](https://www.conventionalcommits.org/). Use `feat` / `fix` only when it genuinely affects semantic versioning — prefer `chore`, `refactor`, `docs`, `test`, `ci`, `build` for non-semver changes.
 - **PR / Issue titles**: Always in English.
 - **PR / Issue body**: English by default unless otherwise specified.
+- **PR assignee**: Always assign the user who requested the PR creation.
