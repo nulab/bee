@@ -101,6 +101,8 @@ packages/tsconfigs — Shared TypeScript base config
 
 Do NOT manually run lint or format during development. The pre-commit hook (lefthook) automatically runs `oxlint --fix` and `oxfmt` on staged files at commit time. Only `typecheck` and `test` need to be run manually when verifying changes.
 
+**`lint` vs `typecheck`**: Both use oxlint. `typecheck` (`--type-aware --type-check`) is a strict superset of `lint` — it runs all lint rules plus type-aware rules. Do NOT run both; run `typecheck` alone when verifying changes. `lint` exists only for the fast pre-commit hook (no type resolution overhead).
+
 Plan files (implementation plans, design docs, etc.) go in `.claude/plans/`.
 
 ## Commit & PR Conventions

@@ -24,9 +24,6 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm exec oxlint --max-warnings 0
-
       - name: Generate OpenAPI client
         run: pnpm --filter @repo/openapi build && pnpm --filter @repo/openapi-client build
 
@@ -37,8 +34,8 @@ jobs:
         if: always() && github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2
 
-      - name: Type check
-        run: pnpm run typecheck
+      - name: Lint & Type check
+        run: pnpm exec oxlint --type-aware --type-check --ignore-pattern 'apps/docs' --max-warnings 0
 
       - name: Format check
         run: pnpm run format:check
