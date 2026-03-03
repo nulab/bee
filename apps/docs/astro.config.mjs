@@ -12,10 +12,10 @@ export default defineConfig({
           href: "https://github.com/nulab/backlog-cli",
         },
         {
-          "icon": "npm",
-          "label": "npm",
-          "href": "https://www.npmjs.com/package/@nulab/backlog-cli",
-        }
+          icon: "npm",
+          label: "npm",
+          href: "https://www.npmjs.com/package/@nulab/backlog-cli",
+        },
       ],
       sidebar: [
         {
