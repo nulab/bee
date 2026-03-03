@@ -6,9 +6,17 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
-  lint-and-format:
+  ci:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
@@ -17,13 +25,17 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm run lint
+        run: pnpm exec oxlint --max-warnings 0
 
       - name: Generate OpenAPI client
         run: pnpm --filter @repo/openapi build && pnpm --filter @repo/openapi-client build
 
       - name: Test
-        run: pnpm test
+        run: pnpm exec vitest run --coverage.enabled
+
+      - name: Report coverage
+        if: always() && github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
 
       - name: Type check
         run: pnpm run typecheck
