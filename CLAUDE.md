@@ -62,16 +62,16 @@ import { createClient } from "../../client.js";
 ## Architecture
 
 ```
+apps/cli           — CLI entry point (citty framework, consola logging)
 apps/docs          — Astro Starlight documentation site
 packages/api       — Backlog API client (ofetch, rate-limit handling)
-packages/cli       — CLI entry point (citty framework, consola logging)
 packages/api-spec  — TypeSpec definitions for Backlog API v2
 packages/tsconfigs — Shared TypeScript base config
 ```
 
 `@repo/api` exposes `createClient(config)` which returns an ofetch `$Fetch` instance preconfigured with Backlog API v2 base URL, auth, and rate-limit error handling.
 
-`@repo/cli` uses citty's `defineCommand` / `runMain` with subcommand registration.
+`@nulab/backlog-cli` uses citty's `defineCommand` / `runMain` with subcommand registration.
 
 ## Code Conventions (enforced by oxlint)
 
@@ -108,4 +108,4 @@ Plan files (implementation plans, design docs, etc.) go in `.claude/plans/`.
 - **Commits**: Always in English, following [Conventional Commits](https://www.conventionalcommits.org/). Use `feat` / `fix` only when it genuinely affects semantic versioning — prefer `chore`, `refactor`, `docs`, `test`, `ci`, `build` for non-semver changes.
 - **PR / Issue titles**: Always in English.
 - **PR / Issue body**: English by default unless otherwise specified.
-- **PR assignee**: Always assign the user who requested the PR creation.
+- **PR assignee**: Always use `--assignee @me` to assign the PR to the current user.
