@@ -39,10 +39,6 @@ const getClient = async (
     }
 
     // OAuth: Create client with automatic token refresh on 401
-    if (resolved.auth.method !== "oauth") {
-      throw new Error("Expected OAuth authentication");
-    }
-
     const oauthAuth = resolved.auth;
     let currentAccessToken = oauthAuth.accessToken;
     let refreshPromise: Promise<void> | null = null;
@@ -131,7 +127,7 @@ const getClient = async (
             return process.exit(1);
           }
           // Retry with new token
-          return await baseClient(url, options);
+          return baseClient(url, options);
         }
         throw error;
       }
@@ -144,8 +140,8 @@ const getClient = async (
   }
 
   // Fallback: BACKLOG_API_KEY + BACKLOG_SPACE environment variables
-  const envApiKey = process.env["BACKLOG_API_KEY"];
-  const envHost = space ?? process.env["BACKLOG_SPACE"];
+  const envApiKey = process.env.BACKLOG_API_KEY;
+  const envHost = space ?? process.env.BACKLOG_SPACE;
 
   if (envApiKey && envHost) {
     return {

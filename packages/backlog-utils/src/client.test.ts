@@ -17,8 +17,8 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 describe("getClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    delete process.env["BACKLOG_API_KEY"];
-    delete process.env["BACKLOG_SPACE"];
+    delete process.env.BACKLOG_API_KEY;
+    delete process.env.BACKLOG_SPACE;
   });
 
   it("creates client with API Key authentication", async () => {
@@ -70,8 +70,8 @@ describe("getClient", () => {
       host: "configured.backlog.com",
       auth: { method: "api-key" as const, apiKey: "configured-key" },
     });
-    process.env["BACKLOG_API_KEY"] = "env-key";
-    process.env["BACKLOG_SPACE"] = "configured.backlog.com";
+    process.env.BACKLOG_API_KEY = "env-key";
+    process.env.BACKLOG_SPACE = "configured.backlog.com";
 
     const result = await getClient();
 
@@ -84,8 +84,8 @@ describe("getClient", () => {
 
   it("falls back to BACKLOG_API_KEY and BACKLOG_SPACE env vars", async () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
-    process.env["BACKLOG_API_KEY"] = "env-api-key";
-    process.env["BACKLOG_SPACE"] = "env.backlog.com";
+    process.env.BACKLOG_API_KEY = "env-api-key";
+    process.env.BACKLOG_SPACE = "env.backlog.com";
 
     const result = await getClient();
 
@@ -98,7 +98,7 @@ describe("getClient", () => {
 
   it("falls back to BACKLOG_API_KEY with explicit host", async () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
-    process.env["BACKLOG_API_KEY"] = "env-api-key";
+    process.env.BACKLOG_API_KEY = "env-api-key";
 
     const result = await getClient("explicit.backlog.com");
 
@@ -111,7 +111,7 @@ describe("getClient", () => {
 
   it("calls process.exit(1) when BACKLOG_API_KEY set but no BACKLOG_SPACE", async () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
-    process.env["BACKLOG_API_KEY"] = "env-api-key";
+    process.env.BACKLOG_API_KEY = "env-api-key";
     const mockExit = spyOnProcessExit();
 
     await getClient();

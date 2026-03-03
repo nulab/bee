@@ -9,7 +9,7 @@ describe("startCallbackServer", () => {
   let server: CallbackServer;
 
   afterEach(() => {
-    server?.stop();
+    server.stop();
   });
 
   it("returns an object with port, waitForCallback, stop", () => {

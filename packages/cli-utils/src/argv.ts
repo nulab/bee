@@ -10,14 +10,12 @@ const extractGlobalArgs = (argv: string[]): ExtractedArgs => {
   let noInput = false;
 
   for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i] as string;
+    const arg = argv[i];
 
-    if (arg === "--space" || arg === "-s") {
+    if (arg === "--space") {
       space = argv[++i];
     } else if (arg.startsWith("--space=")) {
       space = arg.slice("--space=".length);
-    } else if (arg.startsWith("-s=")) {
-      space = arg.slice("-s=".length);
     } else if (arg === "--no-input") {
       noInput = true;
     } else {
@@ -28,7 +26,7 @@ const extractGlobalArgs = (argv: string[]): ExtractedArgs => {
   return { space, noInput, argv: result };
 };
 
-const isNoInput = (): boolean => process.env["BACKLOG_NO_INPUT"] === "1";
+const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
 
 export type { ExtractedArgs };
 export { extractGlobalArgs, isNoInput };

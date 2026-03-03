@@ -10,7 +10,7 @@ const CONFIG_DIR_NAME = "backlog";
 const CONFIG_FILE_NAME = ".backlogrc";
 
 const resolveConfigDir = (): string => {
-  const xdgConfigHome = process.env["XDG_CONFIG_HOME"];
+  const xdgConfigHome = process.env.XDG_CONFIG_HOME;
   const base = xdgConfigHome ?? join(homedir(), ".config");
   return join(base, CONFIG_DIR_NAME);
 };

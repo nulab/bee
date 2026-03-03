@@ -11,7 +11,7 @@ describe("promptRequired", () => {
   });
 
   afterEach(() => {
-    delete process.env["BACKLOG_NO_INPUT"];
+    delete process.env.BACKLOG_NO_INPUT;
   });
 
   it("returns existing value without prompting", async () => {
@@ -77,7 +77,7 @@ describe("promptRequired", () => {
   });
 
   it("returns existing value without prompting in --no-input mode", async () => {
-    process.env["BACKLOG_NO_INPUT"] = "1";
+    process.env.BACKLOG_NO_INPUT = "1";
 
     const result = await promptRequired("Label:", "existing-value");
     expect(result).toBe("existing-value");
@@ -85,7 +85,7 @@ describe("promptRequired", () => {
   });
 
   it("exits with error when value is missing in --no-input mode", async () => {
-    process.env["BACKLOG_NO_INPUT"] = "1";
+    process.env.BACKLOG_NO_INPUT = "1";
     const mockExit = spyOnProcessExit();
 
     await promptRequired("Project key:");
@@ -105,7 +105,7 @@ describe("confirmOrExit", () => {
   });
 
   afterEach(() => {
-    delete process.env["BACKLOG_NO_INPUT"];
+    delete process.env.BACKLOG_NO_INPUT;
   });
 
   it("returns true without prompting when skipConfirm is true", async () => {
@@ -148,7 +148,7 @@ describe("confirmOrExit", () => {
   });
 
   it("returns true without prompting when skipConfirm is true in --no-input mode", async () => {
-    process.env["BACKLOG_NO_INPUT"] = "1";
+    process.env.BACKLOG_NO_INPUT = "1";
 
     const result = await confirmOrExit("Are you sure?", true);
     expect(result).toBeTruthy();
@@ -156,7 +156,7 @@ describe("confirmOrExit", () => {
   });
 
   it("exits with error when skipConfirm is not specified in --no-input mode", async () => {
-    process.env["BACKLOG_NO_INPUT"] = "1";
+    process.env.BACKLOG_NO_INPUT = "1";
     const mockExit = spyOnProcessExit();
 
     await confirmOrExit("Are you sure?");

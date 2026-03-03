@@ -14,18 +14,6 @@ describe("extractGlobalArgs", () => {
     expect(result.argv).toEqual(["issue", "list"]);
   });
 
-  it("extracts space with -s value format", () => {
-    const result = extractGlobalArgs(["-s", "example.backlog.com", "issue", "list"]);
-    expect(result.space).toBe("example.backlog.com");
-    expect(result.argv).toEqual(["issue", "list"]);
-  });
-
-  it("extracts space with -s=value format", () => {
-    const result = extractGlobalArgs(["-s=example.backlog.com", "issue", "list"]);
-    expect(result.space).toBe("example.backlog.com");
-    expect(result.argv).toEqual(["issue", "list"]);
-  });
-
   it("returns undefined when --space is not provided", () => {
     const result = extractGlobalArgs(["issue", "list", "--project", "PROJ"]);
     expect(result.space).toBeUndefined();
@@ -56,12 +44,6 @@ describe("extractGlobalArgs", () => {
     expect(result.argv).toEqual(["issue", "list"]);
   });
 
-  it("returns undefined when -s is at the end of argv without a value", () => {
-    const result = extractGlobalArgs(["issue", "list", "-s"]);
-    expect(result.space).toBeUndefined();
-    expect(result.argv).toEqual(["issue", "list"]);
-  });
-
   it("preserves the order of other arguments", () => {
     const result = extractGlobalArgs([
       "issue",
@@ -75,12 +57,6 @@ describe("extractGlobalArgs", () => {
     ]);
     expect(result.space).toBe("example.backlog.com");
     expect(result.argv).toEqual(["issue", "create", "--project", "PROJ", "--title", "test"]);
-  });
-
-  it("uses the last value when --space and -s are mixed", () => {
-    const result = extractGlobalArgs(["--space", "first.backlog.com", "-s", "last.backlog.com"]);
-    expect(result.space).toBe("last.backlog.com");
-    expect(result.argv).toEqual([]);
   });
 
   it("returns empty string when --space= is specified with empty value", () => {
@@ -116,21 +92,21 @@ describe("extractGlobalArgs", () => {
 
 describe("isNoInput", () => {
   afterEach(() => {
-    delete process.env["BACKLOG_NO_INPUT"];
+    delete process.env.BACKLOG_NO_INPUT;
   });
 
   it("returns true when BACKLOG_NO_INPUT is '1'", () => {
-    process.env["BACKLOG_NO_INPUT"] = "1";
+    process.env.BACKLOG_NO_INPUT = "1";
     expect(isNoInput()).toBeTruthy();
   });
 
   it("returns false when BACKLOG_NO_INPUT is not set", () => {
-    delete process.env["BACKLOG_NO_INPUT"];
+    delete process.env.BACKLOG_NO_INPUT;
     expect(isNoInput()).toBeFalsy();
   });
 
   it("returns false when BACKLOG_NO_INPUT is '0'", () => {
-    process.env["BACKLOG_NO_INPUT"] = "0";
+    process.env.BACKLOG_NO_INPUT = "0";
     expect(isNoInput()).toBeFalsy();
   });
 });

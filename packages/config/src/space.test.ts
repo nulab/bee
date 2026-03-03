@@ -178,7 +178,7 @@ describe("findSpace", () => {
 
 describe("resolveSpace", () => {
   beforeEach(() => {
-    delete process.env["BACKLOG_SPACE"];
+    delete process.env.BACKLOG_SPACE;
   });
 
   it("returns space matching explicit host", () => {
@@ -193,7 +193,7 @@ describe("resolveSpace", () => {
   it("returns space matching BACKLOG_SPACE env var", () => {
     const space = makeSpace("env.backlog.com");
     mockLoadConfig.mockReturnValue(makeConfig([space]));
-    process.env["BACKLOG_SPACE"] = "env.backlog.com";
+    process.env.BACKLOG_SPACE = "env.backlog.com";
 
     const result = resolveSpace();
 
@@ -213,7 +213,7 @@ describe("resolveSpace", () => {
     const explicit = makeSpace("explicit.backlog.com");
     const env = makeSpace("env.backlog.com");
     mockLoadConfig.mockReturnValue(makeConfig([explicit, env], "env.backlog.com"));
-    process.env["BACKLOG_SPACE"] = "env.backlog.com";
+    process.env.BACKLOG_SPACE = "env.backlog.com";
 
     const result = resolveSpace("explicit.backlog.com");
 
@@ -256,7 +256,7 @@ describe("resolveSpace", () => {
   it("resolves shorthand from BACKLOG_SPACE env var", () => {
     const space = makeSpace("envspace.backlog.com");
     mockLoadConfig.mockReturnValue(makeConfig([space]));
-    process.env["BACKLOG_SPACE"] = "envspace";
+    process.env.BACKLOG_SPACE = "envspace";
 
     const result = resolveSpace();
 
