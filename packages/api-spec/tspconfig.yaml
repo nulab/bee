@@ -1,0 +1,8 @@
+emit:
+  - "@typespec/openapi3"
+options:
+  "@typespec/openapi3":
+    output-file: openapi.yaml
+    file-type: yaml
+    new-line: lf
+    omit-unreachable-types: true
