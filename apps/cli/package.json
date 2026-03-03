@@ -1,5 +1,5 @@
 {
-  "name": "@repo/cli",
+  "name": "@nulab/backlog-cli",
   "version": "0.0.0",
   "private": true,
   "description": "A command-line interface for Backlog",

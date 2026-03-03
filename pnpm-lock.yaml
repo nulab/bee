@@ -27,6 +27,28 @@ importers:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@22.19.13)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
 
+  apps/cli:
+    dependencies:
+      citty:
+        specifier: ^0.1.6
+        version: 0.1.6
+      consola:
+        specifier: ^3.4.2
+        version: 3.4.2
+    devDependencies:
+      '@repo/tsconfigs':
+        specifier: workspace:*
+        version: link:../../packages/tsconfigs
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.13
+      tsx:
+        specifier: ^4.19.0
+        version: 4.21.0
+      unbuild:
+        specifier: ^3.5.0
+        version: 3.6.1(typescript@6.0.0-dev.20260303)
+
   apps/docs:
     dependencies:
       '@astrojs/starlight':
@@ -63,28 +85,6 @@ importers:
       vitest:
         specifier: ^3.1.0
         version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.13)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
-
-  packages/cli:
-    dependencies:
-      citty:
-        specifier: ^0.1.6
-        version: 0.1.6
-      consola:
-        specifier: ^3.4.2
-        version: 3.4.2
-    devDependencies:
-      '@repo/tsconfigs':
-        specifier: workspace:*
-        version: link:../tsconfigs
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.19.13
-      tsx:
-        specifier: ^4.19.0
-        version: 4.21.0
-      unbuild:
-        specifier: ^3.5.0
-        version: 3.6.1(typescript@6.0.0-dev.20260303)
 
   packages/config:
     dependencies:
