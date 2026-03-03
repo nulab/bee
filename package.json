@@ -16,7 +16,9 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "lefthook"
+      "esbuild",
+      "lefthook",
+      "sharp"
     ]
   }
 }

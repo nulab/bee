@@ -1,5 +1,5 @@
 {
-  "name": "@backlog-cli/tsconfigs",
+  "name": "@repo/tsconfigs",
   "version": "0.0.0",
   "private": true,
   "exports": {
