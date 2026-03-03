@@ -71,7 +71,7 @@ packages/tsconfigs — Shared TypeScript base config
 
 `@repo/api` exposes `createClient(config)` which returns an ofetch `$Fetch` instance preconfigured with Backlog API v2 base URL, auth, and rate-limit error handling.
 
-`@repo/cli` uses citty's `defineCommand` / `runMain` with subcommand registration.
+`@nulab/backlog-cli` uses citty's `defineCommand` / `runMain` with subcommand registration.
 
 ## Code Conventions (enforced by oxlint)
 
