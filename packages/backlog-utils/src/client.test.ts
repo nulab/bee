@@ -54,17 +54,6 @@ describe("getClient", () => {
     expect(result.client).toBeTypeOf("function");
   });
 
-  it("passes explicit host to resolveSpace", async () => {
-    vi.mocked(resolveSpace).mockReturnValue({
-      host: "custom.backlog.com",
-      auth: { method: "api-key" as const, apiKey: "key" },
-    });
-
-    await getClient("custom.backlog.com");
-
-    expect(resolveSpace).toHaveBeenCalledWith("custom.backlog.com");
-  });
-
   it("prioritizes configured space over BACKLOG_API_KEY", async () => {
     vi.mocked(resolveSpace).mockReturnValue({
       host: "configured.backlog.com",
@@ -94,19 +83,6 @@ describe("getClient", () => {
       apiKey: "env-api-key",
     });
     expect(result.host).toBe("env.backlog.com");
-  });
-
-  it("falls back to BACKLOG_API_KEY with explicit host", async () => {
-    vi.mocked(resolveSpace).mockReturnValue(null);
-    process.env.BACKLOG_API_KEY = "env-api-key";
-
-    const result = await getClient("explicit.backlog.com");
-
-    expect(createClient).toHaveBeenCalledWith({
-      host: "explicit.backlog.com",
-      apiKey: "env-api-key",
-    });
-    expect(result.host).toBe("explicit.backlog.com");
   });
 
   it("calls process.exit(1) when BACKLOG_API_KEY set but no BACKLOG_SPACE", async () => {

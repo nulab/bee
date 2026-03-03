@@ -1,5 +1,6 @@
-import { isNoInput } from "#/argv.js";
 import consola from "consola";
+
+const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
 
 const promptRequired = async (
   label: string,
@@ -16,7 +17,7 @@ const promptRequired = async (
 
   if (isNoInput()) {
     consola.error(
-      `${label.replace(/:$/, "")} is required. Use arguments to provide it in --no-input mode.`,
+      `${label.replace(/:$/, "")} is required. Use arguments to provide it in BACKLOG_NO_INPUT mode.`,
     );
     return process.exit(1);
   }
@@ -37,7 +38,7 @@ const confirmOrExit = async (message: string, skipConfirm?: boolean): Promise<bo
   }
 
   if (isNoInput()) {
-    consola.error("Confirmation required. Use --yes to skip in --no-input mode.");
+    consola.error("Confirmation required. Use --yes to skip in BACKLOG_NO_INPUT mode.");
     return process.exit(1);
   }
 

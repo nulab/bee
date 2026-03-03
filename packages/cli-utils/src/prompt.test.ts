@@ -102,7 +102,7 @@ describe("promptRequired", () => {
     await promptRequired("Project key:");
 
     expect(consola.error).toHaveBeenCalledWith(
-      "Project key is required. Use arguments to provide it in --no-input mode.",
+      "Project key is required. Use arguments to provide it in BACKLOG_NO_INPUT mode.",
     );
     expect(mockExit).toHaveBeenCalledWith(1);
     expect(consola.prompt).not.toHaveBeenCalled();
@@ -173,7 +173,7 @@ describe("confirmOrExit", () => {
     await confirmOrExit("Are you sure?");
 
     expect(consola.error).toHaveBeenCalledWith(
-      "Confirmation required. Use --yes to skip in --no-input mode.",
+      "Confirmation required. Use --yes to skip in BACKLOG_NO_INPUT mode.",
     );
     expect(mockExit).toHaveBeenCalledWith(1);
     expect(consola.prompt).not.toHaveBeenCalled();

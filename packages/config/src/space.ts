@@ -66,9 +66,9 @@ const findSpace = (spaces: readonly RcSpace[], host: string): RcSpace | null => 
   return null;
 };
 
-const resolveSpace = (explicitHost?: string): RcSpace | null => {
+const resolveSpace = (): RcSpace | null => {
   const config = loadConfig();
-  const host = explicitHost ?? process.env.BACKLOG_SPACE ?? config.defaultSpace;
+  const host = process.env.BACKLOG_SPACE ?? config.defaultSpace;
 
   if (!host) {
     return null;

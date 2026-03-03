@@ -14,21 +14,18 @@ type BacklogClient = $Fetch;
  * Resolves the active space and creates an authenticated API client.
  *
  * Authentication is resolved in priority order:
- * 1. Configured space (via --space flag, BACKLOG_SPACE env, or defaultSpace)
+ * 1. Configured space (via BACKLOG_SPACE env or defaultSpace in config)
  * 2. BACKLOG_API_KEY + BACKLOG_SPACE environment variables (lowest priority fallback)
  *
  * For OAuth authentication, automatically refreshes the access token when it expires (401 error).
  *
- * @param space - Optional explicit space hostname (--space flag).
  * @returns The authenticated client and host string.
  */
-const getClient = async (
-  space?: string,
-): Promise<{
+const getClient = async (): Promise<{
   client: BacklogClient;
   host: string;
 }> => {
-  const resolved = resolveSpace(space);
+  const resolved = resolveSpace();
 
   if (resolved) {
     if (resolved.auth.method === "api-key") {
@@ -141,7 +138,7 @@ const getClient = async (
 
   // Fallback: BACKLOG_API_KEY + BACKLOG_SPACE environment variables
   const envApiKey = process.env.BACKLOG_API_KEY;
-  const envHost = space ?? process.env.BACKLOG_SPACE;
+  const envHost = process.env.BACKLOG_SPACE;
 
   if (envApiKey && envHost) {
     return {
