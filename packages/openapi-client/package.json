@@ -8,7 +8,8 @@
     "#/*": "./src/*"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./client": "./src/generated/client/index.ts"
   },
   "scripts": {
     "build": "openapi-ts",

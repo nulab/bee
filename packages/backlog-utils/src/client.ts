@@ -1,5 +1,6 @@
 import type { $Fetch } from "@repo/api";
-import { createClient, formatResetTime, refreshAccessToken } from "@repo/api";
+import { createClient, formatResetTime } from "@repo/api";
+import { refreshAccessToken } from "#/oauth.js";
 import { resolveSpace, updateSpaceAuth } from "@repo/config";
 import consola from "consola";
 import type { FetchOptions } from "ofetch";
@@ -67,11 +68,10 @@ const getClient = async (
       refreshPromise = (async () => {
         try {
           consola.start("Access token expired. Refreshing...");
-          const tokenResponse = await refreshAccessToken({
-            host: resolved.host,
-            refreshToken,
+          const tokenResponse = await refreshAccessToken(resolved.host, {
             clientId,
             clientSecret,
+            refreshToken,
           });
 
           currentAccessToken = tokenResponse.access_token;

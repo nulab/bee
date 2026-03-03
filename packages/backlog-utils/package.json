@@ -13,6 +13,7 @@
   "dependencies": {
     "@repo/api": "workspace:*",
     "@repo/config": "workspace:*",
+    "@repo/openapi-client": "workspace:*",
     "consola": "^3.4.2",
     "ofetch": "^1.4.1",
     "open": "^10.1.0",

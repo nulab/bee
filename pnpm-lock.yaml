@@ -94,6 +94,9 @@ importers:
       '@repo/config':
         specifier: workspace:*
         version: link:../config
+      '@repo/openapi-client':
+        specifier: workspace:*
+        version: link:../openapi-client
       consola:
         specifier: ^3.4.2
         version: 3.4.2
