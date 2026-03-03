@@ -16,6 +16,7 @@
     "valibot": "^1.0.0"
   },
   "devDependencies": {
+    "@repo/test-utils": "workspace:*",
     "@repo/tsconfigs": "workspace:*",
     "vitest": "^3.0.0"
   }

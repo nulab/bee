@@ -1,14 +1,25 @@
 import { vi } from "vitest";
 
-const mockConsola = {
-  log: vi.fn(),
-  info: vi.fn(),
-  success: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
-  start: vi.fn(),
-  prompt: vi.fn(),
-  debug: vi.fn(),
+export type MockConsola = {
+  error: ReturnType<typeof vi.fn>;
+  warn: ReturnType<typeof vi.fn>;
+  info: ReturnType<typeof vi.fn>;
+  log: ReturnType<typeof vi.fn>;
+  success: ReturnType<typeof vi.fn>;
 };
 
-export default mockConsola;
+export const setupMockConsola = (): MockConsola => {
+  const mockConsola: MockConsola = {
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+    log: vi.fn(),
+    success: vi.fn(),
+  };
+
+  vi.mock("consola", () => ({
+    default: mockConsola,
+  }));
+
+  return mockConsola;
+};
