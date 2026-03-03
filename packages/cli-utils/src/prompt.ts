@@ -1,11 +1,11 @@
 import { isNoInput } from "#/argv.js";
 import consola from "consola";
 
-export async function promptRequired(
+const promptRequired = async (
   label: string,
   existing?: string,
   options?: { placeholder?: string },
-): Promise<string> {
+): Promise<string> => {
   if (existing) {
     return existing;
   }
@@ -25,9 +25,9 @@ export async function promptRequired(
   }
 
   return value;
-}
+};
 
-export async function confirmOrExit(message: string, skipConfirm?: boolean): Promise<boolean> {
+const confirmOrExit = async (message: string, skipConfirm?: boolean): Promise<boolean> => {
   if (skipConfirm) {
     return true;
   }
@@ -45,4 +45,6 @@ export async function confirmOrExit(message: string, skipConfirm?: boolean): Pro
   }
 
   return true;
-}
+};
+
+export { promptRequired, confirmOrExit };

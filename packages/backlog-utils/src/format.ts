@@ -9,44 +9,44 @@ import type {
 /**
  * Formats a date string to a short local representation (yyyy-MM-dd).
  */
-export function formatDate(dateStr: string | null): string {
+const formatDate = (dateStr: string | null): string => {
   if (!dateStr) {
     return "";
   }
   return dateStr.slice(0, 10);
-}
+};
 
 /**
  * Pads or truncates a string to a fixed width.
  */
-export function padEnd(str: string, width: number): string {
+const padEnd = (str: string, width: number): string => {
   if (str.length >= width) {
     return `${str.slice(0, width - 1)}\u2026`;
   }
   return str.padEnd(width);
-}
+};
 
 /**
  * Formats an issue for list display as a single line.
  */
-export function formatIssueLine(issue: BacklogIssue): string {
+const formatIssueLine = (issue: BacklogIssue): string => {
   const key = padEnd(issue.issueKey, 16);
   const status = padEnd(issue.status.name, 12);
   const type = padEnd(issue.issueType.name, 12);
   const priority = padEnd(issue.priority.name, 8);
   const assignee = padEnd(issue.assignee?.name ?? "", 14);
   return `${key}${status}${type}${priority}${assignee}${issue.summary}`;
-}
+};
 
 /**
  * Formats a project for list display as a single line.
  */
-export function formatProjectLine(project: BacklogProject): string {
+const formatProjectLine = (project: BacklogProject): string => {
   const key = padEnd(project.projectKey, 16);
   const name = padEnd(project.name, 30);
   const status = project.archived ? "Archived" : "Active";
   return `${key}${name}${status}`;
-}
+};
 
 /** Activity type ID to human-readable label mapping. */
 const ACTIVITY_TYPES: Record<number, string> = {
@@ -81,29 +81,28 @@ const ACTIVITY_TYPES: Record<number, string> = {
 /**
  * Returns a human-readable label for an activity type ID.
  */
-export function getActivityLabel(typeId: number): string {
-  return ACTIVITY_TYPES[typeId] ?? `Activity (${typeId})`;
-}
+const getActivityLabel = (typeId: number): string =>
+  ACTIVITY_TYPES[typeId] ?? `Activity (${typeId})`;
 
 /**
  * Formats a pull request for list display as a single line.
  */
-export function formatPullRequestLine(pr: BacklogPullRequest): string {
+const formatPullRequestLine = (pr: BacklogPullRequest): string => {
   const num = padEnd(`#${pr.number}`, 8);
   const status = padEnd(pr.status.name, 10);
   const assignee = padEnd(pr.assignee?.name ?? "", 14);
   const branch = padEnd(`${pr.branch} \u2192 ${pr.base}`, 30);
   return `${num}${status}${assignee}${branch}${pr.summary}`;
-}
+};
 
 /**
  * Formats a repository for list display as a single line.
  */
-export function formatRepositoryLine(repo: BacklogRepository): string {
+const formatRepositoryLine = (repo: BacklogRepository): string => {
   const name = padEnd(repo.name, 30);
   const desc = repo.description ?? "";
   return `${name}${desc}`;
-}
+};
 
 /** Notification reason ID to human-readable label mapping. */
 const NOTIFICATION_REASONS: Record<number, string> = {
@@ -123,7 +122,7 @@ const NOTIFICATION_REASONS: Record<number, string> = {
 /**
  * Formats a notification for list display as a single line.
  */
-export function formatNotificationLine(notification: BacklogNotification): string {
+const formatNotificationLine = (notification: BacklogNotification): string => {
   const id = padEnd(`${notification.id}`, 12);
   const read = notification.alreadyRead ? "  " : "* ";
   const reason = padEnd(NOTIFICATION_REASONS[notification.reason] ?? "Other", 18);
@@ -134,4 +133,15 @@ export function formatNotificationLine(notification: BacklogNotification): strin
     notification.comment?.content?.slice(0, 50) ??
     "";
   return `${read}${id}${reason}${sender}${summary}`;
-}
+};
+
+export {
+  formatDate,
+  formatIssueLine,
+  formatNotificationLine,
+  formatProjectLine,
+  formatPullRequestLine,
+  formatRepositoryLine,
+  getActivityLabel,
+  padEnd,
+};

@@ -5,15 +5,14 @@ import { readStdin } from "#/stdin.js";
  * Create a mock async iterable that yields the given buffers,
  * compatible with the `process.stdin` interface used by `readStdin`.
  */
-function createMockStdin(chunks: Buffer[]) {
-  return {
+const createMockStdin = (chunks: Buffer[]) =>
+  ({
     [Symbol.asyncIterator]: async function* generate() {
       for (const chunk of chunks) {
         yield chunk;
       }
     },
-  } as unknown as typeof process.stdin;
-}
+  }) as unknown as typeof process.stdin;
 
 describe("readStdin", () => {
   afterEach(() => {

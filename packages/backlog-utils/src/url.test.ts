@@ -1,9 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-
-vi.mock("open", () => ({
-  default: vi.fn(),
-}));
-
 import {
   buildBacklogUrl,
   dashboardUrl,
@@ -16,6 +11,10 @@ import {
   wikiUrl,
 } from "#/url.js";
 import open from "open";
+
+vi.mock("open", () => ({
+  default: vi.fn(),
+}));
 
 describe("buildBacklogUrl", () => {
   it("builds URL from host and path", () => {

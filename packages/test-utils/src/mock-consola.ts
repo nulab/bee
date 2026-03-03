@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 
-export type MockConsola = {
+type MockConsola = {
   error: ReturnType<typeof vi.fn>;
   warn: ReturnType<typeof vi.fn>;
   info: ReturnType<typeof vi.fn>;
@@ -22,14 +22,16 @@ const mockConsola: MockConsola = {
   debug: vi.fn(),
 };
 
-// Default export for use with: vi.mock("consola", () => import("@repo/test-utils/mock-consola"))
-// eslint-disable-next-line import/no-default-export
-export default mockConsola;
-
-export const setupMockConsola = (): MockConsola => {
+const setupMockConsola = (): MockConsola => {
   vi.mock("consola", () => ({
     default: mockConsola,
   }));
 
   return mockConsola;
 };
+
+export type { MockConsola };
+export { setupMockConsola };
+// Default export for use with: vi.mock("consola", () => import("@repo/test-utils/mock-consola"))
+// eslint-disable-next-line import/no-default-export
+export default mockConsola;

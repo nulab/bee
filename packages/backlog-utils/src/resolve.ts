@@ -17,7 +17,7 @@ import consola from "consola";
  * @returns The resolved project key.
  * @throws Exits with code 1 if neither the argument nor the environment variable is set.
  */
-export function resolveProjectArg(argValue?: string): string {
+const resolveProjectArg = (argValue?: string): string => {
   const project = argValue || process.env.BACKLOG_PROJECT;
 
   if (!project) {
@@ -28,7 +28,7 @@ export function resolveProjectArg(argValue?: string): string {
   }
 
   return project;
-}
+};
 
 /**
  * Generic name-to-ID resolver factory.
@@ -37,13 +37,13 @@ export function resolveProjectArg(argValue?: string): string {
  * and returns the item's `id`. Throws a descriptive error listing available names
  * when no match is found.
  */
-export async function resolveByName<K extends string, T extends { id: number } & Record<K, string>>(
+const resolveByName = async <K extends string, T extends { id: number } & Record<K, string>>(
   client: BacklogClient,
   endpoint: string,
   nameField: K,
   value: string,
   label: string,
-): Promise<number> {
+): Promise<number> => {
   const items = await client<T[]>(endpoint);
   const item = items.find((i: T) => i[nameField] === value);
 
@@ -53,20 +53,20 @@ export async function resolveByName<K extends string, T extends { id: number } &
   }
 
   return item.id;
-}
+};
 
 /**
  * Resolves a project key to a project ID.
  */
-export async function resolveProjectId(client: BacklogClient, projectKey: string): Promise<number> {
+const resolveProjectId = async (client: BacklogClient, projectKey: string): Promise<number> => {
   const project = await client<BacklogProject>(`/projects/${projectKey}`);
   return project.id;
-}
+};
 
 /**
  * Resolves a username to a user ID. Supports `@me` for the current user.
  */
-export async function resolveUserId(client: BacklogClient, username: string): Promise<number> {
+const resolveUserId = async (client: BacklogClient, username: string): Promise<number> => {
   if (username === "@me") {
     const me = await client<BacklogUser>("/users/myself");
     return me.id;
@@ -80,23 +80,22 @@ export async function resolveUserId(client: BacklogClient, username: string): Pr
   }
 
   return user.id;
-}
+};
 
 /**
  * Resolves a priority name to its ID.
  */
-export function resolvePriorityId(client: BacklogClient, name: string): Promise<number> {
-  return resolveByName<"name", BacklogPriority>(client, "/priorities", "name", name, "Priority");
-}
+const resolvePriorityId = (client: BacklogClient, name: string): Promise<number> =>
+  resolveByName<"name", BacklogPriority>(client, "/priorities", "name", name, "Priority");
 
 /**
  * Resolves a status name to its ID within a project.
  */
-export async function resolveStatusId(
+const resolveStatusId = async (
   client: BacklogClient,
   projectKey: string,
   name: string,
-): Promise<number> {
+): Promise<number> => {
   const items = await client<BacklogStatus[]>(`/projects/${projectKey}/statuses`);
   const item = items.find((s: BacklogStatus) => s.name === name);
 
@@ -106,15 +105,15 @@ export async function resolveStatusId(
   }
 
   return item.id;
-}
+};
 
 /**
  * Resolves the "completed" status ID for a project.
  */
-export async function resolveClosedStatusId(
+const resolveClosedStatusId = async (
   client: BacklogClient,
   projectKey: string,
-): Promise<number> {
+): Promise<number> => {
   const statuses = await client<BacklogStatus[]>(`/projects/${projectKey}/statuses`);
   const closed = statuses.find((s: BacklogStatus) => s.id === 4) ?? statuses.at(-1);
 
@@ -123,15 +122,12 @@ export async function resolveClosedStatusId(
   }
 
   return closed.id;
-}
+};
 
 /**
  * Resolves the "open" status ID for a project (first status, typically "Open").
  */
-export async function resolveOpenStatusId(
-  client: BacklogClient,
-  projectKey: string,
-): Promise<number> {
+const resolveOpenStatusId = async (client: BacklogClient, projectKey: string): Promise<number> => {
   const statuses = await client<BacklogStatus[]>(`/projects/${projectKey}/statuses`);
   const open = statuses.find((s: BacklogStatus) => s.id === 1) ?? statuses[0];
 
@@ -140,16 +136,16 @@ export async function resolveOpenStatusId(
   }
 
   return open.id;
-}
+};
 
 /**
  * Resolves an issue type name to its ID within a project.
  */
-export async function resolveIssueTypeId(
+const resolveIssueTypeId = async (
   client: BacklogClient,
   projectKey: string,
   name: string,
-): Promise<number> {
+): Promise<number> => {
   const items = await client<BacklogIssueType[]>(`/projects/${projectKey}/issueTypes`);
   const item = items.find((t: BacklogIssueType) => t.name === name);
 
@@ -159,25 +155,18 @@ export async function resolveIssueTypeId(
   }
 
   return item.id;
-}
+};
 
 /**
  * Resolves a resolution name to its ID.
  */
-export function resolveResolutionId(client: BacklogClient, name: string): Promise<number> {
-  return resolveByName<"name", BacklogResolution>(
-    client,
-    "/resolutions",
-    "name",
-    name,
-    "Resolution",
-  );
-}
+const resolveResolutionId = (client: BacklogClient, name: string): Promise<number> =>
+  resolveByName<"name", BacklogResolution>(client, "/resolutions", "name", name, "Resolution");
 
 /**
  * Extracts the project key from an issue key (e.g., "PROJECT-123" -> "PROJECT").
  */
-export function extractProjectKey(issueKey: string): string {
+const extractProjectKey = (issueKey: string): string => {
   const match = issueKey.match(/^([A-Z][A-Z0-9_]+)-\d+$/);
 
   if (!match?.[1]) {
@@ -185,4 +174,18 @@ export function extractProjectKey(issueKey: string): string {
   }
 
   return match[1];
-}
+};
+
+export {
+  extractProjectKey,
+  resolveByName,
+  resolveClosedStatusId,
+  resolveIssueTypeId,
+  resolveOpenStatusId,
+  resolvePriorityId,
+  resolveProjectArg,
+  resolveProjectId,
+  resolveResolutionId,
+  resolveStatusId,
+  resolveUserId,
+};

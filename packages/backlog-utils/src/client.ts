@@ -7,7 +7,7 @@ import { ofetch } from "ofetch";
 import { joinURL } from "ufo";
 
 /** The type of the authenticated API client. */
-export type BacklogClient = $Fetch;
+type BacklogClient = $Fetch;
 
 /**
  * Resolves the active space and creates an authenticated API client.
@@ -21,10 +21,12 @@ export type BacklogClient = $Fetch;
  * @param space - Optional explicit space hostname (--space flag).
  * @returns The authenticated client and host string.
  */
-export async function getClient(space?: string): Promise<{
+const getClient = async (
+  space?: string,
+): Promise<{
   client: BacklogClient;
   host: string;
-}> {
+}> => {
   const resolved = resolveSpace(space);
 
   if (resolved) {
@@ -154,4 +156,7 @@ export async function getClient(space?: string): Promise<{
 
   consola.error("No space configured. Run `bl auth login` to authenticate.");
   return process.exit(1);
-}
+};
+
+export type { BacklogClient };
+export { getClient };

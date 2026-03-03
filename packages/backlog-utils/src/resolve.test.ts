@@ -18,14 +18,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-function createMockClient(responses: Record<string, unknown>): BacklogClient {
-  return ((url: string) => {
+const createMockClient = (responses: Record<string, unknown>): BacklogClient =>
+  ((url: string) => {
     if (url in responses) {
       return Promise.resolve(responses[url]);
     }
     return Promise.reject(new Error(`Unexpected URL: ${url}`));
   }) as unknown as BacklogClient;
-}
 
 describe("resolveProjectArg", () => {
   const originalEnv = process.env.BACKLOG_PROJECT;

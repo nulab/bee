@@ -1,4 +1,4 @@
-export type BacklogUser = {
+type BacklogUser = {
   id: number;
   userId: string;
   name: string;
@@ -8,7 +8,7 @@ export type BacklogUser = {
   lastLoginTime: string | null;
 };
 
-export type BacklogProject = {
+type BacklogProject = {
   id: number;
   projectKey: string;
   name: string;
@@ -26,7 +26,7 @@ export type BacklogProject = {
   useDevAttributes: boolean;
 };
 
-export type BacklogStatus = {
+type BacklogStatus = {
   id: number;
   projectId: number;
   name: string;
@@ -34,7 +34,7 @@ export type BacklogStatus = {
   displayOrder: number;
 };
 
-export type BacklogIssueType = {
+type BacklogIssueType = {
   id: number;
   projectId: number;
   name: string;
@@ -44,12 +44,12 @@ export type BacklogIssueType = {
   templateDescription: string | null;
 };
 
-export type BacklogPriority = {
+type BacklogPriority = {
   id: number;
   name: string;
 };
 
-export type BacklogIssue = {
+type BacklogIssue = {
   id: number;
   projectId: number;
   issueKey: string;
@@ -74,7 +74,7 @@ export type BacklogIssue = {
   updated: string;
 };
 
-export type BacklogChangeLog = {
+type BacklogChangeLog = {
   field: string;
   newValue: string | null;
   originalValue: string | null;
@@ -83,7 +83,7 @@ export type BacklogChangeLog = {
   notificationInfo: { type: string } | null;
 };
 
-export type BacklogCommentNotification = {
+type BacklogCommentNotification = {
   id: number;
   alreadyRead: boolean;
   reason: number;
@@ -91,7 +91,7 @@ export type BacklogCommentNotification = {
   resourceAlreadyRead: boolean;
 };
 
-export type BacklogSharedFile = {
+type BacklogSharedFile = {
   id: number;
   type: string;
   dir: string;
@@ -103,7 +103,7 @@ export type BacklogSharedFile = {
   updated: string;
 };
 
-export type BacklogStar = {
+type BacklogStar = {
   id: number;
   comment: string | null;
   url: string;
@@ -112,7 +112,7 @@ export type BacklogStar = {
   created: string;
 };
 
-export type BacklogComment = {
+type BacklogComment = {
   id: number;
   content: string;
   changeLog: BacklogChangeLog[];
@@ -123,12 +123,12 @@ export type BacklogComment = {
   notifications: BacklogCommentNotification[];
 };
 
-export type BacklogResolution = {
+type BacklogResolution = {
   id: number;
   name: string;
 };
 
-export type BacklogActivity = {
+type BacklogActivity = {
   id: number;
   project: BacklogProject;
   type: number;
@@ -138,7 +138,7 @@ export type BacklogActivity = {
   created: string;
 };
 
-export type BacklogSpace = {
+type BacklogSpace = {
   spaceKey: string;
   name: string;
   ownerId: number;
@@ -150,7 +150,7 @@ export type BacklogSpace = {
   updated: string;
 };
 
-export type BacklogRepository = {
+type BacklogRepository = {
   id: number;
   projectId: number;
   name: string;
@@ -166,12 +166,12 @@ export type BacklogRepository = {
   updated: string;
 };
 
-export type BacklogPullRequestStatus = {
+type BacklogPullRequestStatus = {
   id: number;
   name: string;
 };
 
-export type BacklogPullRequest = {
+type BacklogPullRequest = {
   id: number;
   projectId: number;
   repositoryId: number;
@@ -194,15 +194,15 @@ export type BacklogPullRequest = {
   updated: string;
 };
 
-export const PRIORITY = {
+const PRIORITY = {
   High: 2,
   Normal: 3,
   Low: 4,
 } as const;
 
-export const DEFAULT_PRIORITY_ID = PRIORITY.Normal;
+const DEFAULT_PRIORITY_ID = PRIORITY.Normal;
 
-export const RESOLUTION = {
+const RESOLUTION = {
   Fixed: 0,
   WontFix: 1,
   Invalid: 2,
@@ -210,13 +210,13 @@ export const RESOLUTION = {
   CannotReproduce: 4,
 } as const;
 
-export const PR_STATUS = {
+const PR_STATUS = {
   Open: 1,
   Closed: 2,
   Merged: 3,
 } as const;
 
-export type BacklogPullRequestComment = {
+type BacklogPullRequestComment = {
   id: number;
   content: string;
   changeLog: BacklogChangeLog[];
@@ -227,7 +227,7 @@ export type BacklogPullRequestComment = {
   notifications: BacklogCommentNotification[];
 };
 
-export type BacklogNotification = {
+type BacklogNotification = {
   id: number;
   alreadyRead: boolean;
   reason: number;
@@ -240,11 +240,11 @@ export type BacklogNotification = {
   created: string;
 };
 
-export type BacklogNotificationCount = {
+type BacklogNotificationCount = {
   count: number;
 };
 
-export type BacklogWikiAttachment = {
+type BacklogWikiAttachment = {
   id: number;
   name: string;
   size: number;
@@ -252,7 +252,7 @@ export type BacklogWikiAttachment = {
   created: string;
 };
 
-export type BacklogWiki = {
+type BacklogWiki = {
   id: number;
   projectId: number;
   name: string;
@@ -267,12 +267,12 @@ export type BacklogWiki = {
   updated: string;
 };
 
-export type BacklogWikiTag = {
+type BacklogWikiTag = {
   id: number;
   name: string;
 };
 
-export type BacklogWikiHistory = {
+type BacklogWikiHistory = {
   pageId: number;
   version: number;
   name: string;
@@ -281,11 +281,11 @@ export type BacklogWikiHistory = {
   created: string;
 };
 
-export type BacklogWikiCount = {
+type BacklogWikiCount = {
   count: number;
 };
 
-export type BacklogTeam = {
+type BacklogTeam = {
   id: number;
   name: string;
   members: BacklogUser[];
@@ -296,13 +296,13 @@ export type BacklogTeam = {
   updated: string;
 };
 
-export type BacklogCategory = {
+type BacklogCategory = {
   id: number;
   name: string;
   displayOrder: number;
 };
 
-export type BacklogMilestone = {
+type BacklogMilestone = {
   id: number;
   projectId: number;
   name: string;
@@ -313,7 +313,7 @@ export type BacklogMilestone = {
   displayOrder: number;
 };
 
-export type BacklogSpaceDiskUsage = {
+type BacklogSpaceDiskUsage = {
   capacity: number;
   issue: number;
   wiki: number;
@@ -334,12 +334,12 @@ export type BacklogSpaceDiskUsage = {
   }[];
 };
 
-export type BacklogSpaceNotification = {
+type BacklogSpaceNotification = {
   content: string;
   updated: string;
 };
 
-export type BacklogWebhook = {
+type BacklogWebhook = {
   id: number;
   name: string;
   description: string;
@@ -352,11 +352,11 @@ export type BacklogWebhook = {
   updated: string;
 };
 
-export type BacklogStarCount = {
+type BacklogStarCount = {
   count: number;
 };
 
-export type BacklogWatching = {
+type BacklogWatching = {
   id: number;
   resourceAlreadyRead: boolean;
   note: string;
@@ -367,11 +367,11 @@ export type BacklogWatching = {
   updated: string;
 };
 
-export type BacklogWatchingCount = {
+type BacklogWatchingCount = {
   count: number;
 };
 
-export type BacklogDocument = {
+type BacklogDocument = {
   id: string;
   projectId: number;
   title: string;
@@ -385,7 +385,7 @@ export type BacklogDocument = {
   updated: string;
 };
 
-export type BacklogDocumentDetail = {
+type BacklogDocumentDetail = {
   id: string;
   projectId: number;
   title: string;
@@ -407,15 +407,58 @@ export type BacklogDocumentDetail = {
   updated: string;
 };
 
-export type BacklogDocumentTreeNode = {
+type BacklogDocumentTreeNode = {
   id: string;
   name: string;
   emoji: string | null;
   children: BacklogDocumentTreeNode[];
 };
 
-export type BacklogDocumentTree = {
+type BacklogDocumentTree = {
   projectId: number;
   activeTree: { id: string; children: BacklogDocumentTreeNode[] };
   trashTree: { id: string; children: BacklogDocumentTreeNode[] };
 };
+
+export type {
+  BacklogActivity,
+  BacklogCategory,
+  BacklogChangeLog,
+  BacklogComment,
+  BacklogCommentNotification,
+  BacklogDocument,
+  BacklogDocumentDetail,
+  BacklogDocumentTree,
+  BacklogDocumentTreeNode,
+  BacklogIssue,
+  BacklogIssueType,
+  BacklogMilestone,
+  BacklogNotification,
+  BacklogNotificationCount,
+  BacklogPriority,
+  BacklogProject,
+  BacklogPullRequest,
+  BacklogPullRequestComment,
+  BacklogPullRequestStatus,
+  BacklogRepository,
+  BacklogResolution,
+  BacklogSharedFile,
+  BacklogSpace,
+  BacklogSpaceDiskUsage,
+  BacklogSpaceNotification,
+  BacklogStar,
+  BacklogStarCount,
+  BacklogStatus,
+  BacklogTeam,
+  BacklogUser,
+  BacklogWatching,
+  BacklogWatchingCount,
+  BacklogWebhook,
+  BacklogWiki,
+  BacklogWikiAttachment,
+  BacklogWikiCount,
+  BacklogWikiHistory,
+  BacklogWikiTag,
+};
+
+export { DEFAULT_PRIORITY_ID, PR_STATUS, PRIORITY, RESOLUTION };

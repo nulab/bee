@@ -1,5 +1,8 @@
 import { spyOnProcessExit } from "@repo/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getClient } from "#/client.js";
+import { createClient } from "@repo/api";
+import { resolveSpace } from "@repo/config";
 
 vi.mock("@repo/config", () => ({
   resolveSpace: vi.fn(),
@@ -10,10 +13,6 @@ vi.mock("@repo/api", () => ({
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-import { getClient } from "#/client.js";
-import { createClient } from "@repo/api";
-import { resolveSpace } from "@repo/config";
 
 describe("getClient", () => {
   beforeEach(() => {

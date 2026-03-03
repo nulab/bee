@@ -1,10 +1,10 @@
-export type ExtractedArgs = {
+type ExtractedArgs = {
   space: string | undefined;
   noInput: boolean;
   argv: string[];
 };
 
-export function extractGlobalArgs(argv: string[]): ExtractedArgs {
+const extractGlobalArgs = (argv: string[]): ExtractedArgs => {
   const result: string[] = [];
   let space: string | undefined;
   let noInput = false;
@@ -26,8 +26,9 @@ export function extractGlobalArgs(argv: string[]): ExtractedArgs {
   }
 
   return { space, noInput, argv: result };
-}
+};
 
-export function isNoInput(): boolean {
-  return process.env["BACKLOG_NO_INPUT"] === "1";
-}
+const isNoInput = (): boolean => process.env["BACKLOG_NO_INPUT"] === "1";
+
+export type { ExtractedArgs };
+export { extractGlobalArgs, isNoInput };

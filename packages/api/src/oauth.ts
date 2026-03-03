@@ -1,13 +1,13 @@
 import { ofetch } from "ofetch";
 
-export type OAuthTokenResponse = {
+type OAuthTokenResponse = {
   access_token: string;
   token_type: string;
   expires_in: number;
   refresh_token: string;
 };
 
-export type ExchangeAuthorizationCodeParams = {
+type ExchangeAuthorizationCodeParams = {
   host: string;
   code: string;
   clientId: string;
@@ -15,17 +15,17 @@ export type ExchangeAuthorizationCodeParams = {
   redirectUri: string;
 };
 
-export type RefreshAccessTokenParams = {
+type RefreshAccessTokenParams = {
   host: string;
   refreshToken: string;
   clientId: string;
   clientSecret: string;
 };
 
-export function exchangeAuthorizationCode(
+const exchangeAuthorizationCode = (
   params: ExchangeAuthorizationCodeParams,
-): Promise<OAuthTokenResponse> {
-  return ofetch<OAuthTokenResponse>(`https://${params.host}/api/v2/oauth2/token`, {
+): Promise<OAuthTokenResponse> =>
+  ofetch<OAuthTokenResponse>(`https://${params.host}/api/v2/oauth2/token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -36,10 +36,9 @@ export function exchangeAuthorizationCode(
       redirect_uri: params.redirectUri,
     }).toString(),
   });
-}
 
-export function refreshAccessToken(params: RefreshAccessTokenParams): Promise<OAuthTokenResponse> {
-  return ofetch<OAuthTokenResponse>(`https://${params.host}/api/v2/oauth2/token`, {
+const refreshAccessToken = (params: RefreshAccessTokenParams): Promise<OAuthTokenResponse> =>
+  ofetch<OAuthTokenResponse>(`https://${params.host}/api/v2/oauth2/token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -49,4 +48,7 @@ export function refreshAccessToken(params: RefreshAccessTokenParams): Promise<OA
       refresh_token: params.refreshToken,
     }).toString(),
   });
-}
+
+export type { ExchangeAuthorizationCodeParams, OAuthTokenResponse, RefreshAccessTokenParams };
+
+export { exchangeAuthorizationCode, refreshAccessToken };

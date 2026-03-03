@@ -1,10 +1,9 @@
 import { spyOnProcessExit } from "@repo/test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
 import consola from "consola";
 import { confirmOrExit, promptRequired } from "#/prompt.js";
+
+vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("promptRequired", () => {
   beforeEach(() => {

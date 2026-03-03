@@ -16,7 +16,7 @@
  * }
  * ```
  */
-export const outputArgs = {
+const outputArgs = {
   json: {
     type: "string" as const,
     description: "Output as JSON (optionally filter by field names, comma-separated)",
@@ -26,7 +26,7 @@ export const outputArgs = {
 /**
  * Picks specified top-level fields from a plain object.
  */
-export function pickFields(obj: unknown, fields: string[]): Record<string, unknown> {
+const pickFields = (obj: unknown, fields: string[]): Record<string, unknown> => {
   if (typeof obj !== "object" || obj === null) {
     return {};
   }
@@ -37,18 +37,18 @@ export function pickFields(obj: unknown, fields: string[]): Record<string, unkno
     }
   }
   return result;
-}
+};
 
 /**
  * Filters data to include only the specified fields.
  * Works on both single objects and arrays.
  */
-export function filterFields<T>(data: T, fields: string[]): unknown {
+const filterFields = <T>(data: T, fields: string[]): unknown => {
   if (Array.isArray(data)) {
     return data.map((item) => pickFields(item, fields));
   }
   return pickFields(data, fields);
-}
+};
 
 /**
  * Outputs structured data based on the `--json` flag.
@@ -59,11 +59,11 @@ export function filterFields<T>(data: T, fields: string[]): unknown {
  *
  * JSON is pretty-printed when stdout is a TTY, compact otherwise.
  */
-export function outputResult<T>(
+const outputResult = <T>(
   data: T,
   args: { json?: string },
   defaultFormat: (data: T) => void,
-): void {
+): void => {
   if (args.json === undefined) {
     defaultFormat(data);
     return;
@@ -79,4 +79,6 @@ export function outputResult<T>(
   const json = process.stdout.isTTY ? JSON.stringify(output, null, 2) : JSON.stringify(output);
 
   process.stdout.write(`${json}\n`);
-}
+};
+
+export { outputArgs, pickFields, filterFields, outputResult };
