@@ -1,0 +1,21 @@
+{
+  "name": "@repo/cli-utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "exports": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "consola": "^3.4.2"
+  },
+  "devDependencies": {
+    "@repo/test-utils": "workspace:*",
+    "@repo/tsconfigs": "workspace:*",
+    "vitest": "^3.1.0"
+  }
+}

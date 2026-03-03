@@ -83,6 +83,22 @@ importers:
         specifier: ^3.5.0
         version: 3.6.1(typescript@6.0.0-dev.20260303)
 
+  packages/cli-utils:
+    dependencies:
+      consola:
+        specifier: ^3.4.2
+        version: 3.4.2
+    devDependencies:
+      '@repo/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+      '@repo/tsconfigs':
+        specifier: workspace:*
+        version: link:../tsconfigs
+      vitest:
+        specifier: ^3.1.0
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.13)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
+
   packages/config:
     dependencies:
       consola:
