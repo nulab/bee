@@ -1,133 +1,235 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BacklogRateLimitError } from "#/rate-limit.js";
 
-vi.mock("ofetch", () => {
-  const createMock = vi.fn((defaults: Record<string, unknown>) => defaults);
-  return {
-    ofetch: { create: createMock },
-  };
+const { mockFetch, mockCreate } = vi.hoisted(() => {
+  const fetch = vi.fn();
+  const create = vi.fn((_defaults: Record<string, unknown>) => fetch);
+  return { mockFetch: fetch, mockCreate: create };
 });
+
+vi.mock("ofetch", () => ({
+  ofetch: { create: mockCreate },
+}));
 
 vi.mock("ufo", () => ({
   joinURL: (...parts: string[]) => parts.join(""),
 }));
 
+vi.mock("node:timers/promises", () => ({
+  setTimeout: (ms: number) =>
+    new Promise<void>((resolve) => {
+      globalThis.setTimeout(resolve, ms);
+    }),
+}));
+
 // eslint-disable-next-line import/first -- must follow vi.mock calls
 import { createClient } from "#/client.js";
 
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
+
 describe("createClient", () => {
-  it("sets baseURL from host", () => {
-    const result = createClient({
-      host: "example.backlog.com",
-    }) as unknown as Record<string, unknown>;
+  describe("configuration", () => {
+    it("sets baseURL from host", () => {
+      createClient({ host: "example.backlog.com" });
 
-    expect(result.baseURL).toBe("https://example.backlog.com/api/v2");
-  });
-
-  it("sets apiKey as query param for API Key auth", () => {
-    const result = createClient({
-      host: "example.backlog.com",
-      apiKey: "test-key",
-    }) as unknown as Record<string, unknown>;
-
-    expect(result.query).toEqual({ apiKey: "test-key" });
-    expect(result.headers).toEqual({});
-  });
-
-  it("sets Authorization header for OAuth auth", () => {
-    const result = createClient({
-      host: "example.backlog.com",
-      accessToken: "test-token",
-    }) as unknown as Record<string, unknown>;
-
-    expect(result.headers).toEqual({
-      Authorization: "Bearer test-token",
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          baseURL: "https://example.backlog.com/api/v2",
+        }),
+      );
     });
-    expect(result.query).toEqual({});
+
+    it("sets apiKey as query param for API Key auth", () => {
+      createClient({ host: "example.backlog.com", apiKey: "test-key" });
+
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { apiKey: "test-key" },
+        }),
+      );
+    });
+
+    it("sets Authorization header for static accessToken", () => {
+      createClient({ host: "example.backlog.com", accessToken: "test-token" });
+
+      const callArgs = mockCreate.mock.calls.at(-1)?.[0] as Record<string, unknown>;
+      expect(callArgs.headers).toEqual({ Authorization: "Bearer test-token" });
+    });
+
+    it("sets Authorization header via getter for function accessToken", () => {
+      let token = "token-v1";
+      createClient({ host: "example.backlog.com", accessToken: () => token });
+
+      const callArgs = mockCreate.mock.calls.at(-1)?.[0] as Record<string, unknown>;
+      const headers = callArgs.headers as Record<string, string>;
+
+      expect(headers.Authorization).toBe("Bearer token-v1");
+
+      token = "token-v2";
+      expect(headers.Authorization).toBe("Bearer token-v2");
+    });
   });
 
-  it("throws BacklogRateLimitError on 429 with reset header", () => {
-    const resetEpoch = "1700000000";
-    const result = createClient({
-      host: "example.backlog.com",
-    }) as unknown as Record<string, unknown>;
-    const onResponseError = result.onResponseError as (ctx: {
-      response: { status: number; headers: Map<string, string> };
-    }) => void;
+  describe("429 error handling (onResponseError)", () => {
+    const getOnResponseError = () => {
+      createClient({ host: "example.backlog.com", rateLimitRetry: false });
+      const callArgs = mockCreate.mock.calls.at(-1)?.[0] as Record<string, unknown>;
+      return callArgs.onResponseError as (ctx: {
+        response: { status: number; headers: Map<string, string> };
+      }) => void;
+    };
 
-    const headers = new Map([["X-RateLimit-Reset", resetEpoch]]);
+    it("throws BacklogRateLimitError on 429 with reset header", () => {
+      const onResponseError = getOnResponseError();
+      const headers = new Map([["X-RateLimit-Reset", "1700000000"]]);
 
-    expect(() => {
-      onResponseError({
-        response: {
-          status: 429,
-          headers: headers as unknown as Map<string, string>,
-        },
-      });
-    }).toThrow(BacklogRateLimitError);
+      expect(() => {
+        onResponseError({
+          response: { status: 429, headers: headers as unknown as Map<string, string> },
+        });
+      }).toThrow(BacklogRateLimitError);
+    });
+
+    it("throws BacklogRateLimitError on 429 without reset header", () => {
+      const onResponseError = getOnResponseError();
+      const headers = new Map<string, string>();
+
+      expect(() => {
+        onResponseError({
+          response: { status: 429, headers: headers as unknown as Map<string, string> },
+        });
+      }).toThrow(BacklogRateLimitError);
+    });
+
+    it("includes resetAt in error when header present", () => {
+      const onResponseError = getOnResponseError();
+      const headers = new Map([["X-RateLimit-Reset", "1700000000"]]);
+
+      try {
+        onResponseError({
+          response: { status: 429, headers: headers as unknown as Map<string, string> },
+        });
+      } catch (error) {
+        expect(error).toBeInstanceOf(BacklogRateLimitError);
+        expect((error as BacklogRateLimitError).resetAt).toEqual(new Date(1_700_000_000 * 1000));
+      }
+    });
+
+    it("does not throw for non-429 responses", () => {
+      const onResponseError = getOnResponseError();
+      const headers = new Map<string, string>();
+
+      expect(() => {
+        onResponseError({
+          response: { status: 500, headers: headers as unknown as Map<string, string> },
+        });
+      }).not.toThrow();
+    });
   });
 
-  it("throws BacklogRateLimitError on 429 without reset header", () => {
-    const result = createClient({
-      host: "example.backlog.com",
-    }) as unknown as Record<string, unknown>;
-    const onResponseError = result.onResponseError as (ctx: {
-      response: { status: number; headers: Map<string, string> };
-    }) => void;
+  describe("rate limit retry", () => {
+    it("retries after waiting when resetAt is within 60s (default: rateLimitRetry=true)", async () => {
+      const now = Date.now();
+      const resetAt = new Date(now + 5000);
+      const rateLimitError = new BacklogRateLimitError("rate limited", resetAt);
 
-    const headers = new Map<string, string>();
+      mockFetch.mockRejectedValueOnce(rateLimitError).mockResolvedValueOnce({ ok: true });
 
-    expect(() => {
-      onResponseError({
-        response: {
-          status: 429,
-          headers: headers as unknown as Map<string, string>,
-        },
+      const client = createClient({ host: "example.backlog.com" });
+      const resultPromise = client("/test");
+
+      await vi.advanceTimersByTimeAsync(5000 + 1000);
+
+      await expect(resultPromise).resolves.toEqual({ ok: true });
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
+    it("throws if retry also fails with 429", async () => {
+      const now = Date.now();
+      const resetAt = new Date(now + 5000);
+      const rateLimitError = new BacklogRateLimitError("rate limited", resetAt);
+
+      mockFetch.mockRejectedValueOnce(rateLimitError).mockRejectedValueOnce(rateLimitError);
+
+      const client = createClient({ host: "example.backlog.com" });
+      const resultPromise = client("/test");
+
+      // Attach rejection handler before advancing timers to avoid unhandled rejection
+      const assertion = expect(resultPromise).rejects.toThrow(BacklogRateLimitError);
+
+      await vi.advanceTimersByTimeAsync(5000 + 1000);
+
+      await assertion;
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
+    it("does not retry when rateLimitRetry is false", async () => {
+      const now = Date.now();
+      const resetAt = new Date(now + 5000);
+      const rateLimitError = new BacklogRateLimitError("rate limited", resetAt);
+
+      mockFetch.mockRejectedValueOnce(rateLimitError);
+
+      const client = createClient({
+        host: "example.backlog.com",
+        rateLimitRetry: false,
       });
-    }).toThrow(BacklogRateLimitError);
-  });
 
-  it("includes resetAt in BacklogRateLimitError when header present", () => {
-    const resetEpoch = "1700000000";
-    const result = createClient({
-      host: "example.backlog.com",
-    }) as unknown as Record<string, unknown>;
-    const onResponseError = result.onResponseError as (ctx: {
-      response: { status: number; headers: Map<string, string> };
-    }) => void;
+      await expect(client("/test")).rejects.toThrow(BacklogRateLimitError);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
 
-    const headers = new Map([["X-RateLimit-Reset", resetEpoch]]);
+    it("does not retry when resetAt exceeds 60s", async () => {
+      const now = Date.now();
+      const resetAt = new Date(now + 120_000);
+      const rateLimitError = new BacklogRateLimitError("rate limited", resetAt);
 
-    try {
-      onResponseError({
-        response: {
-          status: 429,
-          headers: headers as unknown as Map<string, string>,
-        },
-      });
-    } catch (error) {
-      expect(error).toBeInstanceOf(BacklogRateLimitError);
-      expect((error as BacklogRateLimitError).resetAt).toEqual(new Date(Number(resetEpoch) * 1000));
-    }
-  });
+      mockFetch.mockRejectedValueOnce(rateLimitError);
 
-  it("does not throw for non-429 responses", () => {
-    const result = createClient({
-      host: "example.backlog.com",
-    }) as unknown as Record<string, unknown>;
-    const onResponseError = result.onResponseError as (ctx: {
-      response: { status: number; headers: Map<string, string> };
-    }) => void;
+      const client = createClient({ host: "example.backlog.com" });
 
-    const headers = new Map<string, string>();
+      await expect(client("/test")).rejects.toThrow(BacklogRateLimitError);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
 
-    expect(() => {
-      onResponseError({
-        response: {
-          status: 500,
-          headers: headers as unknown as Map<string, string>,
-        },
-      });
-    }).not.toThrow();
+    it("does not retry when resetAt is undefined", async () => {
+      const rateLimitError = new BacklogRateLimitError("rate limited");
+
+      mockFetch.mockRejectedValueOnce(rateLimitError);
+
+      const client = createClient({ host: "example.backlog.com" });
+
+      await expect(client("/test")).rejects.toThrow(BacklogRateLimitError);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not retry when resetAt is in the past", async () => {
+      const now = Date.now();
+      const resetAt = new Date(now - 5000);
+      const rateLimitError = new BacklogRateLimitError("rate limited", resetAt);
+
+      mockFetch.mockRejectedValueOnce(rateLimitError);
+
+      const client = createClient({ host: "example.backlog.com" });
+
+      await expect(client("/test")).rejects.toThrow(BacklogRateLimitError);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not retry non-rate-limit errors", async () => {
+      mockFetch.mockRejectedValueOnce(new Error("network error"));
+
+      const client = createClient({ host: "example.backlog.com" });
+
+      await expect(client("/test")).rejects.toThrow("network error");
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
   });
 });

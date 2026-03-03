@@ -1,3 +1,6 @@
+const MAX_RATE_LIMIT_WAIT_MS = 60_000;
+const RATE_LIMIT_BUFFER_MS = 1000;
+
 const formatResetTime = (epochSeconds: number): string => {
   const date = new Date(epochSeconds * 1000);
   return date.toLocaleString();
@@ -13,4 +16,4 @@ class BacklogRateLimitError extends Error {
   }
 }
 
-export { BacklogRateLimitError, formatResetTime };
+export { BacklogRateLimitError, formatResetTime, MAX_RATE_LIMIT_WAIT_MS, RATE_LIMIT_BUFFER_MS };
