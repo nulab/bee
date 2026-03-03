@@ -1,0 +1,22 @@
+{
+  "name": "@repo/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "exports": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "consola": "^3.4.2",
+    "rc9": "^2.1.2",
+    "valibot": "^1.0.0"
+  },
+  "devDependencies": {
+    "@repo/tsconfigs": "workspace:*",
+    "vitest": "^3.0.0"
+  }
+}
