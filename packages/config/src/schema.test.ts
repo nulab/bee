@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
-import { RcAuthSchema, RcSchema, RcSpaceSchema } from "#/schema.ts";
+import { RcAuthSchema, RcSchema, RcSpaceSchema } from "#/schema.js";
 
 describe("RcAuthSchema", () => {
   it("accepts valid api-key auth", () => {
