@@ -1,0 +1,20 @@
+{
+  "name": "@repo/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "build": "unbuild",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "ofetch": "^1.4.1",
+    "ufo": "^1.5.4"
+  },
+  "devDependencies": {
+    "@repo/tsconfigs": "workspace:*",
+    "unbuild": "^3.5.0",
+    "vitest": "^3.1.0"
+  }
+}
