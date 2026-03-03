@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { BacklogRateLimitError } from "./rate-limit.ts";
+import { BacklogRateLimitError } from "#/rate-limit.js";
 
 vi.mock("ofetch", () => {
   const createMock = vi.fn((defaults: Record<string, unknown>) => defaults);
@@ -13,7 +13,7 @@ vi.mock("ufo", () => ({
 }));
 
 // eslint-disable-next-line import/first -- must follow vi.mock calls
-import { createClient } from "./client.ts";
+import { createClient } from "#/client.js";
 
 describe("createClient", () => {
   it("sets baseURL from host", () => {

@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@repo/tsconfigs": "workspace:*",
+    "@types/node": "^22.19.13",
     "unbuild": "^3.5.0",
     "vitest": "^3.1.0"
   }
