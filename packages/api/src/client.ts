@@ -3,13 +3,13 @@ import { ofetch } from "ofetch";
 import { joinURL } from "ufo";
 import { BacklogRateLimitError, formatResetTime } from "#/rate-limit.js";
 
-export type BacklogClientConfig = {
+type BacklogClientConfig = {
   host: string;
   apiKey?: string;
   accessToken?: string;
 };
 
-export const createClient = (config: BacklogClientConfig): $Fetch =>
+const createClient = (config: BacklogClientConfig): $Fetch =>
   ofetch.create({
     baseURL: joinURL(`https://${config.host}`, "/api/v2"),
     headers: config.accessToken ? { Authorization: `Bearer ${config.accessToken}` } : {},
@@ -26,3 +26,6 @@ export const createClient = (config: BacklogClientConfig): $Fetch =>
       }
     },
   });
+
+export { createClient };
+export type { BacklogClientConfig };

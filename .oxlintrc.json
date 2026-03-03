@@ -149,8 +149,34 @@
     // Conflicts with no-default-export; disable the opposite rule enabled by categories.style
     "import/no-named-export": "off",
     // ESM only, no require/module.exports
-    "import/no-commonjs": "warn"
+    "import/no-commonjs": "warn",
+
+    // ── Import: Style overrides ────────────────────────────────
+    // Allow namespace imports (e.g., import * as v from "valibot")
+    "import/no-namespace": "off",
+    // Allow separate import type + import from same module (conflicts with consistent-type-specifier-style)
+    "no-duplicate-imports": "off",
+    // Allow default-as-named (false positive for consola etc.)
+    "import/no-named-as-default": "off",
+    // Conflicts with no-default-export
+    "import/prefer-default-export": "off"
   },
+  "overrides": [
+    {
+      // Tool config files require default exports
+      "files": ["**/astro.config.*", "**/build.config.*", "**/vitest.config.*"],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    },
+    {
+      // CLI entry point uses side-effect import
+      "files": ["**/bin/**"],
+      "rules": {
+        "import/no-unassigned-import": "off"
+      }
+    }
+  ],
   "settings": {
     "vitest": {
       "typecheck": false
