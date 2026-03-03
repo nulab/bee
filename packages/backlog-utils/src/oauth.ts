@@ -1,6 +1,16 @@
 import { createClient } from "@repo/openapi-client/client";
 import { oAuthToken } from "@repo/openapi-client";
-import type { OAuthTokenResponse } from "@repo/openapi-client";
+
+/**
+ * OAuth token response from Backlog API.
+ * Locally defined to avoid oxlint type resolution issues with generated code.
+ */
+type OAuthTokenResponse = {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token: string;
+};
 
 /**
  * Exchanges an authorization code for an OAuth token pair.

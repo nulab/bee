@@ -116,6 +116,7 @@ const getClient = async (
     });
 
     // Wrap client to handle 401 and retry with refreshed token
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- async wrapper is $Fetch-compatible
     const client = (async (url: string, options?: FetchOptions) => {
       try {
         return await baseClient(url, options);

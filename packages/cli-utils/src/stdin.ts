@@ -1,9 +1,8 @@
+import { text } from "node:stream/consumers";
+
 const readStdin = async (): Promise<string> => {
-  const chunks: Uint8Array[] = [];
-  for await (const chunk of process.stdin) {
-    chunks.push(chunk);
-  }
-  return Buffer.concat(chunks).toString("utf8").trim();
+  const content = await text(process.stdin);
+  return content.trim();
 };
 
 export { readStdin };

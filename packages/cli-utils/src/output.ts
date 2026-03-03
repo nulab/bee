@@ -23,17 +23,20 @@ const outputArgs = {
   },
 } as const;
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
 /**
  * Picks specified top-level fields from a plain object.
  */
 const pickFields = (obj: unknown, fields: string[]): Record<string, unknown> => {
-  if (typeof obj !== "object" || obj === null) {
+  if (!isRecord(obj)) {
     return {};
   }
   const result: Record<string, unknown> = {};
   for (const field of fields) {
     if (field in obj) {
-      result[field] = (obj as Record<string, unknown>)[field];
+      result[field] = obj[field];
     }
   }
   return result;

@@ -179,10 +179,24 @@
     },
     {
       // Test files reference mock functions as unbound methods (e.g., expect(obj.method))
-      // which is safe and expected in Vitest assertions
+      // which is safe and expected in Vitest assertions.
+      // Type assertions (as never, as unknown as T) are common patterns for mocking
+      // return values and constructing test fixtures.
       "files": ["**/*.test.ts"],
       "rules": {
-        "typescript/unbound-method": "off"
+        "typescript/unbound-method": "off",
+        "typescript/no-unsafe-type-assertion": "off"
+      }
+    },
+    {
+      // oauth.ts consumes @repo/openapi-client whose generated types cannot be
+      // resolved by oxlint's type checker (extensionless imports in generated code).
+      // All no-unsafe-* warnings here are false positives from unresolved types.
+      "files": ["packages/backlog-utils/src/oauth.ts"],
+      "rules": {
+        "typescript/no-unsafe-assignment": "off",
+        "typescript/no-unsafe-call": "off",
+        "typescript/no-unsafe-return": "off"
       }
     }
   ],
