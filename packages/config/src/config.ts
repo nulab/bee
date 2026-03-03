@@ -3,8 +3,8 @@ import { join } from "node:path";
 import * as v from "valibot";
 import consola from "consola";
 import { read, write } from "rc9";
-import { RcSchema } from "#/schema.js";
 import type { Rc } from "#/schema.js";
+import { RcSchema } from "#/schema.js";
 
 const CONFIG_DIR_NAME = "backlog";
 const CONFIG_FILE_NAME = ".backlogrc";
@@ -15,7 +15,7 @@ const resolveConfigDir = (): string => {
   return join(base, CONFIG_DIR_NAME);
 };
 
-export const loadConfig = (): Rc => {
+const loadConfig = (): Rc => {
   const dir = resolveConfigDir();
   const raw = read({ name: CONFIG_FILE_NAME, dir });
   const result = v.safeParse(RcSchema, raw);
@@ -31,7 +31,9 @@ export const loadConfig = (): Rc => {
   return result.output;
 };
 
-export const writeConfig = (config: Rc): void => {
+const writeConfig = (config: Rc): void => {
   const dir = resolveConfigDir();
   write(config, { name: CONFIG_FILE_NAME, dir });
 };
+
+export { loadConfig, writeConfig };

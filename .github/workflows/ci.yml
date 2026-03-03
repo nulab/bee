@@ -17,7 +17,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm run lint
+        run: pnpm exec oxlint --max-warnings 0
 
       - name: Generate OpenAPI client
         run: pnpm --filter @repo/openapi build && pnpm --filter @repo/openapi-client build
