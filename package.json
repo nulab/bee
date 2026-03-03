@@ -1,5 +1,13 @@
 {
   "private": true,
   "license": "MIT",
-  "repository": "nulab/backlog-cli"
+  "repository": "nulab/backlog-cli",
+  "pnpm": {
+    "onlyBuiltDependencies": ["lefthook"]
+  },
+  "devDependencies": {
+    "lefthook": "^2.1.2",
+    "oxfmt": "^0.36.0",
+    "oxlint": "^1.51.0"
+  }
 }
