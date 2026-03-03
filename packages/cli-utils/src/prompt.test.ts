@@ -14,13 +14,13 @@ describe("promptRequired", () => {
     delete process.env["BACKLOG_NO_INPUT"];
   });
 
-  it("既存の値がある場合はそのまま返す", async () => {
+  it("returns existing value without prompting", async () => {
     const result = await promptRequired("Label:", "existing-value");
     expect(result).toBe("existing-value");
     expect(consola.prompt).not.toHaveBeenCalled();
   });
 
-  it("既存の値がない場合はプロンプトを表示する", async () => {
+  it("shows prompt when no existing value is provided", async () => {
     vi.mocked(consola.prompt).mockResolvedValue("user-input" as never);
 
     const result = await promptRequired("Label:");
@@ -28,7 +28,7 @@ describe("promptRequired", () => {
     expect(result).toBe("user-input");
   });
 
-  it("既存の値が undefined の場合はプロンプトを表示する", async () => {
+  it("shows prompt when existing value is undefined", async () => {
     vi.mocked(consola.prompt).mockResolvedValue("prompted" as never);
 
     const result = await promptRequired("Label:");
@@ -36,7 +36,7 @@ describe("promptRequired", () => {
     expect(result).toBe("prompted");
   });
 
-  it("プロンプトで空文字が入力された場合は process.exit(1) を呼ぶ", async () => {
+  it("calls process.exit(1) when prompt input is empty", async () => {
     vi.mocked(consola.prompt).mockResolvedValue("" as never);
     const mockExit = spyOnProcessExit();
 
@@ -47,7 +47,7 @@ describe("promptRequired", () => {
     mockExit.mockRestore();
   });
 
-  it("options が consola.prompt に渡される", async () => {
+  it("passes options to consola.prompt", async () => {
     vi.mocked(consola.prompt).mockResolvedValue("user-input" as never);
 
     const result = await promptRequired("Label:", undefined, { placeholder: "xxx.backlog.com" });
@@ -58,7 +58,7 @@ describe("promptRequired", () => {
     expect(result).toBe("user-input");
   });
 
-  it("options が未指定の場合は type: text のみ渡される", async () => {
+  it("passes only type: text when options are not specified", async () => {
     vi.mocked(consola.prompt).mockResolvedValue("user-input" as never);
 
     const result = await promptRequired("Label:");
@@ -66,7 +66,7 @@ describe("promptRequired", () => {
     expect(result).toBe("user-input");
   });
 
-  it("ラベル末尾のコロンを除去してエラーメッセージを生成する", async () => {
+  it("strips trailing colon from label for error message", async () => {
     vi.mocked(consola.prompt).mockResolvedValue("" as never);
     const mockExit = spyOnProcessExit();
 
@@ -76,7 +76,7 @@ describe("promptRequired", () => {
     mockExit.mockRestore();
   });
 
-  it("--no-input モードで既存の値がある場合はそのまま返す", async () => {
+  it("returns existing value without prompting in --no-input mode", async () => {
     process.env["BACKLOG_NO_INPUT"] = "1";
 
     const result = await promptRequired("Label:", "existing-value");
@@ -84,7 +84,7 @@ describe("promptRequired", () => {
     expect(consola.prompt).not.toHaveBeenCalled();
   });
 
-  it("--no-input モードで値が未指定の場合はエラーで終了する", async () => {
+  it("exits with error when value is missing in --no-input mode", async () => {
     process.env["BACKLOG_NO_INPUT"] = "1";
     const mockExit = spyOnProcessExit();
 
@@ -108,13 +108,13 @@ describe("confirmOrExit", () => {
     delete process.env["BACKLOG_NO_INPUT"];
   });
 
-  it("skipConfirm が true の場合、プロンプトを表示せず true を返す", async () => {
+  it("returns true without prompting when skipConfirm is true", async () => {
     const result = await confirmOrExit("Are you sure?", true);
     expect(result).toBeTruthy();
     expect(consola.prompt).not.toHaveBeenCalled();
   });
 
-  it("ユーザーが確認した場合、true を返す", async () => {
+  it("returns true when user confirms", async () => {
     vi.mocked(consola.prompt).mockResolvedValue(true as never);
 
     const result = await confirmOrExit("Are you sure?");
@@ -122,7 +122,7 @@ describe("confirmOrExit", () => {
     expect(result).toBeTruthy();
   });
 
-  it("ユーザーがキャンセルした場合、false を返し Cancelled. を表示する", async () => {
+  it("returns false and shows Cancelled. when user declines", async () => {
     vi.mocked(consola.prompt).mockResolvedValue(false as never);
 
     const result = await confirmOrExit("Are you sure?");
@@ -131,7 +131,7 @@ describe("confirmOrExit", () => {
     expect(result).toBeFalsy();
   });
 
-  it("skipConfirm が undefined の場合、プロンプトを表示する", async () => {
+  it("shows prompt when skipConfirm is undefined", async () => {
     vi.mocked(consola.prompt).mockResolvedValue(true as never);
 
     const result = await confirmOrExit("Are you sure?");
@@ -139,7 +139,7 @@ describe("confirmOrExit", () => {
     expect(result).toBeTruthy();
   });
 
-  it("skipConfirm が false の場合、プロンプトを表示する", async () => {
+  it("shows prompt when skipConfirm is false", async () => {
     vi.mocked(consola.prompt).mockResolvedValue(true as never);
 
     const result = await confirmOrExit("Are you sure?", false);
@@ -147,7 +147,7 @@ describe("confirmOrExit", () => {
     expect(result).toBeTruthy();
   });
 
-  it("--no-input モードで skipConfirm が true の場合はプロンプトなしで true を返す", async () => {
+  it("returns true without prompting when skipConfirm is true in --no-input mode", async () => {
     process.env["BACKLOG_NO_INPUT"] = "1";
 
     const result = await confirmOrExit("Are you sure?", true);
@@ -155,7 +155,7 @@ describe("confirmOrExit", () => {
     expect(consola.prompt).not.toHaveBeenCalled();
   });
 
-  it("--no-input モードで skipConfirm が未指定の場合はエラーで終了する", async () => {
+  it("exits with error when skipConfirm is not specified in --no-input mode", async () => {
     process.env["BACKLOG_NO_INPUT"] = "1";
     const mockExit = spyOnProcessExit();
 

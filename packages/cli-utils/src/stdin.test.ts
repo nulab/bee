@@ -19,7 +19,7 @@ describe("readStdin", () => {
     vi.restoreAllMocks();
   });
 
-  it("複数チャンクを結合して文字列を返す", async () => {
+  it("concatenates multiple chunks and returns a string", async () => {
     vi.spyOn(process, "stdin", "get").mockReturnValue(
       createMockStdin([Buffer.from("hello "), Buffer.from("world")]),
     );
@@ -28,14 +28,14 @@ describe("readStdin", () => {
     expect(result).toBe("hello world");
   });
 
-  it("空入力の場合は空文字列を返す", async () => {
+  it("returns empty string for empty input", async () => {
     vi.spyOn(process, "stdin", "get").mockReturnValue(createMockStdin([]));
 
     const result = await readStdin();
     expect(result).toBe("");
   });
 
-  it("前後の空白を trim する", async () => {
+  it("trims leading and trailing whitespace", async () => {
     vi.spyOn(process, "stdin", "get").mockReturnValue(
       createMockStdin([Buffer.from("  content with spaces  \n")]),
     );
@@ -44,7 +44,7 @@ describe("readStdin", () => {
     expect(result).toBe("content with spaces");
   });
 
-  it("単一チャンクでも正しく読み取る", async () => {
+  it("reads a single chunk correctly", async () => {
     vi.spyOn(process, "stdin", "get").mockReturnValue(
       createMockStdin([Buffer.from("single chunk")]),
     );

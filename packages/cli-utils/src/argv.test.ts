@@ -2,44 +2,44 @@ import { afterEach, describe, expect, it } from "vitest";
 import { extractGlobalArgs, isNoInput } from "#/argv.js";
 
 describe("extractGlobalArgs", () => {
-  it("--space value 形式でスペースを抽出する", () => {
+  it("extracts space with --space value format", () => {
     const result = extractGlobalArgs(["--space", "example.backlog.com", "issue", "list"]);
     expect(result.space).toBe("example.backlog.com");
     expect(result.argv).toEqual(["issue", "list"]);
   });
 
-  it("--space=value 形式でスペースを抽出する", () => {
+  it("extracts space with --space=value format", () => {
     const result = extractGlobalArgs(["--space=example.backlog.com", "issue", "list"]);
     expect(result.space).toBe("example.backlog.com");
     expect(result.argv).toEqual(["issue", "list"]);
   });
 
-  it("-s value 形式でスペースを抽出する", () => {
+  it("extracts space with -s value format", () => {
     const result = extractGlobalArgs(["-s", "example.backlog.com", "issue", "list"]);
     expect(result.space).toBe("example.backlog.com");
     expect(result.argv).toEqual(["issue", "list"]);
   });
 
-  it("-s=value 形式でスペースを抽出する", () => {
+  it("extracts space with -s=value format", () => {
     const result = extractGlobalArgs(["-s=example.backlog.com", "issue", "list"]);
     expect(result.space).toBe("example.backlog.com");
     expect(result.argv).toEqual(["issue", "list"]);
   });
 
-  it("--space がない場合は undefined を返す", () => {
+  it("returns undefined when --space is not provided", () => {
     const result = extractGlobalArgs(["issue", "list", "--project", "PROJ"]);
     expect(result.space).toBeUndefined();
     expect(result.argv).toEqual(["issue", "list", "--project", "PROJ"]);
   });
 
-  it("空の argv を渡すと undefined と空配列を返す", () => {
+  it("returns undefined and empty array for empty argv", () => {
     const result = extractGlobalArgs([]);
     expect(result.space).toBeUndefined();
     expect(result.noInput).toBeFalsy();
     expect(result.argv).toEqual([]);
   });
 
-  it("複数の --space が指定された場合は最後の値が優先される", () => {
+  it("uses the last value when multiple --space flags are provided", () => {
     const result = extractGlobalArgs([
       "--space",
       "first.backlog.com",
@@ -50,19 +50,19 @@ describe("extractGlobalArgs", () => {
     expect(result.argv).toEqual([]);
   });
 
-  it("--space が argv の末尾にあり値がない場合は undefined を返す", () => {
+  it("returns undefined when --space is at the end of argv without a value", () => {
     const result = extractGlobalArgs(["issue", "list", "--space"]);
     expect(result.space).toBeUndefined();
     expect(result.argv).toEqual(["issue", "list"]);
   });
 
-  it("-s が argv の末尾にあり値がない場合は undefined を返す", () => {
+  it("returns undefined when -s is at the end of argv without a value", () => {
     const result = extractGlobalArgs(["issue", "list", "-s"]);
     expect(result.space).toBeUndefined();
     expect(result.argv).toEqual(["issue", "list"]);
   });
 
-  it("他の引数の順序を保持する", () => {
+  it("preserves the order of other arguments", () => {
     const result = extractGlobalArgs([
       "issue",
       "--space",
@@ -77,30 +77,30 @@ describe("extractGlobalArgs", () => {
     expect(result.argv).toEqual(["issue", "create", "--project", "PROJ", "--title", "test"]);
   });
 
-  it("--space と -s が混在する場合は最後の値が優先される", () => {
+  it("uses the last value when --space and -s are mixed", () => {
     const result = extractGlobalArgs(["--space", "first.backlog.com", "-s", "last.backlog.com"]);
     expect(result.space).toBe("last.backlog.com");
     expect(result.argv).toEqual([]);
   });
 
-  it("--space= で空文字列を指定すると空文字列を返す", () => {
+  it("returns empty string when --space= is specified with empty value", () => {
     const result = extractGlobalArgs(["--space=", "issue", "list"]);
     expect(result.space).toBe("");
     expect(result.argv).toEqual(["issue", "list"]);
   });
 
-  it("--no-input を抽出して noInput を true にする", () => {
+  it("extracts --no-input and sets noInput to true", () => {
     const result = extractGlobalArgs(["--no-input", "issue", "list"]);
     expect(result.noInput).toBeTruthy();
     expect(result.argv).toEqual(["issue", "list"]);
   });
 
-  it("--no-input がない場合は noInput が false になる", () => {
+  it("sets noInput to false when --no-input is absent", () => {
     const result = extractGlobalArgs(["issue", "list"]);
     expect(result.noInput).toBeFalsy();
   });
 
-  it("--space と --no-input を同時に抽出する", () => {
+  it("extracts both --space and --no-input simultaneously", () => {
     const result = extractGlobalArgs([
       "--space",
       "example.backlog.com",
@@ -119,17 +119,17 @@ describe("isNoInput", () => {
     delete process.env["BACKLOG_NO_INPUT"];
   });
 
-  it("BACKLOG_NO_INPUT が '1' のとき true を返す", () => {
+  it("returns true when BACKLOG_NO_INPUT is '1'", () => {
     process.env["BACKLOG_NO_INPUT"] = "1";
     expect(isNoInput()).toBeTruthy();
   });
 
-  it("BACKLOG_NO_INPUT が未設定のとき false を返す", () => {
+  it("returns false when BACKLOG_NO_INPUT is not set", () => {
     delete process.env["BACKLOG_NO_INPUT"];
     expect(isNoInput()).toBeFalsy();
   });
 
-  it("BACKLOG_NO_INPUT が '0' のとき false を返す", () => {
+  it("returns false when BACKLOG_NO_INPUT is '0'", () => {
     process.env["BACKLOG_NO_INPUT"] = "0";
     expect(isNoInput()).toBeFalsy();
   });
