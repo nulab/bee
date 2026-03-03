@@ -1,0 +1,24 @@
+{
+  "name": "@repo/cli",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A command-line interface for Backlog",
+  "bin": {
+    "backlog": "./bin/cli.mjs",
+    "bl": "./bin/cli.mjs"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "unbuild",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "citty": "^0.1.6",
+    "consola": "^3.4.2"
+  },
+  "devDependencies": {
+    "@repo/tsconfigs": "workspace:*",
+    "tsx": "^4.19.0",
+    "unbuild": "^3.5.0"
+  }
+}
