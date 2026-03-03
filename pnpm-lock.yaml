@@ -39,9 +39,6 @@ importers:
       '@repo/tsconfigs':
         specifier: workspace:*
         version: link:../../packages/tsconfigs
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.19.13
       tsx:
         specifier: ^4.19.0
         version: 4.21.0
@@ -76,9 +73,6 @@ importers:
       '@repo/tsconfigs':
         specifier: workspace:*
         version: link:../tsconfigs
-      '@types/node':
-        specifier: ^22.19.13
-        version: 22.19.13
       unbuild:
         specifier: ^3.5.0
         version: 3.6.1(typescript@6.0.0-dev.20260303)
@@ -150,6 +144,10 @@ importers:
         version: link:../tsconfigs
 
   packages/tsconfigs:
+    dependencies:
+      '@types/node':
+        specifier: ^22.19.13
+        version: 22.19.13
     devDependencies:
       '@tsconfig/node-lts':
         specifier: ^24.0.0

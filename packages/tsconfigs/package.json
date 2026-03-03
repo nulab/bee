@@ -5,6 +5,9 @@
   "exports": {
     "./base.json": "./base.json"
   },
+  "dependencies": {
+    "@types/node": "^22.19.13"
+  },
   "devDependencies": {
     "@tsconfig/node-lts": "^24.0.0",
     "@tsconfig/node-ts": "^23.6.4",
