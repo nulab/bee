@@ -16,6 +16,7 @@
     "ufo": "^1.5.4"
   },
   "devDependencies": {
+    "@repo/test-utils": "workspace:*",
     "@repo/tsconfigs": "workspace:*",
     "@types/node": "^22.19.13",
     "unbuild": "^3.5.0",
