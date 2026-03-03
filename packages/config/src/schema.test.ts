@@ -39,7 +39,7 @@ describe("RcAuthSchema", () => {
       clientSecret: "my-client-secret",
     });
     expect(result.success).toBe(true);
-    if (result.success) {
+    if (result.success && result.output.method === "oauth") {
       expect(result.output.clientId).toBe("my-client-id");
       expect(result.output.clientSecret).toBe("my-client-secret");
     }

@@ -1,4 +1,12 @@
 {
   "extends": "@repo/tsconfigs/base.json",
-  "include": ["src"]
+  "include": ["src"],
+  "compilerOptions": {
+    "noEmit": true,
+    "rewriteRelativeImportExtensions": false,
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "#/*": ["./src/*"]
+    }
+  }
 }
