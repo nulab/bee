@@ -164,12 +164,7 @@
   "overrides": [
     {
       // Tool config files require default exports
-      "files": [
-        "**/astro.config.*",
-        "**/build.config.*",
-        "**/vitest.config.*",
-        "**/vitest.workspace.*"
-      ],
+      "files": ["**/astro.config.*", "**/build.config.*", "**/vitest.config.*"],
       "rules": {
         "import/no-default-export": "off",
         "import/no-anonymous-default-export": "off"
