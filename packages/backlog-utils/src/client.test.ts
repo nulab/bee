@@ -15,6 +15,15 @@ vi.mock("@repo/openapi-client/client", () => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
+type AuthCallback = (auth: { type: string; scheme?: string }) => string | undefined;
+
+/** Extract the auth callback from the latest createClient mock call. */
+const getAuthCallback = (): AuthCallback => {
+  const config = vi.mocked(createClient).mock.calls.at(-1)?.at(0);
+  expect(config?.auth).toBeTypeOf("function");
+  return config!.auth as AuthCallback;
+};
+
 describe("getClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -33,9 +42,13 @@ describe("getClient", () => {
     expect(createClient).toHaveBeenCalledWith(
       expect.objectContaining({
         baseUrl: "https://example.backlog.com/api/v2",
-        query: { apiKey: "test-key" },
       }),
     );
+
+    const authFn = getAuthCallback();
+    expect(authFn({ type: "apiKey" })).toBe("test-key");
+    expect(authFn({ type: "http", scheme: "bearer" })).toBeUndefined();
+
     expect(result.host).toBe("example.backlog.com");
   });
 
@@ -56,6 +69,11 @@ describe("getClient", () => {
         baseUrl: "https://example.backlog.com/api/v2",
       }),
     );
+
+    const authFn = getAuthCallback();
+    expect(authFn({ type: "http", scheme: "bearer" })).toBe("access-token");
+    expect(authFn({ type: "apiKey" })).toBeUndefined();
+
     expect(result.host).toBe("example.backlog.com");
   });
 
@@ -72,9 +90,12 @@ describe("getClient", () => {
     expect(createClient).toHaveBeenCalledWith(
       expect.objectContaining({
         baseUrl: "https://configured.backlog.com/api/v2",
-        query: { apiKey: "configured-key" },
       }),
     );
+
+    const authFn = getAuthCallback();
+    expect(authFn({ type: "apiKey" })).toBe("configured-key");
+
     expect(result.host).toBe("configured.backlog.com");
   });
 
@@ -88,9 +109,12 @@ describe("getClient", () => {
     expect(createClient).toHaveBeenCalledWith(
       expect.objectContaining({
         baseUrl: "https://env.backlog.com/api/v2",
-        query: { apiKey: "env-api-key" },
       }),
     );
+
+    const authFn = getAuthCallback();
+    expect(authFn({ type: "apiKey" })).toBe("env-api-key");
+
     expect(result.host).toBe("env.backlog.com");
   });
 
