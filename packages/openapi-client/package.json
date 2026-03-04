@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "openapi-ts",
-    "clean": "rm -rf src/generated"
+    "clean": "rm -rf src/generated",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@repo/openapi": "workspace:*",

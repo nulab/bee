@@ -6,7 +6,7 @@
     "postinstall": "lefthook install",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "typecheck": "tsc -b",
+    "typecheck": "turbo run typecheck",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "test": "vitest run"

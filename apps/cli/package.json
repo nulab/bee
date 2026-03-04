@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "unbuild",
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@repo/api": "workspace:*",

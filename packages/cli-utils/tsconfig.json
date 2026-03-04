@@ -5,6 +5,5 @@
     "paths": {
       "#src/*": ["./src/*"]
     }
-  },
-  "references": [{ "path": "../test-utils" }]
+  }
 }

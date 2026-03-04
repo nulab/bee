@@ -5,10 +5,6 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "rewriteRelativeImportExtensions": false,
-    "composite": true,
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "declarationMap": true,
     "types": ["node"]
   }
 }
