@@ -1,5 +1,10 @@
+import { mkdirSync } from "node:fs";
 import { read, write } from "rc9";
 import { describe, expect, it, vi } from "vitest";
+
+vi.mock("node:fs", () => ({
+  mkdirSync: vi.fn(),
+}));
 
 vi.mock("rc9", () => ({
   read: vi.fn(),
@@ -57,7 +62,7 @@ describe("loadConfig", () => {
 });
 
 describe("writeConfig", () => {
-  it("writes config to rc file", () => {
+  it("creates config directory before writing", () => {
     const config = {
       defaultSpace: "example.backlog.com",
       spaces: [
@@ -71,6 +76,7 @@ describe("writeConfig", () => {
 
     writeConfig(config);
 
+    expect(mkdirSync).toHaveBeenCalledWith(expect.stringContaining("backlog"), { recursive: true });
     expect(mockWrite).toHaveBeenCalledWith(config, expect.objectContaining({ name: ".backlogrc" }));
   });
 });

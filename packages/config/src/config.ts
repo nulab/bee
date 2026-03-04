@@ -1,3 +1,4 @@
+import { mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import * as v from "valibot";
@@ -33,6 +34,7 @@ const loadConfig = (): Rc => {
 
 const writeConfig = (config: Rc): void => {
   const dir = resolveConfigDir();
+  mkdirSync(dir, { recursive: true });
   write(config, { name: CONFIG_FILE_NAME, dir });
 };
 
