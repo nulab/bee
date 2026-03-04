@@ -1,5 +1,6 @@
 ---
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import AnchorHeading from "@astrojs/starlight/components/AnchorHeading.astro";
 import { Code } from "@astrojs/starlight/components";
 import { marked } from "marked";
 import { loadCommands } from "../../lib/commands";
@@ -34,6 +35,23 @@ for (const arg of positionals) {
 }
 const usageLine = `${entry.title} ${usageParts.join(" ")}`.trim();
 
+// Build headings for table of contents
+const headings: { depth: number; slug: string; text: string }[] = [
+  { depth: 2, slug: "usage", text: "Usage" },
+];
+if (positionals.length > 0) {
+  headings.push({ depth: 2, slug: "arguments", text: "Arguments" });
+}
+if (flags.length > 0) {
+  headings.push({ depth: 2, slug: "flags", text: "Flags" });
+}
+if (entry.examples && entry.examples.length > 0) {
+  headings.push({ depth: 2, slug: "examples", text: "Examples" });
+}
+if (entry.environment && entry.environment.length > 0) {
+  headings.push({ depth: 2, slug: "environment-variables", text: "Environment variables" });
+}
+
 // Build flag parts for rendering: each flag as a separate code element
 const flagParts = (arg: Arg) => {
   const parts: string[] = arg.alias.map((a: string) => `-${a}`);
@@ -50,16 +68,17 @@ const flagParts = (arg: Arg) => {
     title: entry.title,
     description: entry.description,
   }}
+  headings={headings}
 >
   {entry.long && <div set:html={renderMarkdown(entry.long)} />}
 
-  <h2>Usage</h2>
+  <AnchorHeading level="2" id="usage">Usage</AnchorHeading>
   <Code code={usageLine} lang="sh" />
 
   {
     positionals.length > 0 && (
       <>
-        <h2>Arguments</h2>
+        <AnchorHeading level="2" id="arguments">Arguments</AnchorHeading>
         <dl>
           {positionals.map((arg: Arg) => (
             <>
@@ -85,7 +104,7 @@ const flagParts = (arg: Arg) => {
   {
     flags.length > 0 && (
       <>
-        <h2>Flags</h2>
+        <AnchorHeading level="2" id="flags">Flags</AnchorHeading>
         <dl>
           {flags.map((arg: Arg) => (
             <>
@@ -117,7 +136,7 @@ const flagParts = (arg: Arg) => {
     entry.examples &&
       entry.examples.length > 0 && (
         <>
-          <h2>Examples</h2>
+          <AnchorHeading level="2" id="examples">Examples</AnchorHeading>
           {entry.examples.map((ex: { description: string; command: string }) => (
             <>
               <p>{ex.description}</p>
@@ -132,7 +151,7 @@ const flagParts = (arg: Arg) => {
     entry.environment &&
       entry.environment.length > 0 && (
         <>
-          <h2>Environment variables</h2>
+          <AnchorHeading level="2" id="environment-variables">Environment variables</AnchorHeading>
           <dl>
             {entry.environment.map(([key, desc]: [string, string]) => (
               <>
