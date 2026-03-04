@@ -51,16 +51,7 @@ const formatFlag = (arg: Arg) => {
     description: entry.description,
   }}
 >
-  {
-    entry.long && (
-      <div
-        set:html={entry.long
-          .split("\n\n")
-          .map((p: string) => `<p>${p}</p>`)
-          .join("")}
-      />
-    )
-  }
+  {entry.long && <div set:html={renderMarkdown(entry.long)} />}
 
   <h2>Usage</h2>
   <Code code={usageLine} lang="sh" />
