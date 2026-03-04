@@ -45,11 +45,13 @@ model NulabAccount {
 /** Backlog user. */
 model User {
   id: int64;
-  userId: string;
+
+  userId: string | null;
   name: string;
   roleType: int32;
   lang: string | null;
-  mailAddress: string;
+  mailAddress: string | null;
+
   keyword: string;
   lastLoginTime: utcDateTime | null;
   nulabAccount: NulabAccount | null;

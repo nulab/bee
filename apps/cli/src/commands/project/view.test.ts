@@ -1,90 +1,106 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getClient, openUrl } from "@repo/backlog-utils";
+import { projectsGet } from "@repo/openapi-client";
+import consola from "consola";
+import { describe, expect, it, vi } from "vitest";
 
-vi.mock("#/utils/client.js", () => ({ getClient: vi.fn() }));
-vi.mock("#/utils/url.js", () => ({
+vi.mock("@repo/backlog-utils", () => ({
+  getClient: vi.fn(),
   openUrl: vi.fn(),
-  projectUrl: vi.fn(() => "https://example.backlog.com/projects/PROJ"),
+  projectUrl: vi.fn((host: string, key: string) => `https://${host}/projects/${key}`),
 }));
+
+vi.mock("@repo/openapi-client", () => ({
+  projectsGet: vi.fn(),
+}));
+
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-import { getClient } from "#/utils/client.js";
-import { openUrl, projectUrl } from "#/utils/url.js";
-import consola from "consola";
+const mockClient = {
+  interceptors: { request: { use: vi.fn() } },
+};
 
-const setupMockClient = () => {
-  const mockClient = vi.fn();
+const setupMocks = () => {
   vi.mocked(getClient).mockResolvedValue({
     client: mockClient as never,
     host: "example.backlog.com",
   });
-  return mockClient;
+};
+
+const sampleProject = {
+  id: 1,
+  projectKey: "PROJ1",
+  name: "Test Project",
+  archived: false,
+  textFormattingRule: "markdown",
+  chartEnabled: true,
+  subtaskingEnabled: false,
+  useWiki: true,
+  useFileSharing: true,
+  useGit: true,
+  useSubversion: false,
+  useDevAttributes: false,
 };
 
 describe("project view", () => {
-  const mockProject = {
-    id: 1,
-    projectKey: "PROJ",
-    name: "Test Project",
-    archived: false,
-    textFormattingRule: "markdown",
-    chartEnabled: true,
-    subtaskingEnabled: false,
-    useWiki: true,
-    useFileSharing: true,
-    useDevAttributes: false,
-  };
-
-  it("プロジェクト詳細を表示する", async () => {
-    const mockClient = setupMockClient();
-    mockClient.mockResolvedValue(mockProject);
-
-    const mod = await import("#/commands/project/view.js");
-    await mod.view.run?.({
-      args: { projectKey: "PROJ", web: false },
+  it("displays project details", async () => {
+    setupMocks();
+    vi.mocked(projectsGet).mockResolvedValue({
+      data: sampleProject,
     } as never);
 
-    expect(mockClient).toHaveBeenCalledWith("/projects/PROJ");
+    const { view } = await import("./view");
+    await view.run?.({ args: { project: "PROJ1" } } as never);
+
+    expect(projectsGet).toHaveBeenCalledWith(
+      expect.objectContaining({
+        client: mockClient,
+        throwOnError: true,
+        path: { projectIdOrKey: "PROJ1" },
+      }),
+    );
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Test Project"));
-    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ1"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Active"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("markdown"));
   });
 
-  it("--web でブラウザを開く", async () => {
-    const mockClient = setupMockClient();
-    mockClient.mockResolvedValue(mockProject);
-
-    const mod = await import("#/commands/project/view.js");
-    await mod.view.run?.({
-      args: { projectKey: "PROJ", web: true },
+  it("shows Archived status for archived project", async () => {
+    setupMocks();
+    vi.mocked(projectsGet).mockResolvedValue({
+      data: { ...sampleProject, archived: true },
     } as never);
 
-    expect(projectUrl).toHaveBeenCalledWith("example.backlog.com", "PROJ");
-    expect(openUrl).toHaveBeenCalledWith("https://example.backlog.com/projects/PROJ");
-    expect(consola.info).toHaveBeenCalledWith(expect.stringContaining("Opening"));
+    const { view } = await import("./view");
+    await view.run?.({ args: { project: "PROJ1" } } as never);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Archived"));
   });
 
-  describe("--json", () => {
-    let writeSpy: ReturnType<typeof vi.spyOn>;
+  it("opens browser with --web flag", async () => {
+    setupMocks();
 
-    beforeEach(() => {
-      writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-    });
+    const { view } = await import("./view");
+    await view.run?.({ args: { project: "PROJ1", web: true } } as never);
 
-    afterEach(() => {
-      writeSpy.mockRestore();
-    });
+    expect(openUrl).toHaveBeenCalledWith("https://example.backlog.com/projects/PROJ1");
+    expect(consola.info).toHaveBeenCalledWith(
+      "Opening https://example.backlog.com/projects/PROJ1 in your browser.",
+    );
+    expect(projectsGet).not.toHaveBeenCalled();
+  });
 
-    it("--json で JSON を出力する", async () => {
-      const mockClient = setupMockClient();
-      mockClient.mockResolvedValue(mockProject);
+  it("outputs JSON when --json flag is set", async () => {
+    setupMocks();
+    vi.mocked(projectsGet).mockResolvedValue({
+      data: sampleProject,
+    } as never);
 
-      const mod = await import("#/commands/project/view.js");
-      await mod.view.run?.({
-        args: { projectKey: "PROJ", web: false, json: "" },
-      } as never);
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-      expect(consola.log).not.toHaveBeenCalled();
-      const output = JSON.parse(String(writeSpy.mock.calls[0]?.[0]).trim());
-      expect(output.projectKey).toBe("PROJ");
-    });
+    const { view } = await import("./view");
+    await view.run?.({ args: { project: "PROJ1", json: "" } } as never);
+
+    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("PROJ1"));
+    writeSpy.mockRestore();
   });
 });

@@ -115,6 +115,23 @@ Follow gh CLI conventions for `args` description strings:
 - **`e.g.,` flows naturally in the sentence** — write `The hostname of the Backlog space. e.g., xxx.backlog.com`, not `Space hostname (e.g., xxx.backlog.com)`.
 - **Same-meaning arguments share the same description across commands** — if `--space` means the same thing in `auth login` and `auth logout`, use the identical description string. Do not vary wording per command context.
 
+### Environment variable defaults for arguments
+
+When a command argument can be provided via an environment variable (e.g., `BACKLOG_PROJECT`), use citty's `default` property instead of runtime fallback logic:
+
+```ts
+project: {
+  type: "positional",
+  description: "Project ID or project key",
+  required: true,
+  default: process.env.BACKLOG_PROJECT,
+},
+```
+
+citty skips the `required` check when `default` is not `undefined`, so this naturally makes the argument optional when the env var is set and required when it is not. No runtime fallback code (`||` / `??`) is needed.
+
+Also add the env var to `commandUsage.annotations.environment` so it appears in `--help` output.
+
 ### Key files
 
 - `apps/cli/src/lib/command-usage.ts` — `CommandUsage` type, `withUsage`, `renderCommandUsage`, `showCommandUsage`

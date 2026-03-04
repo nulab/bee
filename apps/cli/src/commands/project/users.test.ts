@@ -1,72 +1,98 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getClient } from "@repo/backlog-utils";
+import { projectsGetUsers } from "@repo/openapi-client";
+import consola from "consola";
+import { describe, expect, it, vi } from "vitest";
 
-vi.mock("#/utils/client.js", () => ({ getClient: vi.fn() }));
-vi.mock("#/utils/format.js", () => ({
-  padEnd: vi.fn((s: string, n: number) => s.padEnd(n)),
+vi.mock("@repo/backlog-utils", () => ({
+  getClient: vi.fn(),
 }));
+
+vi.mock("@repo/openapi-client", () => ({
+  projectsGetUsers: vi.fn(),
+}));
+
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-import { getClient } from "#/utils/client.js";
-import consola from "consola";
+const mockClient = {
+  interceptors: { request: { use: vi.fn() } },
+};
 
-const setupMockClient = () => {
-  const mockClient = vi.fn();
+const setupMocks = () => {
   vi.mocked(getClient).mockResolvedValue({
     client: mockClient as never,
     host: "example.backlog.com",
   });
-  return mockClient;
 };
 
 describe("project users", () => {
-  it("プロジェクトユーザー一覧を表示する", async () => {
-    const mockClient = setupMockClient();
-    mockClient.mockResolvedValue([
-      { id: 1, userId: "user1", name: "User One", roleType: 1 },
-      { id: 2, userId: "user2", name: "User Two", roleType: 2 },
-    ]);
+  it("displays user list in tabular format", async () => {
+    setupMocks();
+    vi.mocked(projectsGetUsers).mockResolvedValue({
+      data: [
+        { id: 1, userId: "user1", name: "User One", roleType: 1 },
+        { id: 2, userId: "user2", name: "User Two", roleType: 2 },
+      ],
+    } as never);
 
-    const mod = await import("#/commands/project/users.js");
-    await mod.users.run?.({ args: { "project-key": "PROJ" } } as never);
+    const { users } = await import("./users");
+    await users.run?.({ args: { project: "PROJ1" } } as never);
 
-    expect(mockClient).toHaveBeenCalledWith("/projects/PROJ/users");
-    expect(consola.log).toHaveBeenCalledTimes(3);
+    expect(projectsGetUsers).toHaveBeenCalledWith(
+      expect.objectContaining({
+        client: mockClient,
+        throwOnError: true,
+        path: { projectIdOrKey: "PROJ1" },
+      }),
+    );
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("user1"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Admin"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Normal"));
   });
 
-  it("0件の場合メッセージ表示", async () => {
-    const mockClient = setupMockClient();
-    mockClient.mockResolvedValue([]);
+  it("shows message when no users found", async () => {
+    setupMocks();
+    vi.mocked(projectsGetUsers).mockResolvedValue({
+      data: [],
+    } as never);
 
-    const mod = await import("#/commands/project/users.js");
-    await mod.users.run?.({ args: { "project-key": "PROJ" } } as never);
+    const { users } = await import("./users");
+    await users.run?.({ args: { project: "PROJ1" } } as never);
 
     expect(consola.info).toHaveBeenCalledWith("No users found.");
   });
 
-  describe("--json", () => {
-    let writeSpy: ReturnType<typeof vi.spyOn>;
+  it("passes excludeGroupMembers query parameter", async () => {
+    setupMocks();
+    vi.mocked(projectsGetUsers).mockResolvedValue({
+      data: [],
+    } as never);
 
-    beforeEach(() => {
-      writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-    });
+    const { users } = await import("./users");
+    await users.run?.({
+      args: { project: "PROJ1", "exclude-group-members": true },
+    } as never);
 
-    afterEach(() => {
-      writeSpy.mockRestore();
-    });
+    expect(projectsGetUsers).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({ excludeGroupMembers: true }),
+      }),
+    );
+  });
 
-    it("--json で JSON を出力する", async () => {
-      const mockClient = setupMockClient();
-      const data = [{ id: 1, userId: "user1", name: "User One", roleType: 1 }];
-      mockClient.mockResolvedValue(data);
+  it("outputs JSON when --json flag is set", async () => {
+    setupMocks();
+    const usersData = [{ id: 1, userId: "user1", name: "User One", roleType: 1 }];
+    vi.mocked(projectsGetUsers).mockResolvedValue({
+      data: usersData,
+    } as never);
 
-      const mod = await import("#/commands/project/users.js");
-      await mod.users.run?.({
-        args: { "project-key": "PROJ", json: "" },
-      } as never);
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-      expect(consola.log).not.toHaveBeenCalled();
-      const output = JSON.parse(String(writeSpy.mock.calls[0]?.[0]).trim());
-      expect(output).toEqual(data);
-    });
+    const { users } = await import("./users");
+    await users.run?.({ args: { project: "PROJ1", json: "" } } as never);
+
+    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("user1"));
+    writeSpy.mockRestore();
   });
 });

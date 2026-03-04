@@ -5,10 +5,6 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "bee",
-      logo: {
-        src: './src/assets/bee-logo.svg',
-        replacesTitle: true,
-      },
       social: [
         {
           icon: "github",
@@ -38,6 +34,15 @@ export default defineConfig({
                 { label: "auth status", link: "/commands/auth/status" },
                 { label: "auth switch", link: "/commands/auth/switch" },
                 { label: "auth token", link: "/commands/auth/token" },
+              ],
+            },
+            {
+              label: "project",
+              items: [
+                { label: "project list", link: "/commands/project/list" },
+                { label: "project view", link: "/commands/project/view" },
+                { label: "project users", link: "/commands/project/users" },
+                { label: "project activities", link: "/commands/project/activities" },
               ],
             },
           ],

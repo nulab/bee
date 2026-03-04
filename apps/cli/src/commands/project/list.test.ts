@@ -1,84 +1,111 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { getClient } from "@repo/backlog-utils";
+import { projectsList } from "@repo/openapi-client";
+import consola from "consola";
+import { describe, expect, it, vi } from "vitest";
 
-vi.mock("#/utils/client.js", () => ({ getClient: vi.fn() }));
-vi.mock("#/utils/format.js", () => ({
-  formatProjectLine: vi.fn(() => "PROJ  Test Project  Active"),
-  padEnd: vi.fn((s: string, n: number) => s.padEnd(n)),
+vi.mock("@repo/backlog-utils", () => ({
+  getClient: vi.fn(),
 }));
+
+vi.mock("@repo/openapi-client", () => ({
+  projectsList: vi.fn(),
+}));
+
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-import { getClient } from "#/utils/client.js";
-import consola from "consola";
+const mockClient = {
+  interceptors: { request: { use: vi.fn() } },
+};
 
-const setupMockClient = () => {
-  const mockClient = vi.fn();
+const setupMocks = () => {
   vi.mocked(getClient).mockResolvedValue({
     client: mockClient as never,
     host: "example.backlog.com",
   });
-  return mockClient;
 };
 
 describe("project list", () => {
-  it("プロジェクト一覧を表示する", async () => {
-    const mockClient = setupMockClient();
-    mockClient.mockResolvedValue([
-      { id: 1, projectKey: "PROJ1", name: "Project 1", archived: false },
-      { id: 2, projectKey: "PROJ2", name: "Project 2", archived: false },
-    ]);
+  it("displays project list in tabular format", async () => {
+    setupMocks();
+    vi.mocked(projectsList).mockResolvedValue({
+      data: [
+        { projectKey: "PROJ1", name: "Project One", archived: false },
+        { projectKey: "PROJ2", name: "Project Two", archived: true },
+      ],
+    } as never);
 
-    const mod = await import("#/commands/project/list.js");
-    await mod.list.run?.({ args: { limit: "20" } } as never);
+    const { list } = await import("./list");
+    await list.run?.({ args: {} } as never);
 
-    expect(mockClient).toHaveBeenCalledWith("/projects", expect.objectContaining({ query: {} }));
-    expect(consola.log).toHaveBeenCalledTimes(3);
+    expect(getClient).toHaveBeenCalled();
+    expect(projectsList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        client: mockClient,
+        throwOnError: true,
+      }),
+    );
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("KEY"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ1"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ2"));
   });
 
-  it("0件の場合メッセージ表示", async () => {
-    const mockClient = setupMockClient();
-    mockClient.mockResolvedValue([]);
+  it("shows message when no projects found", async () => {
+    setupMocks();
+    vi.mocked(projectsList).mockResolvedValue({
+      data: [],
+    } as never);
 
-    const mod = await import("#/commands/project/list.js");
-    await mod.list.run?.({ args: { limit: "20" } } as never);
+    const { list } = await import("./list");
+    await list.run?.({ args: {} } as never);
 
     expect(consola.info).toHaveBeenCalledWith("No projects found.");
   });
 
-  it("--archived でクエリに archived が含まれる", async () => {
-    const mockClient = setupMockClient();
-    mockClient.mockResolvedValue([]);
+  it("passes archived query parameter", async () => {
+    setupMocks();
+    vi.mocked(projectsList).mockResolvedValue({
+      data: [],
+    } as never);
 
-    const mod = await import("#/commands/project/list.js");
-    await mod.list.run?.({ args: { archived: true, limit: "20" } } as never);
+    const { list } = await import("./list");
+    await list.run?.({ args: { archived: true } } as never);
 
-    expect(mockClient).toHaveBeenCalledWith(
-      "/projects",
-      expect.objectContaining({ query: { archived: true } }),
+    expect(projectsList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({ archived: true }),
+      }),
     );
   });
 
-  describe("--json", () => {
-    let writeSpy: ReturnType<typeof vi.spyOn>;
+  it("passes all query parameter", async () => {
+    setupMocks();
+    vi.mocked(projectsList).mockResolvedValue({
+      data: [],
+    } as never);
 
-    beforeEach(() => {
-      writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-    });
+    const { list } = await import("./list");
+    await list.run?.({ args: { all: true } } as never);
 
-    afterEach(() => {
-      writeSpy.mockRestore();
-    });
+    expect(projectsList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({ all: true }),
+      }),
+    );
+  });
 
-    it("--json で JSON を出力する", async () => {
-      const mockClient = setupMockClient();
-      const data = [{ id: 1, projectKey: "PROJ1", name: "Project 1", archived: false }];
-      mockClient.mockResolvedValue(data);
+  it("outputs JSON when --json flag is set", async () => {
+    setupMocks();
+    const projects = [{ projectKey: "PROJ1", name: "Project One", archived: false }];
+    vi.mocked(projectsList).mockResolvedValue({
+      data: projects,
+    } as never);
 
-      const mod = await import("#/commands/project/list.js");
-      await mod.list.run?.({ args: { limit: "20", json: "" } } as never);
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-      expect(consola.log).not.toHaveBeenCalled();
-      const output = JSON.parse(String(writeSpy.mock.calls[0]?.[0]).trim());
-      expect(output).toEqual(data);
-    });
+    const { list } = await import("./list");
+    await list.run?.({ args: { json: "" } } as never);
+
+    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("PROJ1"));
+    writeSpy.mockRestore();
   });
 });

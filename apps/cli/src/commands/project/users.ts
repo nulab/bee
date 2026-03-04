@@ -1,55 +1,79 @@
-import { type BacklogUser } from "@repo/api";
+import { getClient } from "@repo/backlog-utils";
+import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
+import { projectsGetUsers } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
-import { getClient } from "#/utils/client.js";
-import { padEnd } from "#/utils/format.js";
-import { outputArgs, outputResult } from "#/utils/output.js";
+import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { ROLE_LABELS } from "../../lib/role-labels";
 
-const users = defineCommand({
-  meta: {
-    name: "users",
-    description: "List project users",
-  },
-  args: {
-    ...outputArgs,
-    "project-key": {
-      type: "positional",
-      description: "Project key",
-      required: true,
+const commandUsage: CommandUsage = {
+  long: `List members of a Backlog project.
+
+Displays each user's ID, user ID, name, and role within the project.`,
+
+  examples: [
+    { description: "List project members", command: "bee project users PROJECT_KEY" },
+    {
+      description: "Exclude group members",
+      command: "bee project users PROJECT_KEY --exclude-group-members",
     },
+    { description: "Output as JSON", command: "bee project users PROJECT_KEY --json" },
+  ],
+
+  annotations: {
+    environment: [["BACKLOG_PROJECT", "Default project ID or project key"]],
   },
-  async run({ args }) {
-    const { client } = await getClient();
+};
 
-    const userList = await client<BacklogUser[]>(`/projects/${args["project-key"]}/users`);
+const users = withUsage(
+  defineCommand({
+    meta: {
+      name: "users",
+      description: "List project users",
+    },
+    args: {
+      ...outputArgs,
+      project: {
+        type: "positional",
+        description: "Project ID or project key",
+        required: true,
+        default: process.env.BACKLOG_PROJECT,
+      },
+      "exclude-group-members": {
+        type: "boolean",
+        description: "Exclude members that are part of project groups",
+      },
+    },
+    async run({ args }) {
+      const { client } = await getClient();
 
-    outputResult(userList, args, (data) => {
-      if (data.length === 0) {
-        consola.info("No users found.");
-        return;
-      }
+      const { data: members } = await projectsGetUsers({
+        client,
+        throwOnError: true,
+        path: { projectIdOrKey: args.project },
+        query: {
+          excludeGroupMembers: args["exclude-group-members"],
+        },
+      });
 
-      const roleNames: Record<number, string> = {
-        1: "Administrator",
-        2: "Normal User",
-        3: "Reporter",
-        4: "Viewer",
-        5: "Guest Reporter",
-        6: "Guest Viewer",
-      };
+      outputResult(members, args, (data) => {
+        if (data.length === 0) {
+          consola.info("No users found.");
+          return;
+        }
 
-      const header = `${padEnd("ID", 10)}${padEnd("USER ID", 20)}${padEnd("NAME", 20)}ROLE`;
-      consola.log(header);
+        const rows: Row[] = data.map((user) => [
+          { header: "ID", value: String(user.id) },
+          { header: "USER ID", value: user.userId ?? "" },
+          { header: "NAME", value: user.name },
+          { header: "ROLE", value: ROLE_LABELS[user.roleType] ?? `Unknown (${user.roleType})` },
+        ]);
 
-      for (const user of data) {
-        const id = padEnd(`${user.id}`, 10);
-        const userId = padEnd(user.userId, 20);
-        const name = padEnd(user.name, 20);
-        const role = roleNames[user.roleType] ?? `Role ${user.roleType}`;
-        consola.log(`${id}${userId}${name}${role}`);
-      }
-    });
-  },
-});
+        printTable(rows);
+      });
+    },
+  }),
+  commandUsage,
+);
 
-export { users };
+export { commandUsage, users };
