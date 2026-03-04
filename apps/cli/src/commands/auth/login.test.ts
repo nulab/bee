@@ -15,6 +15,10 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@repo/openapi-client/client", () => ({
   createClient: vi.fn(() => ({
     interceptors: { request: { use: vi.fn() } },
+    buildUrl: vi.fn(
+      (opts: { url: string; query?: Record<string, unknown> }) =>
+        `https://example.backlog.com${opts.url}?mocked=true`,
+    ),
   })),
 }));
 
@@ -191,17 +195,31 @@ describe("auth login", () => {
       } as never);
 
       expect(startCallbackServer).toHaveBeenCalled();
+      expect(createClient).toHaveBeenNthCalledWith(1, {
+        baseUrl: "https://example.backlog.com",
+      });
+      const oauthClient = vi.mocked(createClient).mock.results[0].value;
+      expect(oauthClient.buildUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: "/OAuth2AccessRequest.action",
+          query: expect.objectContaining({
+            response_type: "code",
+            client_id: "my-client-id",
+            redirect_uri: "http://localhost:5033/callback",
+          }),
+        }),
+      );
       expect(exchangeAuthorizationCode).toHaveBeenCalledWith("example.backlog.com", {
         code: "auth-code-123",
         clientId: "my-client-id",
         clientSecret: "my-client-secret",
         redirectUri: "http://localhost:5033/callback",
       });
-      expect(createClient).toHaveBeenCalledWith({
+      expect(createClient).toHaveBeenNthCalledWith(2, {
         baseUrl: "https://example.backlog.com/api/v2",
       });
       expect(addBearerAuth).toHaveBeenCalledWith(
-        vi.mocked(createClient).mock.results[0].value,
+        vi.mocked(createClient).mock.results[1].value,
         "new-access-token",
       );
       expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));

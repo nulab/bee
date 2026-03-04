@@ -133,16 +133,21 @@ const loginWithOAuth = async (
   const redirectUri = `http://localhost:${callbackServer.port}/callback`;
   const state = crypto.randomUUID();
 
-  const authUrl = new URL(`https://${hostname}/OAuth2AccessRequest.action`);
-  authUrl.searchParams.set("response_type", "code");
-  authUrl.searchParams.set("client_id", clientId);
-  authUrl.searchParams.set("redirect_uri", redirectUri);
-  authUrl.searchParams.set("state", state);
+  const oauthClient = createClient({ baseUrl: `https://${hostname}` });
+  const authUrl = oauthClient.buildUrl({
+    url: "/OAuth2AccessRequest.action",
+    query: {
+      response_type: "code" as const,
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      state,
+    },
+  });
 
   consola.info("Opening browser for authorization...");
-  consola.info(`If the browser doesn't open, visit: ${authUrl.toString()}`);
+  consola.info(`If the browser doesn't open, visit: ${authUrl}`);
 
-  await openUrl(authUrl.toString());
+  await openUrl(authUrl);
 
   let code: string;
   try {
