@@ -12,8 +12,7 @@ import consola from "consola";
 import { handleValidationError } from "./validation-error";
 
 beforeEach(() => {
-  consola.error.mockClear();
-  consola.debug.mockClear();
+  vi.clearAllMocks();
 });
 
 describe("handleValidationError", () => {
