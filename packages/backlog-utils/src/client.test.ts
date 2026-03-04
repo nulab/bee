@@ -1,15 +1,16 @@
 import { spyOnProcessExit } from "@repo/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getClient } from "#/client.js";
-import { createClient } from "@repo/api";
+import { createClient } from "@repo/openapi-client/client";
 import { resolveSpace } from "@repo/config";
 
 vi.mock("@repo/config", () => ({
   resolveSpace: vi.fn(),
 }));
 
-vi.mock("@repo/api", () => ({
-  createClient: vi.fn(() => (() => {}) as unknown),
+vi.mock("@repo/openapi-client/client", () => ({
+  createClient: vi.fn(() => ({ getConfig: () => ({}), setConfig: vi.fn() })),
+  createConfig: vi.fn(() => ({})),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -29,10 +30,12 @@ describe("getClient", () => {
 
     const result = await getClient();
 
-    expect(createClient).toHaveBeenCalledWith({
-      host: "example.backlog.com",
-      apiKey: "test-key",
-    });
+    expect(createClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseUrl: "https://example.backlog.com/api/v2",
+        query: { apiKey: "test-key" },
+      }),
+    );
     expect(result.host).toBe("example.backlog.com");
   });
 
@@ -48,10 +51,12 @@ describe("getClient", () => {
 
     const result = await getClient();
 
-    // OAuth uses ofetch.create directly, not createClient
-    expect(createClient).not.toHaveBeenCalled();
+    expect(createClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseUrl: "https://example.backlog.com/api/v2",
+      }),
+    );
     expect(result.host).toBe("example.backlog.com");
-    expect(result.client).toBeTypeOf("function");
   });
 
   it("prioritizes configured space over BACKLOG_API_KEY", async () => {
@@ -64,10 +69,12 @@ describe("getClient", () => {
 
     const result = await getClient();
 
-    expect(createClient).toHaveBeenCalledWith({
-      host: "configured.backlog.com",
-      apiKey: "configured-key",
-    });
+    expect(createClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseUrl: "https://configured.backlog.com/api/v2",
+        query: { apiKey: "configured-key" },
+      }),
+    );
     expect(result.host).toBe("configured.backlog.com");
   });
 
@@ -78,10 +85,12 @@ describe("getClient", () => {
 
     const result = await getClient();
 
-    expect(createClient).toHaveBeenCalledWith({
-      host: "env.backlog.com",
-      apiKey: "env-api-key",
-    });
+    expect(createClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseUrl: "https://env.backlog.com/api/v2",
+        query: { apiKey: "env-api-key" },
+      }),
+    );
     expect(result.host).toBe("env.backlog.com");
   });
 
