@@ -11,7 +11,7 @@ vi.mock("@repo/config", () => ({
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("auth logout", () => {
-  it("指定ホストをログアウトする", async () => {
+  it("logs out from specified host", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {
@@ -32,7 +32,7 @@ describe("auth logout", () => {
     expect(consola.success).toHaveBeenCalledWith("Logged out of example.backlog.com.");
   });
 
-  it("スペースが0件の場合メッセージを表示する", async () => {
+  it("shows message when no spaces are configured", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [],
       defaultSpace: undefined,
@@ -48,7 +48,7 @@ describe("auth logout", () => {
     expect(removeSpace).not.toHaveBeenCalled();
   });
 
-  it("存在しないスペースでエラーを出す", async () => {
+  it("shows error for non-existent space", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [],
       defaultSpace: undefined,
@@ -72,7 +72,7 @@ describe("auth logout", () => {
     exitSpy.mockRestore();
   });
 
-  it("--space 省略で1件の場合、自動選択してログアウトする", async () => {
+  it("auto-selects and logs out when --space is omitted and one space exists", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {

@@ -8,7 +8,7 @@ vi.mock("@repo/config", () => ({ loadConfig: vi.fn() }));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("auth status", () => {
-  it("認証済みスペースのステータスを表示する", async () => {
+  it("displays status of authenticated spaces", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {
@@ -40,7 +40,7 @@ describe("auth status", () => {
     expect(consola.log).toHaveBeenCalledWith("    Status: Authenticated");
   });
 
-  it("スペース未登録の場合メッセージを表示する", async () => {
+  it("shows message when no spaces are registered", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [],
       defaultSpace: undefined,
@@ -55,7 +55,7 @@ describe("auth status", () => {
     );
   });
 
-  it("--space でフィルタして該当なしの場合メッセージを表示する", async () => {
+  it("shows message when --space filter has no match", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {
@@ -78,7 +78,7 @@ describe("auth status", () => {
     expect(createClient).not.toHaveBeenCalled();
   });
 
-  it("--show-token でトークンを表示する", async () => {
+  it("displays token with --show-token", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {
@@ -104,7 +104,7 @@ describe("auth status", () => {
     expect(consola.log).toHaveBeenCalledWith("    Token:  my-secret-key");
   });
 
-  it("トークン検証が失敗した場合 Authentication failed を表示する", async () => {
+  it("displays Authentication failed when token verification fails", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {
@@ -126,7 +126,7 @@ describe("auth status", () => {
     expect(consola.debug).toHaveBeenCalledWith("Token verification failed:", expect.any(Error));
   });
 
-  it("OAuth 認証のスペースで正しいクライアント設定を使用する", async () => {
+  it("uses correct client config for OAuth-authenticated space", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {
@@ -159,7 +159,7 @@ describe("auth status", () => {
     expect(consola.log).toHaveBeenCalledWith("    User:   OAuth User (oauthuser)");
   });
 
-  it("--show-token で OAuth トークンを表示する", async () => {
+  it("displays OAuth token with --show-token", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {
@@ -189,7 +189,7 @@ describe("auth status", () => {
     expect(consola.log).toHaveBeenCalledWith("    Token:  oauth-access-token");
   });
 
-  it("デフォルトでないスペースはホスト名のみ表示する", async () => {
+  it("displays only hostname for non-default space", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {

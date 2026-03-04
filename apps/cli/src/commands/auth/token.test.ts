@@ -12,7 +12,7 @@ vi.mock("@repo/config", () => ({
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("auth token", () => {
-  it("API キーを stdout に出力する", async () => {
+  it("outputs API key to stdout", async () => {
     vi.mocked(resolveSpace).mockReturnValue({
       host: "example.backlog.com",
       auth: { method: "api-key", apiKey: "my-api-key" },
@@ -29,7 +29,7 @@ describe("auth token", () => {
     }
   });
 
-  it("OAuth トークンを stdout に出力する", async () => {
+  it("outputs OAuth token to stdout", async () => {
     vi.mocked(resolveSpace).mockReturnValue({
       host: "example.backlog.com",
       auth: { method: "oauth", accessToken: "my-access-token", refreshToken: "my-refresh-token" },
@@ -46,7 +46,7 @@ describe("auth token", () => {
     }
   });
 
-  it("スペース未設定で process.exit(1) が呼ばれる", async () => {
+  it("calls process.exit(1) when no space is configured", async () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
     const exitSpy = spyOnProcessExit();
 

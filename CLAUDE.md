@@ -73,6 +73,10 @@ packages/tsconfigs — Shared TypeScript base config
 
 `@nulab/backlog-cli` uses citty's `defineCommand` / `runMain` with subcommand registration.
 
+## Test Conventions
+
+- **Test titles**: Always in English. Use `verb + condition` pattern (e.g., `"shows error when X"`, `"calls Y when Z"`).
+
 ## Code Conventions (enforced by oxlint)
 
 - **Named exports only** — no default exports (`import/no-default-export`)

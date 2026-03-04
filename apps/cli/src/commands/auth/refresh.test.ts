@@ -23,7 +23,7 @@ vi.mock("@repo/config", () => ({
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("auth refresh", () => {
-  it("スペースが未設定の場合 process.exit(1) を呼ぶ", async () => {
+  it("calls process.exit(1) when no space is configured", async () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
     const exitSpy = spyOnProcessExit();
 
@@ -37,7 +37,7 @@ describe("auth refresh", () => {
     exitSpy.mockRestore();
   });
 
-  it("API Key 認証の場合エラーを出す", async () => {
+  it("shows error for API key authentication", async () => {
     vi.mocked(resolveSpace).mockReturnValue({
       host: "example.backlog.com",
       auth: { method: "api-key" as const, apiKey: "key" },
@@ -54,7 +54,7 @@ describe("auth refresh", () => {
     exitSpy.mockRestore();
   });
 
-  it("clientId/clientSecret が欠落している場合エラーを出す", async () => {
+  it("shows error when clientId/clientSecret are missing", async () => {
     vi.mocked(resolveSpace).mockReturnValue({
       host: "example.backlog.com",
       auth: {
@@ -75,7 +75,7 @@ describe("auth refresh", () => {
     exitSpy.mockRestore();
   });
 
-  it("正常にトークンをリフレッシュする", async () => {
+  it("successfully refreshes token", async () => {
     vi.mocked(resolveSpace).mockReturnValue({
       host: "example.backlog.com",
       auth: {
@@ -123,7 +123,7 @@ describe("auth refresh", () => {
     );
   });
 
-  it("リフレッシュ失敗時にエラーを出す", async () => {
+  it("shows error on refresh failure", async () => {
     vi.mocked(resolveSpace).mockReturnValue({
       host: "example.backlog.com",
       auth: {
@@ -147,7 +147,7 @@ describe("auth refresh", () => {
     exitSpy.mockRestore();
   });
 
-  it("トークン検証に失敗した場合エラーを出す", async () => {
+  it("shows error when token verification fails after refresh", async () => {
     vi.mocked(resolveSpace).mockReturnValue({
       host: "example.backlog.com",
       auth: {

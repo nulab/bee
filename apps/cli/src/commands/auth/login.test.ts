@@ -33,7 +33,7 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("auth login", () => {
   describe("api-key", () => {
-    it("--space と API キーで新規スペースを認証する", async () => {
+    it("authenticates new space with --space and API key", async () => {
       const mockClient = vi.fn().mockResolvedValue({
         name: "Test User",
         userId: "testuser",
@@ -74,7 +74,7 @@ describe("auth login", () => {
       );
     });
 
-    it("既存スペースの認証情報を更新する", async () => {
+    it("updates credentials for existing space", async () => {
       const mockClient = vi.fn().mockResolvedValue({
         name: "Test User",
         userId: "testuser",
@@ -114,7 +114,7 @@ describe("auth login", () => {
       );
     });
 
-    it("認証失敗時にエラーを返す", async () => {
+    it("returns error on authentication failure", async () => {
       const mockClient = vi.fn().mockRejectedValue(new Error("Unauthorized"));
       vi.mocked(createClient).mockReturnValue(mockClient as never);
       vi.mocked(promptRequired)
@@ -138,7 +138,7 @@ describe("auth login", () => {
   });
 
   describe("invalid method", () => {
-    it("無効な method でエラーを返す", async () => {
+    it("returns error for invalid method", async () => {
       const exitSpy = spyOnProcessExit();
 
       const { login } = await import("#/commands/auth/login.js");
@@ -183,7 +183,7 @@ describe("auth login", () => {
       return { mockClient, mockStop, mockWaitForCallback };
     };
 
-    it("OAuth フローで新規スペースを認証する", async () => {
+    it("authenticates new space via OAuth flow", async () => {
       const { mockClient } = setupOAuthMocks();
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
@@ -227,7 +227,7 @@ describe("auth login", () => {
       );
     });
 
-    it("コールバック待機中にエラーが発生した場合 process.exit(1) を呼ぶ", async () => {
+    it("calls process.exit(1) when error occurs during callback", async () => {
       const mockStop = vi.fn();
       vi.mocked(startCallbackServer).mockReturnValue({
         port: 5033,
@@ -260,7 +260,7 @@ describe("auth login", () => {
       exitSpy.mockRestore();
     });
 
-    it("トークン交換に失敗した場合 process.exit(1) を呼ぶ", async () => {
+    it("calls process.exit(1) when token exchange fails", async () => {
       setupOAuthMocks();
       vi.mocked(exchangeAuthorizationCode).mockRejectedValue(new Error("invalid_grant"));
       vi.mocked(promptRequired)
@@ -286,7 +286,7 @@ describe("auth login", () => {
       exitSpy.mockRestore();
     });
 
-    it("トークン検証に失敗した場合 process.exit(1) を呼ぶ", async () => {
+    it("calls process.exit(1) when token verification fails", async () => {
       setupOAuthMocks();
       const mockClient = vi.fn().mockRejectedValue(new Error("Unauthorized"));
       vi.mocked(createClient).mockReturnValue(mockClient as never);
@@ -311,7 +311,7 @@ describe("auth login", () => {
       exitSpy.mockRestore();
     });
 
-    it("既存スペースの OAuth 認証情報を更新する", async () => {
+    it("updates OAuth credentials for existing space", async () => {
       setupOAuthMocks();
       vi.mocked(findSpace).mockReturnValue({
         host: "example.backlog.com",

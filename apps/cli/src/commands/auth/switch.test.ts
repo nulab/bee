@@ -11,7 +11,7 @@ vi.mock("@repo/config", () => ({
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("auth switch", () => {
-  it("指定したホスト名に切り替える", async () => {
+  it("switches to specified host", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {
@@ -36,7 +36,7 @@ describe("auth switch", () => {
     expect(consola.success).toHaveBeenCalledWith("Switched active space to example.backlog.com.");
   });
 
-  it("スペースが見つからない場合エラーを出す", async () => {
+  it("shows error when space is not found", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [],
       defaultSpace: undefined,
@@ -54,7 +54,7 @@ describe("auth switch", () => {
     exitSpy.mockRestore();
   });
 
-  it("正常に切り替えた場合 writeConfig が呼ばれる", async () => {
+  it("calls writeConfig on successful switch", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {
