@@ -27,7 +27,7 @@ describe("auth refresh", () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
     const exitSpy = spyOnProcessExit();
 
-    const { refresh } = await import("#/commands/auth/refresh.js");
+    const { refresh } = await import("#src/commands/auth/refresh.js");
     await refresh.run?.({ args: {} } as never);
 
     expect(consola.error).toHaveBeenCalledWith(
@@ -44,7 +44,7 @@ describe("auth refresh", () => {
     });
     const exitSpy = spyOnProcessExit();
 
-    const { refresh } = await import("#/commands/auth/refresh.js");
+    const { refresh } = await import("#src/commands/auth/refresh.js");
     await refresh.run?.({ args: {} } as never);
 
     expect(consola.error).toHaveBeenCalledWith(
@@ -65,7 +65,7 @@ describe("auth refresh", () => {
     });
     const exitSpy = spyOnProcessExit();
 
-    const { refresh } = await import("#/commands/auth/refresh.js");
+    const { refresh } = await import("#src/commands/auth/refresh.js");
     await refresh.run?.({ args: {} } as never);
 
     expect(consola.error).toHaveBeenCalledWith(
@@ -98,7 +98,7 @@ describe("auth refresh", () => {
     });
     vi.mocked(createClient).mockReturnValue(mockClient as never);
 
-    const { refresh } = await import("#/commands/auth/refresh.js");
+    const { refresh } = await import("#src/commands/auth/refresh.js");
     await refresh.run?.({ args: {} } as never);
 
     expect(refreshAccessToken).toHaveBeenCalledWith("example.backlog.com", {
@@ -137,7 +137,7 @@ describe("auth refresh", () => {
     vi.mocked(refreshAccessToken).mockRejectedValue(new Error("invalid_grant"));
     const exitSpy = spyOnProcessExit();
 
-    const { refresh } = await import("#/commands/auth/refresh.js");
+    const { refresh } = await import("#src/commands/auth/refresh.js");
     await refresh.run?.({ args: {} } as never);
 
     expect(consola.error).toHaveBeenCalledWith(
@@ -168,7 +168,7 @@ describe("auth refresh", () => {
     vi.mocked(createClient).mockReturnValue(mockClient as never);
     const exitSpy = spyOnProcessExit();
 
-    const { refresh } = await import("#/commands/auth/refresh.js");
+    const { refresh } = await import("#src/commands/auth/refresh.js");
     await refresh.run?.({ args: {} } as never);
 
     expect(consola.error).toHaveBeenCalledWith("Token verification failed after refresh.");

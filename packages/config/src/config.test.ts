@@ -7,7 +7,7 @@ vi.mock("rc9", () => ({
 }));
 
 // Must import after mock setup
-const { loadConfig, writeConfig } = await import("#/config.js");
+const { loadConfig, writeConfig } = await import("#src/config.js");
 
 const mockRead = vi.mocked(read);
 const mockWrite = vi.mocked(write);

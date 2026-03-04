@@ -7,7 +7,7 @@ import {
   formatResetTime,
   MAX_RATE_LIMIT_WAIT_MS,
   RATE_LIMIT_BUFFER_MS,
-} from "#/rate-limit.js";
+} from "#src/rate-limit.js";
 
 type BacklogClientConfig = {
   host: string;

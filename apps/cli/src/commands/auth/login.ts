@@ -5,63 +5,98 @@ import { addSpace, findSpace, loadConfig, updateSpaceAuth, writeConfig } from "@
 import type { RcAuth } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
+import type { CommandUsage } from "#src/lib/command-usage.js";
+import { withUsage } from "#src/lib/command-usage.js";
 
 type BacklogUser = {
   name: string;
   userId: string;
 };
 
-export const login = defineCommand({
-  meta: {
-    name: "login",
-    description: "Authenticate with a Backlog space",
-  },
-  args: {
-    space: {
-      type: "string",
-      alias: "s",
-      description: "Space hostname (e.g., xxx.backlog.com)",
-    },
-    method: {
-      type: "string",
-      alias: "m",
-      description: "Auth method: api-key or oauth",
-      default: "api-key",
-    },
-    "with-token": {
-      type: "boolean",
-      description: "Read token from stdin",
-    },
-    "client-id": {
-      type: "string",
-      description: "OAuth Client ID",
-    },
-    "client-secret": {
-      type: "string",
-      description: "OAuth Client Secret",
-    },
-  },
-  async run({ args }) {
-    const { method } = args;
+export const commandUsage: CommandUsage = {
+  long: `Authenticate with a Backlog space.
 
-    if (method !== "api-key" && method !== "oauth") {
-      consola.error('Invalid auth method. Use "api-key" or "oauth".');
-      return process.exit(1);
-    }
+The default authentication mode is API key. You will be prompted to enter
+the space hostname and API key interactively.
 
-    const hostname = await promptRequired(
-      "Backlog space hostname:",
-      args.space || process.env.BACKLOG_SPACE,
-      { placeholder: "xxx.backlog.com" },
-    );
+Alternatively, use --with-token to pass an API key on standard input.
+For OAuth authentication, use --method oauth. You will need to provide
+an OAuth Client ID and Client Secret, then authorize in the browser.`,
 
-    if (method === "api-key") {
-      await loginWithApiKey(hostname, args);
-    } else {
-      await loginWithOAuth(hostname, args);
-    }
+  examples: [
+    { description: "Start interactive setup", command: "bl auth login" },
+    {
+      description: "Login with API key from stdin",
+      command: "echo 'your-api-key' | bl auth login -s xxx.backlog.com --with-token",
+    },
+    { description: "Login with OAuth", command: "bl auth login -m oauth" },
+    {
+      description: "Login with a specific space",
+      command: "bl auth login -s xxx.backlog.com",
+    },
+  ],
+
+  annotations: {
+    environment: `BACKLOG_SPACE                  Default space hostname
+BACKLOG_OAUTH_CLIENT_ID       OAuth Client ID
+BACKLOG_OAUTH_CLIENT_SECRET   OAuth Client Secret`,
   },
-});
+};
+
+export const login = withUsage(
+  defineCommand({
+    meta: {
+      name: "login",
+      description: "Authenticate with a Backlog space",
+    },
+    args: {
+      space: {
+        type: "string",
+        alias: "s",
+        description: "Space hostname (e.g., xxx.backlog.com)",
+      },
+      method: {
+        type: "string",
+        alias: "m",
+        description: "Auth method: api-key or oauth",
+        default: "api-key",
+      },
+      "with-token": {
+        type: "boolean",
+        description: "Read token from stdin",
+      },
+      "client-id": {
+        type: "string",
+        description: "OAuth Client ID",
+      },
+      "client-secret": {
+        type: "string",
+        description: "OAuth Client Secret",
+      },
+    },
+    async run({ args }) {
+      const { method } = args;
+
+      if (method !== "api-key" && method !== "oauth") {
+        consola.error('Invalid auth method. Use "api-key" or "oauth".');
+        return process.exit(1);
+      }
+
+      const hostname = await promptRequired(
+        "Backlog space hostname:",
+        args.space || process.env.BACKLOG_SPACE,
+        { placeholder: "xxx.backlog.com" },
+      );
+
+      if (method === "api-key") {
+        await loginWithApiKey(hostname, args);
+      } else {
+        await loginWithOAuth(hostname, args);
+      }
+    },
+  }),
+  commandUsage,
+);
 
 async function loginWithApiKey(hostname: string, args: { "with-token"?: boolean }): Promise<void> {
   const apiKey = args["with-token"] ? await readStdin() : await promptRequired("API key:");

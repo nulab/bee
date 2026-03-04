@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { BacklogRateLimitError } from "#/rate-limit.js";
+import { BacklogRateLimitError } from "#src/rate-limit.js";
 
 const { mockFetch, mockCreate } = vi.hoisted(() => {
   const fetch = vi.fn();
@@ -23,7 +23,7 @@ vi.mock("node:timers/promises", () => ({
 }));
 
 // eslint-disable-next-line import/first -- must follow vi.mock calls
-import { createClient } from "#/client.js";
+import { createClient } from "#src/client.js";
 
 beforeEach(() => {
   vi.useFakeTimers();

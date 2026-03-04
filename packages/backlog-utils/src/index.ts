@@ -1,9 +1,9 @@
-export { getClient } from "#/client.js";
-export type { BacklogClient } from "#/client.js";
-export { exchangeAuthorizationCode, refreshAccessToken } from "#/oauth.js";
-export type { OAuthTokenResponse } from "#/oauth.js";
-export { startCallbackServer } from "#/oauth-callback.js";
-export type { CallbackServer } from "#/oauth-callback.js";
+export { getClient } from "#src/client.js";
+export type { BacklogClient } from "#src/client.js";
+export { exchangeAuthorizationCode, refreshAccessToken } from "#src/oauth.js";
+export type { OAuthTokenResponse } from "#src/oauth.js";
+export { startCallbackServer } from "#src/oauth-callback.js";
+export type { CallbackServer } from "#src/oauth-callback.js";
 export {
   buildBacklogUrl,
   dashboardUrl,
@@ -14,4 +14,4 @@ export {
   pullRequestUrl,
   repositoryUrl,
   wikiUrl,
-} from "#/url.js";
+} from "#src/url.js";

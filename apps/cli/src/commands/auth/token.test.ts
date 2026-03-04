@@ -20,7 +20,7 @@ describe("auth token", () => {
     const stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     try {
-      const { token } = await import("#/commands/auth/token.js");
+      const { token } = await import("#src/commands/auth/token.js");
       token.run?.({ args: {} } as never);
 
       expect(stdoutSpy).toHaveBeenCalledWith("my-api-key");
@@ -37,7 +37,7 @@ describe("auth token", () => {
     const stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     try {
-      const { token } = await import("#/commands/auth/token.js");
+      const { token } = await import("#src/commands/auth/token.js");
       token.run?.({ args: {} } as never);
 
       expect(stdoutSpy).toHaveBeenCalledWith("my-access-token");
@@ -51,7 +51,7 @@ describe("auth token", () => {
     const exitSpy = spyOnProcessExit();
 
     try {
-      const { token } = await import("#/commands/auth/token.js");
+      const { token } = await import("#src/commands/auth/token.js");
       token.run?.({ args: {} } as never);
 
       expect(consola.error).toHaveBeenCalledWith(

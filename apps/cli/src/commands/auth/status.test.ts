@@ -26,7 +26,7 @@ describe("auth status", () => {
     });
     vi.mocked(createClient).mockReturnValue(mockClient as never);
 
-    const { status } = await import("#/commands/auth/status.js");
+    const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({ args: {} } as never);
 
     expect(createClient).toHaveBeenCalledWith({
@@ -47,7 +47,7 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    const { status } = await import("#/commands/auth/status.js");
+    const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({ args: {} } as never);
 
     expect(consola.info).toHaveBeenCalledWith(
@@ -67,7 +67,7 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    const { status } = await import("#/commands/auth/status.js");
+    const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({
       args: { space: "other.backlog.com" },
     } as never);
@@ -96,7 +96,7 @@ describe("auth status", () => {
     });
     vi.mocked(createClient).mockReturnValue(mockClient as never);
 
-    const { status } = await import("#/commands/auth/status.js");
+    const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({
       args: { "show-token": true },
     } as never);
@@ -119,7 +119,7 @@ describe("auth status", () => {
     const mockClient = vi.fn().mockRejectedValue(new Error("Unauthorized"));
     vi.mocked(createClient).mockReturnValue(mockClient as never);
 
-    const { status } = await import("#/commands/auth/status.js");
+    const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({ args: {} } as never);
 
     expect(consola.log).toHaveBeenCalledWith("    Status: Authentication failed");
@@ -148,7 +148,7 @@ describe("auth status", () => {
     });
     vi.mocked(createClient).mockReturnValue(mockClient as never);
 
-    const { status } = await import("#/commands/auth/status.js");
+    const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({ args: {} } as never);
 
     expect(createClient).toHaveBeenCalledWith({
@@ -181,7 +181,7 @@ describe("auth status", () => {
     });
     vi.mocked(createClient).mockReturnValue(mockClient as never);
 
-    const { status } = await import("#/commands/auth/status.js");
+    const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({
       args: { "show-token": true },
     } as never);
@@ -207,7 +207,7 @@ describe("auth status", () => {
     });
     vi.mocked(createClient).mockReturnValue(mockClient as never);
 
-    const { status } = await import("#/commands/auth/status.js");
+    const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({ args: {} } as never);
 
     expect(consola.log).toHaveBeenCalledWith("  example.backlog.com");

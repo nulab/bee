@@ -49,7 +49,7 @@ describe("auth login", () => {
         aliases: {},
       });
 
-      const { login } = await import("#/commands/auth/login.js");
+      const { login } = await import("#src/commands/auth/login.js");
       await login.run?.({
         args: { space: "example.backlog.com", method: "api-key" },
       } as never);
@@ -98,7 +98,7 @@ describe("auth login", () => {
         aliases: {},
       });
 
-      const { login } = await import("#/commands/auth/login.js");
+      const { login } = await import("#src/commands/auth/login.js");
       await login.run?.({
         args: { space: "example.backlog.com", method: "api-key" },
       } as never);
@@ -122,7 +122,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("bad-key");
       const exitSpy = spyOnProcessExit();
 
-      const { login } = await import("#/commands/auth/login.js");
+      const { login } = await import("#src/commands/auth/login.js");
       await login.run?.({
         args: { space: "example.backlog.com", method: "api-key" },
       } as never);
@@ -141,7 +141,7 @@ describe("auth login", () => {
     it("returns error for invalid method", async () => {
       const exitSpy = spyOnProcessExit();
 
-      const { login } = await import("#/commands/auth/login.js");
+      const { login } = await import("#src/commands/auth/login.js");
       await login.run?.({
         args: { space: "example.backlog.com", method: "invalid" },
       } as never);
@@ -190,7 +190,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { login } = await import("#/commands/auth/login.js");
+      const { login } = await import("#src/commands/auth/login.js");
       await login.run?.({
         args: {
           space: "example.backlog.com",
@@ -242,7 +242,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-secret");
       const exitSpy = spyOnProcessExit();
 
-      const { login } = await import("#/commands/auth/login.js");
+      const { login } = await import("#src/commands/auth/login.js");
       await login.run?.({
         args: {
           space: "example.backlog.com",
@@ -269,7 +269,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-secret");
       const exitSpy = spyOnProcessExit();
 
-      const { login } = await import("#/commands/auth/login.js");
+      const { login } = await import("#src/commands/auth/login.js");
       await login.run?.({
         args: {
           space: "example.backlog.com",
@@ -296,7 +296,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-secret");
       const exitSpy = spyOnProcessExit();
 
-      const { login } = await import("#/commands/auth/login.js");
+      const { login } = await import("#src/commands/auth/login.js");
       await login.run?.({
         args: {
           space: "example.backlog.com",
@@ -344,7 +344,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { login } = await import("#/commands/auth/login.js");
+      const { login } = await import("#src/commands/auth/login.js");
       await login.run?.({
         args: {
           space: "example.backlog.com",

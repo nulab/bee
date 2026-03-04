@@ -23,7 +23,7 @@ describe("auth switch", () => {
       aliases: {},
     });
 
-    const { switchSpace } = await import("#/commands/auth/switch.js");
+    const { switchSpace } = await import("#src/commands/auth/switch.js");
     await switchSpace.run?.({
       args: { space: "example.backlog.com" },
     } as never);
@@ -45,7 +45,7 @@ describe("auth switch", () => {
 
     const exitSpy = spyOnProcessExit();
 
-    const { switchSpace } = await import("#/commands/auth/switch.js");
+    const { switchSpace } = await import("#src/commands/auth/switch.js");
     await switchSpace.run?.({
       args: { space: "missing.backlog.com" },
     } as never);
@@ -66,7 +66,7 @@ describe("auth switch", () => {
       aliases: {},
     });
 
-    const { switchSpace } = await import("#/commands/auth/switch.js");
+    const { switchSpace } = await import("#src/commands/auth/switch.js");
     await switchSpace.run?.({
       args: { space: "target.backlog.com" },
     } as never);
