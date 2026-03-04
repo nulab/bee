@@ -6,18 +6,20 @@
     "postinstall": "lefthook install",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "typecheck": "oxlint --type-aware --type-check --ignore-pattern 'apps/docs'",
+    "typecheck": "tsc -b",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "test": "vitest run"
   },
   "devDependencies": {
+    "@types/node": "^22.19.13",
     "@vitest/coverage-v8": "^4.0.18",
     "lefthook": "^2.1.2",
     "oxfmt": "^0.36.0",
     "oxlint": "^1.51.0",
     "oxlint-tsgolint": "^0.16.0",
     "turbo": "^2.8.13",
+    "typescript": "5.9.3",
     "vitest": "^4.0.18"
   },
   "packageManager": "pnpm@10.30.3",

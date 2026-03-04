@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MockInstance } from "vitest";
-import { filterFields, outputResult, pickFields } from "#src/output.js";
+import { filterFields, outputResult, pickFields } from "#src/output";
 
 describe("pickFields", () => {
   it("picks specified fields from an object", () => {

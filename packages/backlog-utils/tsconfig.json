@@ -5,5 +5,11 @@
     "paths": {
       "#src/*": ["./src/*"]
     }
-  }
+  },
+  "references": [
+    { "path": "../api" },
+    { "path": "../config" },
+    { "path": "../openapi-client" },
+    { "path": "../test-utils" }
+  ]
 }

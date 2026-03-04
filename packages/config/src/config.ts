@@ -3,8 +3,8 @@ import { join } from "node:path";
 import * as v from "valibot";
 import consola from "consola";
 import { read, write } from "rc9";
-import type { Rc } from "#src/schema.js";
-import { RcSchema } from "#src/schema.js";
+import type { Rc } from "#src/schema";
+import { RcSchema } from "#src/schema";
 
 const CONFIG_DIR_NAME = "backlog";
 const CONFIG_FILE_NAME = ".backlogrc";

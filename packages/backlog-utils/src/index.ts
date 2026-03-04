@@ -1,7 +1,7 @@
-export { getClient } from "#src/client.js";
-export type { BacklogClient } from "#src/client.js";
-export { startCallbackServer } from "#src/oauth-callback.js";
-export type { CallbackServer } from "#src/oauth-callback.js";
+export { getClient } from "#src/client";
+export type { BacklogClient } from "#src/client";
+export { startCallbackServer } from "#src/oauth-callback";
+export type { CallbackServer } from "#src/oauth-callback";
 export {
   buildBacklogUrl,
   dashboardUrl,
@@ -12,4 +12,4 @@ export {
   pullRequestUrl,
   repositoryUrl,
   wikiUrl,
-} from "#src/url.js";
+} from "#src/url";
