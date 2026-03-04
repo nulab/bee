@@ -4,7 +4,7 @@ import starlight from "@astrojs/starlight";
 export default defineConfig({
   integrations: [
     starlight({
-      title: "Backlog CLI",
+      title: "bee",
       social: [
         {
           icon: "github",
@@ -14,7 +14,7 @@ export default defineConfig({
         {
           icon: "npm",
           label: "npm",
-          href: "https://www.npmjs.com/package/@nulab/backlog-cli",
+          href: "https://www.npmjs.com/package/@nulab/bee",
         },
       ],
       sidebar: [

@@ -11,15 +11,15 @@ Without the --space flag, the default space is used.
 The token output can be used with BACKLOG_API_KEY or piped to other commands.`,
 
   examples: [
-    { description: "Print token for default space", command: "bl auth token" },
+    { description: "Print token for default space", command: "bee auth token" },
     {
       description: "Print token for specific space",
-      command: "bl auth token -s xxx.backlog.com",
+      command: "bee auth token -s xxx.backlog.com",
     },
     {
       description: "Use with curl",
       command:
-        'bl auth token | curl -H "X-Api-Key: $(cat -)" https://xxx.backlog.com/api/v2/users/myself',
+        'bee auth token | curl -H "X-Api-Key: $(cat -)" https://xxx.backlog.com/api/v2/users/myself',
     },
   ],
 
@@ -45,7 +45,7 @@ const tokenCommand = withUsage(
       const space = args.space ? findSpace(loadConfig().spaces, args.space) : resolveSpace();
 
       if (!space) {
-        consola.error("No space configured. Run `bl auth login` to authenticate.");
+        consola.error("No space configured. Run `bee auth login` to authenticate.");
         return process.exit(1);
       }
 

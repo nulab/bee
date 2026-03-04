@@ -1,11 +1,10 @@
 {
-  "name": "@nulab/backlog-cli",
+  "name": "@nulab/bee",
   "version": "0.0.0",
   "private": true,
-  "description": "A command-line interface for Backlog",
+  "description": "bee — a CLI for Backlog",
   "bin": {
-    "backlog": "./bin/cli.mjs",
-    "bl": "./bin/cli.mjs"
+    "bee": "./bin/cli.mjs"
   },
   "type": "module",
   "scripts": {
@@ -21,6 +20,7 @@
     "@repo/openapi-client": "workspace:*",
     "citty": "^0.1.6",
     "consola": "^3.4.2",
+    "is-unicode-supported": "^2.1.0",
     "ofetch": "^1.4.1",
     "open": "^10.1.0",
     "ufo": "^1.5.4"

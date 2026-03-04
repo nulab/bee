@@ -15,10 +15,10 @@ This command does not revoke API keys or OAuth tokens on the Backlog server.
 If only one space is configured, it will be selected automatically. If multiple spaces are configured, you will be prompted to select one.`,
 
   examples: [
-    { description: "Select space via prompt", command: "bl auth logout" },
+    { description: "Select space via prompt", command: "bee auth logout" },
     {
       description: "Log out of a specific space",
-      command: "bl auth logout -s xxx.backlog.com",
+      command: "bee auth logout -s xxx.backlog.com",
     },
   ],
 

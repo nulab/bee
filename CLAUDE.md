@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Backlog CLI (`backlog` / `bl`) — a command-line interface for the Backlog project management service. pnpm workspace monorepo with ESM-only packages.
+bee (`bee`) — a CLI for the Backlog project management service. pnpm workspace monorepo with ESM-only packages.
 
 ## Commands
 
@@ -28,10 +28,10 @@ pnpm run test                                              # all tests
 pnpm --filter @repo/backlog-utils exec vitest run src/client.test.ts # single file
 
 # Build
-pnpm --filter @nulab/backlog-cli build
+pnpm --filter @nulab/bee build
 
 # Dev (CLI)
-pnpm --filter @nulab/backlog-cli dev
+pnpm --filter @nulab/bee dev
 ```
 
 ## Module Resolution: bundler
@@ -59,7 +59,7 @@ packages/tsconfigs — Shared TypeScript base config
 
 `@repo/backlog-utils` exposes `getClient(config)` which returns an ofetch `$Fetch` instance preconfigured with Backlog API v2 base URL, auth, and rate-limit error handling.
 
-`@nulab/backlog-cli` uses citty's `defineCommand` / `runMain` with subcommand registration and a custom help system (see below).
+`@nulab/bee` uses citty's `defineCommand` / `runMain` with subcommand registration and a custom help system (see below).
 
 ## Command Help System
 
@@ -79,7 +79,7 @@ import { type CommandUsage, withUsage } from "./lib/command-usage";
 
 export const commandUsage: CommandUsage = {
   long: "Detailed multi-line description of the command.",
-  examples: [{ description: "Do something", command: "bl foo bar" }],
+  examples: [{ description: "Do something", command: "bee foo bar" }],
   annotations: {
     environment: [["ENV_VAR_NAME", "Description of what it does"]],
   },

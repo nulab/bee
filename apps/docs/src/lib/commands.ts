@@ -110,7 +110,7 @@ const loadCommands = async (): Promise<CommandEntry[]> => {
 
         results.push({
           id,
-          title: `bl ${parent} ${meta.name ?? commandName}`,
+          title: `bee ${parent} ${meta.name ?? commandName}`,
           description: meta.description ?? "",
           long: commandUsage?.long,
           parent,
