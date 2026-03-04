@@ -13,10 +13,10 @@ model Project {
   useDocument: boolean;
   useFileSharing: boolean;
   useWikiTreeView: boolean;
-  useSubversion: boolean;
-  useGit: boolean;
+  useSubversion?: boolean;
+  useGit?: boolean;
   useOriginalImageSizeAtWiki: boolean;
-  textFormattingRule: "backlog" | "markdown";
+  textFormattingRule: "backlog" | "markdown" | null;
   archived: boolean;
   displayOrder: int32;
   useDevAttributes: boolean;

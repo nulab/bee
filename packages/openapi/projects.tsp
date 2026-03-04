@@ -53,7 +53,10 @@ interface Projects {
   op create(
     @header contentType: "application/x-www-form-urlencoded",
     @body body: AddProjectRequest,
-  ): Project | BacklogErrorResponse;
+  ): {
+    @statusCode statusCode: 201;
+    @body body: Project;
+  } | BacklogErrorResponse;
 
   @summary("Update Project")
   @doc("Updates information about project.")
