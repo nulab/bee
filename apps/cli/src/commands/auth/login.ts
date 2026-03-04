@@ -37,9 +37,11 @@ an OAuth Client ID and Client Secret, then authorize in the browser.`,
   ],
 
   annotations: {
-    environment: `BACKLOG_SPACE                  Default space hostname
-BACKLOG_OAUTH_CLIENT_ID       OAuth Client ID
-BACKLOG_OAUTH_CLIENT_SECRET   OAuth Client Secret`,
+    environment: [
+      ["BACKLOG_SPACE", "Default space hostname"],
+      ["BACKLOG_OAUTH_CLIENT_ID", "OAuth Client ID"],
+      ["BACKLOG_OAUTH_CLIENT_SECRET", "OAuth Client Secret"],
+    ],
   },
 };
 

@@ -11,7 +11,7 @@ export type CommandUsage = {
   examples?: { description: string; command: string }[];
   annotations?: {
     arguments?: string;
-    environment?: string;
+    environment?: [string, string][];
   };
 };
 
@@ -66,14 +66,10 @@ type NormalizedArg = {
 export function renderCommandUsage(usage: CommandUsage) {
   return async (cmd: CommandDef, parent?: CommandDef): Promise<void> => {
     const meta = await resolveValue(cmd.meta ?? {});
-    const parentMeta = parent
-      ? await resolveValue(parent.meta ?? {})
-      : undefined;
+    const parentMeta = parent ? await resolveValue(parent.meta ?? {}) : undefined;
     const args = normalizeArgs(await resolveValue(cmd.args ?? {}));
 
-    const commandName =
-      [parentMeta?.name, meta.name].filter(Boolean).join(" ") ||
-      process.argv[1];
+    const commandName = [parentMeta?.name, meta.name].filter(Boolean).join(" ") || process.argv[1];
 
     const lines: string[] = [];
 
@@ -91,9 +87,7 @@ export function renderCommandUsage(usage: CommandUsage) {
       if (arg.type === "positional") {
         const name = arg.name.toUpperCase();
         usageParts.push(
-          arg.required !== false && arg.default === undefined
-            ? `<${name}>`
-            : `[${name}]`,
+          arg.required !== false && arg.default === undefined ? `<${name}>` : `[${name}]`,
         );
       }
     }
@@ -162,17 +156,17 @@ export function renderCommandUsage(usage: CommandUsage) {
     }
 
     // -- ENVIRONMENT VARIABLES ----------------------------------------------
-    if (usage.annotations?.environment) {
+    if (usage.annotations?.environment && usage.annotations.environment.length > 0) {
       lines.push("ENVIRONMENT VARIABLES");
-      lines.push(indent(usage.annotations.environment));
+      lines.push(
+        ...alignColumns(usage.annotations.environment.map(([key, desc]) => [`  ${key}`, desc])),
+      );
       lines.push("");
     }
 
     // -- LEARN MORE ---------------------------------------------------------
     lines.push("LEARN MORE");
-    lines.push(
-      `  Use \`${commandName} <command> --help\` for more information about a command.`,
-    );
+    lines.push(`  Use \`${commandName} <command> --help\` for more information about a command.`);
 
     consola.log(lines.join("\n") + "\n");
   };
@@ -185,10 +179,7 @@ export function renderCommandUsage(usage: CommandUsage) {
  * gh-cli style help via the closure created by `renderCommandUsage`.
  * Otherwise falls back to citty's built-in `showUsage`.
  */
-export async function showCommandUsage(
-  cmd: CommandDef,
-  parent?: CommandDef,
-): Promise<void> {
+export async function showCommandUsage(cmd: CommandDef, parent?: CommandDef): Promise<void> {
   const usage = getCommandUsage(cmd);
   if (usage) {
     await renderCommandUsage(usage)(cmd, parent);
@@ -210,17 +201,15 @@ async function resolveValue<T>(
   return (await val) as Awaited<T>;
 }
 
-function normalizeArgs(
-  argsDef: Record<string, Record<string, unknown>>,
-): NormalizedArg[] {
+function normalizeArgs(argsDef: Record<string, Record<string, unknown>>): NormalizedArg[] {
   return Object.entries(argsDef).map(([name, def]) => ({
     ...(def as Omit<NormalizedArg, "name" | "alias">),
     name,
     alias: Array.isArray(def.alias)
       ? (def.alias as string[])
-      : (def.alias
+      : def.alias
         ? [def.alias as string]
-        : []),
+        : [],
   }));
 }
 
@@ -239,13 +228,9 @@ function formatFlags(args: NormalizedArg[]): string[] {
       }
     }
 
-    const defaultSuffix =
-      arg.default !== undefined ? ` (default: "${arg.default}")` : "";
+    const defaultSuffix = arg.default !== undefined ? ` (default: "${arg.default}")` : "";
 
-    return [
-      `  ${flag}${hint}`,
-      `${arg.description ?? ""}${defaultSuffix}`,
-    ];
+    return [`  ${flag}${hint}`, `${arg.description ?? ""}${defaultSuffix}`];
   });
 
   return alignColumns(rows);
@@ -256,9 +241,7 @@ function alignColumns(rows: string[][]): string[] {
     return [];
   }
   const maxLen = Math.max(...rows.map(([col]) => col.length));
-  return rows.map(([col1, col2]) =>
-    col2 ? `${col1.padEnd(maxLen + 3)}${col2}` : col1,
-  );
+  return rows.map(([col1, col2]) => (col2 ? `${col1.padEnd(maxLen + 3)}${col2}` : col1));
 }
 
 function indent(text: string): string {

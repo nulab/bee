@@ -71,7 +71,51 @@ packages/tsconfigs — Shared TypeScript base config
 
 `@repo/api` exposes `createClient(config)` which returns an ofetch `$Fetch` instance preconfigured with Backlog API v2 base URL, auth, and rate-limit error handling.
 
-`@nulab/backlog-cli` uses citty's `defineCommand` / `runMain` with subcommand registration.
+`@nulab/backlog-cli` uses citty's `defineCommand` / `runMain` with subcommand registration and a custom help system (see below).
+
+## Command Help System
+
+CLI commands use a **single-source help system** inspired by gh CLI. Each command defines a `CommandUsage` object that drives both `--help` output and documentation generation from the same data.
+
+### How it works
+
+1. Each command file exports `commandUsage: CommandUsage` alongside the command definition
+2. The command is wrapped with `withUsage(defineCommand({ ... }), commandUsage)` to attach the usage data
+3. `runMain` receives `showCommandUsage` as a custom `showUsage` handler, which renders gh-cli style help for commands with attached usage and falls back to citty's default for others
+
+### Adding help to a command
+
+```ts
+import { defineCommand } from "citty";
+import type { CommandUsage } from "#src/lib/command-usage.js";
+import { withUsage } from "#src/lib/command-usage.js";
+
+export const commandUsage: CommandUsage = {
+  long: "Detailed multi-line description of the command.",
+  examples: [{ description: "Do something", command: "bl foo bar" }],
+  annotations: {
+    environment: [["ENV_VAR_NAME", "Description of what it does"]],
+  },
+};
+
+export const myCommand = withUsage(
+  defineCommand({
+    meta: { name: "bar", description: "Short one-liner" },
+    args: {
+      /* ... */
+    },
+    async run({ args }) {
+      /* ... */
+    },
+  }),
+  commandUsage,
+);
+```
+
+### Key files
+
+- `apps/cli/src/lib/command-usage.ts` — `CommandUsage` type, `withUsage`, `renderCommandUsage`, `showCommandUsage`
+- `apps/cli/src/index.ts` — wires `showCommandUsage` into `runMain`
 
 ## Test Conventions
 
