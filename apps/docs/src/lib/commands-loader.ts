@@ -1,35 +1,32 @@
 import { readdir } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { z } from "astro/zod";
-import type { Loader } from "astro/loaders";
 import { createJiti } from "jiti";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const CLI_COMMANDS_DIR = resolve(__dirname, "../../../cli/src/commands");
 
-const argSchema = z.object({
-  name: z.string(),
-  type: z.enum(["string", "boolean", "positional"]).optional(),
-  description: z.string().optional(),
-  alias: z.array(z.string()),
-  default: z.union([z.string(), z.boolean()]).optional(),
-  required: z.boolean().optional(),
-  valueHint: z.string().optional(),
-});
+type NormalizedArg = {
+  name: string;
+  type?: "string" | "boolean" | "positional";
+  description?: string;
+  alias: string[];
+  default?: string | boolean;
+  required?: boolean;
+  valueHint?: string;
+};
 
-const commandEntrySchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  long: z.string().optional(),
-  parent: z.string(),
-  name: z.string(),
-  args: z.array(argSchema),
-  examples: z.array(z.object({ description: z.string(), command: z.string() })).optional(),
-  environment: z.array(z.tuple([z.string(), z.string()])).optional(),
-});
-
-type NormalizedArg = z.infer<typeof argSchema>;
+type CommandEntry = {
+  id: string;
+  title: string;
+  description: string;
+  long?: string;
+  parent: string;
+  name: string;
+  args: NormalizedArg[];
+  examples?: { description: string; command: string }[];
+  environment?: [string, string][];
+};
 
 const toAliasArray = (alias: unknown): string[] => {
   if (Array.isArray(alias)) {
@@ -52,90 +49,84 @@ const normalizeArgs = (argsDef: Record<string, Record<string, unknown>>): Normal
     valueHint: def.valueHint as string | undefined,
   }));
 
-const commandsLoader = (): Loader => ({
-  name: "commands-loader",
-  load: async (context) => {
-    const { store, logger } = context;
-    const jiti = createJiti(import.meta.url, {
-      moduleCache: false,
-      fsCache: false,
-    });
+const loadCommands = async (): Promise<CommandEntry[]> => {
+  const jiti = createJiti(import.meta.url, {
+    moduleCache: false,
+    fsCache: false,
+  });
 
-    store.clear();
+  const results: CommandEntry[] = [];
 
-    const entries = await readdir(CLI_COMMANDS_DIR, { withFileTypes: true });
-    const subdirs = entries.filter((e) => e.isDirectory());
+  const entries = await readdir(CLI_COMMANDS_DIR, { withFileTypes: true });
+  const subdirs = entries.filter((e) => e.isDirectory());
 
-    for (const subdir of subdirs) {
-      const parent = subdir.name;
-      const dirPath = resolve(CLI_COMMANDS_DIR, parent);
-      const files = await readdir(dirPath);
+  for (const subdir of subdirs) {
+    const parent = subdir.name;
+    const dirPath = resolve(CLI_COMMANDS_DIR, parent);
+    const files = await readdir(dirPath);
 
-      const commandFiles = files.filter(
-        (f) => f.endsWith(".ts") && f !== "index.ts" && !f.endsWith(".test.ts"),
-      );
+    const commandFiles = files.filter(
+      (f) => f.endsWith(".ts") && f !== "index.ts" && !f.endsWith(".test.ts"),
+    );
 
-      for (const file of commandFiles) {
-        const filePath = resolve(dirPath, file);
-        const commandName = basename(file, ".ts");
-        const id = `${parent}/${commandName}`;
+    for (const file of commandFiles) {
+      const filePath = resolve(dirPath, file);
+      const commandName = basename(file, ".ts");
+      const id = `${parent}/${commandName}`;
 
-        try {
-          const mod = (await jiti.import(filePath)) as Record<string, unknown>;
+      try {
+        const mod = (await jiti.import(filePath)) as Record<string, unknown>;
 
-          const commandUsage = mod.commandUsage as
-            | {
-                long?: string;
-                examples?: { description: string; command: string }[];
-                annotations?: {
-                  arguments?: string;
-                  environment?: [string, string][];
-                };
-              }
-            | undefined;
-
-          // Find the command definition: an exported object with a `.meta` property
-          let meta: { name?: string; description?: string } | undefined;
-          let args: Record<string, Record<string, unknown>> = {};
-
-          for (const value of Object.values(mod)) {
-            if (value !== null && typeof value === "object" && "meta" in value) {
-              const cmdDef = value as {
-                meta: { name?: string; description?: string };
-                args?: Record<string, Record<string, unknown>>;
+        const commandUsage = mod.commandUsage as
+          | {
+              long?: string;
+              examples?: { description: string; command: string }[];
+              annotations?: {
+                arguments?: string;
+                environment?: [string, string][];
               };
-              ({ meta } = cmdDef);
-              args = cmdDef.args ?? {};
-              break;
             }
+          | undefined;
+
+        // Find the command definition: an exported object with a `.meta` property
+        let meta: { name?: string; description?: string } | undefined;
+        let args: Record<string, Record<string, unknown>> = {};
+
+        for (const value of Object.values(mod)) {
+          if (value !== null && typeof value === "object" && "meta" in value) {
+            const cmdDef = value as {
+              meta: { name?: string; description?: string };
+              args?: Record<string, Record<string, unknown>>;
+            };
+            ({ meta } = cmdDef);
+            args = cmdDef.args ?? {};
+            break;
           }
-
-          if (!meta) {
-            logger.warn(`No command definition found in ${id}, skipping`);
-            continue;
-          }
-
-          const data = {
-            title: `bl ${parent} ${meta.name ?? commandName}`,
-            description: meta.description ?? "",
-            long: commandUsage?.long,
-            parent,
-            name: meta.name ?? commandName,
-            args: normalizeArgs(args),
-            examples: commandUsage?.examples,
-            environment: commandUsage?.annotations?.environment,
-          };
-
-          store.set({ id, data });
-          logger.info(`Loaded command: ${id}`);
-        } catch (error) {
-          logger.warn(
-            `Failed to load command ${id}: ${error instanceof Error ? error.message : String(error)}`,
-          );
         }
+
+        if (!meta) {
+          continue;
+        }
+
+        results.push({
+          id,
+          title: `bl ${parent} ${meta.name ?? commandName}`,
+          description: meta.description ?? "",
+          long: commandUsage?.long,
+          parent,
+          name: meta.name ?? commandName,
+          args: normalizeArgs(args),
+          examples: commandUsage?.examples,
+          environment: commandUsage?.annotations?.environment,
+        });
+      } catch {
+        // Skip commands that fail to load
       }
     }
-  },
-});
+  }
 
-export { commandEntrySchema, commandsLoader };
+  return results;
+};
+
+export { loadCommands };
+export type { CommandEntry };

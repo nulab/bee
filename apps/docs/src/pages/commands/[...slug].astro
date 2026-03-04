@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import { Code } from "@astrojs/starlight/components";
 
 export async function getStaticPaths() {
   const commands = await getCollection("commands");
@@ -67,38 +68,30 @@ const formatFlag = (arg: Arg) => {
   }
 
   <h2>Usage</h2>
-  <pre><code>{usageLine}</code></pre>
+  <Code code={usageLine} lang="sh" />
 
   {
     positionals.length > 0 && (
       <>
         <h2>Arguments</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Argument</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {positionals.map((arg: Arg) => (
-              <tr>
-                <td>
-                  <code>{arg.name.toUpperCase()}</code>
-                </td>
-                <td>
-                  {arg.description ?? ""}
-                  {arg.default !== undefined && (
-                    <>
-                      {" "}
-                      (default: <code>{String(arg.default)}</code>)
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <dl>
+          {positionals.map((arg: Arg) => (
+            <>
+              <dt>
+                <code>{arg.name.toUpperCase()}</code>
+              </dt>
+              <dd>
+                {arg.description ?? ""}
+                {arg.default !== undefined && (
+                  <>
+                    {" "}
+                    (default: <code>{String(arg.default)}</code>)
+                  </>
+                )}
+              </dd>
+            </>
+          ))}
+        </dl>
       </>
     )
   }
@@ -107,32 +100,24 @@ const formatFlag = (arg: Arg) => {
     flags.length > 0 && (
       <>
         <h2>Flags</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Flag</th>
-              <th>Description</th>
-              <th>Default</th>
-            </tr>
-          </thead>
-          <tbody>
-            {flags.map((arg: Arg) => (
-              <tr>
-                <td>
-                  <code>{formatFlag(arg)}</code>
-                </td>
-                <td>{arg.description ?? ""}</td>
-                <td>
-                  {arg.default !== undefined ? (
-                    <code>{String(arg.default)}</code>
-                  ) : (
-                    "\u2014"
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <dl>
+          {flags.map((arg: Arg) => (
+            <>
+              <dt>
+                <code>{formatFlag(arg)}</code>
+              </dt>
+              <dd>
+                {arg.description ?? ""}
+                {arg.default !== undefined && (
+                  <>
+                    {" "}
+                    (default: <code>{String(arg.default)}</code>)
+                  </>
+                )}
+              </dd>
+            </>
+          ))}
+        </dl>
       </>
     )
   }
@@ -145,9 +130,7 @@ const formatFlag = (arg: Arg) => {
           {data.examples.map((ex: { description: string; command: string }) => (
             <>
               <p>{ex.description}</p>
-              <pre>
-                <code>{`$ ${ex.command}`}</code>
-              </pre>
+              <Code code={`$ ${ex.command}`} lang="sh" />
             </>
           ))}
         </>
@@ -159,24 +142,16 @@ const formatFlag = (arg: Arg) => {
       data.environment.length > 0 && (
         <>
           <h2>Environment variables</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Variable</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.environment.map(([key, desc]: [string, string]) => (
-                <tr>
-                  <td>
-                    <code>{key}</code>
-                  </td>
-                  <td>{desc}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <dl>
+            {data.environment.map(([key, desc]: [string, string]) => (
+              <>
+                <dt>
+                  <code>{key}</code>
+                </dt>
+                <dd>{desc}</dd>
+              </>
+            ))}
+          </dl>
         </>
       )
   }
