@@ -28,12 +28,11 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockResolvedValue({
       data: { name: "Test User", userId: "testuser" },
-    });
+    } as never);
 
-    const { status } = await import("#src/commands/auth/status.js");
+    const { status } = await import("./status");
     await status.run?.({ args: {} } as never);
 
     expect(createClient).toHaveBeenCalledWith({
@@ -54,7 +53,7 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    const { status } = await import("#src/commands/auth/status.js");
+    const { status } = await import("./status");
     await status.run?.({ args: {} } as never);
 
     expect(consola.info).toHaveBeenCalledWith(
@@ -74,7 +73,7 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    const { status } = await import("#src/commands/auth/status.js");
+    const { status } = await import("./status");
     await status.run?.({
       args: { space: "other.backlog.com" },
     } as never);
@@ -97,12 +96,11 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockResolvedValue({
       data: { name: "Test User", userId: "testuser" },
-    });
+    } as never);
 
-    const { status } = await import("#src/commands/auth/status.js");
+    const { status } = await import("./status");
     await status.run?.({
       args: { "show-token": true },
     } as never);
@@ -122,10 +120,9 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
 
-    const { status } = await import("#src/commands/auth/status.js");
+    const { status } = await import("./status");
     await status.run?.({ args: {} } as never);
 
     expect(consola.log).toHaveBeenCalledWith("    Status: Authentication failed");
@@ -148,12 +145,11 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockResolvedValue({
       data: { name: "OAuth User", userId: "oauthuser" },
-    });
+    } as never);
 
-    const { status } = await import("#src/commands/auth/status.js");
+    const { status } = await import("./status");
     await status.run?.({ args: {} } as never);
 
     expect(createClient).toHaveBeenCalledWith({
@@ -180,12 +176,11 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockResolvedValue({
       data: { name: "OAuth User", userId: "oauthuser" },
-    });
+    } as never);
 
-    const { status } = await import("#src/commands/auth/status.js");
+    const { status } = await import("./status");
     await status.run?.({
       args: { "show-token": true },
     } as never);
@@ -205,12 +200,11 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockResolvedValue({
       data: { name: "Test User", userId: "testuser" },
-    });
+    } as never);
 
-    const { status } = await import("#src/commands/auth/status.js");
+    const { status } = await import("./status");
     await status.run?.({ args: {} } as never);
 
     expect(consola.log).toHaveBeenCalledWith("  example.backlog.com");

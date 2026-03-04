@@ -32,7 +32,7 @@ describe("auth refresh", () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
     const exitSpy = spyOnProcessExit();
 
-    const { refresh } = await import("#src/commands/auth/refresh.js");
+    const { refresh } = await import("./refresh");
     await refresh.run?.({ args: {} } as never);
 
     expect(consola.error).toHaveBeenCalledWith(
@@ -49,7 +49,7 @@ describe("auth refresh", () => {
     });
     const exitSpy = spyOnProcessExit();
 
-    const { refresh } = await import("#src/commands/auth/refresh.js");
+    const { refresh } = await import("./refresh");
     await refresh.run?.({ args: {} } as never);
 
     expect(consola.error).toHaveBeenCalledWith(
@@ -70,7 +70,7 @@ describe("auth refresh", () => {
     });
     const exitSpy = spyOnProcessExit();
 
-    const { refresh } = await import("#src/commands/auth/refresh.js");
+    const { refresh } = await import("./refresh");
     await refresh.run?.({ args: {} } as never);
 
     expect(consola.error).toHaveBeenCalledWith(
@@ -97,12 +97,11 @@ describe("auth refresh", () => {
       expires_in: 3600,
       refresh_token: "new-refresh",
     });
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockResolvedValue({
       data: { name: "Test User", userId: "testuser" },
-    });
+    } as never);
 
-    const { refresh } = await import("#src/commands/auth/refresh.js");
+    const { refresh } = await import("./refresh");
     await refresh.run?.({ args: {} } as never);
 
     expect(refreshAccessToken).toHaveBeenCalledWith("example.backlog.com", {
@@ -141,7 +140,7 @@ describe("auth refresh", () => {
     vi.mocked(refreshAccessToken).mockRejectedValue(new Error("invalid_grant"));
     const exitSpy = spyOnProcessExit();
 
-    const { refresh } = await import("#src/commands/auth/refresh.js");
+    const { refresh } = await import("./refresh");
     await refresh.run?.({ args: {} } as never);
 
     expect(consola.error).toHaveBeenCalledWith(
@@ -168,11 +167,10 @@ describe("auth refresh", () => {
       expires_in: 3600,
       refresh_token: "new-refresh",
     });
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
     const exitSpy = spyOnProcessExit();
 
-    const { refresh } = await import("#src/commands/auth/refresh.js");
+    const { refresh } = await import("./refresh");
     await refresh.run?.({ args: {} } as never);
 
     expect(consola.error).toHaveBeenCalledWith("Token verification failed after refresh.");

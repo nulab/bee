@@ -39,10 +39,9 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 describe("auth login", () => {
   describe("api-key", () => {
     it("authenticates new space with --space and API key", async () => {
-      // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
       vi.mocked(usersGetMyself).mockResolvedValue({
         data: { name: "Test User", userId: "testuser" },
-      });
+      } as never);
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("test-api-key");
@@ -53,14 +52,14 @@ describe("auth login", () => {
         aliases: {},
       });
 
-      const { login } = await import("#src/commands/auth/login.js");
+      const { login } = await import("./login");
       await login.run?.({
         args: { space: "example.backlog.com", method: "api-key" },
       } as never);
 
       expect(createClient).toHaveBeenCalledWith({
         baseUrl: "https://example.backlog.com/api/v2",
-        query: { apiKey: "test-api-key" },
+        auth: expect.any(Function),
       });
       expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
       expect(addSpace).toHaveBeenCalledWith({
@@ -79,10 +78,9 @@ describe("auth login", () => {
     });
 
     it("updates credentials for existing space", async () => {
-      // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
       vi.mocked(usersGetMyself).mockResolvedValue({
         data: { name: "Test User", userId: "testuser" },
-      });
+      } as never);
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("new-api-key");
@@ -101,7 +99,7 @@ describe("auth login", () => {
         aliases: {},
       });
 
-      const { login } = await import("#src/commands/auth/login.js");
+      const { login } = await import("./login");
       await login.run?.({
         args: { space: "example.backlog.com", method: "api-key" },
       } as never);
@@ -118,14 +116,13 @@ describe("auth login", () => {
     });
 
     it("returns error on authentication failure", async () => {
-      // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
       vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("bad-key");
       const exitSpy = spyOnProcessExit();
 
-      const { login } = await import("#src/commands/auth/login.js");
+      const { login } = await import("./login");
       await login.run?.({
         args: { space: "example.backlog.com", method: "api-key" },
       } as never);
@@ -144,7 +141,7 @@ describe("auth login", () => {
     it("returns error for invalid method", async () => {
       const exitSpy = spyOnProcessExit();
 
-      const { login } = await import("#src/commands/auth/login.js");
+      const { login } = await import("./login");
       await login.run?.({
         args: { space: "example.backlog.com", method: "invalid" },
       } as never);
@@ -157,10 +154,9 @@ describe("auth login", () => {
 
   describe("oauth", () => {
     const setupOAuthMocks = () => {
-      // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
       vi.mocked(usersGetMyself).mockResolvedValue({
         data: { name: "OAuth User", userId: "oauthuser" },
-      });
+      } as never);
       vi.mocked(findSpace).mockReturnValue(null);
       vi.mocked(loadConfig).mockReturnValue({
         spaces: [],
@@ -192,7 +188,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { login } = await import("#src/commands/auth/login.js");
+      const { login } = await import("./login");
       await login.run?.({
         args: {
           space: "example.backlog.com",
@@ -244,7 +240,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-secret");
       const exitSpy = spyOnProcessExit();
 
-      const { login } = await import("#src/commands/auth/login.js");
+      const { login } = await import("./login");
       await login.run?.({
         args: {
           space: "example.backlog.com",
@@ -271,7 +267,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-secret");
       const exitSpy = spyOnProcessExit();
 
-      const { login } = await import("#src/commands/auth/login.js");
+      const { login } = await import("./login");
       await login.run?.({
         args: {
           space: "example.backlog.com",
@@ -290,7 +286,6 @@ describe("auth login", () => {
 
     it("calls process.exit(1) when token verification fails", async () => {
       setupOAuthMocks();
-      // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
       vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
@@ -298,7 +293,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-secret");
       const exitSpy = spyOnProcessExit();
 
-      const { login } = await import("#src/commands/auth/login.js");
+      const { login } = await import("./login");
       await login.run?.({
         args: {
           space: "example.backlog.com",
@@ -346,7 +341,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { login } = await import("#src/commands/auth/login.js");
+      const { login } = await import("./login");
       await login.run?.({
         args: {
           space: "example.backlog.com",

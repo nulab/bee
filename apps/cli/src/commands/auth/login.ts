@@ -6,8 +6,8 @@ import { createClient } from "@repo/openapi-client/client";
 import { usersGetMyself } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
-import type { CommandUsage } from "#src/lib/command-usage.js";
-import { withUsage } from "#src/lib/command-usage.js";
+import type { CommandUsage } from "../../lib/command-usage";
+import { withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
   long: `Authenticate with a Backlog space.
@@ -104,12 +104,10 @@ const loginWithApiKey = async (
 
   let user;
   try {
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
     const client = createClient({
       baseUrl: `https://${hostname}/api/v2`,
-      query: { apiKey },
+      auth: (auth) => (auth.type === "apiKey" ? apiKey : undefined),
     });
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
   } catch {
     consola.error(
@@ -119,7 +117,6 @@ const loginWithApiKey = async (
   }
 
   saveSpace(hostname, { method: "api-key", apiKey });
-  // oxlint-disable-next-line typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
   consola.success(`Logged in to ${hostname} as ${user.name} (${user.userId})`);
 };
 
@@ -182,12 +179,10 @@ const loginWithOAuth = async (
 
   let user;
   try {
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
     const client = createClient({
       baseUrl: `https://${hostname}/api/v2`,
       headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
     });
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
   } catch {
     consola.error("Authentication verification failed.");
@@ -201,7 +196,6 @@ const loginWithOAuth = async (
     clientId,
     clientSecret,
   });
-  // oxlint-disable-next-line typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
   consola.success(`Logged in to ${hostname} as ${user.name} (${user.userId})`);
 };
 

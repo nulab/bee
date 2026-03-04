@@ -23,7 +23,7 @@ describe("auth logout", () => {
       aliases: {},
     });
 
-    const { logout } = await import("#src/commands/auth/logout.js");
+    const { logout } = await import("./logout");
     await logout.run?.({
       args: { space: "example.backlog.com" },
     } as never);
@@ -39,7 +39,7 @@ describe("auth logout", () => {
       aliases: {},
     });
 
-    const { logout } = await import("#src/commands/auth/logout.js");
+    const { logout } = await import("./logout");
     await logout.run?.({
       args: {},
     } as never);
@@ -60,7 +60,7 @@ describe("auth logout", () => {
 
     const exitSpy = spyOnProcessExit();
 
-    const { logout } = await import("#src/commands/auth/logout.js");
+    const { logout } = await import("./logout");
     await logout.run?.({
       args: { space: "nonexistent.backlog.com" },
     } as never);
@@ -85,7 +85,7 @@ describe("auth logout", () => {
     });
     vi.mocked(removeSpace).mockImplementation(() => {});
 
-    const { logout } = await import("#src/commands/auth/logout.js");
+    const { logout } = await import("./logout");
     await logout.run?.({
       args: {},
     } as never);

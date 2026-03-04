@@ -4,8 +4,8 @@ import type { User } from "@repo/openapi-client";
 import { loadConfig } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
-import type { CommandUsage } from "#src/lib/command-usage.js";
-import { withUsage } from "#src/lib/command-usage.js";
+import type { CommandUsage } from "../../lib/command-usage";
+import { withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
   long: `Display authentication status for configured Backlog spaces.
@@ -68,19 +68,16 @@ const status = withUsage(
         const isDefault = config.defaultSpace === space.host;
         const label = isDefault ? `${space.host} (default)` : space.host;
 
-        // oxlint-disable-next-line typescript-eslint/no-redundant-type-constituents -- oxlint cannot resolve generated client types across workspace packages
         let user: User | null = null;
         try {
           const clientOptions =
             space.auth.method === "api-key"
               ? { query: { apiKey: space.auth.apiKey } }
               : { headers: { Authorization: `Bearer ${space.auth.accessToken}` } };
-          // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
           const client = createClient({
             baseUrl: `https://${space.host}/api/v2`,
             ...clientOptions,
           });
-          // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
           ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
         } catch (error) {
           consola.debug("Token verification failed:", error);
@@ -91,7 +88,6 @@ const status = withUsage(
         consola.log(`    Method: ${space.auth.method}`);
 
         if (user) {
-          // oxlint-disable-next-line typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
           consola.log(`    User:   ${user.name} (${user.userId})`);
           consola.log("    Status: Authenticated");
         } else {

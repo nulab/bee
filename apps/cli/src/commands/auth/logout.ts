@@ -1,8 +1,8 @@
 import { loadConfig, removeSpace } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
-import type { CommandUsage } from "#src/lib/command-usage.js";
-import { withUsage } from "#src/lib/command-usage.js";
+import type { CommandUsage } from "../../lib/command-usage";
+import { withUsage } from "../../lib/command-usage";
 
 const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
 
