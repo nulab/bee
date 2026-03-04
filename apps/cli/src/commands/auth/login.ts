@@ -29,13 +29,9 @@ an OAuth Client ID and Client Secret, then authorize in the browser.`,
     { description: "Start interactive setup", command: "bl auth login" },
     {
       description: "Login with API key from stdin",
-      command: "echo 'your-api-key' | bl auth login -s xxx.backlog.com --with-token",
+      command: "echo 'your-api-key' | BACKLOG_SPACE=xxx.backlog.com bl auth login --with-token",
     },
     { description: "Login with OAuth", command: "bl auth login -m oauth" },
-    {
-      description: "Login with a specific space",
-      command: "bl auth login -s xxx.backlog.com",
-    },
   ],
 
   annotations: {
@@ -54,15 +50,10 @@ const login = withUsage(
       description: "Authenticate with a Backlog space",
     },
     args: {
-      space: {
-        type: "string",
-        alias: "s",
-        description: "The hostname of the Backlog space. e.g., xxx.backlog.com",
-      },
       method: {
         type: "string",
         alias: "m",
-        description: "Authentication method: {api-key|oauth}",
+        description: "The authentication method to use: {api-key|oauth}",
         default: "api-key",
       },
       "with-token": {
@@ -71,11 +62,11 @@ const login = withUsage(
       },
       "client-id": {
         type: "string",
-        description: "OAuth Client ID",
+        description: "The OAuth Client ID to use when authenticating with Backlog",
       },
       "client-secret": {
         type: "string",
-        description: "OAuth Client Secret",
+        description: "The OAuth Client Secret to use when authenticating with Backlog",
       },
     },
     async run({ args }) {
@@ -86,11 +77,9 @@ const login = withUsage(
         return process.exit(1);
       }
 
-      const hostname = await promptRequired(
-        "Backlog space hostname:",
-        args.space || process.env.BACKLOG_SPACE,
-        { placeholder: "xxx.backlog.com" },
-      );
+      const hostname = await promptRequired("Backlog space hostname:", process.env.BACKLOG_SPACE, {
+        placeholder: "xxx.backlog.com",
+      });
 
       await (method === "api-key"
         ? loginWithApiKey(hostname, args)

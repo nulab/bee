@@ -24,6 +24,21 @@ model OAuthTokenRequest {
 
 @route("/oauth2")
 interface OAuth {
+  @doc("""
+    Starts the OAuth2 authorization code flow.
+    The actual endpoint is https://{spaceKey}.backlog.com/OAuth2AccessRequest.action
+    (not under /api/v2). The user is redirected to Backlog to authorize the application.
+    """)
+  @get
+  @route("/authorize")
+  authorize(
+    @query response_type: "code",
+    @query client_id: string,
+    @query redirect_uri: string,
+    @query state?: string,
+  ): void;
+
+  @doc("Exchanges an authorization code or refresh token for an access token.")
   @route("token")
   @post
   token(

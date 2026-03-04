@@ -27,26 +27,8 @@ model BacklogErrorResponse {
 }
 
 // ────────────────────────────────────────────
-// Shared enums
+// Shared scalars
 // ────────────────────────────────────────────
-
-/**
- * User role type.
- * - 1: Administrator
- * - 2: Normal User
- * - 3: Reporter
- * - 4: Viewer
- * - 5: Guest Reporter
- * - 6: Guest Viewer
- */
-enum UserRoleType {
-  Administrator: 1,
-  NormalUser: 2,
-  Reporter: 3,
-  Viewer: 4,
-  GuestReporter: 5,
-  GuestViewer: 6,
-}
 
 // ────────────────────────────────────────────
 // Shared models
@@ -55,8 +37,9 @@ enum UserRoleType {
 /** Nulab account information. */
 model NulabAccount {
   nulabId: string;
-  name: string;
-  uniqueId: string;
+  name: string | null;
+  uniqueId: string | null;
+  iconUrl: string;
 }
 
 /** Backlog user. */
@@ -64,9 +47,10 @@ model User {
   id: int64;
   userId: string;
   name: string;
-  roleType: UserRoleType;
+  roleType: int32;
   lang: string | null;
   mailAddress: string;
+  keyword: string;
   lastLoginTime: utcDateTime | null;
   nulabAccount: NulabAccount | null;
 }

@@ -43,7 +43,7 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("auth login", () => {
   describe("api-key", () => {
-    it("authenticates new space with --space and API key", async () => {
+    it("authenticates new space with API key", async () => {
       vi.mocked(usersGetMyself).mockResolvedValue({
         data: { name: "Test User", userId: "testuser" },
       } as never);
@@ -56,7 +56,7 @@ describe("auth login", () => {
 
       const { login } = await import("./login");
       await login.run?.({
-        args: { space: "example.backlog.com", method: "api-key" },
+        args: { method: "api-key" },
       } as never);
 
       expect(createClient).toHaveBeenCalledWith({
@@ -99,7 +99,7 @@ describe("auth login", () => {
 
       const { login } = await import("./login");
       await login.run?.({
-        args: { space: "example.backlog.com", method: "api-key" },
+        args: { method: "api-key" },
       } as never);
 
       const result = vi.mocked(updateConfig).mock.results[0]?.value;
@@ -121,7 +121,7 @@ describe("auth login", () => {
 
       const { login } = await import("./login");
       await login.run?.({
-        args: { space: "example.backlog.com", method: "api-key" },
+        args: { method: "api-key" },
       } as never);
 
       expect(consola.error).toHaveBeenCalledWith(
@@ -139,7 +139,7 @@ describe("auth login", () => {
 
       const { login } = await import("./login");
       await login.run?.({
-        args: { space: "example.backlog.com", method: "invalid" },
+        args: { method: "invalid" },
       } as never);
 
       expect(consola.error).toHaveBeenCalledWith('Invalid auth method. Use "api-key" or "oauth".');
@@ -184,7 +184,6 @@ describe("auth login", () => {
       const { login } = await import("./login");
       await login.run?.({
         args: {
-          space: "example.backlog.com",
           method: "oauth",
           "client-id": "my-client-id",
           "client-secret": "my-client-secret",
@@ -243,7 +242,6 @@ describe("auth login", () => {
       const { login } = await import("./login");
       await login.run?.({
         args: {
-          space: "example.backlog.com",
           method: "oauth",
           "client-id": "my-client-id",
           "client-secret": "my-client-secret",
@@ -270,7 +268,6 @@ describe("auth login", () => {
       const { login } = await import("./login");
       await login.run?.({
         args: {
-          space: "example.backlog.com",
           method: "oauth",
           "client-id": "my-client-id",
           "client-secret": "my-client-secret",
@@ -296,7 +293,6 @@ describe("auth login", () => {
       const { login } = await import("./login");
       await login.run?.({
         args: {
-          space: "example.backlog.com",
           method: "oauth",
           "client-id": "my-client-id",
           "client-secret": "my-client-secret",
@@ -336,7 +332,6 @@ describe("auth login", () => {
       const { login } = await import("./login");
       await login.run?.({
         args: {
-          space: "example.backlog.com",
           method: "oauth",
           "client-id": "my-client-id",
           "client-secret": "my-client-secret",
