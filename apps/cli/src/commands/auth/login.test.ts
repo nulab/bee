@@ -1,13 +1,13 @@
-import { createClient } from "@repo/api";
 import { exchangeAuthorizationCode, startCallbackServer } from "@repo/backlog-utils";
 import { promptRequired } from "@repo/cli-utils";
 import { addSpace, findSpace, loadConfig, updateSpaceAuth, writeConfig } from "@repo/config";
 import { spyOnProcessExit } from "@repo/test-utils";
 import consola from "consola";
+import { ofetch } from "ofetch";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@repo/api", () => ({
-  createClient: vi.fn(),
+vi.mock("ofetch", () => ({
+  ofetch: vi.fn(),
 }));
 
 vi.mock("@repo/backlog-utils", () => ({
@@ -34,11 +34,10 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 describe("auth login", () => {
   describe("api-key", () => {
     it("authenticates new space with --space and API key", async () => {
-      const mockClient = vi.fn().mockResolvedValue({
+      vi.mocked(ofetch).mockResolvedValue({
         name: "Test User",
         userId: "testuser",
       });
-      vi.mocked(createClient).mockReturnValue(mockClient as never);
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("test-api-key");
@@ -54,11 +53,9 @@ describe("auth login", () => {
         args: { space: "example.backlog.com", method: "api-key" },
       } as never);
 
-      expect(createClient).toHaveBeenCalledWith({
-        host: "example.backlog.com",
-        apiKey: "test-api-key",
+      expect(ofetch).toHaveBeenCalledWith("https://example.backlog.com/api/v2/users/myself", {
+        query: { apiKey: "test-api-key" },
       });
-      expect(mockClient).toHaveBeenCalledWith("/users/myself");
       expect(addSpace).toHaveBeenCalledWith({
         host: "example.backlog.com",
         auth: { method: "api-key", apiKey: "test-api-key" },
@@ -75,11 +72,10 @@ describe("auth login", () => {
     });
 
     it("updates credentials for existing space", async () => {
-      const mockClient = vi.fn().mockResolvedValue({
+      vi.mocked(ofetch).mockResolvedValue({
         name: "Test User",
         userId: "testuser",
       });
-      vi.mocked(createClient).mockReturnValue(mockClient as never);
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("new-api-key");
@@ -115,8 +111,7 @@ describe("auth login", () => {
     });
 
     it("returns error on authentication failure", async () => {
-      const mockClient = vi.fn().mockRejectedValue(new Error("Unauthorized"));
-      vi.mocked(createClient).mockReturnValue(mockClient as never);
+      vi.mocked(ofetch).mockRejectedValue(new Error("Unauthorized"));
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("bad-key");
@@ -154,11 +149,10 @@ describe("auth login", () => {
 
   describe("oauth", () => {
     const setupOAuthMocks = () => {
-      const mockClient = vi.fn().mockResolvedValue({
+      vi.mocked(ofetch).mockResolvedValue({
         name: "OAuth User",
         userId: "oauthuser",
       });
-      vi.mocked(createClient).mockReturnValue(mockClient as never);
       vi.mocked(findSpace).mockReturnValue(null);
       vi.mocked(loadConfig).mockReturnValue({
         spaces: [],
@@ -180,11 +174,11 @@ describe("auth login", () => {
         stop: mockStop,
       });
 
-      return { mockClient, mockStop, mockWaitForCallback };
+      return { mockStop, mockWaitForCallback };
     };
 
     it("authenticates new space via OAuth flow", async () => {
-      const { mockClient } = setupOAuthMocks();
+      setupOAuthMocks();
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("my-client-id")
@@ -207,11 +201,9 @@ describe("auth login", () => {
         clientSecret: "my-client-secret",
         redirectUri: "http://localhost:5033/callback",
       });
-      expect(createClient).toHaveBeenCalledWith({
-        host: "example.backlog.com",
-        accessToken: "new-access-token",
+      expect(ofetch).toHaveBeenCalledWith("https://example.backlog.com/api/v2/users/myself", {
+        headers: { Authorization: "Bearer new-access-token" },
       });
-      expect(mockClient).toHaveBeenCalledWith("/users/myself");
       expect(addSpace).toHaveBeenCalledWith({
         host: "example.backlog.com",
         auth: {
@@ -288,8 +280,7 @@ describe("auth login", () => {
 
     it("calls process.exit(1) when token verification fails", async () => {
       setupOAuthMocks();
-      const mockClient = vi.fn().mockRejectedValue(new Error("Unauthorized"));
-      vi.mocked(createClient).mockReturnValue(mockClient as never);
+      vi.mocked(ofetch).mockRejectedValue(new Error("Unauthorized"));
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("my-client-id")

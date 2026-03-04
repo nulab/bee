@@ -1,9 +1,9 @@
-import { createClient } from "@repo/api";
 import { loadConfig } from "@repo/config";
 import consola from "consola";
+import { ofetch } from "ofetch";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@repo/api", () => ({ createClient: vi.fn() }));
+vi.mock("ofetch", () => ({ ofetch: vi.fn() }));
 vi.mock("@repo/config", () => ({ loadConfig: vi.fn() }));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
@@ -20,20 +20,17 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    const mockClient = vi.fn().mockResolvedValue({
+    vi.mocked(ofetch).mockResolvedValue({
       name: "Test User",
       userId: "testuser",
     });
-    vi.mocked(createClient).mockReturnValue(mockClient as never);
 
     const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({ args: {} } as never);
 
-    expect(createClient).toHaveBeenCalledWith({
-      host: "example.backlog.com",
-      apiKey: "key",
+    expect(ofetch).toHaveBeenCalledWith("https://example.backlog.com/api/v2/users/myself", {
+      query: { apiKey: "key" },
     });
-    expect(mockClient).toHaveBeenCalledWith("/users/myself");
     expect(consola.log).toHaveBeenCalledWith("  example.backlog.com (default)");
     expect(consola.log).toHaveBeenCalledWith("    Method: api-key");
     expect(consola.log).toHaveBeenCalledWith("    User:   Test User (testuser)");
@@ -75,7 +72,7 @@ describe("auth status", () => {
     expect(consola.info).toHaveBeenCalledWith(
       "No authentication configured for other.backlog.com.",
     );
-    expect(createClient).not.toHaveBeenCalled();
+    expect(ofetch).not.toHaveBeenCalled();
   });
 
   it("displays token with --show-token", async () => {
@@ -90,11 +87,10 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    const mockClient = vi.fn().mockResolvedValue({
+    vi.mocked(ofetch).mockResolvedValue({
       name: "Test User",
       userId: "testuser",
     });
-    vi.mocked(createClient).mockReturnValue(mockClient as never);
 
     const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({
@@ -116,8 +112,7 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    const mockClient = vi.fn().mockRejectedValue(new Error("Unauthorized"));
-    vi.mocked(createClient).mockReturnValue(mockClient as never);
+    vi.mocked(ofetch).mockRejectedValue(new Error("Unauthorized"));
 
     const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({ args: {} } as never);
@@ -126,7 +121,7 @@ describe("auth status", () => {
     expect(consola.debug).toHaveBeenCalledWith("Token verification failed:", expect.any(Error));
   });
 
-  it("uses correct client config for OAuth-authenticated space", async () => {
+  it("uses correct fetch options for OAuth-authenticated space", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {
@@ -142,18 +137,16 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    const mockClient = vi.fn().mockResolvedValue({
+    vi.mocked(ofetch).mockResolvedValue({
       name: "OAuth User",
       userId: "oauthuser",
     });
-    vi.mocked(createClient).mockReturnValue(mockClient as never);
 
     const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({ args: {} } as never);
 
-    expect(createClient).toHaveBeenCalledWith({
-      host: "example.backlog.com",
-      accessToken: "oauth-access-token",
+    expect(ofetch).toHaveBeenCalledWith("https://example.backlog.com/api/v2/users/myself", {
+      headers: { Authorization: "Bearer oauth-access-token" },
     });
     expect(consola.log).toHaveBeenCalledWith("    Method: oauth");
     expect(consola.log).toHaveBeenCalledWith("    User:   OAuth User (oauthuser)");
@@ -175,11 +168,10 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    const mockClient = vi.fn().mockResolvedValue({
+    vi.mocked(ofetch).mockResolvedValue({
       name: "OAuth User",
       userId: "oauthuser",
     });
-    vi.mocked(createClient).mockReturnValue(mockClient as never);
 
     const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({
@@ -201,11 +193,10 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    const mockClient = vi.fn().mockResolvedValue({
+    vi.mocked(ofetch).mockResolvedValue({
       name: "Test User",
       userId: "testuser",
     });
-    vi.mocked(createClient).mockReturnValue(mockClient as never);
 
     const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({ args: {} } as never);

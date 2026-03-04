@@ -17,12 +17,15 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@repo/api": "workspace:*",
     "@repo/backlog-utils": "workspace:*",
     "@repo/cli-utils": "workspace:*",
     "@repo/config": "workspace:*",
+    "@repo/openapi-client": "workspace:*",
     "citty": "^0.1.6",
-    "consola": "^3.4.2"
+    "consola": "^3.4.2",
+    "ofetch": "^1.4.1",
+    "open": "^10.1.0",
+    "ufo": "^1.5.4"
   },
   "devDependencies": {
     "@repo/test-utils": "workspace:*",

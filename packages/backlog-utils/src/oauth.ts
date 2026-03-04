@@ -41,6 +41,7 @@ const exchangeAuthorizationCode = async (
 
 /**
  * Refreshes an OAuth access token using a refresh token.
+ * Creates a plain client (no retry/interceptors) to avoid 401 retry loops.
  */
 const refreshAccessToken = async (
   host: string,

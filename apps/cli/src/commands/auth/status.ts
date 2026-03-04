@@ -1,7 +1,7 @@
-import { createClient } from "@repo/api";
 import { loadConfig } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
+import { ofetch } from "ofetch";
 import type { CommandUsage } from "#src/lib/command-usage.js";
 import { withUsage } from "#src/lib/command-usage.js";
 
@@ -73,12 +73,14 @@ export const status = withUsage(
 
         let user: BacklogUser | null = null;
         try {
-          const clientConfig =
+          const fetchOptions =
             space.auth.method === "api-key"
-              ? { host: space.host, apiKey: space.auth.apiKey }
-              : { host: space.host, accessToken: space.auth.accessToken };
-          const client = createClient(clientConfig);
-          user = await client<BacklogUser>("/users/myself");
+              ? { query: { apiKey: space.auth.apiKey } }
+              : { headers: { Authorization: `Bearer ${space.auth.accessToken}` } };
+          user = await ofetch<BacklogUser>(
+            `https://${space.host}/api/v2/users/myself`,
+            fetchOptions,
+          );
         } catch (error) {
           consola.debug("Token verification failed:", error);
         }

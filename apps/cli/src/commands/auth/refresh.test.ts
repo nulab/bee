@@ -1,12 +1,12 @@
-import { createClient } from "@repo/api";
 import { refreshAccessToken } from "@repo/backlog-utils";
 import { resolveSpace, updateSpaceAuth } from "@repo/config";
 import { spyOnProcessExit } from "@repo/test-utils";
 import consola from "consola";
+import { ofetch } from "ofetch";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@repo/api", () => ({
-  createClient: vi.fn(),
+vi.mock("ofetch", () => ({
+  ofetch: vi.fn(),
 }));
 
 vi.mock("@repo/backlog-utils", () => ({
@@ -92,11 +92,10 @@ describe("auth refresh", () => {
       expires_in: 3600,
       refresh_token: "new-refresh",
     });
-    const mockClient = vi.fn().mockResolvedValue({
+    vi.mocked(ofetch).mockResolvedValue({
       name: "Test User",
       userId: "testuser",
     });
-    vi.mocked(createClient).mockReturnValue(mockClient as never);
 
     const { refresh } = await import("#src/commands/auth/refresh.js");
     await refresh.run?.({ args: {} } as never);
@@ -106,11 +105,9 @@ describe("auth refresh", () => {
       clientId: "client-id",
       clientSecret: "client-secret",
     });
-    expect(createClient).toHaveBeenCalledWith({
-      host: "example.backlog.com",
-      accessToken: "new-access",
+    expect(ofetch).toHaveBeenCalledWith("https://example.backlog.com/api/v2/users/myself", {
+      headers: { Authorization: "Bearer new-access" },
     });
-    expect(mockClient).toHaveBeenCalledWith("/users/myself");
     expect(updateSpaceAuth).toHaveBeenCalledWith("example.backlog.com", {
       method: "oauth",
       accessToken: "new-access",
@@ -164,8 +161,7 @@ describe("auth refresh", () => {
       expires_in: 3600,
       refresh_token: "new-refresh",
     });
-    const mockClient = vi.fn().mockRejectedValue(new Error("Unauthorized"));
-    vi.mocked(createClient).mockReturnValue(mockClient as never);
+    vi.mocked(ofetch).mockRejectedValue(new Error("Unauthorized"));
     const exitSpy = spyOnProcessExit();
 
     const { refresh } = await import("#src/commands/auth/refresh.js");

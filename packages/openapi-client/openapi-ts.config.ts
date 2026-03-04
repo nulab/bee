@@ -10,7 +10,7 @@ export default defineConfig({
       name: "@hey-api/sdk",
       validator: true,
     },
-    "@hey-api/client-fetch",
+    "@hey-api/client-ofetch",
     "valibot",
   ],
 });

@@ -1,10 +1,10 @@
-import { createClient } from "@repo/api";
 import { exchangeAuthorizationCode, openUrl, startCallbackServer } from "@repo/backlog-utils";
 import { promptRequired, readStdin } from "@repo/cli-utils";
 import { addSpace, findSpace, loadConfig, updateSpaceAuth, writeConfig } from "@repo/config";
 import type { RcAuth } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
+import { ofetch } from "ofetch";
 import type { CommandUsage } from "#src/lib/command-usage.js";
 import { withUsage } from "#src/lib/command-usage.js";
 
@@ -105,10 +105,11 @@ async function loginWithApiKey(hostname: string, args: { "with-token"?: boolean 
 
   consola.start(`Authenticating with ${hostname}...`);
 
-  const client = createClient({ host: hostname, apiKey });
   let user: BacklogUser;
   try {
-    user = await client<BacklogUser>("/users/myself");
+    user = await ofetch<BacklogUser>(`https://${hostname}/api/v2/users/myself`, {
+      query: { apiKey },
+    });
   } catch {
     consola.error(
       `Authentication failed. Could not connect to ${hostname} with the provided API key.`,
@@ -177,10 +178,11 @@ async function loginWithOAuth(
     return process.exit(1);
   }
 
-  const client = createClient({ host: hostname, accessToken: tokenResponse.access_token });
   let user: BacklogUser;
   try {
-    user = await client<BacklogUser>("/users/myself");
+    user = await ofetch<BacklogUser>(`https://${hostname}/api/v2/users/myself`, {
+      headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+    });
   } catch {
     consola.error("Authentication verification failed.");
     return process.exit(1);

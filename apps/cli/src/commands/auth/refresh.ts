@@ -1,8 +1,8 @@
-import { createClient } from "@repo/api";
 import { refreshAccessToken } from "@repo/backlog-utils";
 import { findSpace, loadConfig, resolveSpace, updateSpaceAuth } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
+import { ofetch } from "ofetch";
 import type { CommandUsage } from "#src/lib/command-usage.js";
 import { withUsage } from "#src/lib/command-usage.js";
 
@@ -83,10 +83,11 @@ export const refresh = withUsage(
         return process.exit(1);
       }
 
-      const client = createClient({ host: space.host, accessToken: tokenResponse.access_token });
       let user: BacklogUser;
       try {
-        user = await client<BacklogUser>("/users/myself");
+        user = await ofetch<BacklogUser>(`https://${space.host}/api/v2/users/myself`, {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        });
       } catch {
         consola.error("Token verification failed after refresh.");
         return process.exit(1);
