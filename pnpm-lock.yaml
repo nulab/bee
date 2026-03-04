@@ -29,6 +29,18 @@ importers:
 
   apps/cli:
     dependencies:
+      '@repo/api':
+        specifier: workspace:*
+        version: link:../../packages/api
+      '@repo/backlog-utils':
+        specifier: workspace:*
+        version: link:../../packages/backlog-utils
+      '@repo/cli-utils':
+        specifier: workspace:*
+        version: link:../../packages/cli-utils
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       citty:
         specifier: ^0.1.6
         version: 0.1.6
@@ -36,6 +48,9 @@ importers:
         specifier: ^3.4.2
         version: 3.4.2
     devDependencies:
+      '@repo/test-utils':
+        specifier: workspace:*
+        version: link:../../packages/test-utils
       '@repo/tsconfigs':
         specifier: workspace:*
         version: link:../../packages/tsconfigs
@@ -45,6 +60,9 @@ importers:
       unbuild:
         specifier: ^3.5.0
         version: 3.6.1(typescript@6.0.0-dev.20260303)
+      vitest:
+        specifier: ^3.1.0
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.13)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
 
   apps/docs:
     dependencies:

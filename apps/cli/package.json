@@ -13,15 +13,22 @@
   },
   "scripts": {
     "build": "unbuild",
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@repo/api": "workspace:*",
+    "@repo/backlog-utils": "workspace:*",
+    "@repo/cli-utils": "workspace:*",
+    "@repo/config": "workspace:*",
     "citty": "^0.1.6",
     "consola": "^3.4.2"
   },
   "devDependencies": {
+    "@repo/test-utils": "workspace:*",
     "@repo/tsconfigs": "workspace:*",
     "tsx": "^4.19.0",
-    "unbuild": "^3.5.0"
+    "unbuild": "^3.5.0",
+    "vitest": "^3.1.0"
   }
 }

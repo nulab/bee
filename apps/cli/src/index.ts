@@ -8,7 +8,7 @@ const main = defineCommand({
     description: pkg.description,
   },
   subCommands: {
-    // Commands will be registered here
+    auth: () => import("#/commands/auth/index.js").then((m) => m.auth),
   },
 });
 
