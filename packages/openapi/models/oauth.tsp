@@ -53,7 +53,7 @@ namespace OAuth {
   }
 
   @route("/oauth2")
-  interface OAuthToken {
+  interface OAuth {
     @doc("""
       Exchanges an authorization code or refresh token for an access token.
 
