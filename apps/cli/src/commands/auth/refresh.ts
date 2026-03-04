@@ -4,8 +4,7 @@ import { usersGetMyself } from "@repo/openapi-client";
 import { findSpace, loadConfig, resolveSpace, updateSpaceAuth } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
-import type { CommandUsage } from "../../lib/command-usage";
-import { withUsage } from "../../lib/command-usage";
+import { type CommandUsage, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
   long: `Refresh the OAuth access token for a Backlog space.

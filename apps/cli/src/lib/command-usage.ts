@@ -1,5 +1,4 @@
-import type { ArgsDef, CommandDef } from "citty";
-import { showUsage as cittyShowUsage } from "citty";
+import { type ArgsDef, type CommandDef, showUsage as cittyShowUsage } from "citty";
 import consola from "consola";
 
 // ---------------------------------------------------------------------------

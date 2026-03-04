@@ -46,7 +46,7 @@ TypeScript is configured with `module: "preserve"` / `moduleResolution: "bundler
   import { foo } from "./foo.js";
   import { foo } from "./foo.ts";
   ```
-- Use `import type` for type-only imports (enforced by oxlint)
+- **Inline `type` keyword** — use `import { type Foo, bar }` instead of separate `import type { Foo }` (enforced by oxlint)
 
 ## Architecture
 
@@ -75,8 +75,7 @@ CLI commands use a **single-source help system** inspired by gh CLI. Each comman
 
 ```ts
 import { defineCommand } from "citty";
-import type { CommandUsage } from "./lib/command-usage";
-import { withUsage } from "./lib/command-usage";
+import { type CommandUsage, withUsage } from "./lib/command-usage";
 
 export const commandUsage: CommandUsage = {
   long: "Detailed multi-line description of the command.",

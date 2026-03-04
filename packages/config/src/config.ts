@@ -1,8 +1,7 @@
 import * as v from "valibot";
 import consola from "consola";
 import { readUser, writeUser } from "rc9";
-import type { Rc } from "./schema";
-import { RcSchema } from "./schema";
+import { type Rc, RcSchema } from "./schema";
 
 const CONFIG_FILE_NAME = ".backlogrc";
 

@@ -52,8 +52,11 @@
     "typescript/array-type": ["warn", { "default": "array" }],
     // Type definitions: use type instead of interface
     "typescript/consistent-type-definitions": ["warn", "type"],
-    // Enforce import type for type-only imports
-    "typescript/consistent-type-imports": ["warn", { "prefer": "type-imports" }],
+    // Enforce inline type imports: import { type Foo, bar } instead of separate import type
+    "typescript/consistent-type-imports": [
+      "warn",
+      { "prefer": "type-imports", "fixStyle": "inline-type-imports" }
+    ],
     // Indexed object style: Record<K, V> instead of { [key: K]: V }
     "typescript/consistent-indexed-object-style": ["warn", "record"],
     // Generic constructors: const x = new Foo<T>() instead of const x: Foo<T> = new Foo()
@@ -146,8 +149,10 @@
     // ── Import: Style overrides ────────────────────────────────
     // Allow namespace imports (e.g., import * as v from "valibot")
     "import/no-namespace": "off",
-    // Allow separate import type + import from same module (conflicts with consistent-type-specifier-style)
-    "no-duplicate-imports": "off",
+    // Inline type imports eliminate the need for separate import type statements
+    "no-duplicate-imports": "warn",
+    // Prefer inline type specifiers: import { type Foo } instead of import type { Foo }
+    "import/consistent-type-specifier-style": ["warn", "prefer-inline"],
     // Allow default-as-named (false positive for consola etc.)
     "import/no-named-as-default": "off",
     // Conflicts with no-default-export

@@ -6,14 +6,12 @@ import {
   startCallbackServer,
 } from "@repo/backlog-utils";
 import { promptRequired, readStdin } from "@repo/cli-utils";
-import { updateConfig } from "@repo/config";
-import type { RcAuth } from "@repo/config";
+import { type RcAuth, updateConfig } from "@repo/config";
 import { createClient } from "@repo/openapi-client/client";
 import { usersGetMyself } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
-import type { CommandUsage } from "../../lib/command-usage";
-import { withUsage } from "../../lib/command-usage";
+import { type CommandUsage, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
   long: `Authenticate with a Backlog space.

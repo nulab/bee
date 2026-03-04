@@ -1,4 +1,4 @@
-import type { RcAuth, RcSpace } from "./schema";
+import { type RcAuth, type RcSpace } from "./schema";
 
 import { loadConfig, updateConfig } from "./config";
 

@@ -1,8 +1,7 @@
 import { loadConfig, writeConfig } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
-import type { CommandUsage } from "../../lib/command-usage";
-import { withUsage } from "../../lib/command-usage";
+import { type CommandUsage, withUsage } from "../../lib/command-usage";
 
 const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
 

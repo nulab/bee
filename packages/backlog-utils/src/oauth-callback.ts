@@ -1,5 +1,4 @@
-import { createServer } from "node:http";
-import type { Server, ServerResponse } from "node:http";
+import { type Server, type ServerResponse, createServer } from "node:http";
 
 /** 5 minutes in milliseconds */
 const CALLBACK_TIMEOUT_MS = 300_000;

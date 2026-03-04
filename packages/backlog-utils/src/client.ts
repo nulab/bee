@@ -1,5 +1,4 @@
-import type { Client } from "@repo/openapi-client/client";
-import { createClient } from "@repo/openapi-client/client";
+import { type Client, createClient } from "@repo/openapi-client/client";
 import { refreshAccessToken } from "./oauth";
 import { formatResetTime } from "./rate-limit";
 import { resolveSpace, updateSpaceAuth } from "@repo/config";

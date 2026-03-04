@@ -1,5 +1,4 @@
-import type { Mock } from "vitest";
-import { vi } from "vitest";
+import { type Mock, vi } from "vitest";
 
 export type MockClient = Mock<(...args: unknown[]) => unknown>;
 

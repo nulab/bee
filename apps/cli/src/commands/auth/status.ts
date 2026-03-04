@@ -1,12 +1,10 @@
 import { addApiKeyAuth, addBearerAuth } from "@repo/backlog-utils";
 import { createClient } from "@repo/openapi-client/client";
-import { usersGetMyself } from "@repo/openapi-client";
-import type { User } from "@repo/openapi-client";
+import { type User, usersGetMyself } from "@repo/openapi-client";
 import { loadConfig } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
-import type { CommandUsage } from "../../lib/command-usage";
-import { withUsage } from "../../lib/command-usage";
+import { type CommandUsage, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
   long: `Display authentication status for configured Backlog spaces.
