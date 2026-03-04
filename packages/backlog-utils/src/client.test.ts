@@ -19,8 +19,11 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 /** Extract the request interceptor function registered on the latest createClient result. */
 const getRequestInterceptor = (): ((request: Request) => Request) => {
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment -- mock result value is typed as `any` by Vitest
   const client = vi.mocked(createClient).mock.results.at(-1)?.value;
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-member-access -- shape guaranteed by mock factory above
   expect(client.interceptors.request.use).toHaveBeenCalled();
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-member-access, typescript-eslint/no-unsafe-return -- shape guaranteed by mock factory above
   return client.interceptors.request.use.mock.calls[0][0];
 };
 

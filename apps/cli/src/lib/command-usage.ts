@@ -184,9 +184,9 @@ const showCommandUsage = async <T extends ArgsDef>(
   // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- generic CommandDef<T> is structurally compatible for metadata read
   const resolved = cmd as CommandDef;
   const usage = getCommandUsage(resolved);
-  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- generic CommandDef<T> is structurally compatible for rendering
   await (usage
-    ? renderCommandUsage(usage)(resolved, parent as CommandDef)
+    ? // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- generic CommandDef<T> is structurally compatible for rendering
+      renderCommandUsage(usage)(resolved, parent as CommandDef)
     : cittyShowUsage(cmd, parent));
 };
 
