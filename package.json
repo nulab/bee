@@ -6,7 +6,10 @@
     "postinstall": "lefthook install",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
+    "build": "turbo run build",
+    "dev": "turbo run dev",
     "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "test": "vitest run"
