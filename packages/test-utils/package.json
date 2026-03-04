@@ -3,13 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "imports": {
-    "#src/*": "./src/*"
-  },
   "exports": {
     ".": "./src/index.ts",
     "./setup": "./src/setup.ts",
     "./mock-consola": "./src/mock-consola.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@repo/tsconfigs": "workspace:*"

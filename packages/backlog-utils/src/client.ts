@@ -1,13 +1,19 @@
-import type { Client } from "@repo/openapi-client/client";
+import type { Auth, Client } from "@repo/openapi-client/client";
 import { createClient } from "@repo/openapi-client/client";
-import { refreshAccessToken } from "#src/oauth.js";
-import { formatResetTime } from "#src/rate-limit.js";
+import { refreshAccessToken } from "./oauth";
+import { formatResetTime } from "./rate-limit";
 import { resolveSpace, updateSpaceAuth } from "@repo/config";
 import consola from "consola";
 import { ofetch } from "ofetch";
 
 /** The type of the authenticated API client. */
 type BacklogClient = Client;
+
+/** Returns an auth callback that only responds to apiKey security entries. */
+const apiKeyAuth =
+  (apiKey: string): ((auth: Auth) => string | undefined) =>
+  (auth) =>
+    auth.type === "apiKey" ? apiKey : undefined;
 
 /**
  * Resolves the active space and creates an authenticated API client.
@@ -31,10 +37,9 @@ const getClient = async (): Promise<{
 
     if (resolved.auth.method === "api-key") {
       return {
-        // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
         client: createClient({
           baseUrl,
-          query: { apiKey: resolved.auth.apiKey },
+          auth: apiKeyAuth(resolved.auth.apiKey),
           onResponseError: handleRateLimitError,
         }),
         host: resolved.host,
@@ -43,7 +48,6 @@ const getClient = async (): Promise<{
 
     // OAuth: Create client with automatic token refresh on 401
     return {
-      // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment -- oxlint cannot resolve generated client types across workspace packages
       client: createOAuthClient(baseUrl, resolved.host, resolved.auth),
       host: resolved.host,
     };
@@ -55,10 +59,9 @@ const getClient = async (): Promise<{
 
   if (envApiKey && envHost) {
     return {
-      // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
       client: createClient({
         baseUrl: `https://${envHost}/api/v2`,
-        query: { apiKey: envApiKey },
+        auth: apiKeyAuth(envApiKey),
         onResponseError: handleRateLimitError,
       }),
       host: envHost,
@@ -153,15 +156,10 @@ const createOAuthClient = (
     retryStatusCodes: [401],
   });
 
-  // oxlint-disable-next-line typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
   return createClient({
     baseUrl,
     ofetch: customOfetch,
-    headers: {
-      get Authorization() {
-        return `Bearer ${currentAccessToken}`;
-      },
-    },
+    auth: (auth) => (auth.scheme === "bearer" ? currentAccessToken : undefined),
   });
 };
 

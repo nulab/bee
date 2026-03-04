@@ -94,15 +94,10 @@
     "typescript/no-unnecessary-type-assertion": "warn",
     // Disallow conditionals where the type is always truthy or always falsy
     "typescript/no-unnecessary-condition": "warn",
-    // Disallow calling a function with a value with type `any`
     "typescript/no-unsafe-argument": "warn",
-    // Disallow assigning a value with type `any` to variables and properties
     "typescript/no-unsafe-assignment": "warn",
-    // Disallow calling a value with type `any`
     "typescript/no-unsafe-call": "warn",
-    // Disallow member access on a value with type `any`
     "typescript/no-unsafe-member-access": "warn",
-    // Disallow returning a value with type `any` from a function
     "typescript/no-unsafe-return": "warn",
 
     // ── Unicorn: Style overrides ────────────────────────────────
@@ -186,17 +181,6 @@
       "rules": {
         "typescript/unbound-method": "off",
         "typescript/no-unsafe-type-assertion": "off"
-      }
-    },
-    {
-      // oauth.ts consumes @repo/openapi-client whose generated types cannot be
-      // resolved by oxlint's type checker (extensionless imports in generated code).
-      // All no-unsafe-* warnings here are false positives from unresolved types.
-      "files": ["packages/backlog-utils/src/oauth.ts"],
-      "rules": {
-        "typescript/no-unsafe-assignment": "off",
-        "typescript/no-unsafe-call": "off",
-        "typescript/no-unsafe-return": "off"
       }
     }
   ],
