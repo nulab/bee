@@ -1,32 +1,27 @@
 ---
-import { getCollection } from "astro:content";
 import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 import { Code } from "@astrojs/starlight/components";
+import { marked } from "marked";
+import { loadCommands } from "../../lib/commands";
+import type { CommandEntry } from "../../lib/commands";
+
+const renderMarkdown = (text: string) => marked.parse(text, { async: false }) as string;
 
 export async function getStaticPaths() {
-  const commands = await getCollection("commands");
+  const commands = await loadCommands();
   return commands.map((entry) => ({
     params: { slug: entry.id },
     props: { entry },
   }));
 }
 
-type Arg = {
-  name: string;
-  type?: "string" | "boolean" | "positional";
-  description?: string;
-  alias: string[];
-  default?: string | boolean;
-  required?: boolean;
-  valueHint?: string;
-};
-
 const { entry } = Astro.props;
-const { data } = entry;
+
+type Arg = CommandEntry["args"][number];
 
 // Build usage line
-const flags = data.args.filter((a: Arg) => a.type !== "positional");
-const positionals = data.args.filter((a: Arg) => a.type === "positional");
+const flags = entry.args.filter((a: Arg) => a.type !== "positional");
+const positionals = entry.args.filter((a: Arg) => a.type === "positional");
 const usageParts: string[] = [];
 if (flags.length > 0) usageParts.push("[flags]");
 for (const arg of positionals) {
@@ -37,7 +32,7 @@ for (const arg of positionals) {
       : `[${name}]`,
   );
 }
-const usageLine = `${data.title} ${usageParts.join(" ")}`.trim();
+const usageLine = `${entry.title} ${usageParts.join(" ")}`.trim();
 
 // Format flag display
 const formatFlag = (arg: Arg) => {
@@ -52,14 +47,14 @@ const formatFlag = (arg: Arg) => {
 
 <StarlightPage
   frontmatter={{
-    title: data.title,
-    description: data.description,
+    title: entry.title,
+    description: entry.description,
   }}
 >
   {
-    data.long && (
+    entry.long && (
       <div
-        set:html={data.long
+        set:html={entry.long
           .split("\n\n")
           .map((p: string) => `<p>${p}</p>`)
           .join("")}
@@ -123,11 +118,11 @@ const formatFlag = (arg: Arg) => {
   }
 
   {
-    data.examples &&
-      data.examples.length > 0 && (
+    entry.examples &&
+      entry.examples.length > 0 && (
         <>
           <h2>Examples</h2>
-          {data.examples.map((ex: { description: string; command: string }) => (
+          {entry.examples.map((ex: { description: string; command: string }) => (
             <>
               <p>{ex.description}</p>
               <Code code={`$ ${ex.command}`} lang="sh" />
@@ -138,12 +133,12 @@ const formatFlag = (arg: Arg) => {
   }
 
   {
-    data.environment &&
-      data.environment.length > 0 && (
+    entry.environment &&
+      entry.environment.length > 0 && (
         <>
           <h2>Environment variables</h2>
           <dl>
-            {data.environment.map(([key, desc]: [string, string]) => (
+            {entry.environment.map(([key, desc]: [string, string]) => (
               <>
                 <dt>
                   <code>{key}</code>
