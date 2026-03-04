@@ -10,7 +10,10 @@ export default defineConfig({
       name: "@hey-api/sdk",
       validator: true,
     },
-    "@hey-api/client-fetch",
+    {
+      name: "@hey-api/client-ofetch",
+      runtimeConfigPath: "../hey-api.ts",
+    },
     "valibot",
   ],
 });

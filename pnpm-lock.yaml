@@ -169,9 +169,15 @@ importers:
 
   packages/openapi-client:
     dependencies:
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../config
       '@repo/openapi':
         specifier: workspace:*
         version: link:../openapi
+      ofetch:
+        specifier: ^1.4.1
+        version: 1.5.1
       valibot:
         specifier: ^1.2.0
         version: 1.2.0(typescript@6.0.0-dev.20260303)
