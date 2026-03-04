@@ -11,13 +11,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@repo/api": "workspace:*",
     "@repo/config": "workspace:*",
     "@repo/openapi-client": "workspace:*",
     "consola": "^3.4.2",
     "ofetch": "^1.4.1",
-    "open": "^10.1.0",
-    "ufo": "^1.5.4"
+    "open": "^10.1.0"
   },
   "devDependencies": {
     "@repo/test-utils": "workspace:*",

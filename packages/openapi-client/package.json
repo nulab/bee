@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@repo/openapi": "workspace:*",
+    "ofetch": "^1.4.1",
     "valibot": "^1.2.0"
   },
   "devDependencies": {
