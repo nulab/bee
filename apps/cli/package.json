@@ -16,12 +16,20 @@
     "dev": "tsx src/index.ts"
   },
   "dependencies": {
+    "@repo/api": "workspace:*",
+    "@repo/config": "workspace:*",
+    "@repo/openapi-client": "workspace:*",
     "citty": "^0.1.6",
-    "consola": "^3.4.2"
+    "consola": "^3.4.2",
+    "ofetch": "^1.4.1",
+    "open": "^10.1.0",
+    "ufo": "^1.5.4"
   },
   "devDependencies": {
+    "@repo/test-utils": "workspace:*",
     "@repo/tsconfigs": "workspace:*",
     "tsx": "^4.19.0",
-    "unbuild": "^3.5.0"
+    "unbuild": "^3.5.0",
+    "vitest": "^3.1.0"
   }
 }
