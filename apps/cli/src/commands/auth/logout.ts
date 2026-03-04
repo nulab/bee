@@ -6,7 +6,7 @@ import { withUsage } from "#src/lib/command-usage.js";
 
 const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
 
-export const commandUsage: CommandUsage = {
+const commandUsage: CommandUsage = {
   long: `Remove authentication for a Backlog space.
 
 This command removes the stored authentication configuration for a space. The configuration is only removed locally.
@@ -31,7 +31,7 @@ If only one space is configured, it will be selected automatically. If multiple 
   },
 };
 
-export const logout = withUsage(
+const logout = withUsage(
   defineCommand({
     meta: {
       name: "logout",
@@ -87,3 +87,5 @@ export const logout = withUsage(
   }),
   commandUsage,
 );
+
+export { commandUsage, logout };

@@ -97,6 +97,7 @@ describe("auth refresh", () => {
       expires_in: 3600,
       refresh_token: "new-refresh",
     });
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockResolvedValue({
       data: { name: "Test User", userId: "testuser" },
     });
@@ -167,6 +168,7 @@ describe("auth refresh", () => {
       expires_in: 3600,
       refresh_token: "new-refresh",
     });
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
     const exitSpy = spyOnProcessExit();
 

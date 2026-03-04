@@ -28,6 +28,7 @@ describe("auth status", () => {
       aliases: {},
     });
 
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockResolvedValue({
       data: { name: "Test User", userId: "testuser" },
     });
@@ -96,6 +97,7 @@ describe("auth status", () => {
       aliases: {},
     });
 
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockResolvedValue({
       data: { name: "Test User", userId: "testuser" },
     });
@@ -120,6 +122,7 @@ describe("auth status", () => {
       aliases: {},
     });
 
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
 
     const { status } = await import("#src/commands/auth/status.js");
@@ -145,6 +148,7 @@ describe("auth status", () => {
       aliases: {},
     });
 
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockResolvedValue({
       data: { name: "OAuth User", userId: "oauthuser" },
     });
@@ -176,6 +180,7 @@ describe("auth status", () => {
       aliases: {},
     });
 
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockResolvedValue({
       data: { name: "OAuth User", userId: "oauthuser" },
     });
@@ -200,6 +205,7 @@ describe("auth status", () => {
       aliases: {},
     });
 
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
     vi.mocked(usersGetMyself).mockResolvedValue({
       data: { name: "Test User", userId: "testuser" },
     });

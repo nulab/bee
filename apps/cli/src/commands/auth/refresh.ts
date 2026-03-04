@@ -7,7 +7,7 @@ import consola from "consola";
 import type { CommandUsage } from "#src/lib/command-usage.js";
 import { withUsage } from "#src/lib/command-usage.js";
 
-export const commandUsage: CommandUsage = {
+const commandUsage: CommandUsage = {
   long: `Refresh the OAuth access token for a Backlog space.
 
 This command uses the stored refresh token to obtain a new access token. It is only available for spaces authenticated with OAuth.
@@ -27,7 +27,7 @@ For spaces using API key authentication, this command is not applicable. If the 
   },
 };
 
-export const refresh = withUsage(
+const refresh = withUsage(
   defineCommand({
     meta: {
       name: "refresh",
@@ -107,3 +107,5 @@ export const refresh = withUsage(
   }),
   commandUsage,
 );
+
+export { commandUsage, refresh };

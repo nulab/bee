@@ -9,7 +9,7 @@ import consola from "consola";
 import type { CommandUsage } from "#src/lib/command-usage.js";
 import { withUsage } from "#src/lib/command-usage.js";
 
-export const commandUsage: CommandUsage = {
+const commandUsage: CommandUsage = {
   long: `Authenticate with a Backlog space.
 
 The default authentication mode is API key. You will be prompted to enter
@@ -41,7 +41,7 @@ an OAuth Client ID and Client Secret, then authorize in the browser.`,
   },
 };
 
-export const login = withUsage(
+const login = withUsage(
   defineCommand({
     meta: {
       name: "login",
@@ -86,17 +86,18 @@ export const login = withUsage(
         { placeholder: "xxx.backlog.com" },
       );
 
-      if (method === "api-key") {
-        await loginWithApiKey(hostname, args);
-      } else {
-        await loginWithOAuth(hostname, args);
-      }
+      await (method === "api-key"
+        ? loginWithApiKey(hostname, args)
+        : loginWithOAuth(hostname, args));
     },
   }),
   commandUsage,
 );
 
-async function loginWithApiKey(hostname: string, args: { "with-token"?: boolean }): Promise<void> {
+const loginWithApiKey = async (
+  hostname: string,
+  args: { "with-token"?: boolean },
+): Promise<void> => {
   const apiKey = args["with-token"] ? await readStdin() : await promptRequired("API key:");
 
   consola.start(`Authenticating with ${hostname}...`);
@@ -120,12 +121,12 @@ async function loginWithApiKey(hostname: string, args: { "with-token"?: boolean 
   saveSpace(hostname, { method: "api-key", apiKey });
   // oxlint-disable-next-line typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
   consola.success(`Logged in to ${hostname} as ${user.name} (${user.userId})`);
-}
+};
 
-async function loginWithOAuth(
+const loginWithOAuth = async (
   hostname: string,
   args: { "client-id"?: string; "client-secret"?: string },
-): Promise<void> {
+): Promise<void> => {
   const clientId = await promptRequired(
     "OAuth Client ID:",
     args["client-id"] ?? process.env.BACKLOG_OAUTH_CLIENT_ID,
@@ -202,9 +203,9 @@ async function loginWithOAuth(
   });
   // oxlint-disable-next-line typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
   consola.success(`Logged in to ${hostname} as ${user.name} (${user.userId})`);
-}
+};
 
-function saveSpace(hostname: string, auth: RcAuth): void {
+const saveSpace = (hostname: string, auth: RcAuth): void => {
   const config = loadConfig();
   const existing = findSpace(config.spaces, hostname);
 
@@ -217,4 +218,6 @@ function saveSpace(hostname: string, auth: RcAuth): void {
   if (!config.defaultSpace) {
     writeConfig({ ...config, defaultSpace: hostname });
   }
-}
+};
+
+export { commandUsage, login };

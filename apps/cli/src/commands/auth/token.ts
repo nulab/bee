@@ -4,7 +4,7 @@ import consola from "consola";
 import type { CommandUsage } from "#src/lib/command-usage.js";
 import { withUsage } from "#src/lib/command-usage.js";
 
-export const commandUsage: CommandUsage = {
+const commandUsage: CommandUsage = {
   long: `Print the auth token for a Backlog space to standard output.
 
 Without the --space flag, the default space is used.
@@ -29,7 +29,7 @@ The token output can be used with BACKLOG_API_KEY or piped to other commands.`,
   },
 };
 
-export const token = withUsage(
+const tokenCommand = withUsage(
   defineCommand({
     meta: {
       name: "token",
@@ -57,3 +57,5 @@ export const token = withUsage(
   }),
   commandUsage,
 );
+
+export { commandUsage, tokenCommand as token };

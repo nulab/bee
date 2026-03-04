@@ -6,7 +6,7 @@ import consola from "consola";
 // Types
 // ---------------------------------------------------------------------------
 
-export type CommandUsage = {
+type CommandUsage = {
   long?: string;
   examples?: { description: string; command: string }[];
   annotations?: {
@@ -29,21 +29,19 @@ type CommandDefWithUsage = CommandDef & { [kUsage]?: CommandUsage };
  * The usage object is stored directly on the command via a private Symbol,
  * so no global registry is needed.
  */
-export function withUsage<T extends ArgsDef>(
-  cmd: CommandDef<T>,
-  usage: CommandUsage,
-): CommandDef<T> {
+const withUsage = <T extends ArgsDef>(cmd: CommandDef<T>, usage: CommandUsage): CommandDef<T> => {
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- intentional: attaching metadata via symbol key
   (cmd as CommandDefWithUsage)[kUsage] = usage;
   return cmd;
-}
+};
 
 /**
  * Retrieve the `CommandUsage` previously attached via `withUsage`.
  * Useful for documentation generation scripts that import command modules.
  */
-export function getCommandUsage(cmd: CommandDef): CommandUsage | undefined {
-  return (cmd as CommandDefWithUsage)[kUsage];
-}
+const getCommandUsage = (cmd: CommandDef): CommandUsage | undefined =>
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- intentional: reading metadata via symbol key
+  (cmd as CommandDefWithUsage)[kUsage];
 
 // ---------------------------------------------------------------------------
 // Rendering
@@ -63,8 +61,9 @@ type NormalizedArg = {
  * Create a `showUsage`-compatible closure that renders gh-cli style help
  * for the given `CommandUsage`.
  */
-export function renderCommandUsage(usage: CommandUsage) {
-  return async (cmd: CommandDef, parent?: CommandDef): Promise<void> => {
+const renderCommandUsage =
+  (usage: CommandUsage) =>
+  async (cmd: CommandDef, parent?: CommandDef): Promise<void> => {
     const meta = await resolveValue(cmd.meta ?? {});
     const parentMeta = parent ? await resolveValue(parent.meta ?? {}) : undefined;
     const args = normalizeArgs(await resolveValue(cmd.args ?? {}));
@@ -130,8 +129,8 @@ export function renderCommandUsage(usage: CommandUsage) {
       const rows: string[][] = [];
       for (const [name, sub] of Object.entries(subs)) {
         const subCmd = await resolveValue(sub);
-        const subMeta = subCmd ? await resolveValue(subCmd.meta ?? {}) : {};
-        rows.push([`  ${name}`, subMeta?.description ?? ""]);
+        const subMeta = await resolveValue(subCmd.meta ?? {});
+        rows.push([`  ${name}`, subMeta.description ?? ""]);
       }
       lines.push("COMMANDS");
       lines.push(...alignColumns(rows));
@@ -168,9 +167,8 @@ export function renderCommandUsage(usage: CommandUsage) {
     lines.push("LEARN MORE");
     lines.push(`  Use \`${commandName} <command> --help\` for more information about a command.`);
 
-    consola.log(lines.join("\n") + "\n");
+    consola.log(`${lines.join("\n")}\n`);
   };
-}
 
 /**
  * `showUsage` replacement for `runMain`.
@@ -179,41 +177,52 @@ export function renderCommandUsage(usage: CommandUsage) {
  * gh-cli style help via the closure created by `renderCommandUsage`.
  * Otherwise falls back to citty's built-in `showUsage`.
  */
-export async function showCommandUsage(cmd: CommandDef, parent?: CommandDef): Promise<void> {
-  const usage = getCommandUsage(cmd);
-  if (usage) {
-    await renderCommandUsage(usage)(cmd, parent);
-  } else {
-    await cittyShowUsage(cmd, parent);
-  }
-}
+const showCommandUsage = async <T extends ArgsDef>(
+  cmd: CommandDef<T>,
+  parent?: CommandDef<T>,
+): Promise<void> => {
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- generic CommandDef<T> is structurally compatible for metadata read
+  const resolved = cmd as CommandDef;
+  const usage = getCommandUsage(resolved);
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- generic CommandDef<T> is structurally compatible for rendering
+  await (usage
+    ? renderCommandUsage(usage)(resolved, parent as CommandDef)
+    : cittyShowUsage(cmd, parent));
+};
 
 // ---------------------------------------------------------------------------
 // Helpers (private)
 // ---------------------------------------------------------------------------
 
-async function resolveValue<T>(
+const resolveValue = async <T>(
   val: T | (() => T) | (() => Promise<T>) | Promise<T>,
-): Promise<Awaited<T>> {
+): Promise<Awaited<T>> => {
   if (typeof val === "function") {
-    return (await (val as () => T | Promise<T>)()) as Awaited<T>;
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion, typescript-eslint/return-await -- generic function cast required, await needed for Awaited<T> inference
+    return await (val as () => T | Promise<T>)();
   }
-  return (await val) as Awaited<T>;
-}
+  // oxlint-disable-next-line typescript-eslint/return-await -- await needed for Awaited<T> inference
+  return await val;
+};
 
-function normalizeArgs(argsDef: Record<string, Record<string, unknown>>): NormalizedArg[] {
-  return Object.entries(argsDef).map(([name, def]) => ({
+const toAliasArray = (alias: unknown): string[] => {
+  if (Array.isArray(alias)) {
+    return alias.map(String);
+  }
+  if (typeof alias === "string") {
+    return [alias];
+  }
+  return [];
+};
+
+const normalizeArgs = (argsDef: Record<string, Record<string, unknown>>): NormalizedArg[] =>
+  Object.entries(argsDef).map(([name, def]) => ({
     ...(def as Omit<NormalizedArg, "name" | "alias">),
     name,
-    alias: Array.isArray(def.alias)
-      ? (def.alias as string[])
-      : def.alias
-        ? [def.alias as string]
-        : [],
+    alias: toAliasArray(def.alias),
   }));
-}
 
-function formatFlags(args: NormalizedArg[]): string[] {
+const formatFlags = (args: NormalizedArg[]): string[] => {
   const rows: [string, string][] = args.map((arg) => {
     const short = arg.alias.map((a) => `-${a}`).join(", ");
     const long = `--${arg.name}`;
@@ -221,32 +230,29 @@ function formatFlags(args: NormalizedArg[]): string[] {
 
     let hint = "";
     if (arg.type === "string") {
-      if (arg.valueHint) {
-        hint = ` ${arg.valueHint}`;
-      } else {
-        hint = " string";
-      }
+      hint = arg.valueHint ? ` ${arg.valueHint}` : " string";
     }
 
-    const defaultSuffix = arg.default !== undefined ? ` (default: "${arg.default}")` : "";
+    const defaultSuffix = arg.default === undefined ? "" : ` (default: "${arg.default}")`;
 
     return [`  ${flag}${hint}`, `${arg.description ?? ""}${defaultSuffix}`];
   });
 
   return alignColumns(rows);
-}
+};
 
-function alignColumns(rows: string[][]): string[] {
+const alignColumns = (rows: string[][]): string[] => {
   if (rows.length === 0) {
     return [];
   }
   const maxLen = Math.max(...rows.map(([col]) => col.length));
   return rows.map(([col1, col2]) => (col2 ? `${col1.padEnd(maxLen + 3)}${col2}` : col1));
-}
+};
 
-function indent(text: string): string {
-  return text
+const indent = (text: string): string =>
+  text
     .split("\n")
     .map((line) => `  ${line}`)
     .join("\n");
-}
+
+export { type CommandUsage, withUsage, getCommandUsage, renderCommandUsage, showCommandUsage };

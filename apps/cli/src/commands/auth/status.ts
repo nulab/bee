@@ -7,7 +7,7 @@ import consola from "consola";
 import type { CommandUsage } from "#src/lib/command-usage.js";
 import { withUsage } from "#src/lib/command-usage.js";
 
-export const commandUsage: CommandUsage = {
+const commandUsage: CommandUsage = {
   long: `Display authentication status for configured Backlog spaces.
 
 For each space, the authentication method and credential validity are
@@ -30,7 +30,7 @@ used when no --space flag is provided to other commands.`,
   },
 };
 
-export const status = withUsage(
+const status = withUsage(
   defineCommand({
     meta: {
       name: "status",
@@ -68,6 +68,7 @@ export const status = withUsage(
         const isDefault = config.defaultSpace === space.host;
         const label = isDefault ? `${space.host} (default)` : space.host;
 
+        // oxlint-disable-next-line typescript-eslint/no-redundant-type-constituents -- oxlint cannot resolve generated client types across workspace packages
         let user: User | null = null;
         try {
           const clientOptions =
@@ -90,6 +91,7 @@ export const status = withUsage(
         consola.log(`    Method: ${space.auth.method}`);
 
         if (user) {
+          // oxlint-disable-next-line typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
           consola.log(`    User:   ${user.name} (${user.userId})`);
           consola.log("    Status: Authenticated");
         } else {
@@ -108,3 +110,5 @@ export const status = withUsage(
   }),
   commandUsage,
 );
+
+export { commandUsage, status };

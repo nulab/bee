@@ -6,7 +6,7 @@ import { withUsage } from "#src/lib/command-usage.js";
 
 const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
 
-export const commandUsage: CommandUsage = {
+const commandUsage: CommandUsage = {
   long: `Switch the active (default) Backlog space.
 
 This command changes which space is used by default when running commands
@@ -33,7 +33,7 @@ For a list of configured spaces, see \`bl auth status\`.`,
   },
 };
 
-export const switchSpace = withUsage(
+const switchSpace = withUsage(
   defineCommand({
     meta: {
       name: "switch",
@@ -92,3 +92,5 @@ export const switchSpace = withUsage(
   }),
   commandUsage,
 );
+
+export { commandUsage, switchSpace };
