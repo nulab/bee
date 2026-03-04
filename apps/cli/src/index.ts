@@ -12,6 +12,7 @@ const main = defineCommand({
   },
   subCommands: {
     auth: () => import("./commands/auth/index").then((m) => m.auth),
+    project: () => import("./commands/project/index").then((m) => m.project),
   },
 });
 

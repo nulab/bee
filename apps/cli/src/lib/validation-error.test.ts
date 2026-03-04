@@ -1,9 +1,15 @@
-import consola from "consola";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import * as v from "valibot";
-import { handleValidationError } from "./validation-error";
 
-vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
+vi.mock("consola", () => ({
+  default: {
+    error: vi.fn(),
+    debug: vi.fn(),
+  },
+}));
+
+import consola from "consola";
+import { handleValidationError } from "./validation-error";
 
 beforeEach(() => {
   vi.clearAllMocks();

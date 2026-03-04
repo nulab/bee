@@ -1,53 +1,80 @@
-import { type BacklogProject } from "@repo/api";
+import { getClient, openUrl, projectUrl } from "@repo/backlog-utils";
+import { outputArgs, outputResult } from "@repo/cli-utils";
+import { projectsGet } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
-import { getClient } from "#/utils/client.js";
-import { outputArgs, outputResult } from "#/utils/output.js";
-import { openUrl, projectUrl } from "#/utils/url.js";
+import { type CommandUsage, withUsage } from "../../lib/command-usage";
 
-const view = defineCommand({
-  meta: {
-    name: "view",
-    description: "View project details",
-  },
-  args: {
-    ...outputArgs,
-    projectKey: {
-      type: "positional",
-      description: "Project key",
-      required: true,
+const commandUsage: CommandUsage = {
+  long: `Display details of a Backlog project.
+
+Shows project settings including chart, subtasking, wiki, file sharing,
+and git/subversion integration status.
+
+Use --web to open the project in your default browser instead of showing
+details in the terminal.`,
+
+  examples: [
+    { description: "View project details", command: "bee project view PROJECT_KEY" },
+    { description: "Open project in browser", command: "bee project view PROJECT_KEY --web" },
+    { description: "Output as JSON", command: "bee project view PROJECT_KEY --json" },
+  ],
+};
+
+const view = withUsage(
+  defineCommand({
+    meta: {
+      name: "view",
+      description: "View a project",
     },
-    web: {
-      type: "boolean",
-      description: "Open in browser",
+    args: {
+      ...outputArgs,
+      project: {
+        type: "positional",
+        description: "Project ID or project key",
+        required: true,
+      },
+      web: {
+        type: "boolean",
+        alias: "w",
+        description: "Open the project in the browser",
+      },
     },
-  },
-  async run({ args }) {
-    const { client, host } = await getClient();
+    async run({ args }) {
+      const { client, host } = await getClient();
 
-    const p = await client<BacklogProject>(`/projects/${args.projectKey}`);
+      if (args.web) {
+        const url = projectUrl(host, args.project);
+        await openUrl(url);
+        consola.info(`Opening ${url} in your browser.`);
+        return;
+      }
 
-    if (args.web) {
-      const url = projectUrl(host, p.projectKey);
-      consola.info(`Opening ${url}`);
-      await openUrl(url);
-      return;
-    }
+      const { data: project } = await projectsGet({
+        client,
+        throwOnError: true,
+        path: { projectIdOrKey: args.project },
+      });
 
-    outputResult(p, args, (data) => {
-      consola.log("");
-      consola.log(`  ${data.name} (${data.projectKey})`);
-      consola.log("");
-      consola.log(`    Status:              ${data.archived ? "Archived" : "Active"}`);
-      consola.log(`    Text Formatting:     ${data.textFormattingRule}`);
-      consola.log(`    Chart Enabled:       ${data.chartEnabled ? "Yes" : "No"}`);
-      consola.log(`    Subtasking Enabled:  ${data.subtaskingEnabled ? "Yes" : "No"}`);
-      consola.log(`    Wiki:                ${data.useWiki ? "Yes" : "No"}`);
-      consola.log(`    File Sharing:        ${data.useFileSharing ? "Yes" : "No"}`);
-      consola.log(`    Dev Attributes:      ${data.useDevAttributes ? "Yes" : "No"}`);
-      consola.log("");
-    });
-  },
-});
+      outputResult(project, args, (data) => {
+        consola.log("");
+        consola.log(`  ${data.name} (${data.projectKey})`);
+        consola.log("");
+        consola.log(`    Status:              ${data.archived ? "Archived" : "Active"}`);
+        consola.log(`    Text Formatting:     ${data.textFormattingRule}`);
+        consola.log(`    Chart:               ${data.chartEnabled ? "Yes" : "No"}`);
+        consola.log(`    Subtasking:          ${data.subtaskingEnabled ? "Yes" : "No"}`);
+        consola.log(`    Wiki:                ${data.useWiki ? "Yes" : "No"}`);
+        consola.log(`    File Sharing:        ${data.useFileSharing ? "Yes" : "No"}`);
+        consola.log(`    Git:                 ${data.useGit ? "Yes" : "No"}`);
+        consola.log(`    Subversion:          ${data.useSubversion ? "Yes" : "No"}`);
+        consola.log(`    Dev Attributes:      ${data.useDevAttributes ? "Yes" : "No"}`);
+        consola.log(`    Document:            ${data.useDocument ? "Yes" : "No"}`);
+        consola.log("");
+      });
+    },
+  }),
+  commandUsage,
+);
 
-export { view };
+export { commandUsage, view };
