@@ -50,11 +50,11 @@ TypeScript is configured with `module: "nodenext"` / `moduleResolution: "nodenex
 
 ## Subpath Imports
 
-Each package uses Node.js subpath imports (`"imports"` field in package.json) to alias `#/*` to `./src/*`. Use this instead of relative paths when importing within a package:
+Each package uses Node.js subpath imports (`"imports"` field in package.json) to alias `#src/*` to `./src/*`. Use this instead of relative paths when importing within a package:
 
 ```ts
 // Preferred (subpath import)
-import { createClient } from "#/client.js";
+import { createClient } from "#src/client.js";
 // Avoid (deep relative path)
 import { createClient } from "../../client.js";
 ```
