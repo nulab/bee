@@ -1,14 +1,11 @@
+import { createClient } from "@repo/openapi-client/client";
+import { usersGetMyself } from "@repo/openapi-client";
+import type { User } from "@repo/openapi-client";
 import { loadConfig } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
-import { ofetch } from "ofetch";
 import type { CommandUsage } from "#src/lib/command-usage.js";
 import { withUsage } from "#src/lib/command-usage.js";
-
-type BacklogUser = {
-  name: string;
-  userId: string;
-};
 
 export const commandUsage: CommandUsage = {
   long: `Display authentication status for configured Backlog spaces.
@@ -71,16 +68,19 @@ export const status = withUsage(
         const isDefault = config.defaultSpace === space.host;
         const label = isDefault ? `${space.host} (default)` : space.host;
 
-        let user: BacklogUser | null = null;
+        let user: User | null = null;
         try {
-          const fetchOptions =
+          const clientOptions =
             space.auth.method === "api-key"
               ? { query: { apiKey: space.auth.apiKey } }
               : { headers: { Authorization: `Bearer ${space.auth.accessToken}` } };
-          user = await ofetch<BacklogUser>(
-            `https://${space.host}/api/v2/users/myself`,
-            fetchOptions,
-          );
+          // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
+          const client = createClient({
+            baseUrl: `https://${space.host}/api/v2`,
+            ...clientOptions,
+          });
+          // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
+          ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
         } catch (error) {
           consola.debug("Token verification failed:", error);
         }

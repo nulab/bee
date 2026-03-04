@@ -1,13 +1,18 @@
 import { exchangeAuthorizationCode, startCallbackServer } from "@repo/backlog-utils";
 import { promptRequired } from "@repo/cli-utils";
 import { addSpace, findSpace, loadConfig, updateSpaceAuth, writeConfig } from "@repo/config";
+import { createClient } from "@repo/openapi-client/client";
+import { usersGetMyself } from "@repo/openapi-client";
 import { spyOnProcessExit } from "@repo/test-utils";
 import consola from "consola";
-import { ofetch } from "ofetch";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("ofetch", () => ({
-  ofetch: vi.fn(),
+vi.mock("@repo/openapi-client/client", () => ({
+  createClient: vi.fn(() => ({})),
+}));
+
+vi.mock("@repo/openapi-client", () => ({
+  usersGetMyself: vi.fn(),
 }));
 
 vi.mock("@repo/backlog-utils", () => ({
@@ -34,9 +39,8 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 describe("auth login", () => {
   describe("api-key", () => {
     it("authenticates new space with --space and API key", async () => {
-      vi.mocked(ofetch).mockResolvedValue({
-        name: "Test User",
-        userId: "testuser",
+      vi.mocked(usersGetMyself).mockResolvedValue({
+        data: { name: "Test User", userId: "testuser" },
       });
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
@@ -53,9 +57,11 @@ describe("auth login", () => {
         args: { space: "example.backlog.com", method: "api-key" },
       } as never);
 
-      expect(ofetch).toHaveBeenCalledWith("https://example.backlog.com/api/v2/users/myself", {
+      expect(createClient).toHaveBeenCalledWith({
+        baseUrl: "https://example.backlog.com/api/v2",
         query: { apiKey: "test-api-key" },
       });
+      expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
       expect(addSpace).toHaveBeenCalledWith({
         host: "example.backlog.com",
         auth: { method: "api-key", apiKey: "test-api-key" },
@@ -72,9 +78,8 @@ describe("auth login", () => {
     });
 
     it("updates credentials for existing space", async () => {
-      vi.mocked(ofetch).mockResolvedValue({
-        name: "Test User",
-        userId: "testuser",
+      vi.mocked(usersGetMyself).mockResolvedValue({
+        data: { name: "Test User", userId: "testuser" },
       });
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
@@ -111,7 +116,7 @@ describe("auth login", () => {
     });
 
     it("returns error on authentication failure", async () => {
-      vi.mocked(ofetch).mockRejectedValue(new Error("Unauthorized"));
+      vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("bad-key");
@@ -149,9 +154,8 @@ describe("auth login", () => {
 
   describe("oauth", () => {
     const setupOAuthMocks = () => {
-      vi.mocked(ofetch).mockResolvedValue({
-        name: "OAuth User",
-        userId: "oauthuser",
+      vi.mocked(usersGetMyself).mockResolvedValue({
+        data: { name: "OAuth User", userId: "oauthuser" },
       });
       vi.mocked(findSpace).mockReturnValue(null);
       vi.mocked(loadConfig).mockReturnValue({
@@ -201,9 +205,11 @@ describe("auth login", () => {
         clientSecret: "my-client-secret",
         redirectUri: "http://localhost:5033/callback",
       });
-      expect(ofetch).toHaveBeenCalledWith("https://example.backlog.com/api/v2/users/myself", {
+      expect(createClient).toHaveBeenCalledWith({
+        baseUrl: "https://example.backlog.com/api/v2",
         headers: { Authorization: "Bearer new-access-token" },
       });
+      expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
       expect(addSpace).toHaveBeenCalledWith({
         host: "example.backlog.com",
         auth: {
@@ -280,7 +286,7 @@ describe("auth login", () => {
 
     it("calls process.exit(1) when token verification fails", async () => {
       setupOAuthMocks();
-      vi.mocked(ofetch).mockRejectedValue(new Error("Unauthorized"));
+      vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("my-client-id")

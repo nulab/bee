@@ -1,12 +1,17 @@
 import { refreshAccessToken } from "@repo/backlog-utils";
+import { createClient } from "@repo/openapi-client/client";
+import { usersGetMyself } from "@repo/openapi-client";
 import { resolveSpace, updateSpaceAuth } from "@repo/config";
 import { spyOnProcessExit } from "@repo/test-utils";
 import consola from "consola";
-import { ofetch } from "ofetch";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("ofetch", () => ({
-  ofetch: vi.fn(),
+vi.mock("@repo/openapi-client/client", () => ({
+  createClient: vi.fn(() => ({})),
+}));
+
+vi.mock("@repo/openapi-client", () => ({
+  usersGetMyself: vi.fn(),
 }));
 
 vi.mock("@repo/backlog-utils", () => ({
@@ -92,9 +97,8 @@ describe("auth refresh", () => {
       expires_in: 3600,
       refresh_token: "new-refresh",
     });
-    vi.mocked(ofetch).mockResolvedValue({
-      name: "Test User",
-      userId: "testuser",
+    vi.mocked(usersGetMyself).mockResolvedValue({
+      data: { name: "Test User", userId: "testuser" },
     });
 
     const { refresh } = await import("#src/commands/auth/refresh.js");
@@ -105,9 +109,11 @@ describe("auth refresh", () => {
       clientId: "client-id",
       clientSecret: "client-secret",
     });
-    expect(ofetch).toHaveBeenCalledWith("https://example.backlog.com/api/v2/users/myself", {
+    expect(createClient).toHaveBeenCalledWith({
+      baseUrl: "https://example.backlog.com/api/v2",
       headers: { Authorization: "Bearer new-access" },
     });
+    expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
     expect(updateSpaceAuth).toHaveBeenCalledWith("example.backlog.com", {
       method: "oauth",
       accessToken: "new-access",
@@ -161,7 +167,7 @@ describe("auth refresh", () => {
       expires_in: 3600,
       refresh_token: "new-refresh",
     });
-    vi.mocked(ofetch).mockRejectedValue(new Error("Unauthorized"));
+    vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
     const exitSpy = spyOnProcessExit();
 
     const { refresh } = await import("#src/commands/auth/refresh.js");

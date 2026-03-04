@@ -1,15 +1,11 @@
 import { refreshAccessToken } from "@repo/backlog-utils";
+import { createClient } from "@repo/openapi-client/client";
+import { usersGetMyself } from "@repo/openapi-client";
 import { findSpace, loadConfig, resolveSpace, updateSpaceAuth } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
-import { ofetch } from "ofetch";
 import type { CommandUsage } from "#src/lib/command-usage.js";
 import { withUsage } from "#src/lib/command-usage.js";
-
-type BacklogUser = {
-  name: string;
-  userId: string;
-};
 
 export const commandUsage: CommandUsage = {
   long: `Refresh the OAuth access token for a Backlog space.
@@ -83,11 +79,15 @@ export const refresh = withUsage(
         return process.exit(1);
       }
 
-      let user: BacklogUser;
+      let user;
       try {
-        user = await ofetch<BacklogUser>(`https://${space.host}/api/v2/users/myself`, {
+        // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
+        const client = createClient({
+          baseUrl: `https://${space.host}/api/v2`,
           headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
         });
+        // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
+        ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
       } catch {
         consola.error("Token verification failed after refresh.");
         return process.exit(1);
@@ -101,6 +101,7 @@ export const refresh = withUsage(
         clientSecret,
       });
 
+      // oxlint-disable-next-line typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
       consola.success(`Token refreshed for ${space.host} (${user.name})`);
     },
   }),

@@ -1,9 +1,17 @@
+import { createClient } from "@repo/openapi-client/client";
+import { usersGetMyself } from "@repo/openapi-client";
 import { loadConfig } from "@repo/config";
 import consola from "consola";
-import { ofetch } from "ofetch";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("ofetch", () => ({ ofetch: vi.fn() }));
+vi.mock("@repo/openapi-client/client", () => ({
+  createClient: vi.fn(() => ({})),
+}));
+
+vi.mock("@repo/openapi-client", () => ({
+  usersGetMyself: vi.fn(),
+}));
+
 vi.mock("@repo/config", () => ({ loadConfig: vi.fn() }));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
@@ -20,17 +28,18 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    vi.mocked(ofetch).mockResolvedValue({
-      name: "Test User",
-      userId: "testuser",
+    vi.mocked(usersGetMyself).mockResolvedValue({
+      data: { name: "Test User", userId: "testuser" },
     });
 
     const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({ args: {} } as never);
 
-    expect(ofetch).toHaveBeenCalledWith("https://example.backlog.com/api/v2/users/myself", {
+    expect(createClient).toHaveBeenCalledWith({
+      baseUrl: "https://example.backlog.com/api/v2",
       query: { apiKey: "key" },
     });
+    expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
     expect(consola.log).toHaveBeenCalledWith("  example.backlog.com (default)");
     expect(consola.log).toHaveBeenCalledWith("    Method: api-key");
     expect(consola.log).toHaveBeenCalledWith("    User:   Test User (testuser)");
@@ -72,7 +81,7 @@ describe("auth status", () => {
     expect(consola.info).toHaveBeenCalledWith(
       "No authentication configured for other.backlog.com.",
     );
-    expect(ofetch).not.toHaveBeenCalled();
+    expect(usersGetMyself).not.toHaveBeenCalled();
   });
 
   it("displays token with --show-token", async () => {
@@ -87,9 +96,8 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    vi.mocked(ofetch).mockResolvedValue({
-      name: "Test User",
-      userId: "testuser",
+    vi.mocked(usersGetMyself).mockResolvedValue({
+      data: { name: "Test User", userId: "testuser" },
     });
 
     const { status } = await import("#src/commands/auth/status.js");
@@ -112,7 +120,7 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    vi.mocked(ofetch).mockRejectedValue(new Error("Unauthorized"));
+    vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
 
     const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({ args: {} } as never);
@@ -121,7 +129,7 @@ describe("auth status", () => {
     expect(consola.debug).toHaveBeenCalledWith("Token verification failed:", expect.any(Error));
   });
 
-  it("uses correct fetch options for OAuth-authenticated space", async () => {
+  it("uses correct client options for OAuth-authenticated space", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [
         {
@@ -137,15 +145,15 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    vi.mocked(ofetch).mockResolvedValue({
-      name: "OAuth User",
-      userId: "oauthuser",
+    vi.mocked(usersGetMyself).mockResolvedValue({
+      data: { name: "OAuth User", userId: "oauthuser" },
     });
 
     const { status } = await import("#src/commands/auth/status.js");
     await status.run?.({ args: {} } as never);
 
-    expect(ofetch).toHaveBeenCalledWith("https://example.backlog.com/api/v2/users/myself", {
+    expect(createClient).toHaveBeenCalledWith({
+      baseUrl: "https://example.backlog.com/api/v2",
       headers: { Authorization: "Bearer oauth-access-token" },
     });
     expect(consola.log).toHaveBeenCalledWith("    Method: oauth");
@@ -168,9 +176,8 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    vi.mocked(ofetch).mockResolvedValue({
-      name: "OAuth User",
-      userId: "oauthuser",
+    vi.mocked(usersGetMyself).mockResolvedValue({
+      data: { name: "OAuth User", userId: "oauthuser" },
     });
 
     const { status } = await import("#src/commands/auth/status.js");
@@ -193,9 +200,8 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    vi.mocked(ofetch).mockResolvedValue({
-      name: "Test User",
-      userId: "testuser",
+    vi.mocked(usersGetMyself).mockResolvedValue({
+      data: { name: "Test User", userId: "testuser" },
     });
 
     const { status } = await import("#src/commands/auth/status.js");

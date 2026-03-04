@@ -3,6 +3,7 @@ import "@typespec/openapi";
 import "@typespec/openapi3";
 
 import "./models";
+import "./users.tsp";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;

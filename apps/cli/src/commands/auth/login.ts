@@ -2,16 +2,12 @@ import { exchangeAuthorizationCode, openUrl, startCallbackServer } from "@repo/b
 import { promptRequired, readStdin } from "@repo/cli-utils";
 import { addSpace, findSpace, loadConfig, updateSpaceAuth, writeConfig } from "@repo/config";
 import type { RcAuth } from "@repo/config";
+import { createClient } from "@repo/openapi-client/client";
+import { usersGetMyself } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
-import { ofetch } from "ofetch";
 import type { CommandUsage } from "#src/lib/command-usage.js";
 import { withUsage } from "#src/lib/command-usage.js";
-
-type BacklogUser = {
-  name: string;
-  userId: string;
-};
 
 export const commandUsage: CommandUsage = {
   long: `Authenticate with a Backlog space.
@@ -105,11 +101,15 @@ async function loginWithApiKey(hostname: string, args: { "with-token"?: boolean 
 
   consola.start(`Authenticating with ${hostname}...`);
 
-  let user: BacklogUser;
+  let user;
   try {
-    user = await ofetch<BacklogUser>(`https://${hostname}/api/v2/users/myself`, {
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
+    const client = createClient({
+      baseUrl: `https://${hostname}/api/v2`,
       query: { apiKey },
     });
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
+    ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
   } catch {
     consola.error(
       `Authentication failed. Could not connect to ${hostname} with the provided API key.`,
@@ -118,6 +118,7 @@ async function loginWithApiKey(hostname: string, args: { "with-token"?: boolean 
   }
 
   saveSpace(hostname, { method: "api-key", apiKey });
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
   consola.success(`Logged in to ${hostname} as ${user.name} (${user.userId})`);
 }
 
@@ -178,11 +179,15 @@ async function loginWithOAuth(
     return process.exit(1);
   }
 
-  let user: BacklogUser;
+  let user;
   try {
-    user = await ofetch<BacklogUser>(`https://${hostname}/api/v2/users/myself`, {
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
+    const client = createClient({
+      baseUrl: `https://${hostname}/api/v2`,
       headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
     });
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call, typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
+    ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
   } catch {
     consola.error("Authentication verification failed.");
     return process.exit(1);
@@ -195,6 +200,7 @@ async function loginWithOAuth(
     clientId,
     clientSecret,
   });
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-member-access -- oxlint cannot resolve generated client types across workspace packages
   consola.success(`Logged in to ${hostname} as ${user.name} (${user.userId})`);
 }
 
