@@ -1,4 +1,9 @@
-import { exchangeAuthorizationCode, startCallbackServer } from "@repo/backlog-utils";
+import {
+  addApiKeyAuth,
+  addBearerAuth,
+  exchangeAuthorizationCode,
+  startCallbackServer,
+} from "@repo/backlog-utils";
 import { promptRequired } from "@repo/cli-utils";
 import { addSpace, findSpace, loadConfig, updateSpaceAuth, writeConfig } from "@repo/config";
 import { createClient } from "@repo/openapi-client/client";
@@ -8,7 +13,9 @@ import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@repo/openapi-client/client", () => ({
-  createClient: vi.fn(() => ({})),
+  createClient: vi.fn(() => ({
+    interceptors: { request: { use: vi.fn() } },
+  })),
 }));
 
 vi.mock("@repo/openapi-client", () => ({
@@ -16,6 +23,8 @@ vi.mock("@repo/openapi-client", () => ({
 }));
 
 vi.mock("@repo/backlog-utils", () => ({
+  addApiKeyAuth: vi.fn(),
+  addBearerAuth: vi.fn(),
   exchangeAuthorizationCode: vi.fn(),
   startCallbackServer: vi.fn(),
   openUrl: vi.fn(),
@@ -59,8 +68,11 @@ describe("auth login", () => {
 
       expect(createClient).toHaveBeenCalledWith({
         baseUrl: "https://example.backlog.com/api/v2",
-        auth: expect.any(Function),
       });
+      expect(addApiKeyAuth).toHaveBeenCalledWith(
+        vi.mocked(createClient).mock.results[0].value,
+        "test-api-key",
+      );
       expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
       expect(addSpace).toHaveBeenCalledWith({
         host: "example.backlog.com",
@@ -207,8 +219,11 @@ describe("auth login", () => {
       });
       expect(createClient).toHaveBeenCalledWith({
         baseUrl: "https://example.backlog.com/api/v2",
-        headers: { Authorization: "Bearer new-access-token" },
       });
+      expect(addBearerAuth).toHaveBeenCalledWith(
+        vi.mocked(createClient).mock.results[0].value,
+        "new-access-token",
+      );
       expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
       expect(addSpace).toHaveBeenCalledWith({
         host: "example.backlog.com",

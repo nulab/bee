@@ -1,3 +1,4 @@
+import { addApiKeyAuth, addBearerAuth } from "@repo/backlog-utils";
 import { createClient } from "@repo/openapi-client/client";
 import { usersGetMyself } from "@repo/openapi-client";
 import type { User } from "@repo/openapi-client";
@@ -70,14 +71,12 @@ const status = withUsage(
 
         let user: User | null = null;
         try {
-          const clientOptions =
-            space.auth.method === "api-key"
-              ? { query: { apiKey: space.auth.apiKey } }
-              : { headers: { Authorization: `Bearer ${space.auth.accessToken}` } };
-          const client = createClient({
-            baseUrl: `https://${space.host}/api/v2`,
-            ...clientOptions,
-          });
+          const client = createClient({ baseUrl: `https://${space.host}/api/v2` });
+          if (space.auth.method === "api-key") {
+            addApiKeyAuth(client, space.auth.apiKey);
+          } else {
+            addBearerAuth(client, space.auth.accessToken);
+          }
           ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
         } catch (error) {
           consola.debug("Token verification failed:", error);

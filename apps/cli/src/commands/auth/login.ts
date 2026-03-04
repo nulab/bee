@@ -1,4 +1,10 @@
-import { exchangeAuthorizationCode, openUrl, startCallbackServer } from "@repo/backlog-utils";
+import {
+  addApiKeyAuth,
+  addBearerAuth,
+  exchangeAuthorizationCode,
+  openUrl,
+  startCallbackServer,
+} from "@repo/backlog-utils";
 import { promptRequired, readStdin } from "@repo/cli-utils";
 import { addSpace, findSpace, loadConfig, updateSpaceAuth, writeConfig } from "@repo/config";
 import type { RcAuth } from "@repo/config";
@@ -106,8 +112,8 @@ const loginWithApiKey = async (
   try {
     const client = createClient({
       baseUrl: `https://${hostname}/api/v2`,
-      auth: (auth) => (auth.type === "apiKey" ? apiKey : undefined),
     });
+    addApiKeyAuth(client, apiKey);
     ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
   } catch {
     consola.error(
@@ -181,8 +187,8 @@ const loginWithOAuth = async (
   try {
     const client = createClient({
       baseUrl: `https://${hostname}/api/v2`,
-      headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
     });
+    addBearerAuth(client, tokenResponse.access_token);
     ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
   } catch {
     consola.error("Authentication verification failed.");

@@ -1,11 +1,19 @@
+import { addApiKeyAuth, addBearerAuth } from "@repo/backlog-utils";
 import { createClient } from "@repo/openapi-client/client";
 import { usersGetMyself } from "@repo/openapi-client";
 import { loadConfig } from "@repo/config";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("@repo/backlog-utils", () => ({
+  addApiKeyAuth: vi.fn(),
+  addBearerAuth: vi.fn(),
+}));
+
 vi.mock("@repo/openapi-client/client", () => ({
-  createClient: vi.fn(() => ({})),
+  createClient: vi.fn(() => ({
+    interceptors: { request: { use: vi.fn() } },
+  })),
 }));
 
 vi.mock("@repo/openapi-client", () => ({
@@ -37,8 +45,11 @@ describe("auth status", () => {
 
     expect(createClient).toHaveBeenCalledWith({
       baseUrl: "https://example.backlog.com/api/v2",
-      query: { apiKey: "key" },
     });
+    expect(addApiKeyAuth).toHaveBeenCalledWith(
+      vi.mocked(createClient).mock.results[0].value,
+      "key",
+    );
     expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
     expect(consola.log).toHaveBeenCalledWith("  example.backlog.com (default)");
     expect(consola.log).toHaveBeenCalledWith("    Method: api-key");
@@ -154,8 +165,11 @@ describe("auth status", () => {
 
     expect(createClient).toHaveBeenCalledWith({
       baseUrl: "https://example.backlog.com/api/v2",
-      headers: { Authorization: "Bearer oauth-access-token" },
     });
+    expect(addBearerAuth).toHaveBeenCalledWith(
+      vi.mocked(createClient).mock.results[0].value,
+      "oauth-access-token",
+    );
     expect(consola.log).toHaveBeenCalledWith("    Method: oauth");
     expect(consola.log).toHaveBeenCalledWith("    User:   OAuth User (oauthuser)");
   });

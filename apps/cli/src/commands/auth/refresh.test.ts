@@ -1,4 +1,4 @@
-import { refreshAccessToken } from "@repo/backlog-utils";
+import { addBearerAuth, refreshAccessToken } from "@repo/backlog-utils";
 import { createClient } from "@repo/openapi-client/client";
 import { usersGetMyself } from "@repo/openapi-client";
 import { resolveSpace, updateSpaceAuth } from "@repo/config";
@@ -7,7 +7,9 @@ import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@repo/openapi-client/client", () => ({
-  createClient: vi.fn(() => ({})),
+  createClient: vi.fn(() => ({
+    interceptors: { request: { use: vi.fn() } },
+  })),
 }));
 
 vi.mock("@repo/openapi-client", () => ({
@@ -15,6 +17,7 @@ vi.mock("@repo/openapi-client", () => ({
 }));
 
 vi.mock("@repo/backlog-utils", () => ({
+  addBearerAuth: vi.fn(),
   refreshAccessToken: vi.fn(),
 }));
 
@@ -111,8 +114,11 @@ describe("auth refresh", () => {
     });
     expect(createClient).toHaveBeenCalledWith({
       baseUrl: "https://example.backlog.com/api/v2",
-      headers: { Authorization: "Bearer new-access" },
     });
+    expect(addBearerAuth).toHaveBeenCalledWith(
+      vi.mocked(createClient).mock.results[0].value,
+      "new-access",
+    );
     expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
     expect(updateSpaceAuth).toHaveBeenCalledWith("example.backlog.com", {
       method: "oauth",
