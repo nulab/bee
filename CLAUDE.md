@@ -76,6 +76,10 @@ packages/tsconfigs — Shared TypeScript base config
 ## Test Conventions
 
 - **Test titles**: Always in English. Use `verb + condition` pattern (e.g., `"shows error when X"`, `"calls Y when Z"`).
+- **Mock at package boundaries** — mock entire packages (`@repo/api`, `@repo/config`, etc.), not internal functions. Each package is independently tested; CLI command tests trust the package interface.
+- **CLI command tests verify side-effect composition** — assert which functions were called, in what order, and with what arguments. Actual network I/O and file I/O belong in package-level or E2E tests.
+- **Cover both happy path and error paths** — each command should have tests for success, auth/config failures, and edge cases (e.g., empty state, already-existing resources).
+- **Extract shared mock setup into helper functions** — when multiple tests in the same `describe` need the same mock state, use a named setup function (e.g., `setupOAuthMocks()`).
 
 ## Code Conventions (enforced by oxlint)
 
