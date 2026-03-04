@@ -5,6 +5,10 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "bee",
+      logo: {
+        src: './src/assets/bee-logo.svg',
+        replacesTitle: true,
+      },
       social: [
         {
           icon: "github",
