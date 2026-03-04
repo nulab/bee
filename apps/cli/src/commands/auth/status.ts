@@ -16,12 +16,12 @@ The active (default) space is indicated so you can see which space will be
 used when no --space flag is provided to other commands.`,
 
   examples: [
-    { description: "Display status for all spaces", command: "bl auth status" },
+    { description: "Display status for all spaces", command: "bee auth status" },
     {
       description: "Check a specific space",
-      command: "bl auth status -s xxx.backlog.com",
+      command: "bee auth status -s xxx.backlog.com",
     },
-    { description: "Show auth tokens in the output", command: "bl auth status --show-token" },
+    { description: "Show auth tokens in the output", command: "bee auth status --show-token" },
   ],
 
   annotations: {
@@ -58,7 +58,7 @@ const status = withUsage(
         if (filterSpace) {
           consola.info(`No authentication configured for ${filterSpace}.`);
         } else {
-          consola.info("No spaces are authenticated. Run `bl auth login` to get started.");
+          consola.info("No spaces are authenticated. Run `bee auth login` to get started.");
         }
         return;
       }

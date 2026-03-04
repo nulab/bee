@@ -14,13 +14,13 @@ without the --space flag.
 If multiple spaces are configured, you will be prompted to select one
 interactively. Use --space to switch directly without a prompt.
 
-For a list of configured spaces, see \`bl auth status\`.`,
+For a list of configured spaces, see \`bee auth status\`.`,
 
   examples: [
-    { description: "Select space via prompt", command: "bl auth switch" },
+    { description: "Select space via prompt", command: "bee auth switch" },
     {
       description: "Switch to a specific space",
-      command: "bl auth switch -s xxx.backlog.com",
+      command: "bee auth switch -s xxx.backlog.com",
     },
   ],
 
@@ -52,7 +52,7 @@ const switchSpace = withUsage(
 
       if (!hostname) {
         if (config.spaces.length === 0) {
-          consola.error("No spaces configured. Run `bl auth login` to add a space.");
+          consola.error("No spaces configured. Run `bee auth login` to add a space.");
           return process.exit(1);
         }
 

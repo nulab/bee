@@ -4,7 +4,7 @@ import pkg from "../package.json" with { type: "json" };
 
 const main = defineCommand({
   meta: {
-    name: "bl",
+    name: "bee",
     version: pkg.version,
     description: pkg.description,
   },

@@ -68,7 +68,7 @@ describe("auth status", () => {
     await status.run?.({ args: {} } as never);
 
     expect(consola.info).toHaveBeenCalledWith(
-      "No spaces are authenticated. Run `bl auth login` to get started.",
+      "No spaces are authenticated. Run `bee auth login` to get started.",
     );
   });
 

@@ -55,7 +55,7 @@ describe("auth token", () => {
       token.run?.({ args: {} } as never);
 
       expect(consola.error).toHaveBeenCalledWith(
-        "No space configured. Run `bl auth login` to authenticate.",
+        "No space configured. Run `bee auth login` to authenticate.",
       );
       expect(exitSpy).toHaveBeenCalledWith(1);
     } finally {

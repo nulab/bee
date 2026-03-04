@@ -24,12 +24,12 @@ For OAuth authentication, use --method oauth. You will need to provide
 an OAuth Client ID and Client Secret, then authorize in the browser.`,
 
   examples: [
-    { description: "Start interactive setup", command: "bl auth login" },
+    { description: "Start interactive setup", command: "bee auth login" },
     {
       description: "Login with API key from stdin",
-      command: "echo 'your-api-key' | BACKLOG_SPACE=xxx.backlog.com bl auth login --with-token",
+      command: "echo 'your-api-key' | BACKLOG_SPACE=xxx.backlog.com bee auth login --with-token",
     },
-    { description: "Login with OAuth", command: "bl auth login -m oauth" },
+    { description: "Login with OAuth", command: "bee auth login -m oauth" },
   ],
 
   annotations: {

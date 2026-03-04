@@ -3,7 +3,7 @@ import { defineCommand } from "citty";
 export const auth = defineCommand({
   meta: {
     name: "auth",
-    description: "Authenticate bl with Backlog",
+    description: "Authenticate bee with Backlog",
   },
   subCommands: {
     login: () => import("./login.js").then((m) => m.login),

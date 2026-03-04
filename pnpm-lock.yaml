@@ -56,6 +56,9 @@ importers:
       consola:
         specifier: ^3.4.2
         version: 3.4.2
+      is-unicode-supported:
+        specifier: ^2.1.0
+        version: 2.1.0
       ofetch:
         specifier: ^1.4.1
         version: 1.5.1

@@ -1,16 +1,16 @@
 ---
 title: Getting Started
-description: How to install and use Backlog CLI.
+description: How to install and use bee.
 ---
 
 ## Installation
 
 ```sh
-npm install -g backlog-cli
+npm install -g @nulab/bee
 ```
 
 ## Usage
 
 ```sh
-backlog --help
+bee --help
 ```
