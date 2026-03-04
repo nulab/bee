@@ -114,7 +114,7 @@ Datadog が成功している理由:
 
 | 項目 | 方針 |
 |------|------|
-| コマンド名 | `bee`（プライマリ）、`bl`（後方互換エイリアス） |
+| コマンド名 | `bee` のみ（未リリースのため後方互換エイリアス不要。Datadog pup も単一コマンド） |
 | パッケージ名 | `@nulab/bee` (description に "Backlog" を含む) |
 | 環境変数 | `BACKLOG_*` を維持（サービス接続情報のため） |
 | サブコマンド名 | 実用的な名前を維持（auth, issue, project 等） |
@@ -126,7 +126,7 @@ Datadog が成功している理由:
 
 ## 採用する場合の変更箇所
 
-1. `apps/cli/package.json` — `name` → `@nulab/bee`、`bin` → `{ "bee": ..., "bl": ... }`
+1. `apps/cli/package.json` — `name` → `@nulab/bee`、`bin` → `{ "bee": ... }`
 2. `apps/cli/src/index.ts` — `meta.name` → `"bee"`
 3. 全コマンドの `commandUsage` — 例示中の `bl` → `bee`
 4. 環境変数 — **変更なし**（`BACKLOG_*` を維持）
