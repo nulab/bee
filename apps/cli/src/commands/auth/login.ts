@@ -6,7 +6,7 @@ import {
   startCallbackServer,
 } from "@repo/backlog-utils";
 import { promptRequired, readStdin } from "@repo/cli-utils";
-import { addSpace, findSpace, loadConfig, updateSpaceAuth, writeConfig } from "@repo/config";
+import { updateConfig } from "@repo/config";
 import type { RcAuth } from "@repo/config";
 import { createClient } from "@repo/openapi-client/client";
 import { usersGetMyself } from "@repo/openapi-client";
@@ -206,18 +206,15 @@ const loginWithOAuth = async (
 };
 
 const saveSpace = (hostname: string, auth: RcAuth): void => {
-  const config = loadConfig();
-  const existing = findSpace(config.spaces, hostname);
-
-  if (existing) {
-    updateSpaceAuth(hostname, auth);
-  } else {
-    addSpace({ host: hostname, auth });
-  }
-
-  if (!config.defaultSpace) {
-    writeConfig({ ...config, defaultSpace: hostname });
-  }
+  updateConfig((config) => {
+    const index = config.spaces.findIndex((s) => s.host === hostname);
+    const spaces =
+      index === -1
+        ? [...config.spaces, { host: hostname, auth }]
+        : config.spaces.with(index, { ...config.spaces[index], auth });
+    const defaultSpace = config.defaultSpace ?? hostname;
+    return { ...config, spaces, defaultSpace };
+  });
 };
 
 export { commandUsage, login };

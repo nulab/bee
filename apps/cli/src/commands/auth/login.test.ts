@@ -5,7 +5,7 @@ import {
   startCallbackServer,
 } from "@repo/backlog-utils";
 import { promptRequired } from "@repo/cli-utils";
-import { addSpace, findSpace, loadConfig, updateSpaceAuth, writeConfig } from "@repo/config";
+import { updateConfig } from "@repo/config";
 import { createClient } from "@repo/openapi-client/client";
 import { usersGetMyself } from "@repo/openapi-client";
 import { spyOnProcessExit } from "@repo/test-utils";
@@ -36,11 +36,7 @@ vi.mock("@repo/cli-utils", () => ({
 }));
 
 vi.mock("@repo/config", () => ({
-  addSpace: vi.fn(),
-  findSpace: vi.fn(),
-  loadConfig: vi.fn(),
-  updateSpaceAuth: vi.fn(),
-  writeConfig: vi.fn(),
+  updateConfig: vi.fn(),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -54,12 +50,9 @@ describe("auth login", () => {
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("test-api-key");
-      vi.mocked(findSpace).mockReturnValue(null);
-      vi.mocked(loadConfig).mockReturnValue({
-        spaces: [],
-        defaultSpace: undefined,
-        aliases: {},
-      });
+      vi.mocked(updateConfig).mockImplementation((updater) =>
+        updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
+      );
 
       const { login } = await import("./login");
       await login.run?.({
@@ -74,16 +67,11 @@ describe("auth login", () => {
         "test-api-key",
       );
       expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
-      expect(addSpace).toHaveBeenCalledWith({
-        host: "example.backlog.com",
-        auth: { method: "api-key", apiKey: "test-api-key" },
-      });
-      expect(updateSpaceAuth).not.toHaveBeenCalled();
-      expect(writeConfig).toHaveBeenCalledWith(
-        expect.objectContaining({
-          defaultSpace: "example.backlog.com",
-        }),
-      );
+      const result = vi.mocked(updateConfig).mock.results[0]?.value;
+      expect(result.spaces).toEqual([
+        { host: "example.backlog.com", auth: { method: "api-key", apiKey: "test-api-key" } },
+      ]);
+      expect(result.defaultSpace).toBe("example.backlog.com");
       expect(consola.success).toHaveBeenCalledWith(
         "Logged in to example.backlog.com as Test User (testuser)",
       );
@@ -96,32 +84,29 @@ describe("auth login", () => {
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("new-api-key");
-      vi.mocked(findSpace).mockReturnValue({
-        host: "example.backlog.com",
-        auth: { method: "api-key" as const, apiKey: "old-api-key" },
-      });
-      vi.mocked(loadConfig).mockReturnValue({
-        spaces: [
-          {
-            host: "example.backlog.com",
-            auth: { method: "api-key" as const, apiKey: "old-api-key" },
-          },
-        ],
-        defaultSpace: "example.backlog.com",
-        aliases: {},
-      });
+      vi.mocked(updateConfig).mockImplementation((updater) =>
+        updater({
+          spaces: [
+            {
+              host: "example.backlog.com",
+              auth: { method: "api-key" as const, apiKey: "old-api-key" },
+            },
+          ],
+          defaultSpace: "example.backlog.com",
+          aliases: {},
+        }),
+      );
 
       const { login } = await import("./login");
       await login.run?.({
         args: { space: "example.backlog.com", method: "api-key" },
       } as never);
 
-      expect(updateSpaceAuth).toHaveBeenCalledWith("example.backlog.com", {
-        method: "api-key",
-        apiKey: "new-api-key",
-      });
-      expect(addSpace).not.toHaveBeenCalled();
-      expect(writeConfig).not.toHaveBeenCalled();
+      const result = vi.mocked(updateConfig).mock.results[0]?.value;
+      expect(result.spaces).toEqual([
+        { host: "example.backlog.com", auth: { method: "api-key", apiKey: "new-api-key" } },
+      ]);
+      expect(result.defaultSpace).toBe("example.backlog.com");
       expect(consola.success).toHaveBeenCalledWith(
         "Logged in to example.backlog.com as Test User (testuser)",
       );
@@ -143,8 +128,7 @@ describe("auth login", () => {
         "Authentication failed. Could not connect to example.backlog.com with the provided API key.",
       );
       expect(exitSpy).toHaveBeenCalledWith(1);
-      expect(addSpace).not.toHaveBeenCalled();
-      expect(updateSpaceAuth).not.toHaveBeenCalled();
+      expect(updateConfig).not.toHaveBeenCalled();
       exitSpy.mockRestore();
     });
   });
@@ -169,12 +153,9 @@ describe("auth login", () => {
       vi.mocked(usersGetMyself).mockResolvedValue({
         data: { name: "OAuth User", userId: "oauthuser" },
       } as never);
-      vi.mocked(findSpace).mockReturnValue(null);
-      vi.mocked(loadConfig).mockReturnValue({
-        spaces: [],
-        defaultSpace: undefined,
-        aliases: {},
-      });
+      vi.mocked(updateConfig).mockImplementation((updater) =>
+        updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
+      );
       vi.mocked(exchangeAuthorizationCode).mockResolvedValue({
         access_token: "new-access-token",
         token_type: "Bearer",
@@ -225,16 +206,20 @@ describe("auth login", () => {
         "new-access-token",
       );
       expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
-      expect(addSpace).toHaveBeenCalledWith({
-        host: "example.backlog.com",
-        auth: {
-          method: "oauth",
-          accessToken: "new-access-token",
-          refreshToken: "new-refresh-token",
-          clientId: "my-client-id",
-          clientSecret: "my-client-secret",
+      const result = vi.mocked(updateConfig).mock.results[0]?.value;
+      expect(result.spaces).toEqual([
+        {
+          host: "example.backlog.com",
+          auth: {
+            method: "oauth",
+            accessToken: "new-access-token",
+            refreshToken: "new-refresh-token",
+            clientId: "my-client-id",
+            clientSecret: "my-client-secret",
+          },
         },
-      });
+      ]);
+      expect(result.defaultSpace).toBe("example.backlog.com");
       expect(consola.success).toHaveBeenCalledWith(
         "Logged in to example.backlog.com as OAuth User (oauthuser)",
       );
@@ -325,32 +310,24 @@ describe("auth login", () => {
 
     it("updates OAuth credentials for existing space", async () => {
       setupOAuthMocks();
-      vi.mocked(findSpace).mockReturnValue({
-        host: "example.backlog.com",
-        auth: {
-          method: "oauth" as const,
-          accessToken: "old-access",
-          refreshToken: "old-refresh",
-          clientId: "old-client-id",
-          clientSecret: "old-client-secret",
-        },
-      });
-      vi.mocked(loadConfig).mockReturnValue({
-        spaces: [
-          {
-            host: "example.backlog.com",
-            auth: {
-              method: "oauth" as const,
-              accessToken: "old-access",
-              refreshToken: "old-refresh",
-              clientId: "old-client-id",
-              clientSecret: "old-client-secret",
+      vi.mocked(updateConfig).mockImplementation((updater) =>
+        updater({
+          spaces: [
+            {
+              host: "example.backlog.com",
+              auth: {
+                method: "oauth" as const,
+                accessToken: "old-access",
+                refreshToken: "old-refresh",
+                clientId: "old-client-id",
+                clientSecret: "old-client-secret",
+              },
             },
-          },
-        ],
-        defaultSpace: "example.backlog.com",
-        aliases: {},
-      });
+          ],
+          defaultSpace: "example.backlog.com",
+          aliases: {},
+        }),
+      );
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("my-client-id")
@@ -366,15 +343,20 @@ describe("auth login", () => {
         },
       } as never);
 
-      expect(updateSpaceAuth).toHaveBeenCalledWith("example.backlog.com", {
-        method: "oauth",
-        accessToken: "new-access-token",
-        refreshToken: "new-refresh-token",
-        clientId: "my-client-id",
-        clientSecret: "my-client-secret",
-      });
-      expect(addSpace).not.toHaveBeenCalled();
-      expect(writeConfig).not.toHaveBeenCalled();
+      const result = vi.mocked(updateConfig).mock.results[0]?.value;
+      expect(result.spaces).toEqual([
+        {
+          host: "example.backlog.com",
+          auth: {
+            method: "oauth",
+            accessToken: "new-access-token",
+            refreshToken: "new-refresh-token",
+            clientId: "my-client-id",
+            clientSecret: "my-client-secret",
+          },
+        },
+      ]);
+      expect(result.defaultSpace).toBe("example.backlog.com");
     });
   });
 });

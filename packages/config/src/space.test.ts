@@ -2,14 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("./config", () => ({
   loadConfig: vi.fn(),
-  writeConfig: vi.fn(),
+  updateConfig: vi.fn(),
 }));
 
-const { loadConfig, writeConfig } = await import("./config");
+const { loadConfig, updateConfig } = await import("./config");
 const { addSpace, findSpace, removeSpace, resolveSpace, updateSpaceAuth } = await import("./space");
 
 const mockLoadConfig = vi.mocked(loadConfig);
-const mockWriteConfig = vi.mocked(writeConfig);
+const mockUpdateConfig = vi.mocked(updateConfig);
 
 const makeSpace = (host: string) => ({
   host,
@@ -22,23 +22,29 @@ const makeConfig = (spaces: ReturnType<typeof makeSpace>[], defaultSpace?: strin
   aliases: {} as Record<string, string>,
 });
 
+/**
+ * Sets up mockUpdateConfig to call the updater with the given config
+ * and returns the result for assertion.
+ */
+const setupUpdateConfig = (config: ReturnType<typeof makeConfig>) => {
+  mockUpdateConfig.mockImplementation((updater) => updater(config));
+};
+
 describe("addSpace", () => {
   it("adds a new space to config", () => {
-    mockLoadConfig.mockReturnValue(makeConfig([]));
+    setupUpdateConfig(makeConfig([]));
 
     const newSpace = makeSpace("new.backlog.com");
     addSpace(newSpace);
 
-    expect(mockWriteConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        spaces: [newSpace],
-      }),
-    );
+    expect(mockUpdateConfig).toHaveBeenCalled();
+    const result = mockUpdateConfig.mock.results[0]?.value;
+    expect(result.spaces).toEqual([newSpace]);
   });
 
   it("throws if space with same host already exists", () => {
     const existing = makeSpace("existing.backlog.com");
-    mockLoadConfig.mockReturnValue(makeConfig([existing]));
+    setupUpdateConfig(makeConfig([existing]));
 
     expect(() => addSpace(makeSpace("existing.backlog.com"))).toThrow(
       'Space with host "existing.backlog.com" already exists',
@@ -50,46 +56,37 @@ describe("removeSpace", () => {
   it("removes an existing space", () => {
     const space1 = makeSpace("one.backlog.com");
     const space2 = makeSpace("two.backlog.com");
-    mockLoadConfig.mockReturnValue(makeConfig([space1, space2]));
+    setupUpdateConfig(makeConfig([space1, space2]));
 
     removeSpace("one.backlog.com");
 
-    expect(mockWriteConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        spaces: [space2],
-      }),
-    );
+    const result = mockUpdateConfig.mock.results[0]?.value;
+    expect(result.spaces).toEqual([space2]);
   });
 
   it("clears defaultSpace when removing the default space", () => {
     const space = makeSpace("default.backlog.com");
-    mockLoadConfig.mockReturnValue(makeConfig([space], "default.backlog.com"));
+    setupUpdateConfig(makeConfig([space], "default.backlog.com"));
 
     removeSpace("default.backlog.com");
 
-    expect(mockWriteConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        defaultSpace: undefined,
-      }),
-    );
+    const result = mockUpdateConfig.mock.results[0]?.value;
+    expect(result.defaultSpace).toBeUndefined();
   });
 
   it("keeps defaultSpace when removing a non-default space", () => {
     const space1 = makeSpace("one.backlog.com");
     const space2 = makeSpace("two.backlog.com");
-    mockLoadConfig.mockReturnValue(makeConfig([space1, space2], "one.backlog.com"));
+    setupUpdateConfig(makeConfig([space1, space2], "one.backlog.com"));
 
     removeSpace("two.backlog.com");
 
-    expect(mockWriteConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        defaultSpace: "one.backlog.com",
-      }),
-    );
+    const result = mockUpdateConfig.mock.results[0]?.value;
+    expect(result.defaultSpace).toBe("one.backlog.com");
   });
 
   it("throws if space not found", () => {
-    mockLoadConfig.mockReturnValue(makeConfig([]));
+    setupUpdateConfig(makeConfig([]));
 
     expect(() => removeSpace("missing.backlog.com")).toThrow(
       'Space with host "missing.backlog.com" not found',
@@ -100,7 +97,7 @@ describe("removeSpace", () => {
 describe("updateSpaceAuth", () => {
   it("updates auth for an existing space", () => {
     const space = makeSpace("target.backlog.com");
-    mockLoadConfig.mockReturnValue(makeConfig([space]));
+    setupUpdateConfig(makeConfig([space]));
 
     const newAuth = {
       method: "oauth" as const,
@@ -110,15 +107,12 @@ describe("updateSpaceAuth", () => {
 
     updateSpaceAuth("target.backlog.com", newAuth);
 
-    expect(mockWriteConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        spaces: [{ host: "target.backlog.com", auth: newAuth }],
-      }),
-    );
+    const result = mockUpdateConfig.mock.results[0]?.value;
+    expect(result.spaces).toEqual([{ host: "target.backlog.com", auth: newAuth }]);
   });
 
   it("throws if space not found", () => {
-    mockLoadConfig.mockReturnValue(makeConfig([]));
+    setupUpdateConfig(makeConfig([]));
 
     expect(() =>
       updateSpaceAuth("missing.backlog.com", {
