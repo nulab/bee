@@ -89,7 +89,7 @@
     // Disallow awaiting a value that is not a Thenable
     "typescript/await-thenable": "error",
     // Require Promise-like statements to be handled appropriately
-    "typescript/return-await": "warn",
+    "typescript/return-await": "allow",
     // Disallow type assertions that do not change the type of an expression
     "typescript/no-unnecessary-type-assertion": "warn",
     // Disallow conditionals where the type is always truthy or always falsy

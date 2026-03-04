@@ -198,10 +198,9 @@ const resolveValue = async <T>(
   val: T | (() => T) | (() => Promise<T>) | Promise<T>,
 ): Promise<Awaited<T>> => {
   if (typeof val === "function") {
-    // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion, typescript-eslint/return-await -- generic function cast required, await needed for Awaited<T> inference
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- generic function cast required
     return await (val as () => T | Promise<T>)();
   }
-  // oxlint-disable-next-line typescript-eslint/return-await -- await needed for Awaited<T> inference
   return await val;
 };
 
