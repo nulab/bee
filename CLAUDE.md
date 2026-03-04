@@ -57,7 +57,77 @@ packages/api-spec  — TypeSpec definitions for Backlog API v2
 packages/tsconfigs — Shared TypeScript base config
 ```
 
-`@nulab/backlog-cli` uses citty's `defineCommand` / `runMain` with subcommand registration.
+`@repo/backlog-utils` exposes `getClient(config)` which returns an ofetch `$Fetch` instance preconfigured with Backlog API v2 base URL, auth, and rate-limit error handling.
+
+`@nulab/backlog-cli` uses citty's `defineCommand` / `runMain` with subcommand registration and a custom help system (see below).
+
+## Command Help System
+
+CLI commands use a **single-source help system** inspired by gh CLI. Each command defines a `CommandUsage` object that drives both `--help` output and documentation generation from the same data.
+
+### How it works
+
+1. Each command file exports `commandUsage: CommandUsage` alongside the command definition
+2. The command is wrapped with `withUsage(defineCommand({ ... }), commandUsage)` to attach the usage data
+3. `runMain` receives `showCommandUsage` as a custom `showUsage` handler, which renders gh-cli style help for commands with attached usage and falls back to citty's default for others
+
+### Adding help to a command
+
+```ts
+import { defineCommand } from "citty";
+import type { CommandUsage } from "./lib/command-usage";
+import { withUsage } from "./lib/command-usage";
+
+export const commandUsage: CommandUsage = {
+  long: "Detailed multi-line description of the command.",
+  examples: [{ description: "Do something", command: "bl foo bar" }],
+  annotations: {
+    environment: [["ENV_VAR_NAME", "Description of what it does"]],
+  },
+};
+
+export const myCommand = withUsage(
+  defineCommand({
+    meta: { name: "bar", description: "Short one-liner" },
+    args: {
+      /* ... */
+    },
+    async run({ args }) {
+      /* ... */
+    },
+  }),
+  commandUsage,
+);
+```
+
+### Writing help content
+
+- **Every new command must have `commandUsage`** — all commands export `commandUsage: CommandUsage` and wrap with `withUsage`.
+- **Reference `gh <command> --help`** for tone and structure — run the corresponding gh CLI help (e.g., `gh auth login --help`) and adapt the content to Backlog's context.
+- **`long`**: Multi-paragraph description. First line is a standalone summary. Subsequent paragraphs explain behavior, caveats, and related commands.
+- **`examples`**: 2–4 practical examples covering common use cases (interactive, flags, piping).
+- **`annotations.environment`**: `[string, string][]` — list relevant environment variables as `[key, description]` pairs. Columns are auto-aligned.
+
+### Writing argument descriptions
+
+Follow gh CLI conventions for `args` description strings:
+
+- **Choices use `{x|y}` notation** — write `{api-key|oauth}`, not `api-key or oauth`.
+- **`e.g.,` flows naturally in the sentence** — write `The hostname of the Backlog space. e.g., xxx.backlog.com`, not `Space hostname (e.g., xxx.backlog.com)`.
+- **Same-meaning arguments share the same description across commands** — if `--space` means the same thing in `auth login` and `auth logout`, use the identical description string. Do not vary wording per command context.
+
+### Key files
+
+- `apps/cli/src/lib/command-usage.ts` — `CommandUsage` type, `withUsage`, `renderCommandUsage`, `showCommandUsage`
+- `apps/cli/src/index.ts` — wires `showCommandUsage` into `runMain`
+
+## Test Conventions
+
+- **Test titles**: Always in English. Use `verb + condition` pattern (e.g., `"shows error when X"`, `"calls Y when Z"`).
+- **Mock at package boundaries** — mock entire packages (`@repo/backlog-utils`, `@repo/config`, etc.), not internal functions. Each package is independently tested; CLI command tests trust the package interface.
+- **CLI command tests verify side-effect composition** — assert which functions were called, in what order, and with what arguments. Actual network I/O and file I/O belong in package-level or E2E tests.
+- **Cover both happy path and error paths** — each command should have tests for success, auth/config failures, and edge cases (e.g., empty state, already-existing resources).
+- **Extract shared mock setup into helper functions** — when multiple tests in the same `describe` need the same mock state, use a named setup function (e.g., `setupOAuthMocks()`).
 
 ## Code Conventions (enforced by oxlint)
 

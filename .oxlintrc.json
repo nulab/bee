@@ -81,24 +81,21 @@
     // obj.prop instead of obj["prop"]
     "typescript/dot-notation": "warn",
 
-    // ── TypeScript: Type-aware rules (require --type-aware flag) ──
-    // Disallow floating (unhandled) Promises
-    "typescript/no-floating-promises": "error",
-    // Disallow Promises in places not designed to handle them
-    "typescript/no-misused-promises": "error",
-    // Disallow awaiting a value that is not a Thenable
-    "typescript/await-thenable": "error",
-    // Require Promise-like statements to be handled appropriately
-    "typescript/return-await": "warn",
-    // Disallow type assertions that do not change the type of an expression
-    "typescript/no-unnecessary-type-assertion": "warn",
-    // Disallow conditionals where the type is always truthy or always falsy
-    "typescript/no-unnecessary-condition": "warn",
-    "typescript/no-unsafe-argument": "warn",
-    "typescript/no-unsafe-assignment": "warn",
-    "typescript/no-unsafe-call": "warn",
-    "typescript/no-unsafe-member-access": "warn",
-    "typescript/no-unsafe-return": "warn",
+    // ── TypeScript: Type-aware rules ──
+    // Disabled: oxlint's type checker cannot reliably resolve types across
+    // workspace packages, causing widespread false positives. Type safety is
+    // covered by `tsc --noEmit` (typecheck).
+    "typescript/no-floating-promises": "off",
+    "typescript/no-misused-promises": "off",
+    "typescript/await-thenable": "off",
+    "typescript/return-await": "off",
+    "typescript/no-unnecessary-type-assertion": "off",
+    "typescript/no-unnecessary-condition": "off",
+    "typescript/no-unsafe-argument": "off",
+    "typescript/no-unsafe-assignment": "off",
+    "typescript/no-unsafe-call": "off",
+    "typescript/no-unsafe-member-access": "off",
+    "typescript/no-unsafe-return": "off",
 
     // ── Unicorn: Style overrides ────────────────────────────────
     // Don't ban null (external API compatibility)
@@ -159,7 +156,12 @@
   "overrides": [
     {
       // Tool config files require default exports
-      "files": ["**/astro.config.*", "**/build.config.*", "**/vitest.config.*"],
+      "files": [
+        "**/astro.config.*",
+        "**/build.config.*",
+        "**/vitest.config.*",
+        "**/openapi-ts.config.*"
+      ],
       "rules": {
         "import/no-default-export": "off",
         "import/no-anonymous-default-export": "off"
@@ -181,6 +183,14 @@
       "rules": {
         "typescript/unbound-method": "off",
         "typescript/no-unsafe-type-assertion": "off"
+      }
+    },
+    {
+      // Auth commands consume @repo/openapi-client whose generated types cannot be
+      // resolved by oxlint's type checker across workspace packages.
+      "files": ["apps/cli/src/commands/**"],
+      "rules": {
+        "typescript/no-redundant-type-constituents": "off"
       }
     }
   ],

@@ -1,0 +1,375 @@
+import {
+  addApiKeyAuth,
+  addBearerAuth,
+  exchangeAuthorizationCode,
+  startCallbackServer,
+} from "@repo/backlog-utils";
+import { promptRequired } from "@repo/cli-utils";
+import { updateConfig } from "@repo/config";
+import { createClient } from "@repo/openapi-client/client";
+import { usersGetMyself } from "@repo/openapi-client";
+import { spyOnProcessExit } from "@repo/test-utils";
+import consola from "consola";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@repo/openapi-client/client", () => ({
+  createClient: vi.fn(() => ({
+    interceptors: { request: { use: vi.fn() } },
+    buildUrl: vi.fn(
+      (opts: { url: string; query?: Record<string, unknown> }) =>
+        `https://example.backlog.com${opts.url}?mocked=true`,
+    ),
+  })),
+}));
+
+vi.mock("@repo/openapi-client", () => ({
+  usersGetMyself: vi.fn(),
+}));
+
+vi.mock("@repo/backlog-utils", () => ({
+  addApiKeyAuth: vi.fn(),
+  addBearerAuth: vi.fn(),
+  exchangeAuthorizationCode: vi.fn(),
+  startCallbackServer: vi.fn(),
+  openUrl: vi.fn(),
+}));
+
+vi.mock("@repo/cli-utils", () => ({
+  promptRequired: vi.fn(),
+  readStdin: vi.fn(),
+}));
+
+vi.mock("@repo/config", () => ({
+  updateConfig: vi.fn(),
+}));
+
+vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
+
+describe("auth login", () => {
+  describe("api-key", () => {
+    it("authenticates new space with API key", async () => {
+      vi.mocked(usersGetMyself).mockResolvedValue({
+        data: { name: "Test User", userId: "testuser" },
+      } as never);
+      vi.mocked(promptRequired)
+        .mockResolvedValueOnce("example.backlog.com")
+        .mockResolvedValueOnce("test-api-key");
+      vi.mocked(updateConfig).mockImplementation((updater) =>
+        updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
+      );
+
+      const { login } = await import("./login");
+      await login.run?.({
+        args: { method: "api-key" },
+      } as never);
+
+      expect(createClient).toHaveBeenCalledWith({
+        baseUrl: "https://example.backlog.com/api/v2",
+      });
+      expect(addApiKeyAuth).toHaveBeenCalledWith(
+        vi.mocked(createClient).mock.results[0].value,
+        "test-api-key",
+      );
+      expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
+      const result = vi.mocked(updateConfig).mock.results[0]?.value;
+      expect(result.spaces).toEqual([
+        { host: "example.backlog.com", auth: { method: "api-key", apiKey: "test-api-key" } },
+      ]);
+      expect(result.defaultSpace).toBe("example.backlog.com");
+      expect(consola.success).toHaveBeenCalledWith(
+        "Logged in to example.backlog.com as Test User (testuser)",
+      );
+    });
+
+    it("updates credentials for existing space", async () => {
+      vi.mocked(usersGetMyself).mockResolvedValue({
+        data: { name: "Test User", userId: "testuser" },
+      } as never);
+      vi.mocked(promptRequired)
+        .mockResolvedValueOnce("example.backlog.com")
+        .mockResolvedValueOnce("new-api-key");
+      vi.mocked(updateConfig).mockImplementation((updater) =>
+        updater({
+          spaces: [
+            {
+              host: "example.backlog.com",
+              auth: { method: "api-key" as const, apiKey: "old-api-key" },
+            },
+          ],
+          defaultSpace: "example.backlog.com",
+          aliases: {},
+        }),
+      );
+
+      const { login } = await import("./login");
+      await login.run?.({
+        args: { method: "api-key" },
+      } as never);
+
+      const result = vi.mocked(updateConfig).mock.results[0]?.value;
+      expect(result.spaces).toEqual([
+        { host: "example.backlog.com", auth: { method: "api-key", apiKey: "new-api-key" } },
+      ]);
+      expect(result.defaultSpace).toBe("example.backlog.com");
+      expect(consola.success).toHaveBeenCalledWith(
+        "Logged in to example.backlog.com as Test User (testuser)",
+      );
+    });
+
+    it("returns error on authentication failure", async () => {
+      vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
+      vi.mocked(promptRequired)
+        .mockResolvedValueOnce("example.backlog.com")
+        .mockResolvedValueOnce("bad-key");
+      const exitSpy = spyOnProcessExit();
+
+      const { login } = await import("./login");
+      await login.run?.({
+        args: { method: "api-key" },
+      } as never);
+
+      expect(consola.error).toHaveBeenCalledWith(
+        "Authentication failed. Could not connect to example.backlog.com with the provided API key.",
+      );
+      expect(exitSpy).toHaveBeenCalledWith(1);
+      expect(updateConfig).not.toHaveBeenCalled();
+      exitSpy.mockRestore();
+    });
+  });
+
+  describe("invalid method", () => {
+    it("returns error for invalid method", async () => {
+      const exitSpy = spyOnProcessExit();
+
+      const { login } = await import("./login");
+      await login.run?.({
+        args: { method: "invalid" },
+      } as never);
+
+      expect(consola.error).toHaveBeenCalledWith('Invalid auth method. Use "api-key" or "oauth".');
+      expect(exitSpy).toHaveBeenCalledWith(1);
+      exitSpy.mockRestore();
+    });
+  });
+
+  describe("oauth", () => {
+    const setupOAuthMocks = () => {
+      vi.mocked(usersGetMyself).mockResolvedValue({
+        data: { name: "OAuth User", userId: "oauthuser" },
+      } as never);
+      vi.mocked(updateConfig).mockImplementation((updater) =>
+        updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
+      );
+      vi.mocked(exchangeAuthorizationCode).mockResolvedValue({
+        access_token: "new-access-token",
+        token_type: "Bearer",
+        expires_in: 3600,
+        refresh_token: "new-refresh-token",
+      });
+
+      const mockStop = vi.fn();
+      const mockWaitForCallback = vi.fn().mockResolvedValue("auth-code-123");
+      vi.mocked(startCallbackServer).mockReturnValue({
+        port: 5033,
+        waitForCallback: mockWaitForCallback,
+        stop: mockStop,
+      });
+
+      return { mockStop, mockWaitForCallback };
+    };
+
+    it("authenticates new space via OAuth flow", async () => {
+      setupOAuthMocks();
+      vi.mocked(promptRequired)
+        .mockResolvedValueOnce("example.backlog.com")
+        .mockResolvedValueOnce("my-client-id")
+        .mockResolvedValueOnce("my-client-secret");
+
+      const { login } = await import("./login");
+      await login.run?.({
+        args: {
+          method: "oauth",
+          "client-id": "my-client-id",
+          "client-secret": "my-client-secret",
+        },
+      } as never);
+
+      expect(startCallbackServer).toHaveBeenCalled();
+      expect(createClient).toHaveBeenNthCalledWith(1, {
+        baseUrl: "https://example.backlog.com",
+      });
+      const oauthClient = vi.mocked(createClient).mock.results[0].value;
+      expect(oauthClient.buildUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: "/OAuth2AccessRequest.action",
+          query: expect.objectContaining({
+            response_type: "code",
+            client_id: "my-client-id",
+            redirect_uri: "http://localhost:5033/callback",
+          }),
+        }),
+      );
+      expect(exchangeAuthorizationCode).toHaveBeenCalledWith("example.backlog.com", {
+        code: "auth-code-123",
+        clientId: "my-client-id",
+        clientSecret: "my-client-secret",
+        redirectUri: "http://localhost:5033/callback",
+      });
+      expect(createClient).toHaveBeenNthCalledWith(2, {
+        baseUrl: "https://example.backlog.com/api/v2",
+      });
+      expect(addBearerAuth).toHaveBeenCalledWith(
+        vi.mocked(createClient).mock.results[1].value,
+        "new-access-token",
+      );
+      expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
+      const result = vi.mocked(updateConfig).mock.results[0]?.value;
+      expect(result.spaces).toEqual([
+        {
+          host: "example.backlog.com",
+          auth: {
+            method: "oauth",
+            accessToken: "new-access-token",
+            refreshToken: "new-refresh-token",
+            clientId: "my-client-id",
+            clientSecret: "my-client-secret",
+          },
+        },
+      ]);
+      expect(result.defaultSpace).toBe("example.backlog.com");
+      expect(consola.success).toHaveBeenCalledWith(
+        "Logged in to example.backlog.com as OAuth User (oauthuser)",
+      );
+    });
+
+    it("calls process.exit(1) when error occurs during callback", async () => {
+      const mockStop = vi.fn();
+      vi.mocked(startCallbackServer).mockReturnValue({
+        port: 5033,
+        waitForCallback: vi
+          .fn()
+          .mockRejectedValue(new Error("OAuth callback timed out after 5 minutes")),
+        stop: mockStop,
+      });
+      vi.mocked(promptRequired)
+        .mockResolvedValueOnce("example.backlog.com")
+        .mockResolvedValueOnce("my-client-id")
+        .mockResolvedValueOnce("my-client-secret");
+      const exitSpy = spyOnProcessExit();
+
+      const { login } = await import("./login");
+      await login.run?.({
+        args: {
+          method: "oauth",
+          "client-id": "my-client-id",
+          "client-secret": "my-client-secret",
+        },
+      } as never);
+
+      expect(consola.error).toHaveBeenCalledWith(
+        "OAuth authorization failed: OAuth callback timed out after 5 minutes",
+      );
+      expect(exitSpy).toHaveBeenCalledWith(1);
+      expect(mockStop).toHaveBeenCalled();
+      exitSpy.mockRestore();
+    });
+
+    it("calls process.exit(1) when token exchange fails", async () => {
+      setupOAuthMocks();
+      vi.mocked(exchangeAuthorizationCode).mockRejectedValue(new Error("invalid_grant"));
+      vi.mocked(promptRequired)
+        .mockResolvedValueOnce("example.backlog.com")
+        .mockResolvedValueOnce("my-client-id")
+        .mockResolvedValueOnce("my-client-secret");
+      const exitSpy = spyOnProcessExit();
+
+      const { login } = await import("./login");
+      await login.run?.({
+        args: {
+          method: "oauth",
+          "client-id": "my-client-id",
+          "client-secret": "my-client-secret",
+        },
+      } as never);
+
+      expect(consola.error).toHaveBeenCalledWith(
+        "Failed to exchange authorization code for tokens.",
+      );
+      expect(exitSpy).toHaveBeenCalledWith(1);
+      exitSpy.mockRestore();
+    });
+
+    it("calls process.exit(1) when token verification fails", async () => {
+      setupOAuthMocks();
+      vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
+      vi.mocked(promptRequired)
+        .mockResolvedValueOnce("example.backlog.com")
+        .mockResolvedValueOnce("my-client-id")
+        .mockResolvedValueOnce("my-client-secret");
+      const exitSpy = spyOnProcessExit();
+
+      const { login } = await import("./login");
+      await login.run?.({
+        args: {
+          method: "oauth",
+          "client-id": "my-client-id",
+          "client-secret": "my-client-secret",
+        },
+      } as never);
+
+      expect(consola.error).toHaveBeenCalledWith("Authentication verification failed.");
+      expect(exitSpy).toHaveBeenCalledWith(1);
+      exitSpy.mockRestore();
+    });
+
+    it("updates OAuth credentials for existing space", async () => {
+      setupOAuthMocks();
+      vi.mocked(updateConfig).mockImplementation((updater) =>
+        updater({
+          spaces: [
+            {
+              host: "example.backlog.com",
+              auth: {
+                method: "oauth" as const,
+                accessToken: "old-access",
+                refreshToken: "old-refresh",
+                clientId: "old-client-id",
+                clientSecret: "old-client-secret",
+              },
+            },
+          ],
+          defaultSpace: "example.backlog.com",
+          aliases: {},
+        }),
+      );
+      vi.mocked(promptRequired)
+        .mockResolvedValueOnce("example.backlog.com")
+        .mockResolvedValueOnce("my-client-id")
+        .mockResolvedValueOnce("my-client-secret");
+
+      const { login } = await import("./login");
+      await login.run?.({
+        args: {
+          method: "oauth",
+          "client-id": "my-client-id",
+          "client-secret": "my-client-secret",
+        },
+      } as never);
+
+      const result = vi.mocked(updateConfig).mock.results[0]?.value;
+      expect(result.spaces).toEqual([
+        {
+          host: "example.backlog.com",
+          auth: {
+            method: "oauth",
+            accessToken: "new-access-token",
+            refreshToken: "new-refresh-token",
+            clientId: "my-client-id",
+            clientSecret: "my-client-secret",
+          },
+        },
+      ]);
+      expect(result.defaultSpace).toBe("example.backlog.com");
+    });
+  });
+});

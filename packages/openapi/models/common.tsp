@@ -25,3 +25,32 @@ model BacklogErrorDetail {
 model BacklogErrorResponse {
   errors: BacklogErrorDetail[];
 }
+
+// ────────────────────────────────────────────
+// Shared scalars
+// ────────────────────────────────────────────
+
+// ────────────────────────────────────────────
+// Shared models
+// ────────────────────────────────────────────
+
+/** Nulab account information. */
+model NulabAccount {
+  nulabId: string;
+  name: string | null;
+  uniqueId: string | null;
+  iconUrl: string;
+}
+
+/** Backlog user. */
+model User {
+  id: int64;
+  userId: string;
+  name: string;
+  roleType: int32;
+  lang: string | null;
+  mailAddress: string;
+  keyword: string;
+  lastLoginTime: utcDateTime | null;
+  nulabAccount: NulabAccount | null;
+}

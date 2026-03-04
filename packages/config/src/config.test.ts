@@ -1,20 +1,20 @@
-import { read, write } from "rc9";
+import { readUser, writeUser } from "rc9";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("rc9", () => ({
-  read: vi.fn(),
-  write: vi.fn(),
+  readUser: vi.fn(),
+  writeUser: vi.fn(),
 }));
 
 // Must import after mock setup
-const { loadConfig, writeConfig } = await import("./config");
+const { loadConfig, updateConfig, writeConfig } = await import("./config");
 
-const mockRead = vi.mocked(read);
-const mockWrite = vi.mocked(write);
+const mockReadUser = vi.mocked(readUser);
+const mockWriteUser = vi.mocked(writeUser);
 
 describe("loadConfig", () => {
   it("returns validated config when rc file is valid", () => {
-    mockRead.mockReturnValue({
+    mockReadUser.mockReturnValue({
       defaultSpace: "example.backlog.com",
       spaces: [
         {
@@ -26,14 +26,14 @@ describe("loadConfig", () => {
 
     const config = loadConfig();
 
-    expect(mockRead).toHaveBeenCalledWith(expect.objectContaining({ name: ".backlogrc" }));
+    expect(mockReadUser).toHaveBeenCalledWith(".backlogrc");
     expect(config.defaultSpace).toBe("example.backlog.com");
     expect(config.spaces).toHaveLength(1);
     expect(config.spaces[0]?.host).toBe("example.backlog.com");
   });
 
   it("returns empty spaces array when rc file is empty", () => {
-    mockRead.mockReturnValue({});
+    mockReadUser.mockReturnValue({});
 
     const config = loadConfig();
 
@@ -44,7 +44,7 @@ describe("loadConfig", () => {
   it("exits process when config validation fails", () => {
     const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
 
-    mockRead.mockReturnValue({
+    mockReadUser.mockReturnValue({
       spaces: [{ host: "invalid", auth: { method: "bad" } }],
     });
 
@@ -56,21 +56,45 @@ describe("loadConfig", () => {
   });
 });
 
+const sampleConfig = {
+  defaultSpace: "example.backlog.com",
+  spaces: [
+    {
+      host: "example.backlog.com",
+      auth: { method: "api-key" as const, apiKey: "abc123" },
+    },
+  ],
+  aliases: {} as Record<string, string>,
+};
+
 describe("writeConfig", () => {
-  it("writes config to rc file", () => {
-    const config = {
-      defaultSpace: "example.backlog.com",
+  it("writes config via rc9 writeUser", () => {
+    writeConfig(sampleConfig);
+
+    expect(mockWriteUser).toHaveBeenCalledWith(sampleConfig, ".backlogrc");
+  });
+});
+
+describe("updateConfig", () => {
+  it("loads config, applies updater, and writes result", () => {
+    mockReadUser.mockReturnValue({
       spaces: [
         {
           host: "example.backlog.com",
-          auth: { method: "api-key" as const, apiKey: "abc123" },
+          auth: { method: "api-key", apiKey: "abc123" },
         },
       ],
-      aliases: {} as Record<string, string>,
-    };
+    });
 
-    writeConfig(config);
+    const result = updateConfig((config) => ({
+      ...config,
+      defaultSpace: "example.backlog.com",
+    }));
 
-    expect(mockWrite).toHaveBeenCalledWith(config, expect.objectContaining({ name: ".backlogrc" }));
+    expect(result.defaultSpace).toBe("example.backlog.com");
+    expect(mockWriteUser).toHaveBeenCalledWith(
+      expect.objectContaining({ defaultSpace: "example.backlog.com" }),
+      ".backlogrc",
+    );
   });
 });

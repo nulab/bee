@@ -1,47 +1,37 @@
 import type { RcAuth, RcSpace } from "./schema";
 
-import { loadConfig, writeConfig } from "./config";
+import { loadConfig, updateConfig } from "./config";
 
 const addSpace = (space: RcSpace): void => {
-  const config = loadConfig();
-  const exists = config.spaces.some((s) => s.host === space.host);
-
-  if (exists) {
-    throw new Error(`Space with host "${space.host}" already exists in configuration.`);
-  }
-
-  writeConfig({
-    ...config,
-    spaces: [...config.spaces, space],
+  updateConfig((config) => {
+    if (config.spaces.some((s) => s.host === space.host)) {
+      throw new Error(`Space with host "${space.host}" already exists in configuration.`);
+    }
+    return { ...config, spaces: [...config.spaces, space] };
   });
 };
 
 const removeSpace = (host: string): void => {
-  const config = loadConfig();
-  const index = config.spaces.findIndex((space) => space.host === host);
-
-  if (index === -1) {
-    throw new Error(`Space with host "${host}" not found in configuration.`);
-  }
-
-  const spaces = config.spaces.filter((space) => space.host !== host);
-  const defaultSpace = config.defaultSpace === host ? undefined : config.defaultSpace;
-
-  writeConfig({ ...config, spaces, defaultSpace });
+  updateConfig((config) => {
+    if (!config.spaces.some((space) => space.host === host)) {
+      throw new Error(`Space with host "${host}" not found in configuration.`);
+    }
+    const spaces = config.spaces.filter((space) => space.host !== host);
+    const defaultSpace = config.defaultSpace === host ? undefined : config.defaultSpace;
+    return { ...config, spaces, defaultSpace };
+  });
 };
 
 const updateSpaceAuth = (host: string, auth: RcAuth): void => {
-  const config = loadConfig();
-  const index = config.spaces.findIndex((space) => space.host === host);
-  const space = config.spaces[index];
-
-  if (index === -1) {
-    throw new Error(`Space with host "${host}" not found in configuration.`);
-  }
-
-  writeConfig({
-    ...config,
-    spaces: config.spaces.with(index, { ...space, auth }),
+  updateConfig((config) => {
+    const index = config.spaces.findIndex((space) => space.host === host);
+    if (index === -1) {
+      throw new Error(`Space with host "${host}" not found in configuration.`);
+    }
+    return {
+      ...config,
+      spaces: config.spaces.with(index, { ...config.spaces[index], auth }),
+    };
   });
 };
 

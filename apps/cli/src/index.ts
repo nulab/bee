@@ -1,4 +1,5 @@
 import { defineCommand, runMain } from "citty";
+import { showCommandUsage } from "./lib/command-usage";
 import pkg from "../package.json" with { type: "json" };
 
 const main = defineCommand({
@@ -8,8 +9,8 @@ const main = defineCommand({
     description: pkg.description,
   },
   subCommands: {
-    // Commands will be registered here
+    auth: () => import("./commands/auth/index").then((m) => m.auth),
   },
 });
 
-void runMain(main);
+void runMain(main, { showUsage: showCommandUsage });

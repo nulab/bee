@@ -11,10 +11,12 @@
   "scripts": {
     "build": "unbuild",
     "dev": "tsx src/index.ts",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/api": "workspace:*",
+    "@repo/backlog-utils": "workspace:*",
+    "@repo/cli-utils": "workspace:*",
     "@repo/config": "workspace:*",
     "@repo/openapi-client": "workspace:*",
     "citty": "^0.1.6",

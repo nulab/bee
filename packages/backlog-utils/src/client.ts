@@ -1,4 +1,4 @@
-import type { Auth, Client } from "@repo/openapi-client/client";
+import type { Client } from "@repo/openapi-client/client";
 import { createClient } from "@repo/openapi-client/client";
 import { refreshAccessToken } from "./oauth";
 import { formatResetTime } from "./rate-limit";
@@ -9,11 +9,22 @@ import { ofetch } from "ofetch";
 /** The type of the authenticated API client. */
 type BacklogClient = Client;
 
-/** Returns an auth callback that only responds to apiKey security entries. */
-const apiKeyAuth =
-  (apiKey: string): ((auth: Auth) => string | undefined) =>
-  (auth) =>
-    auth.type === "apiKey" ? apiKey : undefined;
+/** Adds a request interceptor that sets the apiKey query parameter. */
+const addApiKeyAuth = (client: Client, apiKey: string): void => {
+  client.interceptors.request.use((request) => {
+    const url = new URL(request.url);
+    url.searchParams.set("apiKey", apiKey);
+    return new Request(url, request);
+  });
+};
+
+/** Adds a request interceptor that sets the Authorization Bearer header. */
+const addBearerAuth = (client: Client, token: string): void => {
+  client.interceptors.request.use((request) => {
+    request.headers.set("Authorization", `Bearer ${token}`);
+    return request;
+  });
+};
 
 /**
  * Resolves the active space and creates an authenticated API client.
@@ -36,14 +47,12 @@ const getClient = async (): Promise<{
     const baseUrl = `https://${resolved.host}/api/v2`;
 
     if (resolved.auth.method === "api-key") {
-      return {
-        client: createClient({
-          baseUrl,
-          auth: apiKeyAuth(resolved.auth.apiKey),
-          onResponseError: handleRateLimitError,
-        }),
-        host: resolved.host,
-      };
+      const client = createClient({
+        baseUrl,
+        onResponseError: handleRateLimitError,
+      });
+      addApiKeyAuth(client, resolved.auth.apiKey);
+      return { client, host: resolved.host };
     }
 
     // OAuth: Create client with automatic token refresh on 401
@@ -58,14 +67,12 @@ const getClient = async (): Promise<{
   const envHost = process.env.BACKLOG_SPACE;
 
   if (envApiKey && envHost) {
-    return {
-      client: createClient({
-        baseUrl: `https://${envHost}/api/v2`,
-        auth: apiKeyAuth(envApiKey),
-        onResponseError: handleRateLimitError,
-      }),
-      host: envHost,
-    };
+    const client = createClient({
+      baseUrl: `https://${envHost}/api/v2`,
+      onResponseError: handleRateLimitError,
+    });
+    addApiKeyAuth(client, envApiKey);
+    return { client, host: envHost };
   }
 
   consola.error("No space configured. Run `bl auth login` to authenticate.");
@@ -156,11 +163,12 @@ const createOAuthClient = (
     retryStatusCodes: [401],
   });
 
-  return createClient({
-    baseUrl,
-    ofetch: customOfetch,
-    auth: (auth) => (auth.scheme === "bearer" ? currentAccessToken : undefined),
+  const client = createClient({ baseUrl, ofetch: customOfetch });
+  client.interceptors.request.use((request) => {
+    request.headers.set("Authorization", `Bearer ${currentAccessToken}`);
+    return request;
   });
+  return client;
 };
 
 const handleRateLimitError = ({
@@ -178,4 +186,4 @@ const handleRateLimitError = ({
 };
 
 export type { BacklogClient };
-export { getClient };
+export { addApiKeyAuth, addBearerAuth, getClient };
