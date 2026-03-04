@@ -112,6 +112,14 @@ export const myCommand = withUsage(
 );
 ```
 
+### Writing help content
+
+- **Every new command must have `commandUsage`** — all commands export `commandUsage: CommandUsage` and wrap with `withUsage`.
+- **Reference `gh <command> --help`** for tone and structure — run the corresponding gh CLI help (e.g., `gh auth login --help`) and adapt the content to Backlog's context.
+- **`long`**: Multi-paragraph description. First line is a standalone summary. Subsequent paragraphs explain behavior, caveats, and related commands.
+- **`examples`**: 2–4 practical examples covering common use cases (interactive, flags, piping).
+- **`annotations.environment`**: `[string, string][]` — list relevant environment variables as `[key, description]` pairs. Columns are auto-aligned.
+
 ### Key files
 
 - `apps/cli/src/lib/command-usage.ts` — `CommandUsage` type, `withUsage`, `renderCommandUsage`, `showCommandUsage`
