@@ -114,25 +114,62 @@ Datadog が成功している理由:
 
 | 項目 | 方針 |
 |------|------|
-| コマンド名 | `bee` のみ（未リリースのため後方互換エイリアス不要。Datadog pup も単一コマンド） |
+| コマンド名 | `bee` のみ（未リリースのため後方互換不要。Datadog pup も単一コマンド） |
 | パッケージ名 | `@nulab/bee` (description に "Backlog" を含む) |
 | 環境変数 | `BACKLOG_*` を維持（サービス接続情報のため） |
 | サブコマンド名 | 実用的な名前を維持（auth, issue, project 等） |
-| ヘルプ表示 | 「bee — a CLI for Backlog」をヘッダーに |
+| ヘルプ表示 | 「bee — a CLI for Backlog 🐝」をヘッダーに |
+| 🐝 絵文字 | 積極的に多用する。ただし非Unicode端末向けにフォールバックを実装（下記参照） |
 | ドキュメント | ロゴ → bee のストーリーを紹介 |
 | マスコット | 将来的にキャラ設定の余地を残す |
+
+### 🐝 絵文字フォールバック戦略
+
+consola が依存している `is-unicode-supported` パッケージを活用し、端末の Unicode 対応状況に応じて出し分ける。新規パッケージの追加は不要。
+
+```ts
+// apps/cli/src/lib/icon.ts
+import { isUnicodeSupported } from "is-unicode-supported";
+
+const unicode = isUnicodeSupported();
+
+export const icons = {
+  bee: unicode ? "🐝" : ">",
+  success: unicode ? "🍯" : "OK",
+  error: unicode ? "🔥" : "ERR",
+  info: unicode ? "🐝" : "i",
+} as const;
+```
+
+**使用例**:
+```
+# Unicode 対応端末（通常のターミナル）
+🐝 Issue BLG-123 created
+🍯 Successfully logged in to example.backlog.com
+
+# 非 Unicode 端末（古い cmd.exe, 一部 CI）
+> Issue BLG-123 created
+OK Successfully logged in to example.backlog.com
+```
+
+**方針**:
+- `is-unicode-supported` は consola の既存依存なので追加インストール不要
+- アイコン定義を `apps/cli/src/lib/icon.ts` に集約し、全コマンドから参照
+- consola の `.success()` / `.error()` 等は既に独自アイコンを持つので、それとは別にメッセージ本文内で 🐝 を使う場面で活用
 
 ---
 
 ## 採用する場合の変更箇所
 
 1. `apps/cli/package.json` — `name` → `@nulab/bee`、`bin` → `{ "bee": ... }`
-2. `apps/cli/src/index.ts` — `meta.name` → `"bee"`
-3. 全コマンドの `commandUsage` — 例示中の `bl` → `bee`
-4. 環境変数 — **変更なし**（`BACKLOG_*` を維持）
-5. `apps/docs/` — サイトタイトル、説明文、コマンド例の更新
-6. `CLAUDE.md` — プロジェクト説明の更新
-7. `README.md` — ブランディング更新、ロゴストーリーの紹介
+2. `apps/cli/src/index.ts` — `meta.name` → `"bee"`、description 更新
+3. `apps/cli/src/lib/icon.ts` — **新規作成**: 🐝 絵文字フォールバック用アイコン定義
+4. 全コマンドの `commandUsage` — 例示中の `bl` → `bee`
+5. コマンド出力で 🐝 絵文字を使用している箇所に `icons.bee` を適用
+6. 環境変数 — **変更なし**（`BACKLOG_*` を維持）
+7. `apps/docs/` — サイトタイトル、説明文、コマンド例の更新
+8. `CLAUDE.md` — プロジェクト説明の更新
+9. `README.md` — ブランディング更新、ロゴストーリーの紹介
 
 ---
 
