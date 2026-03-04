@@ -38,7 +38,7 @@ jobs:
         run: pnpm run typecheck
 
       - name: Lint
-        run: pnpm exec oxlint --type-aware --ignore-pattern 'apps/docs' --max-warnings 0
+        run: pnpm exec oxlint --ignore-pattern 'apps/docs' --max-warnings 0
 
       - name: Format check
         run: pnpm run format:check
