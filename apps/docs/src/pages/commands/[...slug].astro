@@ -1,0 +1,168 @@
+---
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import AnchorHeading from "@astrojs/starlight/components/AnchorHeading.astro";
+import { Code } from "@astrojs/starlight/components";
+import { marked } from "marked";
+import { loadCommands } from "../../lib/commands";
+import type { CommandEntry } from "../../lib/commands";
+
+const renderMarkdown = (text: string) => marked.parse(text, { async: false }) as string;
+
+export async function getStaticPaths() {
+  const commands = await loadCommands();
+  return commands.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+
+type Arg = CommandEntry["args"][number];
+
+// Build usage line
+const flags = entry.args.filter((a: Arg) => a.type !== "positional");
+const positionals = entry.args.filter((a: Arg) => a.type === "positional");
+const usageParts: string[] = [];
+if (flags.length > 0) usageParts.push("[flags]");
+for (const arg of positionals) {
+  const name = arg.name.toUpperCase();
+  usageParts.push(
+    arg.required !== false && arg.default === undefined
+      ? `<${name}>`
+      : `[${name}]`,
+  );
+}
+const usageLine = `${entry.title} ${usageParts.join(" ")}`.trim();
+
+// Build headings for table of contents
+const headings: { depth: number; slug: string; text: string }[] = [
+  { depth: 2, slug: "usage", text: "Usage" },
+];
+if (positionals.length > 0) {
+  headings.push({ depth: 2, slug: "arguments", text: "Arguments" });
+}
+if (flags.length > 0) {
+  headings.push({ depth: 2, slug: "flags", text: "Flags" });
+}
+if (entry.examples && entry.examples.length > 0) {
+  headings.push({ depth: 2, slug: "examples", text: "Examples" });
+}
+if (entry.environment && entry.environment.length > 0) {
+  headings.push({ depth: 2, slug: "environment-variables", text: "Environment variables" });
+}
+
+// Build flag parts for rendering: each flag as a separate code element
+const flagParts = (arg: Arg) => {
+  const parts: string[] = arg.alias.map((a: string) => `-${a}`);
+  const long = `--${arg.name}`;
+  const hint =
+    arg.type === "string" ? (arg.valueHint ? ` ${arg.valueHint}` : " <string>") : "";
+  parts.push(`${long}${hint}`);
+  return parts;
+};
+---
+
+<StarlightPage
+  frontmatter={{
+    title: entry.title,
+    description: entry.description,
+  }}
+  headings={headings}
+>
+  {entry.long && <div set:html={renderMarkdown(entry.long)} />}
+
+  <AnchorHeading level="2" id="usage">Usage</AnchorHeading>
+  <Code code={usageLine} lang="sh" />
+
+  {
+    positionals.length > 0 && (
+      <>
+        <AnchorHeading level="2" id="arguments">Arguments</AnchorHeading>
+        <dl>
+          {positionals.map((arg: Arg) => (
+            <>
+              <dt>
+                <code>{arg.name.toUpperCase()}</code>
+              </dt>
+              <dd>
+                {arg.description ?? ""}
+                {arg.default !== undefined && (
+                  <>
+                    {" "}
+                    (default: <code>{String(arg.default)}</code>)
+                  </>
+                )}
+              </dd>
+            </>
+          ))}
+        </dl>
+      </>
+    )
+  }
+
+  {
+    flags.length > 0 && (
+      <>
+        <AnchorHeading level="2" id="flags">Flags</AnchorHeading>
+        <dl>
+          {flags.map((arg: Arg) => (
+            <>
+              <dt>
+                {flagParts(arg).map((part, i) => (
+                  <>
+                    {i > 0 && ", "}
+                    <code>{part}</code>
+                  </>
+                ))}
+              </dt>
+              <dd>
+                {arg.description ?? ""}
+                {arg.default !== undefined && (
+                  <>
+                    {" "}
+                    (default: <code>{String(arg.default)}</code>)
+                  </>
+                )}
+              </dd>
+            </>
+          ))}
+        </dl>
+      </>
+    )
+  }
+
+  {
+    entry.examples &&
+      entry.examples.length > 0 && (
+        <>
+          <AnchorHeading level="2" id="examples">Examples</AnchorHeading>
+          {entry.examples.map((ex: { description: string; command: string }) => (
+            <>
+              <p>{ex.description}</p>
+              <Code code={`$ ${ex.command}`} lang="sh" />
+            </>
+          ))}
+        </>
+      )
+  }
+
+  {
+    entry.environment &&
+      entry.environment.length > 0 && (
+        <>
+          <AnchorHeading level="2" id="environment-variables">Environment variables</AnchorHeading>
+          <dl>
+            {entry.environment.map(([key, desc]: [string, string]) => (
+              <>
+                <dt>
+                  <code>{key}</code>
+                </dt>
+                <dd>{desc}</dd>
+              </>
+            ))}
+          </dl>
+        </>
+      )
+  }
+</StarlightPage>
