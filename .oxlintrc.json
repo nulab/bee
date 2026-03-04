@@ -94,16 +94,14 @@
     "typescript/no-unnecessary-type-assertion": "warn",
     // Disallow conditionals where the type is always truthy or always falsy
     "typescript/no-unnecessary-condition": "warn",
-    // Disallow calling a function with a value with type `any`
-    "typescript/no-unsafe-argument": "warn",
-    // Disallow assigning a value with type `any` to variables and properties
-    "typescript/no-unsafe-assignment": "warn",
-    // Disallow calling a value with type `any`
-    "typescript/no-unsafe-call": "warn",
-    // Disallow member access on a value with type `any`
-    "typescript/no-unsafe-member-access": "warn",
-    // Disallow returning a value with type `any` from a function
-    "typescript/no-unsafe-return": "warn",
+    // no-unsafe-* rules disabled: bundler moduleResolution causes cross-package
+    // types to resolve as `any`, producing false positives for these rules.
+    // Type safety is enforced by per-package tsc --noEmit via Turborepo instead.
+    "typescript/no-unsafe-argument": "off",
+    "typescript/no-unsafe-assignment": "off",
+    "typescript/no-unsafe-call": "off",
+    "typescript/no-unsafe-member-access": "off",
+    "typescript/no-unsafe-return": "off",
 
     // ── Unicorn: Style overrides ────────────────────────────────
     // Don't ban null (external API compatibility)
