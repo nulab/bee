@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BacklogRateLimitError, formatResetTime } from "#src/rate-limit";
+import { BacklogRateLimitError, formatResetTime } from "./rate-limit";
 
 describe("formatResetTime", () => {
   it("converts epoch seconds to a localized date-time string", () => {

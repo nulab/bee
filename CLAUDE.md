@@ -48,19 +48,6 @@ TypeScript is configured with `module: "preserve"` / `moduleResolution: "bundler
   ```
 - Use `import type` for type-only imports (enforced by oxlint)
 
-## Subpath Imports
-
-Each package uses Node.js subpath imports (`"imports"` field in package.json) to alias `#src/*` to `./src/*`. Use this instead of relative paths when importing within a package:
-
-```ts
-// Preferred (subpath import)
-import { createClient } from "#src/client";
-// Avoid (deep relative path)
-import { createClient } from "../../client";
-```
-
-> **Note**: Each package's `tsconfig.json` also has `paths: { "#src/*": ["./src/*"] }` because `moduleResolution: "bundler"` does not resolve `package.json` `imports` wildcards. Both `imports` and `paths` must be kept in sync.
-
 ## Architecture
 
 ```

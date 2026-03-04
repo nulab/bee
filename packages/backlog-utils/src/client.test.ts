@@ -1,6 +1,6 @@
 import { spyOnProcessExit } from "@repo/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getClient } from "#src/client";
+import { getClient } from "./client";
 import { createClient } from "@repo/openapi-client/client";
 import { resolveSpace } from "@repo/config";
 

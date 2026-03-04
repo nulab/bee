@@ -94,14 +94,11 @@
     "typescript/no-unnecessary-type-assertion": "warn",
     // Disallow conditionals where the type is always truthy or always falsy
     "typescript/no-unnecessary-condition": "warn",
-    // no-unsafe-* rules disabled: bundler moduleResolution causes cross-package
-    // types to resolve as `any`, producing false positives for these rules.
-    // Type safety is enforced by per-package tsc --noEmit via Turborepo instead.
-    "typescript/no-unsafe-argument": "off",
-    "typescript/no-unsafe-assignment": "off",
-    "typescript/no-unsafe-call": "off",
-    "typescript/no-unsafe-member-access": "off",
-    "typescript/no-unsafe-return": "off",
+    "typescript/no-unsafe-argument": "warn",
+    "typescript/no-unsafe-assignment": "warn",
+    "typescript/no-unsafe-call": "warn",
+    "typescript/no-unsafe-member-access": "warn",
+    "typescript/no-unsafe-return": "warn",
 
     // ── Unicorn: Style overrides ────────────────────────────────
     // Don't ban null (external API compatibility)

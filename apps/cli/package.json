@@ -8,9 +8,6 @@
     "bl": "./bin/cli.mjs"
   },
   "type": "module",
-  "imports": {
-    "#src/*": "./src/*"
-  },
   "scripts": {
     "build": "unbuild",
     "dev": "tsx src/index.ts",

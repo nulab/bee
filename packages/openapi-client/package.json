@@ -4,9 +4,6 @@
   "private": true,
   "description": "Generated TypeScript client for Backlog API v2",
   "type": "module",
-  "imports": {
-    "#src/*": "./src/*"
-  },
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/generated/client/index.ts"

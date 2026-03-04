@@ -1,6 +1,6 @@
-import type { RcAuth, RcSpace } from "#src/schema";
+import type { RcAuth, RcSpace } from "./schema";
 
-import { loadConfig, writeConfig } from "#src/config";
+import { loadConfig, writeConfig } from "./config";
 
 const addSpace = (space: RcSpace): void => {
   const config = loadConfig();
