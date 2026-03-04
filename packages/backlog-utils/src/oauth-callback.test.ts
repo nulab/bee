@@ -1,6 +1,6 @@
-import type { CallbackServer } from "#/oauth-callback.js";
+import type { CallbackServer } from "#src/oauth-callback.js";
 
-import { startCallbackServer } from "#/oauth-callback.js";
+import { startCallbackServer } from "#src/oauth-callback.js";
 import { afterEach, describe, expect, it } from "vitest";
 
 const BASE_URL = "http://localhost:5033";

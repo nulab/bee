@@ -9,7 +9,7 @@
   },
   "type": "module",
   "imports": {
-    "#/*": "./src/*"
+    "#src/*": "./src/*"
   },
   "scripts": {
     "build": "unbuild",

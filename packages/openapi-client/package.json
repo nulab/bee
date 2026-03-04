@@ -5,7 +5,7 @@
   "description": "Generated TypeScript client for Backlog API v2",
   "type": "module",
   "imports": {
-    "#/*": "./src/*"
+    "#src/*": "./src/*"
   },
   "exports": {
     ".": "./src/index.ts",

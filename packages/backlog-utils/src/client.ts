@@ -1,7 +1,7 @@
 import type { Client } from "@repo/openapi-client/client";
 import { createClient } from "@repo/openapi-client/client";
-import { refreshAccessToken } from "#/oauth.js";
-import { formatResetTime } from "#/rate-limit.js";
+import { refreshAccessToken } from "#src/oauth.js";
+import { formatResetTime } from "#src/rate-limit.js";
 import { resolveSpace, updateSpaceAuth } from "@repo/config";
 import consola from "consola";
 import { ofetch } from "ofetch";
