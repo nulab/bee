@@ -1,9 +1,4 @@
 {
   "extends": "@repo/tsconfigs/base.json",
-  "include": ["src"],
-  "compilerOptions": {
-    "paths": {
-      "#src/*": ["./src/*"]
-    }
-  }
+  "include": ["src"]
 }

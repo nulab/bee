@@ -2,9 +2,6 @@
   "extends": "@repo/tsconfigs/base.json",
   "include": ["src"],
   "compilerOptions": {
-    "resolveJsonModule": true,
-    "paths": {
-      "#src/*": ["./src/*"]
-    }
+    "resolveJsonModule": true
   }
 }

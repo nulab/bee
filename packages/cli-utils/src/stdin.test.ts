@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { readStdin } from "#src/stdin.js";
+import { readStdin } from "./stdin";
 
 /**
  * Create a mock async iterable that yields the given buffers,

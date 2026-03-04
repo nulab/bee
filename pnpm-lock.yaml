@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@types/node':
+        specifier: ^22.19.13
+        version: 22.19.13
       '@vitest/coverage-v8':
         specifier: ^4.0.18
         version: 4.0.18(vitest@4.0.18(@types/node@22.19.13)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -26,6 +29,9 @@ importers:
       turbo:
         specifier: ^2.8.13
         version: 2.8.13
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@22.19.13)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -7884,8 +7890,7 @@ snapshots:
 
   type-fest@4.41.0: {}
 
-  typescript@5.9.3:
-    optional: true
+  typescript@5.9.3: {}
 
   typescript@6.0.0-dev.20260303: {}
 

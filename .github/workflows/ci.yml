@@ -34,8 +34,11 @@ jobs:
         if: always() && github.event_name == 'pull_request'
         uses: davelosert/vitest-coverage-report-action@v2
 
-      - name: Lint & Type check
-        run: pnpm exec oxlint --type-aware --type-check --ignore-pattern 'apps/docs' --max-warnings 0
+      - name: Type check
+        run: pnpm run typecheck
+
+      - name: Lint
+        run: pnpm exec oxlint --type-aware --ignore-pattern 'apps/docs' --max-warnings 0
 
       - name: Format check
         run: pnpm run format:check

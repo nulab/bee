@@ -1,13 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("#src/config.js", () => ({
+vi.mock("./config", () => ({
   loadConfig: vi.fn(),
   writeConfig: vi.fn(),
 }));
 
-const { loadConfig, writeConfig } = await import("#src/config.js");
-const { addSpace, findSpace, removeSpace, resolveSpace, updateSpaceAuth } =
-  await import("#src/space.js");
+const { loadConfig, writeConfig } = await import("./config");
+const { addSpace, findSpace, removeSpace, resolveSpace, updateSpaceAuth } = await import("./space");
 
 const mockLoadConfig = vi.mocked(loadConfig);
 const mockWriteConfig = vi.mocked(writeConfig);

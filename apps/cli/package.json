@@ -8,13 +8,11 @@
     "bl": "./bin/cli.mjs"
   },
   "type": "module",
-  "imports": {
-    "#src/*": "./src/*"
-  },
   "scripts": {
     "build": "unbuild",
     "dev": "tsx src/index.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@repo/backlog-utils": "workspace:*",

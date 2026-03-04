@@ -1,3 +1,3 @@
-export { outputArgs, outputResult, pickFields, filterFields } from "#src/output.js";
-export { promptRequired, confirmOrExit } from "#src/prompt.js";
-export { readStdin } from "#src/stdin.js";
+export { outputArgs, outputResult, pickFields, filterFields } from "./output";
+export { promptRequired, confirmOrExit } from "./prompt";
+export { readStdin } from "./stdin";
