@@ -93,6 +93,10 @@ importers:
       sharp:
         specifier: ^0.33.0
         version: 0.33.5
+    devDependencies:
+      jiti:
+        specifier: ^2.6.1
+        version: 2.6.1
 
   packages/backlog-utils:
     dependencies:

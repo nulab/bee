@@ -1,0 +1,183 @@
+---
+import { getCollection } from "astro:content";
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+
+export async function getStaticPaths() {
+  const commands = await getCollection("commands");
+  return commands.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+type Arg = {
+  name: string;
+  type?: "string" | "boolean" | "positional";
+  description?: string;
+  alias: string[];
+  default?: string | boolean;
+  required?: boolean;
+  valueHint?: string;
+};
+
+const { entry } = Astro.props;
+const { data } = entry;
+
+// Build usage line
+const flags = data.args.filter((a: Arg) => a.type !== "positional");
+const positionals = data.args.filter((a: Arg) => a.type === "positional");
+const usageParts: string[] = [];
+if (flags.length > 0) usageParts.push("[flags]");
+for (const arg of positionals) {
+  const name = arg.name.toUpperCase();
+  usageParts.push(
+    arg.required !== false && arg.default === undefined
+      ? `<${name}>`
+      : `[${name}]`,
+  );
+}
+const usageLine = `${data.title} ${usageParts.join(" ")}`.trim();
+
+// Format flag display
+const formatFlag = (arg: Arg) => {
+  const short = arg.alias.map((a: string) => `-${a}`).join(", ");
+  const long = `--${arg.name}`;
+  const flag = short ? `${short}, ${long}` : long;
+  const hint =
+    arg.type === "string" ? (arg.valueHint ? ` ${arg.valueHint}` : " <string>") : "";
+  return `${flag}${hint}`;
+};
+---
+
+<StarlightPage
+  frontmatter={{
+    title: data.title,
+    description: data.description,
+  }}
+>
+  {
+    data.long && (
+      <div
+        set:html={data.long
+          .split("\n\n")
+          .map((p: string) => `<p>${p}</p>`)
+          .join("")}
+      />
+    )
+  }
+
+  <h2>Usage</h2>
+  <pre><code>{usageLine}</code></pre>
+
+  {
+    positionals.length > 0 && (
+      <>
+        <h2>Arguments</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Argument</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {positionals.map((arg: Arg) => (
+              <tr>
+                <td>
+                  <code>{arg.name.toUpperCase()}</code>
+                </td>
+                <td>
+                  {arg.description ?? ""}
+                  {arg.default !== undefined && (
+                    <>
+                      {" "}
+                      (default: <code>{String(arg.default)}</code>)
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>
+    )
+  }
+
+  {
+    flags.length > 0 && (
+      <>
+        <h2>Flags</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Flag</th>
+              <th>Description</th>
+              <th>Default</th>
+            </tr>
+          </thead>
+          <tbody>
+            {flags.map((arg: Arg) => (
+              <tr>
+                <td>
+                  <code>{formatFlag(arg)}</code>
+                </td>
+                <td>{arg.description ?? ""}</td>
+                <td>
+                  {arg.default !== undefined ? (
+                    <code>{String(arg.default)}</code>
+                  ) : (
+                    "\u2014"
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>
+    )
+  }
+
+  {
+    data.examples &&
+      data.examples.length > 0 && (
+        <>
+          <h2>Examples</h2>
+          {data.examples.map((ex: { description: string; command: string }) => (
+            <>
+              <p>{ex.description}</p>
+              <pre>
+                <code>{`$ ${ex.command}`}</code>
+              </pre>
+            </>
+          ))}
+        </>
+      )
+  }
+
+  {
+    data.environment &&
+      data.environment.length > 0 && (
+        <>
+          <h2>Environment variables</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.environment.map(([key, desc]: [string, string]) => (
+                <tr>
+                  <td>
+                    <code>{key}</code>
+                  </td>
+                  <td>{desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )
+  }
+</StarlightPage>

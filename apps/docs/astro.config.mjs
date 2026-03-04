@@ -22,6 +22,22 @@ export default defineConfig({
           label: "Guides",
           items: [{ label: "Getting Started", slug: "guides/getting-started" }],
         },
+        {
+          label: "Commands",
+          items: [
+            {
+              label: "auth",
+              items: [
+                { label: "auth login", link: "/commands/auth/login" },
+                { label: "auth logout", link: "/commands/auth/logout" },
+                { label: "auth refresh", link: "/commands/auth/refresh" },
+                { label: "auth status", link: "/commands/auth/status" },
+                { label: "auth switch", link: "/commands/auth/switch" },
+                { label: "auth token", link: "/commands/auth/token" },
+              ],
+            },
+          ],
+        },
       ],
     }),
   ],
