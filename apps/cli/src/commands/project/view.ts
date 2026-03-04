@@ -19,6 +19,10 @@ details in the terminal.`,
     { description: "Open project in browser", command: "bee project view PROJECT_KEY --web" },
     { description: "Output as JSON", command: "bee project view PROJECT_KEY --json" },
   ],
+
+  annotations: {
+    environment: [["BACKLOG_PROJECT", "Default project ID or project key"]],
+  },
 };
 
 const view = withUsage(
@@ -33,6 +37,7 @@ const view = withUsage(
         type: "positional",
         description: "Project ID or project key",
         required: true,
+        default: process.env.BACKLOG_PROJECT,
       },
       web: {
         type: "boolean",

@@ -19,6 +19,10 @@ Displays each user's ID, user ID, name, and role within the project.`,
     },
     { description: "Output as JSON", command: "bee project users PROJECT_KEY --json" },
   ],
+
+  annotations: {
+    environment: [["BACKLOG_PROJECT", "Default project ID or project key"]],
+  },
 };
 
 const users = withUsage(
@@ -33,6 +37,7 @@ const users = withUsage(
         type: "positional",
         description: "Project ID or project key",
         required: true,
+        default: process.env.BACKLOG_PROJECT,
       },
       "exclude-group-members": {
         type: "boolean",

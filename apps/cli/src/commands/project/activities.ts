@@ -30,6 +30,10 @@ Use --count to control how many activities are returned (default: 20, max: 100).
       command: "bee project activities PROJECT_KEY --json",
     },
   ],
+
+  annotations: {
+    environment: [["BACKLOG_PROJECT", "Default project ID or project key"]],
+  },
 };
 
 const getActivitySummary = (activity: {
@@ -71,6 +75,7 @@ const activities = withUsage(
         type: "positional",
         description: "Project ID or project key",
         required: true,
+        default: process.env.BACKLOG_PROJECT,
       },
       "activity-type": {
         type: "string",
