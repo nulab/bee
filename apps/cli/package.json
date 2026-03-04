@@ -23,7 +23,8 @@
     "is-unicode-supported": "^2.1.0",
     "ofetch": "^1.4.1",
     "open": "^10.1.0",
-    "ufo": "^1.5.4"
+    "ufo": "^1.5.4",
+    "valibot": "^1.2.0"
   },
   "devDependencies": {
     "@repo/test-utils": "workspace:*",

@@ -68,6 +68,9 @@ importers:
       ufo:
         specifier: ^1.5.4
         version: 1.6.3
+      valibot:
+        specifier: ^1.2.0
+        version: 1.2.0(typescript@6.0.0-dev.20260303)
     devDependencies:
       '@repo/test-utils':
         specifier: workspace:*
