@@ -1,6 +1,6 @@
 import { spyOnProcessExit } from "@repo/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getClient } from "#/client.js";
+import { getClient } from "#src/client.js";
 import { createClient } from "@repo/api";
 import { resolveSpace } from "@repo/config";
 

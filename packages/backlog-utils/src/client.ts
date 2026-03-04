@@ -1,6 +1,6 @@
 import type { $Fetch } from "@repo/api";
 import { createClient, formatResetTime } from "@repo/api";
-import { refreshAccessToken } from "#/oauth.js";
+import { refreshAccessToken } from "#src/oauth.js";
 import { resolveSpace, updateSpaceAuth } from "@repo/config";
 import consola from "consola";
 import type { FetchOptions } from "ofetch";

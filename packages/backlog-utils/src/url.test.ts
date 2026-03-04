@@ -9,7 +9,7 @@ import {
   pullRequestUrl,
   repositoryUrl,
   wikiUrl,
-} from "#/url.js";
+} from "#src/url.js";
 import open from "open";
 
 vi.mock("open", () => ({
