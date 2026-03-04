@@ -16,4 +16,14 @@ using TypeSpec.OpenAPI;
   spaceKey: string,
 })
 @useAuth(ApiKeyAuth<ApiKeyLocation.query, "apiKey"> | BearerAuth)
+@tagMetadata(
+  "OAuth 2.0",
+  #{
+    description: """
+      You can access the Backlog API by using the "Authorization Code Grant" defined in "The OAuth 2.0 Authorization Framework" (RFC 6749).
+
+      Register your application in the [Backlog Developer Site](https://backlog.com/developer/applications/) first to obtain your client_id and client_secret.
+      """,
+  }
+)
 namespace Backlog;
