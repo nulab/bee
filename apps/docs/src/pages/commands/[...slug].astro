@@ -34,14 +34,14 @@ for (const arg of positionals) {
 }
 const usageLine = `${entry.title} ${usageParts.join(" ")}`.trim();
 
-// Format flag display
-const formatFlag = (arg: Arg) => {
-  const short = arg.alias.map((a: string) => `-${a}`).join(", ");
+// Build flag parts for rendering: each flag as a separate code element
+const flagParts = (arg: Arg) => {
+  const parts: string[] = arg.alias.map((a: string) => `-${a}`);
   const long = `--${arg.name}`;
-  const flag = short ? `${short}, ${long}` : long;
   const hint =
     arg.type === "string" ? (arg.valueHint ? ` ${arg.valueHint}` : " <string>") : "";
-  return `${flag}${hint}`;
+  parts.push(`${long}${hint}`);
+  return parts;
 };
 ---
 
@@ -90,7 +90,12 @@ const formatFlag = (arg: Arg) => {
           {flags.map((arg: Arg) => (
             <>
               <dt>
-                <code>{formatFlag(arg)}</code>
+                {flagParts(arg).map((part, i) => (
+                  <>
+                    {i > 0 && ", "}
+                    <code>{part}</code>
+                  </>
+                ))}
               </dt>
               <dd>
                 {arg.description ?? ""}
