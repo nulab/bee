@@ -1,4 +1,4 @@
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import * as v from "valibot";
@@ -18,6 +18,7 @@ const resolveConfigDir = (): string => {
 
 const loadConfig = (): Rc => {
   const dir = resolveConfigDir();
+  ensureConfigDir(dir);
   const raw = read({ name: CONFIG_FILE_NAME, dir });
   const result = v.safeParse(RcSchema, raw);
 
@@ -32,9 +33,20 @@ const loadConfig = (): Rc => {
   return result.output;
 };
 
+const ensureConfigDir = (dir: string): void => {
+  if (existsSync(dir) && !statSync(dir).isDirectory()) {
+    const oldContent = readFileSync(dir, "utf8");
+    unlinkSync(dir);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, CONFIG_FILE_NAME), oldContent, "utf8");
+    return;
+  }
+  mkdirSync(dir, { recursive: true });
+};
+
 const writeConfig = (config: Rc): void => {
   const dir = resolveConfigDir();
-  mkdirSync(dir, { recursive: true });
+  ensureConfigDir(dir);
   write(config, { name: CONFIG_FILE_NAME, dir });
 };
 
