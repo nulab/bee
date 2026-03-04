@@ -31,6 +31,7 @@ const getClient = async (): Promise<{
 
     if (resolved.auth.method === "api-key") {
       return {
+        // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
         client: createClient({
           baseUrl,
           query: { apiKey: resolved.auth.apiKey },
@@ -42,6 +43,7 @@ const getClient = async (): Promise<{
 
     // OAuth: Create client with automatic token refresh on 401
     return {
+      // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment -- oxlint cannot resolve generated client types across workspace packages
       client: createOAuthClient(baseUrl, resolved.host, resolved.auth),
       host: resolved.host,
     };
@@ -53,6 +55,7 @@ const getClient = async (): Promise<{
 
   if (envApiKey && envHost) {
     return {
+      // oxlint-disable-next-line typescript-eslint/no-unsafe-assignment, typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
       client: createClient({
         baseUrl: `https://${envHost}/api/v2`,
         query: { apiKey: envApiKey },
@@ -136,8 +139,8 @@ const createOAuthClient = (
   };
 
   const customOfetch = ofetch.create({
-    onResponseError: async ({ response, options }) => {
-      handleRateLimitError({ response, options } as never);
+    onResponseError: async ({ response }) => {
+      handleRateLimitError({ response });
 
       if (response.status === 401) {
         const refreshed = await refreshTokenIfNeeded();
@@ -150,6 +153,7 @@ const createOAuthClient = (
     retryStatusCodes: [401],
   });
 
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-call -- oxlint cannot resolve generated client types across workspace packages
   return createClient({
     baseUrl,
     ofetch: customOfetch,
@@ -161,7 +165,11 @@ const createOAuthClient = (
   });
 };
 
-const handleRateLimitError = ({ response }: { response: Response }) => {
+const handleRateLimitError = ({
+  response,
+}: {
+  response: { status: number; headers: { get(name: string): string | null } };
+}) => {
   if (response.status === 429) {
     const resetEpoch = response.headers.get("X-RateLimit-Reset");
     const resetMessage = resetEpoch
