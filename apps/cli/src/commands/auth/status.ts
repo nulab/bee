@@ -41,7 +41,7 @@ const status = withUsage(
       space: {
         type: "string",
         alias: "s",
-        description: "Filter by space hostname",
+        description: "The hostname of the Backlog space. e.g., xxx.backlog.com",
       },
       "show-token": {
         type: "boolean",

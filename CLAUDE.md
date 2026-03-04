@@ -108,6 +108,14 @@ export const myCommand = withUsage(
 - **`examples`**: 2–4 practical examples covering common use cases (interactive, flags, piping).
 - **`annotations.environment`**: `[string, string][]` — list relevant environment variables as `[key, description]` pairs. Columns are auto-aligned.
 
+### Writing argument descriptions
+
+Follow gh CLI conventions for `args` description strings:
+
+- **Choices use `{x|y}` notation** — write `{api-key|oauth}`, not `api-key or oauth`.
+- **`e.g.,` flows naturally in the sentence** — write `The hostname of the Backlog space. e.g., xxx.backlog.com`, not `Space hostname (e.g., xxx.backlog.com)`.
+- **Same-meaning arguments share the same description across commands** — if `--space` means the same thing in `auth login` and `auth logout`, use the identical description string. Do not vary wording per command context.
+
 ### Key files
 
 - `apps/cli/src/lib/command-usage.ts` — `CommandUsage` type, `withUsage`, `renderCommandUsage`, `showCommandUsage`

@@ -39,7 +39,7 @@ const tokenCommand = withUsage(
       space: {
         type: "string",
         alias: "s",
-        description: "Space hostname",
+        description: "The hostname of the Backlog space. e.g., xxx.backlog.com",
       },
     },
     run({ args }) {

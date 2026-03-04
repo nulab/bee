@@ -37,7 +37,7 @@ const refresh = withUsage(
       space: {
         type: "string",
         alias: "s",
-        description: "Target space hostname",
+        description: "The hostname of the Backlog space. e.g., xxx.backlog.com",
       },
     },
     async run({ args }) {

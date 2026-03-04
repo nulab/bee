@@ -57,17 +57,17 @@ const login = withUsage(
       space: {
         type: "string",
         alias: "s",
-        description: "Space hostname (e.g., xxx.backlog.com)",
+        description: "The hostname of the Backlog space. e.g., xxx.backlog.com",
       },
       method: {
         type: "string",
         alias: "m",
-        description: "Auth method: api-key or oauth",
+        description: "Authentication method: {api-key|oauth}",
         default: "api-key",
       },
       "with-token": {
         type: "boolean",
-        description: "Read token from stdin",
+        description: "Read token from standard input",
       },
       "client-id": {
         type: "string",

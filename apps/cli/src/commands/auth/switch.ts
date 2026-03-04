@@ -43,7 +43,7 @@ const switchSpace = withUsage(
       space: {
         type: "string",
         alias: "s",
-        description: "Space hostname to switch to",
+        description: "The hostname of the Backlog space. e.g., xxx.backlog.com",
       },
     },
     async run({ args }) {
