@@ -10,17 +10,26 @@ permissions:
   contents: read
 
 jobs:
-  ci:
+  test:
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
       pull-requests: write
 
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22, 24]
+
+    name: Test (Node ${{ matrix.node-version }})
+
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
+        with:
+          install_args: node@${{ matrix.node-version }}
 
       - run: pnpm install --frozen-lockfile
 
@@ -31,8 +40,21 @@ jobs:
         run: pnpm exec vitest run --coverage.enabled
 
       - name: Report coverage
-        if: always() && github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request' && matrix.node-version == 24
         uses: davelosert/vitest-coverage-report-action@v2
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Generate OpenAPI client
+        run: pnpm --filter @repo/openapi build && pnpm --filter @repo/openapi-client build
 
       - name: Type check
         run: pnpm run typecheck
