@@ -48,32 +48,32 @@ const edit = withUsage(
       name: {
         type: "string",
         alias: "n",
-        description: "Project name",
+        description: "New name of the project",
       },
       key: {
         type: "string",
         alias: "k",
-        description: "Project key",
+        description: "New key of the project",
       },
       "chart-enabled": {
         type: "boolean",
-        description: "Enable chart",
+        description: "Change whether the chart is enabled",
       },
       "subtasking-enabled": {
         type: "boolean",
-        description: "Enable subtasking",
+        description: "Change whether subtasking is enabled",
       },
       "project-leader-can-edit-project-leader": {
         type: "boolean",
-        description: "Allow project administrators to manage each other",
+        description: "Change whether project administrators can manage each other",
       },
       "text-formatting-rule": {
         type: "string",
-        description: "Formatting rules. {backlog|markdown}",
+        description: "Change text formatting rule. {backlog|markdown}",
       },
       archived: {
         type: "boolean",
-        description: "Archive project",
+        description: "Change whether the project is archived",
       },
     },
     async run({ args }) {
