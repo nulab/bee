@@ -53,6 +53,15 @@ export default defineConfig({
               ],
             },
             {
+              label: "user",
+              items: [
+                { label: "user list", link: "/commands/user/list" },
+                { label: "user view", link: "/commands/user/view" },
+                { label: "user me", link: "/commands/user/me" },
+                { label: "user activities", link: "/commands/user/activities" },
+              ],
+            },
+            {
               label: "project",
               items: [
                 { label: "project list", link: "/commands/project/list" },
