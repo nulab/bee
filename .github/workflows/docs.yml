@@ -25,9 +25,6 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Build dependent packages
-        run: pnpm --filter @repo/openapi build && pnpm --filter @repo/openapi-client build
-
       - name: Build docs
         run: pnpm --filter @repo/docs build
 

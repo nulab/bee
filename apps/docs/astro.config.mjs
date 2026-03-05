@@ -1,6 +1,5 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
-import starlightOpenAPI, { openAPISidebarGroups } from "starlight-openapi";
 
 export default defineConfig({
   site: "https://nulab.github.io",
@@ -8,14 +7,6 @@ export default defineConfig({
     starlight({
       title: "bee",
       defaultLocale: "ja",
-      plugins: [
-        starlightOpenAPI([
-          {
-            base: "api",
-            schema: "../../packages/openapi/tsp-output/@typespec/openapi3/openapi.yaml",
-          },
-        ]),
-      ],
       social: [
         {
           icon: "github",
@@ -58,7 +49,6 @@ export default defineConfig({
             },
           ],
         },
-        ...openAPISidebarGroups,
       ],
     }),
   ],
