@@ -4,6 +4,7 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { PRIORITY_NAMES, PriorityId } from "../../lib/issue-constants";
 
 const commandUsage: CommandUsage = {
   long: `Update an existing Backlog issue.
@@ -18,7 +19,7 @@ will remain unchanged.`,
     },
     {
       description: "Change assignee and priority",
-      command: "bee issue edit PROJECT-123 --assignee 12345 --priority 2",
+      command: "bee issue edit PROJECT-123 --assignee 12345 --priority high",
     },
     {
       description: "Add a comment with the update",
@@ -58,7 +59,7 @@ const edit = withUsage(
       priority: {
         type: "string",
         alias: "P",
-        description: "New priority ID",
+        description: `Change priority. {${PRIORITY_NAMES.join("|")}}`,
       },
       type: {
         type: "string",
@@ -113,11 +114,21 @@ const edit = withUsage(
       const notifiedUserId = splitArg(args.notify, v.number());
       const attachmentId = splitArg(args.attachment, v.number());
 
+      let priorityId: number | undefined;
+      if (args.priority) {
+        priorityId = PriorityId[args.priority.toLowerCase()];
+        if (priorityId === undefined) {
+          throw new Error(
+            `Unknown priority "${args.priority}". Valid values: ${PRIORITY_NAMES.join(", ")}`,
+          );
+        }
+      }
+
       const issue = await client.patchIssue(args.issue, {
         summary: args.title,
         description: args.description,
         statusId: args.status ? Number(args.status) : undefined,
-        priorityId: args.priority ? Number(args.priority) : undefined,
+        priorityId,
         issueTypeId: args.type ? Number(args.type) : undefined,
         assigneeId: args.assignee ? Number(args.assignee) : undefined,
         resolutionId: args.resolution ? Number(args.resolution) : undefined,

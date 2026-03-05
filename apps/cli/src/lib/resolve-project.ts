@@ -1,6 +1,6 @@
 import { type Backlog } from "backlog-js";
 
-export async function resolveProjectIds(client: Backlog, values: string[]): Promise<number[]> {
+export const resolveProjectIds = async (client: Backlog, values: string[]): Promise<number[]> => {
   if (values.length === 0) {
     return [];
   }
@@ -24,4 +24,4 @@ export async function resolveProjectIds(client: Backlog, values: string[]): Prom
 
     throw new Error(`Project not found: "${value}"`);
   });
-}
+};

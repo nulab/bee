@@ -4,6 +4,7 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { PRIORITY_NAMES, PriorityId } from "../../lib/issue-constants";
 import { resolveProjectIds } from "../../lib/resolve-project";
 import { resolveUserId } from "../../lib/resolve-user";
 
@@ -13,25 +14,26 @@ const commandUsage: CommandUsage = {
 Requires a project, summary, issue type, and priority. When run
 interactively, omitted required fields will be prompted.
 
-Issue type and priority accept numeric IDs. Use "bee issue list" to find
-valid values for your project.`,
+Issue type accepts a numeric ID. Priority accepts a name: high, normal,
+or low.`,
 
   examples: [
     {
       description: "Create an issue with required fields",
-      command: 'bee issue create -p PROJECT --type 1 --priority 3 -t "Fix login bug"',
+      command: 'bee issue create -p PROJECT --type 1 --priority normal -t "Fix login bug"',
     },
     {
       description: "Create an issue with description",
-      command: 'bee issue create -p PROJECT --type 1 --priority 3 -t "Title" -d "Details here"',
+      command:
+        'bee issue create -p PROJECT --type 1 --priority normal -t "Title" -d "Details here"',
     },
     {
       description: "Create an issue assigned to yourself",
-      command: 'bee issue create -p PROJECT --type 1 --priority 3 -t "Title" --assignee @me',
+      command: 'bee issue create -p PROJECT --type 1 --priority high -t "Title" --assignee @me',
     },
     {
       description: "Output as JSON",
-      command: 'bee issue create -p PROJECT --type 1 --priority 3 -t "Title" --json',
+      command: 'bee issue create -p PROJECT --type 1 --priority normal -t "Title" --json',
     },
   ],
 
@@ -67,7 +69,7 @@ const create = withUsage(
       priority: {
         type: "string",
         alias: "P",
-        description: "Priority ID",
+        description: `Priority. {${PRIORITY_NAMES.join("|")}}`,
       },
       description: {
         type: "string",
@@ -113,7 +115,16 @@ const create = withUsage(
       const project = await promptRequired("Project:", args.project);
       const title = await promptRequired("Summary:", args.title);
       const issueTypeId = await promptRequired("Issue type ID:", args.type);
-      const priorityId = await promptRequired("Priority ID:", args.priority);
+      const priority = await promptRequired(
+        `Priority (${PRIORITY_NAMES.join("/")}):`,
+        args.priority,
+      );
+      const priorityId = PriorityId[priority.toLowerCase()];
+      if (priorityId === undefined) {
+        throw new Error(
+          `Unknown priority "${priority}". Valid values: ${PRIORITY_NAMES.join(", ")}`,
+        );
+      }
 
       const [projectId] = await resolveProjectIds(client, [project]);
       const assigneeId = args.assignee ? await resolveUserId(client, args.assignee) : undefined;
@@ -124,7 +135,7 @@ const create = withUsage(
         projectId,
         summary: title,
         issueTypeId: Number(issueTypeId),
-        priorityId: Number(priorityId),
+        priorityId,
         description: args.description,
         assigneeId,
         parentIssueId: args["parent-issue"] ? Number(args["parent-issue"]) : undefined,

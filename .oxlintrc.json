@@ -168,6 +168,13 @@
       }
     },
     {
+      // Astro pages have exports in frontmatter before the template
+      "files": ["**/*.astro"],
+      "rules": {
+        "import/exports-last": "off"
+      }
+    },
+    {
       // CLI entry point uses side-effect import
       "files": ["**/bin/**"],
       "rules": {

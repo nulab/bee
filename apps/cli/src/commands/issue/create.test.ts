@@ -25,7 +25,7 @@ describe("issue create", () => {
       .mockResolvedValueOnce("100")
       .mockResolvedValueOnce("Fix bug")
       .mockResolvedValueOnce("1")
-      .mockResolvedValueOnce("3");
+      .mockResolvedValueOnce("normal");
     mockClient.postIssue.mockResolvedValue({
       issueKey: "TEST-1",
       summary: "Fix bug",
@@ -33,7 +33,7 @@ describe("issue create", () => {
 
     const { create } = await import("./create");
     await create.run?.({
-      args: { project: "100", title: "Fix bug", type: "1", priority: "3" },
+      args: { project: "100", title: "Fix bug", type: "1", priority: "normal" },
     } as never);
 
     expect(mockClient.postIssue).toHaveBeenCalledWith(
@@ -52,7 +52,7 @@ describe("issue create", () => {
       .mockResolvedValueOnce("100")
       .mockResolvedValueOnce("Title")
       .mockResolvedValueOnce("2")
-      .mockResolvedValueOnce("3");
+      .mockResolvedValueOnce("normal");
     mockClient.postIssue.mockResolvedValue({
       issueKey: "TEST-2",
       summary: "Title",
@@ -64,7 +64,7 @@ describe("issue create", () => {
     expect(promptRequired).toHaveBeenCalledWith("Project:", undefined);
     expect(promptRequired).toHaveBeenCalledWith("Summary:", undefined);
     expect(promptRequired).toHaveBeenCalledWith("Issue type ID:", undefined);
-    expect(promptRequired).toHaveBeenCalledWith("Priority ID:", undefined);
+    expect(promptRequired).toHaveBeenCalledWith("Priority (high/normal/low):", undefined);
   });
 
   it("passes optional fields to API", async () => {
@@ -72,7 +72,7 @@ describe("issue create", () => {
       .mockResolvedValueOnce("100")
       .mockResolvedValueOnce("Title")
       .mockResolvedValueOnce("1")
-      .mockResolvedValueOnce("3");
+      .mockResolvedValueOnce("normal");
     mockClient.postIssue.mockResolvedValue({
       issueKey: "TEST-3",
       summary: "Title",
@@ -84,7 +84,7 @@ describe("issue create", () => {
         project: "100",
         title: "Title",
         type: "1",
-        priority: "3",
+        priority: "normal",
         description: "Details",
         assignee: "12345",
         "due-date": "2025-12-31",
@@ -105,7 +105,7 @@ describe("issue create", () => {
       .mockResolvedValueOnce("100")
       .mockResolvedValueOnce("Title")
       .mockResolvedValueOnce("1")
-      .mockResolvedValueOnce("3");
+      .mockResolvedValueOnce("normal");
     mockClient.getMyself.mockResolvedValue({ id: 99_999, name: "Me" });
     mockClient.postIssue.mockResolvedValue({
       issueKey: "TEST-5",
@@ -118,7 +118,7 @@ describe("issue create", () => {
         project: "100",
         title: "Title",
         type: "1",
-        priority: "3",
+        priority: "normal",
         assignee: "@me",
       },
     } as never);
@@ -134,7 +134,7 @@ describe("issue create", () => {
       .mockResolvedValueOnce("100")
       .mockResolvedValueOnce("Title")
       .mockResolvedValueOnce("1")
-      .mockResolvedValueOnce("3");
+      .mockResolvedValueOnce("normal");
     mockClient.postIssue.mockResolvedValue({
       issueKey: "TEST-6",
       summary: "Title",
@@ -146,7 +146,7 @@ describe("issue create", () => {
         project: "100",
         title: "Title",
         type: "1",
-        priority: "3",
+        priority: "normal",
         notify: "111,222",
         attachment: "1,2",
       },
@@ -165,7 +165,7 @@ describe("issue create", () => {
       .mockResolvedValueOnce("100")
       .mockResolvedValueOnce("Title")
       .mockResolvedValueOnce("1")
-      .mockResolvedValueOnce("3");
+      .mockResolvedValueOnce("normal");
     mockClient.postIssue.mockResolvedValue({
       issueKey: "TEST-4",
       summary: "Title",
@@ -175,7 +175,7 @@ describe("issue create", () => {
 
     const { create } = await import("./create");
     await create.run?.({
-      args: { project: "100", title: "Title", type: "1", priority: "3", json: "" },
+      args: { project: "100", title: "Title", type: "1", priority: "normal", json: "" },
     } as never);
 
     expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("TEST-4"));

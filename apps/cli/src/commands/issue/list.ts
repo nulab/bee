@@ -5,6 +5,7 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { PRIORITY_NAMES, PriorityId } from "../../lib/issue-constants";
 import { resolveProjectIds } from "../../lib/resolve-project";
 
 const commandUsage: CommandUsage = {
@@ -20,7 +21,7 @@ Multiple project keys can be specified as a comma-separated list.`,
     { description: "List your assigned issues", command: "bee issue list -p PROJECT -a @me" },
     {
       description: "Filter by keyword and priority",
-      command: 'bee issue list -p PROJECT -k "login bug" --priority 高',
+      command: 'bee issue list -p PROJECT -k "login bug" --priority high',
     },
     { description: "Output as JSON", command: "bee issue list -p PROJECT --json" },
   ],
@@ -57,7 +58,7 @@ const list = withUsage(
       priority: {
         type: "string",
         alias: "P",
-        description: "Priority ID (comma-separated for multiple)",
+        description: `Priority name (comma-separated for multiple). {${PRIORITY_NAMES.join("|")}}`,
       },
       keyword: {
         type: "string",
@@ -113,7 +114,21 @@ const list = withUsage(
       const projectId = await resolveProjectIds(client, splitArg(args.project, v.string()));
       const assigneeId = splitArg(args.assignee, v.number());
       const statusId = splitArg(args.status, v.number());
-      const priorityId = splitArg(args.priority, v.number());
+      const priorityId = args.priority
+        ? args.priority
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .map((name) => {
+              const id = PriorityId[name.toLowerCase()];
+              if (id === undefined) {
+                throw new Error(
+                  `Unknown priority "${name}". Valid values: ${PRIORITY_NAMES.join(", ")}`,
+                );
+              }
+              return id;
+            })
+        : [];
 
       const issues = await client.getIssues({
         projectId,

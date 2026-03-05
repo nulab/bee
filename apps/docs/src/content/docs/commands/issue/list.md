@@ -20,7 +20,7 @@ bee issue list [flags]
 | `--project`       | `-p` | プロジェクト ID またはプロジェクトキー（カンマ区切りで複数指定可）      |
 | `--assignee`      | `-a` | 担当者のユーザー ID（カンマ区切りで複数指定可）。`@me` で自分自身を指定 |
 | `--status`        | `-S` | ステータス ID（カンマ区切りで複数指定可）                               |
-| `--priority`      | `-P` | 優先度 ID（カンマ区切りで複数指定可）                                   |
+| `--priority`      | `-P` | 優先度名（カンマ区切りで複数指定可）。`high`、`normal`、`low`           |
 | `--keyword`       | `-k` | キーワード検索                                                          |
 | `--created-since` |      | 作成日の開始日（yyyy-MM-dd）                                            |
 | `--created-until` |      | 作成日の終了日（yyyy-MM-dd）                                            |
@@ -44,7 +44,7 @@ bee issue list -p PROJECT
 bee issue list -p PROJECT -a @me
 
 # キーワードと優先度でフィルタリング
-bee issue list -p PROJECT -k "login bug" --priority 高
+bee issue list -p PROJECT -k "login bug" --priority high
 
 # JSON 形式で出力
 bee issue list -p PROJECT --json

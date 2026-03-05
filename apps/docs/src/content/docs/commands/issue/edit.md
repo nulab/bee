@@ -24,7 +24,7 @@ bee issue edit <issue> [flags]
 | `--title`           | `-t` | 新しいサマリー                                  |
 | `--description`     | `-d` | 新しい詳細                                      |
 | `--status`          | `-S` | 新しいステータス ID                             |
-| `--priority`        | `-P` | 新しい優先度 ID                                 |
+| `--priority`        | `-P` | 新しい優先度。`high`、`normal`、`low`           |
 | `--type`            | `-T` | 新しい種別 ID                                   |
 | `--assignee`        |      | 新しい担当者のユーザー ID                       |
 | `--resolution`      |      | 完了理由 ID                                     |
@@ -45,7 +45,7 @@ bee issue edit <issue> [flags]
 bee issue edit PROJECT-123 -t "New title"
 
 # 担当者と優先度を変更
-bee issue edit PROJECT-123 --assignee 12345 --priority 2
+bee issue edit PROJECT-123 --assignee 12345 --priority high
 
 # コメント付きで更新
 bee issue edit PROJECT-123 -t "New title" --comment "Updated title"

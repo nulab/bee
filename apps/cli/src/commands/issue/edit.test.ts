@@ -30,7 +30,7 @@ describe("issue edit", () => {
 
     const { edit } = await import("./edit");
     await edit.run?.({
-      args: { issue: "TEST-1", assignee: "12345", priority: "2" },
+      args: { issue: "TEST-1", assignee: "12345", priority: "high" },
     } as never);
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
