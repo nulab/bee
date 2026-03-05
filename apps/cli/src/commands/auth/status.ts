@@ -1,9 +1,12 @@
-import { loadConfig } from "@repo/config";
+import { type RcAuth, loadConfig } from "@repo/config";
 import { type Entity, Backlog } from "backlog-js";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { printDefinitionList } from "@repo/cli-utils";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
+
+const getToken = (auth: RcAuth): string =>
+  auth.method === "api-key" ? auth.apiKey : auth.accessToken;
 
 const commandUsage: CommandUsage = {
   long: `Display authentication status for configured Backlog spaces.
@@ -82,14 +85,7 @@ const status = withUsage(
           ["Method", space.auth.method],
           ["User", user ? `${user.name} (${user.userId})` : undefined],
           ["Status", user ? "Authenticated" : "Authentication failed"],
-          [
-            "Token",
-            args["show-token"]
-              ? (space.auth.method === "api-key"
-                ? space.auth.apiKey
-                : space.auth.accessToken)
-              : undefined,
-          ],
+          ["Token", args["show-token"] ? getToken(space.auth) : undefined],
         ]);
       }
 

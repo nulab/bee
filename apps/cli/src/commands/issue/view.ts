@@ -78,8 +78,8 @@ const view = withUsage(
           ["Updated", formatDate(data.updated)],
           ["Start Date", data.startDate ? formatDate(data.startDate) : undefined],
           ["Due Date", data.dueDate ? formatDate(data.dueDate) : undefined],
-          ["Estimated", data.estimatedHours !== undefined ? `${data.estimatedHours}h` : undefined],
-          ["Actual", data.actualHours !== undefined ? `${data.actualHours}h` : undefined],
+          ["Estimated", data.estimatedHours === undefined ? undefined : `${data.estimatedHours}h`],
+          ["Actual", data.actualHours === undefined ? undefined : `${data.actualHours}h`],
           [
             "Categories",
             data.category.length > 0 ? data.category.map((c) => c.name).join(", ") : undefined,

@@ -4,7 +4,7 @@ type DefinitionItem = [label: string, value: string | undefined | null];
 
 const printDefinitionList = (items: DefinitionItem[], indent = 4): void => {
   const filtered = items.filter(
-    (item): item is [string, string] => item[1] != null && item[1] !== "",
+    (item): item is [string, string] => item[1] !== null && item[1] !== undefined && item[1] !== "",
   );
 
   if (filtered.length === 0) {
