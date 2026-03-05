@@ -18,6 +18,7 @@
     "@repo/cli-utils": "workspace:*",
     "@repo/config": "workspace:*",
     "@repo/openapi-client": "workspace:*",
+    "backlog-js": "^0.16.0",
     "citty": "^0.1.6",
     "consola": "^3.4.2",
     "is-unicode-supported": "^2.1.0",
