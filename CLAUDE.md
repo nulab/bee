@@ -51,13 +51,15 @@ TypeScript is configured with `module: "preserve"` / `moduleResolution: "bundler
 ## Architecture
 
 ```
-apps/cli           — CLI entry point (citty framework, consola logging)
-apps/docs          — Astro Starlight documentation site
-packages/api-spec  — TypeSpec definitions for Backlog API v2
-packages/tsconfigs — Shared TypeScript base config
+apps/cli             — CLI entry point (citty framework, consola logging)
+apps/docs            — Astro Starlight documentation site
+packages/api-spec    — TypeSpec definitions for Backlog API v2
+packages/cli-utils   — Shared CLI utilities (output formatting, table, splitArg, prompts)
+packages/openapi-client — Generated OpenAPI client with valibot schema re-exports
+packages/tsconfigs   — Shared TypeScript base config
 ```
 
-`@repo/backlog-utils` exposes `getClient(config)` which returns an ofetch `$Fetch` instance preconfigured with Backlog API v2 base URL, auth, and rate-limit error handling.
+`@repo/backlog-utils` exposes `getClient()` which returns a hey-api `Client` instance preconfigured with Backlog API v2 base URL, auth, and rate-limit error handling. The `addEmptyQueryParamFilter` interceptor automatically strips empty string query parameters (workaround for citty optional args defaulting to `""`).
 
 `@nulab/bee` uses citty's `defineCommand` / `runMain` with subcommand registration and a custom help system (see below).
 
@@ -150,6 +152,45 @@ Also add the env var to `commandUsage.annotations.environment` so it appears in 
 
 - `apps/cli/src/lib/command-usage.ts` — `CommandUsage` type, `withUsage`, `renderCommandUsage`, `showCommandUsage`
 - `apps/cli/src/index.ts` — wires `showCommandUsage` into `runMain`
+
+## Command Implementation Patterns
+
+### Subcommand registration
+
+Register subcommands in `index.ts` using lazy imports:
+
+```ts
+subCommands: {
+  list: () => import("./list").then((m) => m.list),
+  view: () => import("./view").then((m) => m.view),
+},
+```
+
+### Output formatting (`@repo/cli-utils`)
+
+- **`outputArgs` / `outputResult(data, args, formatter)`** — `--json` flag pattern. Spread `...outputArgs` into `args`, then wrap output with `outputResult`. The formatter callback handles human-readable output; JSON mode bypasses it.
+- **`printTable(rows)`** — tabular output for list commands.
+
+### Multiple-value flags with `splitArg`
+
+Use `splitArg(input, schema)` from `@repo/cli-utils` to parse comma-separated flag values with valibot validation:
+
+```ts
+const statuses = splitArg(args.status, vIssueStatusType);
+// --status 1,2,3 → [1, 2, 3] (validated against schema)
+```
+
+### API response validation with valibot
+
+`@repo/openapi-client` re-exports valibot schemas (e.g., `vIssueSortField`). Use `v.parse()` / `v.safeParse()` for type-safe validation of flag values and API responses.
+
+### `--web` flag
+
+View commands support `--web` to open the resource in a browser. Build the URL (e.g., `issueUrl`) and pass to `openUrl`.
+
+### `@me` replacement
+
+`--assignee @me` resolves the current user's ID via `usersGetMyself`. Apply this pattern wherever user IDs accept `@me`.
 
 ## Test Conventions
 
