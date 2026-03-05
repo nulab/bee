@@ -1,29 +1,29 @@
 import { spyOnProcessExit } from "@repo/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getClient } from "./client";
-import { createClient } from "@repo/openapi-client/client";
+import { Backlog } from "backlog-js";
 import { resolveSpace } from "@repo/config";
 
 vi.mock("@repo/config", () => ({
   resolveSpace: vi.fn(),
+  updateSpaceAuth: vi.fn(),
 }));
 
-vi.mock("@repo/openapi-client/client", () => ({
-  createClient: vi.fn(() => ({
-    interceptors: { request: { use: vi.fn() } },
+vi.mock("backlog-js", () => ({
+  Backlog: vi.fn(() => ({
+    getMyself: vi.fn(),
   })),
-  createConfig: vi.fn(() => ({})),
+  Error: {
+    BacklogApiError: class extends globalThis.Error {
+      status = 0;
+    },
+    BacklogAuthError: class extends globalThis.Error {
+      status = 0;
+    },
+  },
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-/** Extract the last request interceptor function registered on the latest createClient result. */
-const getLastRequestInterceptor = (): ((request: Request) => Request) => {
-  const client = vi.mocked(createClient).mock.results.at(-1)?.value;
-  const { calls } = client.interceptors.request.use.mock;
-  expect(calls.length).toBeGreaterThan(0);
-  return calls.at(-1)[0];
-};
 
 describe("getClient", () => {
   beforeEach(() => {
@@ -40,17 +40,10 @@ describe("getClient", () => {
 
     const result = await getClient();
 
-    expect(createClient).toHaveBeenCalledWith(
-      expect.objectContaining({
-        baseUrl: "https://example.backlog.com/api/v2",
-      }),
-    );
-
-    const interceptor = getLastRequestInterceptor();
-    const req = new Request("https://example.com/test");
-    const modified = interceptor(req);
-    expect(new URL(modified.url).searchParams.get("apiKey")).toBe("test-key");
-
+    expect(Backlog).toHaveBeenCalledWith({
+      host: "example.backlog.com",
+      apiKey: "test-key",
+    });
     expect(result.host).toBe("example.backlog.com");
   });
 
@@ -66,17 +59,10 @@ describe("getClient", () => {
 
     const result = await getClient();
 
-    expect(createClient).toHaveBeenCalledWith(
-      expect.objectContaining({
-        baseUrl: "https://example.backlog.com/api/v2",
-      }),
-    );
-
-    const interceptor = getLastRequestInterceptor();
-    const req = new Request("https://example.com/test");
-    interceptor(req);
-    expect(req.headers.get("Authorization")).toBe("Bearer access-token");
-
+    expect(Backlog).toHaveBeenCalledWith({
+      host: "example.backlog.com",
+      accessToken: "access-token",
+    });
     expect(result.host).toBe("example.backlog.com");
   });
 
@@ -90,17 +76,10 @@ describe("getClient", () => {
 
     const result = await getClient();
 
-    expect(createClient).toHaveBeenCalledWith(
-      expect.objectContaining({
-        baseUrl: "https://configured.backlog.com/api/v2",
-      }),
-    );
-
-    const interceptor = getLastRequestInterceptor();
-    const req = new Request("https://example.com/test");
-    const modified = interceptor(req);
-    expect(new URL(modified.url).searchParams.get("apiKey")).toBe("configured-key");
-
+    expect(Backlog).toHaveBeenCalledWith({
+      host: "configured.backlog.com",
+      apiKey: "configured-key",
+    });
     expect(result.host).toBe("configured.backlog.com");
   });
 
@@ -111,17 +90,10 @@ describe("getClient", () => {
 
     const result = await getClient();
 
-    expect(createClient).toHaveBeenCalledWith(
-      expect.objectContaining({
-        baseUrl: "https://env.backlog.com/api/v2",
-      }),
-    );
-
-    const interceptor = getLastRequestInterceptor();
-    const req = new Request("https://example.com/test");
-    const modified = interceptor(req);
-    expect(new URL(modified.url).searchParams.get("apiKey")).toBe("env-api-key");
-
+    expect(Backlog).toHaveBeenCalledWith({
+      host: "env.backlog.com",
+      apiKey: "env-api-key",
+    });
     expect(result.host).toBe("env.backlog.com");
   });
 
