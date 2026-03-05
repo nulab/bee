@@ -58,6 +58,22 @@ packages/cli-utils   — Shared CLI utilities (output formatting, table, splitAr
 packages/tsconfigs   — Shared TypeScript base config
 ```
 
+### Documentation site (`apps/docs`)
+
+Command reference pages are **auto-generated** from CLI source code — do NOT create `.md` files under `apps/docs/src/content/docs/commands/`. The dynamic route `apps/docs/src/pages/commands/[...slug].astro` uses `loadCommands()` (in `apps/docs/src/lib/commands.ts`) to import each command's `commandUsage` and `defineCommand` metadata at build time and render documentation pages automatically.
+
+**To add docs for a new command group**, only add sidebar entries to `apps/docs/astro.config.mjs`:
+
+```js
+{
+  label: "issue",
+  items: [
+    { label: "issue list", link: "/commands/issue/list" },
+    // ...
+  ],
+},
+```
+
 `@repo/backlog-utils` exposes `getClient()` which returns a `backlog-js` `Backlog` instance with OAuth 401 auto-refresh (via Proxy) and rate-limit error handling. Commands call `client.getIssues()`, `client.getProjects()`, etc. directly.
 
 `@nulab/bee` uses citty's `defineCommand` / `runMain` with subcommand registration and a custom help system (see below).
