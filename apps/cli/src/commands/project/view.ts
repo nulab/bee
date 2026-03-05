@@ -10,8 +10,7 @@ const commandUsage: CommandUsage = {
 Shows project settings including chart, subtasking, wiki, file sharing,
 and git/subversion integration status.
 
-Use --web to open the project in your default browser instead of showing
-details in the terminal.`,
+Use \`--web\` to open the project in your default browser instead.`,
 
   examples: [
     { description: "View project details", command: "bee project view PROJECT_KEY" },

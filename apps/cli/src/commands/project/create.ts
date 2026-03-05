@@ -7,9 +7,9 @@ import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage"
 const commandUsage: CommandUsage = {
   long: `Create a new Backlog project.
 
-Project key must consist of uppercase letters (A-Z), numbers (0-9), and
-underscores (_). If name or key is not provided via flags, you will be
-prompted to enter them interactively.`,
+Project key must consist of uppercase letters (A\u2013Z), numbers (0\u20139), and
+underscores (\`_\`). If \`--name\` or \`--key\` is not provided, you will be
+prompted interactively.`,
 
   examples: [
     {

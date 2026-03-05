@@ -8,7 +8,7 @@ const commandUsage: CommandUsage = {
   long: `Delete a Backlog project.
 
 This action is irreversible. You will be prompted for confirmation unless
-the --yes flag is provided.
+\`--yes\` is provided.
 
 Requires Administrator role.`,
 

@@ -7,12 +7,11 @@ import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage"
 const commandUsage: CommandUsage = {
   long: `List projects accessible to the authenticated user.
 
-By default, only active (non-archived) projects are shown. Use --archived to
-include archived projects, or omit the flag to show all projects regardless of
-archive status.
+By default, only active (non-archived) projects are shown. Use \`--archived\`
+to include archived projects.
 
-Administrators can use --all to list every project in the space, not just the
-ones they have joined.`,
+Administrators can use \`--all\` to list every project in the space, not just
+the ones they have joined.`,
 
   examples: [
     { description: "List your active projects", command: "bee project list" },

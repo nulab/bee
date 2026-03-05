@@ -12,8 +12,8 @@ const commandUsage: CommandUsage = {
 The default authentication mode is API key. You will be prompted to enter
 the space hostname and API key interactively.
 
-Alternatively, use --with-token to pass an API key on standard input.
-For OAuth authentication, use --method oauth. You will need to provide
+Alternatively, use \`--with-token\` to pass an API key on standard input.
+For OAuth authentication, use \`--method oauth\`. You will need to provide
 an OAuth Client ID and Client Secret, then authorize in the browser.`,
 
   examples: [

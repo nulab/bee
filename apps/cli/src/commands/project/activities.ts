@@ -19,8 +19,8 @@ const commandUsage: CommandUsage = {
 Shows the most recent updates including issue changes, wiki edits, git pushes,
 and other project activities. Results are ordered by most recent first.
 
-Use --activity-type to filter by specific activity types (comma-separated IDs).
-Use --count to control how many activities are returned (default: 20, max: 100).`,
+Use \`--activity-type\` to filter by specific activity types (comma-separated IDs).
+Use \`--count\` to control how many activities are returned (default: 20, max: 100).`,
 
   examples: [
     { description: "List recent activities", command: "bee project activities PROJECT_KEY" },

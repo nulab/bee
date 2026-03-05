@@ -7,12 +7,12 @@ import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage"
 import { IssueStatusId, RESOLUTION_NAMES, ResolutionId } from "../../lib/issue-constants";
 
 const commandUsage: CommandUsage = {
-  long: `Close a Backlog issue by setting its status to "Closed".
+  long: `Close a Backlog issue by setting its status to \`Closed\`.
 
-By default the resolution is set to "Fixed". Use --resolution to
+By default the resolution is set to \`Fixed\`. Use \`--resolution\` to
 specify a different resolution.
 
-Optionally add a comment with the --comment flag.`,
+Optionally add a comment with \`--comment\`.`,
 
   examples: [
     { description: "Close an issue", command: "bee issue close PROJECT-123" },

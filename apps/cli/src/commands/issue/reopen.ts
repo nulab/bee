@@ -7,9 +7,9 @@ import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage"
 import { IssueStatusId } from "../../lib/issue-constants";
 
 const commandUsage: CommandUsage = {
-  long: `Reopen a closed Backlog issue by setting its status back to "Open".
+  long: `Reopen a closed Backlog issue by setting its status back to \`Open\`.
 
-Optionally add a comment with the --comment flag.`,
+Optionally add a comment with \`--comment\`.`,
 
   examples: [
     { description: "Reopen an issue", command: "bee issue reopen PROJECT-123" },

@@ -8,9 +8,9 @@ import { type CommandUsage, withUsage } from "../../lib/command-usage";
 const commandUsage: CommandUsage = {
   long: `Refresh the OAuth access token for a Backlog space.
 
-This command uses the stored refresh token to obtain a new access token. It is only available for spaces authenticated with OAuth.
+Uses the stored refresh token to obtain a new access token. Only available for spaces authenticated with OAuth.
 
-For spaces using API key authentication, this command is not applicable. If the refresh token is expired or invalid, you will need to re-authenticate with \`bee auth login -m oauth\`.`,
+If the refresh token is expired or invalid, re-authenticate with \`bee auth login -m oauth\`.`,
 
   examples: [
     { description: "Refresh token for default space", command: "bee auth refresh" },

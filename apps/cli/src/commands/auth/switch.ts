@@ -8,11 +8,11 @@ const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
 const commandUsage: CommandUsage = {
   long: `Switch the active (default) Backlog space.
 
-This command changes which space is used by default when running commands
-without the --space flag.
+Changes which space is used by default when running commands without
+\`--space\`.
 
 If multiple spaces are configured, you will be prompted to select one
-interactively. Use --space to switch directly without a prompt.
+interactively. Use \`--space\` to switch directly without a prompt.
 
 For a list of configured spaces, see \`bee auth status\`.`,
 

@@ -7,8 +7,8 @@ import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/c
 const commandUsage: CommandUsage = {
   long: `Add a user to a Backlog project.
 
-The user is specified by their numeric user ID. Use "bee project users"
-to look up user IDs for a project.
+The user is specified by their numeric user ID. Use \`bee project users\`
+to look up user IDs.
 
 Requires Administrator or Project Administrator role.`,
 

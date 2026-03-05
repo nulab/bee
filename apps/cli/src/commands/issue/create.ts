@@ -14,8 +14,8 @@ const commandUsage: CommandUsage = {
 Requires a project, summary, issue type, and priority. When run
 interactively, omitted required fields will be prompted.
 
-Issue type accepts a numeric ID. Priority accepts a name: high, normal,
-or low.`,
+Issue type accepts a numeric ID. Priority accepts a name: \`high\`, \`normal\`,
+or \`low\`.`,
 
   examples: [
     {

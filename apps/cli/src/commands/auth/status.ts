@@ -9,10 +9,8 @@ const commandUsage: CommandUsage = {
   long: `Display authentication status for configured Backlog spaces.
 
 For each space, the authentication method and credential validity are
-verified by calling the Backlog API. Any issues are included in the output.
-
-The active (default) space is indicated so you can see which space will be
-used when no --space flag is provided to other commands.`,
+verified by calling the Backlog API. The active (default) space is indicated
+so you can see which space is used when \`--space\` is not provided.`,
 
   examples: [
     { description: "Display status for all spaces", command: "bee auth status" },
@@ -87,9 +85,9 @@ const status = withUsage(
           [
             "Token",
             args["show-token"]
-              ? space.auth.method === "api-key"
+              ? (space.auth.method === "api-key"
                 ? space.auth.apiKey
-                : space.auth.accessToken
+                : space.auth.accessToken)
               : undefined,
           ],
         ]);

@@ -8,7 +8,7 @@ import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage"
 const commandUsage: CommandUsage = {
   long: `Add a comment to a Backlog issue.
 
-The comment body is required. Use "-b -" to read the body from stdin.`,
+The comment body is required. Use \`-b -\` to read the body from stdin.`,
 
   examples: [
     {

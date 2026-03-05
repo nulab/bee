@@ -6,9 +6,9 @@ import { type CommandUsage, withUsage } from "../../lib/command-usage";
 const commandUsage: CommandUsage = {
   long: `Print the auth token for a Backlog space to standard output.
 
-Without the --space flag, the default space is used.
+Without \`--space\`, the default space is used.
 
-The token output can be used with BACKLOG_API_KEY or piped to other commands.`,
+The token output can be used with \`BACKLOG_API_KEY\` or piped to other commands.`,
 
   examples: [
     { description: "Print token for default space", command: "bee auth token" },
