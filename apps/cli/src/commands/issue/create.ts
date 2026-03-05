@@ -69,7 +69,8 @@ const create = withUsage(
       priority: {
         type: "string",
         alias: "P",
-        description: `Priority. {${PRIORITY_NAMES.join("|")}}`,
+        description: "Priority",
+        valueHint: `{${PRIORITY_NAMES.join("|")}}`,
       },
       description: {
         type: "string",
@@ -86,11 +87,13 @@ const create = withUsage(
       },
       "start-date": {
         type: "string",
-        description: "Start date (yyyy-MM-dd)",
+        description: "Start date",
+        valueHint: "<yyyy-MM-dd>",
       },
       "due-date": {
         type: "string",
-        description: "Due date (yyyy-MM-dd)",
+        description: "Due date",
+        valueHint: "<yyyy-MM-dd>",
       },
       "estimated-hours": {
         type: "string",
@@ -115,10 +118,9 @@ const create = withUsage(
       const project = await promptRequired("Project:", args.project);
       const title = await promptRequired("Summary:", args.title);
       const issueTypeId = await promptRequired("Issue type ID:", args.type);
-      const priority = await promptRequired(
-        `Priority (${PRIORITY_NAMES.join("/")}):`,
-        args.priority,
-      );
+      const priority = await promptRequired("Priority:", args.priority, {
+        valueHint: `{${PRIORITY_NAMES.join("|")}}`,
+      });
       const priorityId = PriorityId[priority.toLowerCase()];
       if (priorityId === undefined) {
         throw new Error(

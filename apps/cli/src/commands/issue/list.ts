@@ -58,7 +58,8 @@ const list = withUsage(
       priority: {
         type: "string",
         alias: "P",
-        description: `Priority name (comma-separated for multiple). {${PRIORITY_NAMES.join("|")}}`,
+        description: "Priority name (comma-separated for multiple)",
+        valueHint: `{${PRIORITY_NAMES.join("|")}}`,
       },
       keyword: {
         type: "string",
@@ -67,41 +68,50 @@ const list = withUsage(
       },
       "created-since": {
         type: "string",
-        description: "Created since (yyyy-MM-dd)",
+        description: "Created since",
+        valueHint: "<yyyy-MM-dd>",
       },
       "created-until": {
         type: "string",
-        description: "Created until (yyyy-MM-dd)",
+        description: "Created until",
+        valueHint: "<yyyy-MM-dd>",
       },
       "updated-since": {
         type: "string",
-        description: "Updated since (yyyy-MM-dd)",
+        description: "Updated since",
+        valueHint: "<yyyy-MM-dd>",
       },
       "updated-until": {
         type: "string",
-        description: "Updated until (yyyy-MM-dd)",
+        description: "Updated until",
+        valueHint: "<yyyy-MM-dd>",
       },
       "due-since": {
         type: "string",
-        description: "Due date since (yyyy-MM-dd)",
+        description: "Due date since",
+        valueHint: "<yyyy-MM-dd>",
       },
       "due-until": {
         type: "string",
-        description: "Due date until (yyyy-MM-dd)",
+        description: "Due date until",
+        valueHint: "<yyyy-MM-dd>",
       },
       sort: {
         type: "string",
-        description:
-          "Sort field. {issueType|category|version|milestone|summary|status|priority|attachment|sharedFile|created|createdUser|updated|updatedUser|assignee|startDate|dueDate|estimatedHours|actualHours|childIssue}",
+        description: "Sort field",
+        valueHint:
+          "{issueType|category|version|milestone|summary|status|priority|attachment|sharedFile|created|createdUser|updated|updatedUser|assignee|startDate|dueDate|estimatedHours|actualHours|childIssue}",
       },
       order: {
         type: "string",
-        description: "Sort order. {asc|desc}",
+        description: "Sort order",
+        valueHint: "{asc|desc}",
       },
       count: {
         type: "string",
         alias: "L",
-        description: "Number of results (1-100, default: 20)",
+        description: "Number of results (default: 20)",
+        valueHint: "<1-100>",
       },
       offset: {
         type: "string",

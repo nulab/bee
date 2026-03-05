@@ -37,7 +37,8 @@ const close = withUsage(
       ...outputArgs,
       issue: {
         type: "positional",
-        description: "Issue ID or issue key. e.g., PROJECT-123",
+        description: "Issue ID or issue key",
+        valueHint: "<PROJECT-123>",
         required: true,
       },
       comment: {
@@ -47,7 +48,8 @@ const close = withUsage(
       },
       resolution: {
         type: "string",
-        description: `Resolution. {${RESOLUTION_NAMES.join("|")}} (default: fixed)`,
+        description: "Resolution (default: fixed)",
+        valueHint: `{${RESOLUTION_NAMES.join("|")}}`,
       },
       notify: {
         type: "string",

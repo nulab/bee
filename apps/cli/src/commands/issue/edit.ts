@@ -38,7 +38,8 @@ const edit = withUsage(
       ...outputArgs,
       issue: {
         type: "positional",
-        description: "Issue ID or issue key. e.g., PROJECT-123",
+        description: "Issue ID or issue key",
+        valueHint: "<PROJECT-123>",
         required: true,
       },
       title: {
@@ -59,7 +60,8 @@ const edit = withUsage(
       priority: {
         type: "string",
         alias: "P",
-        description: `Change priority. {${PRIORITY_NAMES.join("|")}}`,
+        description: "Change priority",
+        valueHint: `{${PRIORITY_NAMES.join("|")}}`,
       },
       type: {
         type: "string",
@@ -80,11 +82,13 @@ const edit = withUsage(
       },
       "start-date": {
         type: "string",
-        description: "New start date (yyyy-MM-dd)",
+        description: "New start date",
+        valueHint: "<yyyy-MM-dd>",
       },
       "due-date": {
         type: "string",
-        description: "New due date (yyyy-MM-dd)",
+        description: "New due date",
+        valueHint: "<yyyy-MM-dd>",
       },
       "estimated-hours": {
         type: "string",

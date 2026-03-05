@@ -36,7 +36,8 @@ const comment = withUsage(
       ...outputArgs,
       issue: {
         type: "positional",
-        description: "Issue ID or issue key. e.g., PROJECT-123",
+        description: "Issue ID or issue key",
+        valueHint: "<PROJECT-123>",
         required: true,
       },
       body: {

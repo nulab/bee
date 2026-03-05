@@ -1,5 +1,6 @@
 import { type ArgsDef, type CommandDef, showUsage as cittyShowUsage } from "citty";
 import consola from "consola";
+import { colorize } from "consola/utils";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -93,14 +94,14 @@ const renderCommandUsage =
       const subs = await resolveValue(cmd.subCommands);
       usageParts.push(Object.keys(subs).join("|"));
     }
-    lines.push("USAGE");
+    lines.push(colorize("bold", "USAGE"));
     lines.push(`  ${commandName} ${usageParts.join(" ")}`);
     lines.push("");
 
     // -- ARGUMENTS (positional) ---------------------------------------------
     const positionals = args.filter((a) => a.type === "positional");
     if (positionals.length > 0) {
-      lines.push("ARGUMENTS");
+      lines.push(colorize("bold", "ARGUMENTS"));
       const rows = positionals.map((a) => {
         const name = a.name.toUpperCase();
         const hint = a.default ? ` (default: "${a.default}")` : "";
@@ -112,13 +113,13 @@ const renderCommandUsage =
 
     // -- FLAGS (non-positional) ---------------------------------------------
     if (flags.length > 0) {
-      lines.push("FLAGS");
+      lines.push(colorize("bold", "FLAGS"));
       lines.push(...formatFlags(flags));
       lines.push("");
     }
 
     // -- INHERITED FLAGS ----------------------------------------------------
-    lines.push("INHERITED FLAGS");
+    lines.push(colorize("bold", "INHERITED FLAGS"));
     lines.push("  --help   Show help for command");
     lines.push("");
 
@@ -131,21 +132,21 @@ const renderCommandUsage =
         const subMeta = await resolveValue(subCmd.meta ?? {});
         rows.push([`  ${name}`, subMeta.description ?? ""]);
       }
-      lines.push("COMMANDS");
+      lines.push(colorize("bold", "COMMANDS"));
       lines.push(...alignColumns(rows));
       lines.push("");
     }
 
     // -- annotations: arguments ---------------------------------------------
     if (usage.annotations?.arguments) {
-      lines.push("ARGUMENTS");
+      lines.push(colorize("bold", "ARGUMENTS"));
       lines.push(indent(usage.annotations.arguments));
       lines.push("");
     }
 
     // -- EXAMPLES -----------------------------------------------------------
     if (usage.examples && usage.examples.length > 0) {
-      lines.push("EXAMPLES");
+      lines.push(colorize("bold", "EXAMPLES"));
       for (const ex of usage.examples) {
         lines.push(`  # ${ex.description}`);
         lines.push(`  $ ${ex.command}`);
@@ -155,7 +156,7 @@ const renderCommandUsage =
 
     // -- ENVIRONMENT VARIABLES ----------------------------------------------
     if (usage.annotations?.environment && usage.annotations.environment.length > 0) {
-      lines.push("ENVIRONMENT VARIABLES");
+      lines.push(colorize("bold", "ENVIRONMENT VARIABLES"));
       lines.push(
         ...alignColumns(usage.annotations.environment.map(([key, desc]) => [`  ${key}`, desc])),
       );
@@ -163,7 +164,7 @@ const renderCommandUsage =
     }
 
     // -- LEARN MORE ---------------------------------------------------------
-    lines.push("LEARN MORE");
+    lines.push(colorize("bold", "LEARN MORE"));
     lines.push(`  Use \`${commandName} <command> --help\` for more information about a command.`);
 
     consola.log(`${lines.join("\n")}\n`);

@@ -86,11 +86,13 @@ const activities = withUsage(
       },
       "activity-type": {
         type: "string",
-        description: "Filter by activity type IDs (comma-separated). e.g., 1,2,3",
+        description: "Filter by activity type IDs (comma-separated)",
+        valueHint: "<1,2,3>",
       },
       count: {
         type: "string",
-        description: "Number of activities to return (1-100, default: 20)",
+        description: "Number of activities to return (default: 20)",
+        valueHint: "<1-100>",
       },
       order: {
         type: "string",

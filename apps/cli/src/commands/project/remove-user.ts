@@ -41,7 +41,8 @@ const removeUser = withUsage(
       },
       "user-id": {
         type: "string",
-        description: "User ID (numeric)",
+        description: "User ID",
+        valueHint: "<number>",
         required: true,
       },
     },
