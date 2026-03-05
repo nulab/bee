@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { getClient } from "@repo/backlog-utils";
 import { outputArgs, outputResult } from "@repo/cli-utils";
 import { defineCommand } from "citty";
@@ -30,6 +30,18 @@ Use \`--directory\` to specify a custom destination directory.`,
     environment: [...ENV_AUTH, ENV_PROJECT],
   },
 };
+
+const gitClone = (gitArgs: string[]): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const child = spawn("git", gitArgs, { stdio: "inherit" });
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`git clone exited with code ${code}`));
+      }
+    });
+  });
 
 const clone = withUsage(
   defineCommand({
@@ -66,17 +78,20 @@ const clone = withUsage(
 
       const repo = await client.getGitRepository(args.project, args.repository);
 
-      outputResult(repo, args, (data) => {
-        const cloneUrl = args.http ? data.httpUrl : data.sshUrl;
-        const gitArgs = ["clone", cloneUrl];
+      if (args.json !== undefined) {
+        outputResult(repo, args, () => {});
+        return;
+      }
 
-        if (args.directory) {
-          gitArgs.push(args.directory);
-        }
+      const cloneUrl = args.http ? repo.httpUrl : repo.sshUrl;
+      const gitArgs = ["clone", cloneUrl];
 
-        consola.info(`Cloning into '${args.directory ?? data.name}'...`);
-        execFileSync("git", gitArgs, { stdio: "inherit" });
-      });
+      if (args.directory) {
+        gitArgs.push(args.directory);
+      }
+
+      consola.info(`Cloning into '${args.directory ?? repo.name}'...`);
+      await gitClone(gitArgs);
     },
   }),
   commandUsage,
