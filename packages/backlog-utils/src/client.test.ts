@@ -20,7 +20,7 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 /** Extract the last request interceptor function registered on the latest createClient result. */
 const getLastRequestInterceptor = (): ((request: Request) => Request) => {
   const client = vi.mocked(createClient).mock.results.at(-1)?.value;
-  const {calls} = client.interceptors.request.use.mock;
+  const { calls } = client.interceptors.request.use.mock;
   expect(calls.length).toBeGreaterThan(0);
   return calls.at(-1)[0];
 };

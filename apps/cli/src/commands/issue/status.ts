@@ -53,7 +53,7 @@ const status = withUsage(
       outputResult({ user: me, issues }, args, (data) => {
         const grouped = new Map<string, typeof data.issues>();
         for (const issue of data.issues) {
-          const {name} = issue.status;
+          const { name } = issue.status;
           const group = grouped.get(name) ?? [];
           group.push(issue);
           grouped.set(name, group);
