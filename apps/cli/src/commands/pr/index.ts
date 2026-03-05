@@ -12,9 +12,6 @@ export const pr = defineCommand({
     status: () => import("./status").then((m) => m.status),
     create: () => import("./create").then((m) => m.create),
     edit: () => import("./edit").then((m) => m.edit),
-    close: () => import("./close").then((m) => m.close),
-    merge: () => import("./merge").then((m) => m.merge),
-    reopen: () => import("./reopen").then((m) => m.reopen),
     comment: () => import("./comment").then((m) => m.comment),
   },
 });

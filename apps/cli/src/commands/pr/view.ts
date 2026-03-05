@@ -56,7 +56,7 @@ const view = withUsage(
       repo: {
         type: "string",
         alias: "R",
-        description: "Repository name",
+        description: "Repository name or ID",
         default: process.env.BACKLOG_REPO,
         required: true,
       },

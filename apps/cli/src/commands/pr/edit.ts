@@ -61,7 +61,7 @@ const edit = withUsage(
       repo: {
         type: "string",
         alias: "R",
-        description: "Repository name",
+        description: "Repository name or ID",
         default: process.env.BACKLOG_REPO,
         required: true,
       },
@@ -70,9 +70,9 @@ const edit = withUsage(
         alias: "t",
         description: "New summary of the pull request",
       },
-      description: {
+      body: {
         type: "string",
-        alias: "d",
+        alias: "b",
         description: "New description of the pull request",
       },
       assignee: {
@@ -81,7 +81,8 @@ const edit = withUsage(
       },
       issue: {
         type: "string",
-        description: "New related issue ID",
+        description: "New related issue ID or issue key",
+        valueHint: "<PROJECT-123>",
       },
       comment: {
         type: "string",
@@ -99,10 +100,20 @@ const edit = withUsage(
       const prNumber = Number(args.number);
       const notifiedUserId = splitArg(args.notify, v.number());
 
+      let issueId: number | undefined;
+      if (args.issue) {
+        if (Number.isNaN(Number(args.issue))) {
+          const issue = await client.getIssue(args.issue);
+          issueId = issue.id;
+        } else {
+          issueId = Number(args.issue);
+        }
+      }
+
       const pullRequest = await client.patchPullRequest(args.project, args.repo, prNumber, {
         summary: args.title,
-        description: args.description,
-        issueId: args.issue ? Number(args.issue) : undefined,
+        description: args.body,
+        issueId,
         assigneeId: args.assignee ? Number(args.assignee) : undefined,
         comment: args.comment ? [args.comment] : undefined,
         notifiedUserId,

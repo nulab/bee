@@ -54,7 +54,7 @@ const list = withUsage(
       repo: {
         type: "string",
         alias: "R",
-        description: "Repository name",
+        description: "Repository name or ID",
         default: process.env.BACKLOG_REPO,
         required: true,
       },
@@ -68,6 +68,14 @@ const list = withUsage(
         type: "string",
         alias: "a",
         description: "Assignee user ID (comma-separated for multiple). Use @me for yourself.",
+      },
+      issue: {
+        type: "string",
+        description: "Issue ID (comma-separated for multiple)",
+      },
+      "created-user": {
+        type: "string",
+        description: "Created user ID (comma-separated for multiple)",
       },
       count: {
         type: "string",
@@ -100,10 +108,14 @@ const list = withUsage(
         : undefined;
 
       const assigneeId = splitArg(args.assignee, v.number());
+      const issueId = splitArg(args.issue, v.number());
+      const createdUserId = splitArg(args["created-user"], v.number());
 
       const pullRequests = await client.getPullRequests(args.project, args.repo, {
         statusId,
         assigneeId: assigneeId.length > 0 ? assigneeId : undefined,
+        issueId: issueId.length > 0 ? issueId : undefined,
+        createdUserId: createdUserId.length > 0 ? createdUserId : undefined,
         count: args.count ? Number(args.count) : undefined,
         offset: args.offset ? Number(args.offset) : undefined,
       });

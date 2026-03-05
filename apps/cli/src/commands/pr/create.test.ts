@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 const mockClient = {
   postPullRequest: vi.fn(),
   getMyself: vi.fn(),
+  getIssue: vi.fn(),
 };
 
 vi.mock("@repo/backlog-utils", () => ({
@@ -38,7 +39,7 @@ describe("pr create", () => {
         base: "main",
         head: "feature",
         title: "Add feature",
-        description: "Details here",
+        body: "Details here",
       },
     } as never);
 
@@ -68,7 +69,7 @@ describe("pr create", () => {
         base: "main",
         head: "feature",
         title: "Title",
-        description: "Desc",
+        body: "Desc",
         assignee: "@me",
       },
     } as never);
@@ -92,7 +93,7 @@ describe("pr create", () => {
         base: "main",
         head: "feature",
         title: "Title",
-        description: "Desc",
+        body: "Desc",
         issue: "456",
       },
     } as never);
@@ -101,6 +102,32 @@ describe("pr create", () => {
       "PROJ",
       "repo",
       expect.objectContaining({ issueId: 456 }),
+    );
+  });
+
+  it("resolves issue key to issue ID", async () => {
+    setupMocks();
+    mockClient.getIssue.mockResolvedValue({ id: 789 });
+    mockClient.postPullRequest.mockResolvedValue({ number: 4, summary: "Title" });
+
+    const { create } = await import("./create");
+    await create.run?.({
+      args: {
+        project: "PROJ",
+        repo: "repo",
+        base: "main",
+        head: "feature",
+        title: "Title",
+        body: "Desc",
+        issue: "PROJ-123",
+      },
+    } as never);
+
+    expect(mockClient.getIssue).toHaveBeenCalledWith("PROJ-123");
+    expect(mockClient.postPullRequest).toHaveBeenCalledWith(
+      "PROJ",
+      "repo",
+      expect.objectContaining({ issueId: 789 }),
     );
   });
 
@@ -118,7 +145,7 @@ describe("pr create", () => {
         base: "main",
         head: "feature",
         title: "Add feature",
-        description: "Details",
+        body: "Details",
         json: "",
       },
     } as never);

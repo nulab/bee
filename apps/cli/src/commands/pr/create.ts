@@ -22,17 +22,17 @@ interactively, omitted required fields will be prompted.`,
     {
       description: "Create a pull request",
       command:
-        'bee pr create -p PROJECT -R repo --base main --head feature -t "Add login" -d "Details"',
+        'bee pr create -p PROJECT -R repo --base main --head feature -t "Add login" -b "Details"',
     },
     {
       description: "Create a pull request assigned to yourself",
       command:
-        'bee pr create -p PROJECT -R repo --base main --head feature -t "Title" -d "Desc" --assignee @me',
+        'bee pr create -p PROJECT -R repo --base main --head feature -t "Title" -b "Desc" --assignee @me',
     },
     {
       description: "Create a pull request linked to an issue",
       command:
-        'bee pr create -p PROJECT -R repo --base main --head feature -t "Title" -d "Desc" --issue 123',
+        'bee pr create -p PROJECT -R repo --base main --head feature -t "Title" -b "Desc" --issue 123',
     },
   ],
 
@@ -59,7 +59,7 @@ const create = withUsage(
       repo: {
         type: "string",
         alias: "R",
-        description: "Repository name",
+        description: "Repository name or ID",
         default: process.env.BACKLOG_REPO,
         required: true,
       },
@@ -76,9 +76,9 @@ const create = withUsage(
         alias: "t",
         description: "Pull request summary",
       },
-      description: {
+      body: {
         type: "string",
-        alias: "d",
+        alias: "b",
         description: "Pull request description",
       },
       assignee: {
@@ -87,7 +87,8 @@ const create = withUsage(
       },
       issue: {
         type: "string",
-        description: "Related issue ID",
+        description: "Related issue ID or issue key",
+        valueHint: "<PROJECT-123>",
       },
       notify: {
         type: "string",
@@ -104,18 +105,28 @@ const create = withUsage(
       const base = await promptRequired("Base branch:", args.base);
       const head = await promptRequired("Head branch:", args.head);
       const summary = await promptRequired("Summary:", args.title);
-      const description = await promptRequired("Description:", args.description);
+      const description = await promptRequired("Body:", args.body);
 
       const assigneeId = args.assignee ? await resolveUserId(client, args.assignee) : undefined;
       const notifiedUserId = splitArg(args.notify, v.number());
       const attachmentId = splitArg(args.attachment, v.number());
+
+      let issueId: number | undefined;
+      if (args.issue) {
+        if (Number.isNaN(Number(args.issue))) {
+          const issue = await client.getIssue(args.issue);
+          issueId = issue.id;
+        } else {
+          issueId = Number(args.issue);
+        }
+      }
 
       const pullRequest = await client.postPullRequest(args.project, args.repo, {
         summary,
         description,
         base,
         branch: head,
-        issueId: args.issue ? Number(args.issue) : undefined,
+        issueId,
         assigneeId,
         notifiedUserId,
         attachmentId,

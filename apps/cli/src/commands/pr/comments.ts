@@ -52,9 +52,17 @@ const comments = withUsage(
       repo: {
         type: "string",
         alias: "R",
-        description: "Repository name",
+        description: "Repository name or ID",
         default: process.env.BACKLOG_REPO,
         required: true,
+      },
+      "min-id": {
+        type: "string",
+        description: "Minimum comment ID",
+      },
+      "max-id": {
+        type: "string",
+        description: "Maximum comment ID",
       },
       count: {
         type: "string",
@@ -74,6 +82,8 @@ const comments = withUsage(
       const prNumber = Number(args.number);
 
       const prComments = await client.getPullRequestComments(args.project, args.repo, prNumber, {
+        minId: args["min-id"] ? Number(args["min-id"]) : undefined,
+        maxId: args["max-id"] ? Number(args["max-id"]) : undefined,
         order: (args.order as "asc" | "desc") ?? "asc",
         count: args.count ? Number(args.count) : undefined,
       });

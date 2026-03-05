@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 const mockClient = {
   patchPullRequest: vi.fn(),
+  getIssue: vi.fn(),
 };
 
 vi.mock("@repo/backlog-utils", () => ({
@@ -77,6 +78,25 @@ describe("pr edit", () => {
       "repo",
       42,
       expect.objectContaining({ notifiedUserId: [111, 222] }),
+    );
+  });
+
+  it("resolves issue key to issue ID", async () => {
+    setupMocks();
+    mockClient.getIssue.mockResolvedValue({ id: 789 });
+    mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
+
+    const { edit } = await import("./edit");
+    await edit.run?.({
+      args: { number: "42", project: "PROJ", repo: "repo", issue: "PROJ-123" },
+    } as never);
+
+    expect(mockClient.getIssue).toHaveBeenCalledWith("PROJ-123");
+    expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
+      "PROJ",
+      "repo",
+      42,
+      expect.objectContaining({ issueId: 789 }),
     );
   });
 
