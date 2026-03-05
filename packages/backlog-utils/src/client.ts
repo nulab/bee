@@ -15,6 +15,9 @@ const addEmptyQueryParamFilter = (client: Client): void => {
     const keysToDelete = [...url.searchParams.entries()]
       .filter(([, value]) => value === "")
       .map(([key]) => key);
+    if (keysToDelete.length === 0) {
+      return request;
+    }
     for (const key of keysToDelete) {
       url.searchParams.delete(key);
     }
