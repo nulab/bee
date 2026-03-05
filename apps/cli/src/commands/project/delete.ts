@@ -1,6 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
 import { confirmOrExit, outputArgs, outputResult } from "@repo/cli-utils";
-import { projectsDelete } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -61,11 +60,7 @@ const deleteProject = withUsage(
 
       const { client } = await getClient();
 
-      const { data: project } = await projectsDelete({
-        client,
-        throwOnError: true,
-        path: { projectIdOrKey: args.project },
-      });
+      const project = await client.deleteProject(args.project);
 
       outputResult(project, args, (data) => {
         consola.success(`Deleted project ${data.projectKey}: ${data.name}`);

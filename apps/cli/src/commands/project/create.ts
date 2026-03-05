@@ -1,6 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
 import { outputArgs, outputResult, promptRequired } from "@repo/cli-utils";
-import { projectsCreate } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -71,17 +70,13 @@ const create = withUsage(
       const key = await promptRequired("Project key:", args.key);
       const name = await promptRequired("Project name:", args.name);
 
-      const { data: project } = await projectsCreate({
-        client,
-        throwOnError: true,
-        body: {
-          key,
-          name,
-          chartEnabled: args["chart-enabled"],
-          subtaskingEnabled: args["subtasking-enabled"],
-          projectLeaderCanEditProjectLeader: args["project-leader-can-edit-project-leader"],
-          textFormattingRule: args["text-formatting-rule"] as "backlog" | "markdown" | undefined,
-        },
+      const project = await client.postProject({
+        key,
+        name,
+        chartEnabled: args["chart-enabled"],
+        subtaskingEnabled: args["subtasking-enabled"],
+        projectLeaderCanEditProjectLeader: args["project-leader-can-edit-project-leader"],
+        textFormattingRule: args["text-formatting-rule"] as "backlog" | "markdown" | undefined,
       });
 
       outputResult(project, args, (data) => {

@@ -1,49 +1,27 @@
 import { getClient } from "@repo/backlog-utils";
-import { projectsAddUser } from "@repo/openapi-client";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(),
-}));
+const mockClient = {
+  postProjectUser: vi.fn(),
+};
 
-vi.mock("@repo/openapi-client", () => ({
-  projectsAddUser: vi.fn(),
+vi.mock("@repo/backlog-utils", () => ({
+  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-const mockClient = {
-  interceptors: { request: { use: vi.fn() } },
-};
-
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
-
 describe("project add-user", () => {
   it("adds a user to a project", async () => {
-    setupMocks();
-    vi.mocked(projectsAddUser).mockResolvedValue({
-      data: { id: 12_345, name: "John Doe" },
-    } as never);
+    mockClient.postProjectUser.mockResolvedValue({ id: 12_345, name: "John Doe" });
 
     const { addUser } = await import("./add-user");
     await addUser.run?.({
       args: { project: "TEST", "user-id": "12345" },
     } as never);
 
-    expect(projectsAddUser).toHaveBeenCalledWith(
-      expect.objectContaining({
-        client: mockClient,
-        throwOnError: true,
-        path: { projectIdOrKey: "TEST" },
-        body: { userId: 12_345 },
-      }),
-    );
+    expect(mockClient.postProjectUser).toHaveBeenCalledWith("TEST", "12345");
     expect(consola.success).toHaveBeenCalledWith("Added user John Doe to project TEST.");
   });
 
@@ -66,11 +44,7 @@ describe("project add-user", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
-    const user = { id: 12_345, name: "John Doe" };
-    vi.mocked(projectsAddUser).mockResolvedValue({
-      data: user,
-    } as never);
+    mockClient.postProjectUser.mockResolvedValue({ id: 12_345, name: "John Doe" });
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 

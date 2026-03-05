@@ -7,7 +7,6 @@ import {
   printTable,
   splitArg,
 } from "@repo/cli-utils";
-import { projectsGetActivities } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
@@ -103,15 +102,10 @@ const activities = withUsage(
 
       const activityTypeId = splitArg(args["activity-type"], v.number());
 
-      const { data: activityList } = await projectsGetActivities({
-        client,
-        throwOnError: true,
-        path: { projectIdOrKey: args.project },
-        query: {
-          "activityTypeId[]": activityTypeId,
-          count: args.count ? Number(args.count) : undefined,
-          order: args.order as "asc" | "desc" | undefined,
-        },
+      const activityList = await client.getProjectActivities(args.project, {
+        activityTypeId,
+        count: args.count ? Number(args.count) : undefined,
+        order: args.order as "asc" | "desc" | undefined,
       });
 
       outputResult(activityList, args, (data) => {

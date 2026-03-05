@@ -1,6 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
 import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { projectsList } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -43,13 +42,9 @@ const list = withUsage(
     async run({ args }) {
       const { client } = await getClient();
 
-      const { data: projects } = await projectsList({
-        client,
-        throwOnError: true,
-        query: {
-          archived: args.archived,
-          all: args.all,
-        },
+      const projects = await client.getProjects({
+        archived: args.archived,
+        all: args.all,
       });
 
       outputResult(projects, args, (data) => {
