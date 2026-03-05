@@ -1,6 +1,5 @@
 import { getClient, openUrl, projectUrl } from "@repo/backlog-utils";
 import { outputArgs, outputResult } from "@repo/cli-utils";
-import { projectsGet } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -55,11 +54,7 @@ const view = withUsage(
         return;
       }
 
-      const { data: project } = await projectsGet({
-        client,
-        throwOnError: true,
-        path: { projectIdOrKey: args.project },
-      });
+      const project = await client.getProject(args.project);
 
       outputResult(project, args, (data) => {
         consola.log("");
@@ -74,7 +69,6 @@ const view = withUsage(
         consola.log(`    Git:                 ${data.useGit ? "Yes" : "No"}`);
         consola.log(`    Subversion:          ${data.useSubversion ? "Yes" : "No"}`);
         consola.log(`    Dev Attributes:      ${data.useDevAttributes ? "Yes" : "No"}`);
-        consola.log(`    Document:            ${data.useDocument ? "Yes" : "No"}`);
         consola.log("");
       });
     },

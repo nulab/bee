@@ -1,21 +1,16 @@
 import { getClient } from "@repo/backlog-utils";
-import { issuesList } from "@repo/openapi-client";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(),
-}));
+const mockClient = {
+  getIssues: vi.fn(),
+};
 
-vi.mock("@repo/openapi-client", () => ({
-  issuesList: vi.fn(),
+vi.mock("@repo/backlog-utils", () => ({
+  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-const mockClient = {
-  interceptors: { request: { use: vi.fn() } },
-};
 
 const setupMocks = () => {
   vi.mocked(getClient).mockResolvedValue({
@@ -46,20 +41,13 @@ const sampleIssues = [
 describe("issue list", () => {
   it("displays issue list in tabular format", async () => {
     setupMocks();
-    vi.mocked(issuesList).mockResolvedValue({
-      data: sampleIssues,
-    } as never);
+    mockClient.getIssues.mockResolvedValue(sampleIssues);
 
     const { list } = await import("./list");
     await list.run?.({ args: {} } as never);
 
     expect(getClient).toHaveBeenCalled();
-    expect(issuesList).toHaveBeenCalledWith(
-      expect.objectContaining({
-        client: mockClient,
-        throwOnError: true,
-      }),
-    );
+    expect(mockClient.getIssues).toHaveBeenCalled();
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("KEY"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-2"));
@@ -67,9 +55,7 @@ describe("issue list", () => {
 
   it("shows message when no issues found", async () => {
     setupMocks();
-    vi.mocked(issuesList).mockResolvedValue({
-      data: [],
-    } as never);
+    mockClient.getIssues.mockResolvedValue([]);
 
     const { list } = await import("./list");
     await list.run?.({ args: {} } as never);
@@ -79,9 +65,7 @@ describe("issue list", () => {
 
   it("shows Unassigned for issues without assignee", async () => {
     setupMocks();
-    vi.mocked(issuesList).mockResolvedValue({
-      data: [sampleIssues[1]],
-    } as never);
+    mockClient.getIssues.mockResolvedValue([sampleIssues[1]]);
 
     const { list } = await import("./list");
     await list.run?.({ args: {} } as never);
@@ -91,57 +75,43 @@ describe("issue list", () => {
 
   it("passes project query parameter", async () => {
     setupMocks();
-    vi.mocked(issuesList).mockResolvedValue({
-      data: [],
-    } as never);
+    mockClient.getIssues.mockResolvedValue([]);
 
     const { list } = await import("./list");
     await list.run?.({ args: { project: "123" } } as never);
 
-    expect(issuesList).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: expect.objectContaining({ "projectId[]": [123] }),
-      }),
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({ projectId: [123] }),
     );
   });
 
   it("passes assignee query parameter", async () => {
     setupMocks();
-    vi.mocked(issuesList).mockResolvedValue({
-      data: [],
-    } as never);
+    mockClient.getIssues.mockResolvedValue([]);
 
     const { list } = await import("./list");
     await list.run?.({ args: { assignee: "42" } } as never);
 
-    expect(issuesList).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: expect.objectContaining({ "assigneeId[]": [42] }),
-      }),
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({ assigneeId: [42] }),
     );
   });
 
   it("passes keyword query parameter", async () => {
     setupMocks();
-    vi.mocked(issuesList).mockResolvedValue({
-      data: [],
-    } as never);
+    mockClient.getIssues.mockResolvedValue([]);
 
     const { list } = await import("./list");
     await list.run?.({ args: { keyword: "login bug" } } as never);
 
-    expect(issuesList).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: expect.objectContaining({ keyword: "login bug" }),
-      }),
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({ keyword: "login bug" }),
     );
   });
 
   it("outputs JSON when --json flag is set", async () => {
     setupMocks();
-    vi.mocked(issuesList).mockResolvedValue({
-      data: sampleIssues,
-    } as never);
+    mockClient.getIssues.mockResolvedValue(sampleIssues);
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 

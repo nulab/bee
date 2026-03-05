@@ -1,30 +1,18 @@
-import { getClient, openUrl } from "@repo/backlog-utils";
-import { projectsGet } from "@repo/openapi-client";
+import { openUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
+const mockClient = {
+  getProject: vi.fn(),
+};
+
 vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(),
+  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
   openUrl: vi.fn(),
   projectUrl: vi.fn((host: string, key: string) => `https://${host}/projects/${key}`),
 }));
 
-vi.mock("@repo/openapi-client", () => ({
-  projectsGet: vi.fn(),
-}));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-const mockClient = {
-  interceptors: { request: { use: vi.fn() } },
-};
-
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
 
 const sampleProject = {
   id: 1,
@@ -43,21 +31,12 @@ const sampleProject = {
 
 describe("project view", () => {
   it("displays project details", async () => {
-    setupMocks();
-    vi.mocked(projectsGet).mockResolvedValue({
-      data: sampleProject,
-    } as never);
+    mockClient.getProject.mockResolvedValue(sampleProject);
 
     const { view } = await import("./view");
     await view.run?.({ args: { project: "PROJ1" } } as never);
 
-    expect(projectsGet).toHaveBeenCalledWith(
-      expect.objectContaining({
-        client: mockClient,
-        throwOnError: true,
-        path: { projectIdOrKey: "PROJ1" },
-      }),
-    );
+    expect(mockClient.getProject).toHaveBeenCalledWith("PROJ1");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Test Project"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ1"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Active"));
@@ -65,10 +44,7 @@ describe("project view", () => {
   });
 
   it("shows Archived status for archived project", async () => {
-    setupMocks();
-    vi.mocked(projectsGet).mockResolvedValue({
-      data: { ...sampleProject, archived: true },
-    } as never);
+    mockClient.getProject.mockResolvedValue({ ...sampleProject, archived: true });
 
     const { view } = await import("./view");
     await view.run?.({ args: { project: "PROJ1" } } as never);
@@ -77,8 +53,6 @@ describe("project view", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    setupMocks();
-
     const { view } = await import("./view");
     await view.run?.({ args: { project: "PROJ1", web: true } } as never);
 
@@ -86,14 +60,11 @@ describe("project view", () => {
     expect(consola.info).toHaveBeenCalledWith(
       "Opening https://example.backlog.com/projects/PROJ1 in your browser.",
     );
-    expect(projectsGet).not.toHaveBeenCalled();
+    expect(mockClient.getProject).not.toHaveBeenCalled();
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
-    vi.mocked(projectsGet).mockResolvedValue({
-      data: sampleProject,
-    } as never);
+    mockClient.getProject.mockResolvedValue(sampleProject);
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 

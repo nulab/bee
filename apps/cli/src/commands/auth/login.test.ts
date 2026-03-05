@@ -1,34 +1,26 @@
-import {
-  addApiKeyAuth,
-  addBearerAuth,
-  exchangeAuthorizationCode,
-  startCallbackServer,
-} from "@repo/backlog-utils";
+import { exchangeAuthorizationCode, startCallbackServer } from "@repo/backlog-utils";
 import { promptRequired } from "@repo/cli-utils";
 import { updateConfig } from "@repo/config";
-import { createClient } from "@repo/openapi-client/client";
-import { usersGetMyself } from "@repo/openapi-client";
+import { Backlog, OAuth2 } from "backlog-js";
 import { spyOnProcessExit } from "@repo/test-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@repo/openapi-client/client", () => ({
-  createClient: vi.fn(() => ({
-    interceptors: { request: { use: vi.fn() } },
-    buildUrl: vi.fn(
-      (opts: { url: string; query?: Record<string, unknown> }) =>
-        `https://example.backlog.com${opts.url}?mocked=true`,
-    ),
-  })),
-}));
+const mockGetMyself = vi.fn();
+const mockGetAuthorizationURL = vi.fn(
+  () => "https://example.backlog.com/OAuth2AccessRequest.action?mocked=true",
+);
 
-vi.mock("@repo/openapi-client", () => ({
-  usersGetMyself: vi.fn(),
+vi.mock("backlog-js", () => ({
+  Backlog: vi.fn(function () {
+    return { getMyself: mockGetMyself };
+  }),
+  OAuth2: vi.fn(function () {
+    return { getAuthorizationURL: mockGetAuthorizationURL };
+  }),
 }));
 
 vi.mock("@repo/backlog-utils", () => ({
-  addApiKeyAuth: vi.fn(),
-  addBearerAuth: vi.fn(),
   exchangeAuthorizationCode: vi.fn(),
   startCallbackServer: vi.fn(),
   openUrl: vi.fn(),
@@ -48,9 +40,7 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 describe("auth login", () => {
   describe("api-key", () => {
     it("authenticates new space with API key", async () => {
-      vi.mocked(usersGetMyself).mockResolvedValue({
-        data: { name: "Test User", userId: "testuser" },
-      } as never);
+      mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("test-api-key");
@@ -63,14 +53,8 @@ describe("auth login", () => {
         args: { method: "api-key" },
       } as never);
 
-      expect(createClient).toHaveBeenCalledWith({
-        baseUrl: "https://example.backlog.com/api/v2",
-      });
-      expect(addApiKeyAuth).toHaveBeenCalledWith(
-        vi.mocked(createClient).mock.results[0].value,
-        "test-api-key",
-      );
-      expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
+      expect(Backlog).toHaveBeenCalledWith({ host: "example.backlog.com", apiKey: "test-api-key" });
+      expect(mockGetMyself).toHaveBeenCalled();
       const result = vi.mocked(updateConfig).mock.results[0]?.value;
       expect(result.spaces).toEqual([
         { host: "example.backlog.com", auth: { method: "api-key", apiKey: "test-api-key" } },
@@ -82,9 +66,7 @@ describe("auth login", () => {
     });
 
     it("updates credentials for existing space", async () => {
-      vi.mocked(usersGetMyself).mockResolvedValue({
-        data: { name: "Test User", userId: "testuser" },
-      } as never);
+      mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("new-api-key");
@@ -117,7 +99,7 @@ describe("auth login", () => {
     });
 
     it("returns error on authentication failure", async () => {
-      vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
+      mockGetMyself.mockRejectedValue(new Error("Unauthorized"));
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("bad-key");
@@ -154,9 +136,7 @@ describe("auth login", () => {
 
   describe("oauth", () => {
     const setupOAuthMocks = () => {
-      vi.mocked(usersGetMyself).mockResolvedValue({
-        data: { name: "OAuth User", userId: "oauthuser" },
-      } as never);
+      mockGetMyself.mockResolvedValue({ name: "OAuth User", userId: "oauthuser" });
       vi.mocked(updateConfig).mockImplementation((updater) =>
         updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
       );
@@ -195,34 +175,26 @@ describe("auth login", () => {
       } as never);
 
       expect(startCallbackServer).toHaveBeenCalled();
-      expect(createClient).toHaveBeenNthCalledWith(1, {
-        baseUrl: "https://example.backlog.com",
+      expect(OAuth2).toHaveBeenCalledWith({
+        clientId: "my-client-id",
+        clientSecret: "my-client-secret",
       });
-      const oauthClient = vi.mocked(createClient).mock.results[0].value;
-      expect(oauthClient.buildUrl).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: "/OAuth2AccessRequest.action",
-          query: expect.objectContaining({
-            response_type: "code",
-            client_id: "my-client-id",
-            redirect_uri: "http://localhost:5033/callback",
-          }),
-        }),
-      );
+      expect(mockGetAuthorizationURL).toHaveBeenCalledWith({
+        host: "example.backlog.com",
+        redirectUri: "http://localhost:5033/callback",
+        state: expect.any(String),
+      });
       expect(exchangeAuthorizationCode).toHaveBeenCalledWith("example.backlog.com", {
         code: "auth-code-123",
         clientId: "my-client-id",
         clientSecret: "my-client-secret",
         redirectUri: "http://localhost:5033/callback",
       });
-      expect(createClient).toHaveBeenNthCalledWith(2, {
-        baseUrl: "https://example.backlog.com/api/v2",
+      expect(Backlog).toHaveBeenCalledWith({
+        host: "example.backlog.com",
+        accessToken: "new-access-token",
       });
-      expect(addBearerAuth).toHaveBeenCalledWith(
-        vi.mocked(createClient).mock.results[1].value,
-        "new-access-token",
-      );
-      expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
+      expect(mockGetMyself).toHaveBeenCalled();
       const result = vi.mocked(updateConfig).mock.results[0]?.value;
       expect(result.spaces).toEqual([
         {
@@ -301,7 +273,7 @@ describe("auth login", () => {
 
     it("calls process.exit(1) when token verification fails", async () => {
       setupOAuthMocks();
-      vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
+      mockGetMyself.mockRejectedValue(new Error("Unauthorized"));
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("my-client-id")

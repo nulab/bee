@@ -1,59 +1,36 @@
 import { getClient } from "@repo/backlog-utils";
-import { projectsList } from "@repo/openapi-client";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(),
-}));
+const mockClient = {
+  getProjects: vi.fn(),
+};
 
-vi.mock("@repo/openapi-client", () => ({
-  projectsList: vi.fn(),
+vi.mock("@repo/backlog-utils", () => ({
+  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-const mockClient = {
-  interceptors: { request: { use: vi.fn() } },
-};
-
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
-
 describe("project list", () => {
   it("displays project list in tabular format", async () => {
-    setupMocks();
-    vi.mocked(projectsList).mockResolvedValue({
-      data: [
-        { projectKey: "PROJ1", name: "Project One", archived: false },
-        { projectKey: "PROJ2", name: "Project Two", archived: true },
-      ],
-    } as never);
+    mockClient.getProjects.mockResolvedValue([
+      { projectKey: "PROJ1", name: "Project One", archived: false },
+      { projectKey: "PROJ2", name: "Project Two", archived: true },
+    ]);
 
     const { list } = await import("./list");
     await list.run?.({ args: {} } as never);
 
     expect(getClient).toHaveBeenCalled();
-    expect(projectsList).toHaveBeenCalledWith(
-      expect.objectContaining({
-        client: mockClient,
-        throwOnError: true,
-      }),
-    );
+    expect(mockClient.getProjects).toHaveBeenCalled();
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("KEY"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ1"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ2"));
   });
 
   it("shows message when no projects found", async () => {
-    setupMocks();
-    vi.mocked(projectsList).mockResolvedValue({
-      data: [],
-    } as never);
+    mockClient.getProjects.mockResolvedValue([]);
 
     const { list } = await import("./list");
     await list.run?.({ args: {} } as never);
@@ -62,43 +39,29 @@ describe("project list", () => {
   });
 
   it("passes archived query parameter", async () => {
-    setupMocks();
-    vi.mocked(projectsList).mockResolvedValue({
-      data: [],
-    } as never);
+    mockClient.getProjects.mockResolvedValue([]);
 
     const { list } = await import("./list");
     await list.run?.({ args: { archived: true } } as never);
 
-    expect(projectsList).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: expect.objectContaining({ archived: true }),
-      }),
+    expect(mockClient.getProjects).toHaveBeenCalledWith(
+      expect.objectContaining({ archived: true }),
     );
   });
 
   it("passes all query parameter", async () => {
-    setupMocks();
-    vi.mocked(projectsList).mockResolvedValue({
-      data: [],
-    } as never);
+    mockClient.getProjects.mockResolvedValue([]);
 
     const { list } = await import("./list");
     await list.run?.({ args: { all: true } } as never);
 
-    expect(projectsList).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: expect.objectContaining({ all: true }),
-      }),
-    );
+    expect(mockClient.getProjects).toHaveBeenCalledWith(expect.objectContaining({ all: true }));
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
-    const projects = [{ projectKey: "PROJ1", name: "Project One", archived: false }];
-    vi.mocked(projectsList).mockResolvedValue({
-      data: projects,
-    } as never);
+    mockClient.getProjects.mockResolvedValue([
+      { projectKey: "PROJ1", name: "Project One", archived: false },
+    ]);
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 

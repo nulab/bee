@@ -53,13 +53,12 @@ TypeScript is configured with `module: "preserve"` / `moduleResolution: "bundler
 ```
 apps/cli             — CLI entry point (citty framework, consola logging)
 apps/docs            — Astro Starlight documentation site
-packages/api-spec    — TypeSpec definitions for Backlog API v2
+packages/backlog-utils — Backlog API client wrapper (backlog-js, OAuth auto-refresh, rate-limit handling)
 packages/cli-utils   — Shared CLI utilities (output formatting, table, splitArg, prompts)
-packages/openapi-client — Generated OpenAPI client with valibot schema re-exports
 packages/tsconfigs   — Shared TypeScript base config
 ```
 
-`@repo/backlog-utils` exposes `getClient()` which returns a hey-api `Client` instance preconfigured with Backlog API v2 base URL, auth, and rate-limit error handling. The `addEmptyQueryParamFilter` interceptor automatically strips empty string query parameters (workaround for citty optional args defaulting to `""`).
+`@repo/backlog-utils` exposes `getClient()` which returns a `backlog-js` `Backlog` instance with OAuth 401 auto-refresh (via Proxy) and rate-limit error handling. Commands call `client.getIssues()`, `client.getProjects()`, etc. directly.
 
 `@nulab/bee` uses citty's `defineCommand` / `runMain` with subcommand registration and a custom help system (see below).
 
@@ -180,17 +179,13 @@ const statuses = splitArg(args.status, vIssueStatusType);
 // --status 1,2,3 → [1, 2, 3] (validated against schema)
 ```
 
-### API response validation with valibot
-
-`@repo/openapi-client` re-exports valibot schemas (e.g., `vIssueSortField`). Use `v.parse()` / `v.safeParse()` for type-safe validation of flag values and API responses.
-
 ### `--web` flag
 
 View commands support `--web` to open the resource in a browser. Build the URL (e.g., `issueUrl`) and pass to `openUrl`.
 
 ### `@me` replacement
 
-`--assignee @me` resolves the current user's ID via `usersGetMyself`. Apply this pattern wherever user IDs accept `@me`.
+`--assignee @me` resolves the current user's ID via `client.getMyself()`. Apply this pattern wherever user IDs accept `@me`.
 
 ## Test Conventions
 

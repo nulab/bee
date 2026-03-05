@@ -1,6 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
 import { outputArgs, outputResult } from "@repo/cli-utils";
-import { projectsAddUser } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -55,12 +54,7 @@ const addUser = withUsage(
 
       const { client } = await getClient();
 
-      const { data: user } = await projectsAddUser({
-        client,
-        throwOnError: true,
-        path: { projectIdOrKey: args.project },
-        body: { userId },
-      });
+      const user = await client.postProjectUser(args.project, String(userId));
 
       outputResult(user, args, (data) => {
         consola.success(`Added user ${data.name} to project ${args.project}.`);

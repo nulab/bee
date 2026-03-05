@@ -1,61 +1,39 @@
-import { getClient } from "@repo/backlog-utils";
-import { projectsGetActivities } from "@repo/openapi-client";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(),
-}));
+const mockClient = {
+  getProjectActivities: vi.fn(),
+};
 
-vi.mock("@repo/openapi-client", () => ({
-  projectsGetActivities: vi.fn(),
+vi.mock("@repo/backlog-utils", () => ({
+  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-const mockClient = {
-  interceptors: { request: { use: vi.fn() } },
-};
-
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
-
 describe("project activities", () => {
   it("displays activities in formatted output", async () => {
-    setupMocks();
-    vi.mocked(projectsGetActivities).mockResolvedValue({
-      data: [
-        {
-          id: 1,
-          type: 1,
-          content: { summary: "Fix login bug" },
-          createdUser: { name: "Test User" },
-          created: "2024-01-15T10:30:00Z",
-        },
-        {
-          id: 2,
-          type: 2,
-          content: { key_id: 123 },
-          createdUser: { name: "Another User" },
-          created: "2024-01-14T09:00:00Z",
-        },
-      ],
-    } as never);
+    mockClient.getProjectActivities.mockResolvedValue([
+      {
+        id: 1,
+        type: 1,
+        content: { summary: "Fix login bug" },
+        createdUser: { name: "Test User" },
+        created: "2024-01-15T10:30:00Z",
+      },
+      {
+        id: 2,
+        type: 2,
+        content: { key_id: 123 },
+        createdUser: { name: "Another User" },
+        created: "2024-01-14T09:00:00Z",
+      },
+    ]);
 
     const { activities } = await import("./activities");
     await activities.run?.({ args: { project: "PROJ1" } } as never);
 
-    expect(projectsGetActivities).toHaveBeenCalledWith(
-      expect.objectContaining({
-        client: mockClient,
-        throwOnError: true,
-        path: { projectIdOrKey: "PROJ1" },
-      }),
-    );
+    expect(mockClient.getProjectActivities).toHaveBeenCalledWith("PROJ1", expect.any(Object));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("2024-01-15"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Issue Created"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Fix login bug"));
@@ -63,10 +41,7 @@ describe("project activities", () => {
   });
 
   it("shows message when no activities found", async () => {
-    setupMocks();
-    vi.mocked(projectsGetActivities).mockResolvedValue({
-      data: [],
-    } as never);
+    mockClient.getProjectActivities.mockResolvedValue([]);
 
     const { activities } = await import("./activities");
     await activities.run?.({ args: { project: "PROJ1" } } as never);
@@ -75,46 +50,37 @@ describe("project activities", () => {
   });
 
   it("passes activity type filter as array of numbers", async () => {
-    setupMocks();
-    vi.mocked(projectsGetActivities).mockResolvedValue({
-      data: [],
-    } as never);
+    mockClient.getProjectActivities.mockResolvedValue([]);
 
     const { activities } = await import("./activities");
     await activities.run?.({
       args: { project: "PROJ1", "activity-type": "1,2,3" },
     } as never);
 
-    expect(projectsGetActivities).toHaveBeenCalledWith(
+    expect(mockClient.getProjectActivities).toHaveBeenCalledWith(
+      "PROJ1",
       expect.objectContaining({
-        query: expect.objectContaining({
-          "activityTypeId[]": [1, 2, 3],
-        }),
+        activityTypeId: [1, 2, 3],
       }),
     );
   });
 
   it("passes count parameter", async () => {
-    setupMocks();
-    vi.mocked(projectsGetActivities).mockResolvedValue({
-      data: [],
-    } as never);
+    mockClient.getProjectActivities.mockResolvedValue([]);
 
     const { activities } = await import("./activities");
     await activities.run?.({
       args: { project: "PROJ1", count: "50" },
     } as never);
 
-    expect(projectsGetActivities).toHaveBeenCalledWith(
-      expect.objectContaining({
-        query: expect.objectContaining({ count: 50 }),
-      }),
+    expect(mockClient.getProjectActivities).toHaveBeenCalledWith(
+      "PROJ1",
+      expect.objectContaining({ count: 50 }),
     );
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
-    const activityData = [
+    mockClient.getProjectActivities.mockResolvedValue([
       {
         id: 1,
         type: 1,
@@ -122,10 +88,7 @@ describe("project activities", () => {
         createdUser: { name: "User" },
         created: "2024-01-15T10:30:00Z",
       },
-    ];
-    vi.mocked(projectsGetActivities).mockResolvedValue({
-      data: activityData,
-    } as never);
+    ]);
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 

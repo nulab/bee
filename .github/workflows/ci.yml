@@ -33,9 +33,6 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Generate OpenAPI client
-        run: pnpm --filter @repo/openapi build && pnpm --filter @repo/openapi-client build
-
       - name: Test
         run: pnpm exec vitest run --coverage.enabled
 
@@ -52,9 +49,6 @@ jobs:
       - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
 
       - run: pnpm install --frozen-lockfile
-
-      - name: Generate OpenAPI client
-        run: pnpm --filter @repo/openapi build && pnpm --filter @repo/openapi-client build
 
       - name: Type check
         run: pnpm run typecheck

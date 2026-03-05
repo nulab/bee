@@ -1,23 +1,19 @@
-import { addBearerAuth, refreshAccessToken } from "@repo/backlog-utils";
-import { createClient } from "@repo/openapi-client/client";
-import { usersGetMyself } from "@repo/openapi-client";
+import { refreshAccessToken } from "@repo/backlog-utils";
 import { resolveSpace, updateSpaceAuth } from "@repo/config";
+import { Backlog } from "backlog-js";
 import { spyOnProcessExit } from "@repo/test-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@repo/openapi-client/client", () => ({
-  createClient: vi.fn(() => ({
-    interceptors: { request: { use: vi.fn() } },
-  })),
-}));
+const mockGetMyself = vi.fn();
 
-vi.mock("@repo/openapi-client", () => ({
-  usersGetMyself: vi.fn(),
+vi.mock("backlog-js", () => ({
+  Backlog: vi.fn(function () {
+    return { getMyself: mockGetMyself };
+  }),
 }));
 
 vi.mock("@repo/backlog-utils", () => ({
-  addBearerAuth: vi.fn(),
   refreshAccessToken: vi.fn(),
 }));
 
@@ -100,9 +96,7 @@ describe("auth refresh", () => {
       expires_in: 3600,
       refresh_token: "new-refresh",
     });
-    vi.mocked(usersGetMyself).mockResolvedValue({
-      data: { name: "Test User", userId: "testuser" },
-    } as never);
+    mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });
 
     const { refresh } = await import("./refresh");
     await refresh.run?.({ args: {} } as never);
@@ -112,14 +106,11 @@ describe("auth refresh", () => {
       clientId: "client-id",
       clientSecret: "client-secret",
     });
-    expect(createClient).toHaveBeenCalledWith({
-      baseUrl: "https://example.backlog.com/api/v2",
+    expect(Backlog).toHaveBeenCalledWith({
+      host: "example.backlog.com",
+      accessToken: "new-access",
     });
-    expect(addBearerAuth).toHaveBeenCalledWith(
-      vi.mocked(createClient).mock.results[0].value,
-      "new-access",
-    );
-    expect(usersGetMyself).toHaveBeenCalledWith(expect.objectContaining({ throwOnError: true }));
+    expect(mockGetMyself).toHaveBeenCalled();
     expect(updateSpaceAuth).toHaveBeenCalledWith("example.backlog.com", {
       method: "oauth",
       accessToken: "new-access",
@@ -173,7 +164,7 @@ describe("auth refresh", () => {
       expires_in: 3600,
       refresh_token: "new-refresh",
     });
-    vi.mocked(usersGetMyself).mockRejectedValue(new Error("Unauthorized"));
+    mockGetMyself.mockRejectedValue(new Error("Unauthorized"));
     const exitSpy = spyOnProcessExit();
 
     const { refresh } = await import("./refresh");

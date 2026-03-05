@@ -1,46 +1,11 @@
-import { type Client, createClient } from "@repo/openapi-client/client";
+import { Backlog, Error as BacklogErrors } from "backlog-js";
 import { refreshAccessToken } from "./oauth";
 import { formatResetTime } from "./rate-limit";
 import { resolveSpace, updateSpaceAuth } from "@repo/config";
 import consola from "consola";
-import { ofetch } from "ofetch";
 
 /** The type of the authenticated API client. */
-type BacklogClient = Client;
-
-/** Adds a request interceptor that removes query parameters with empty values. */
-const addEmptyQueryParamFilter = (client: Client): void => {
-  client.interceptors.request.use((request) => {
-    const url = new URL(request.url);
-    const keysToDelete = [...url.searchParams.entries()]
-      .filter(([, value]) => value === "")
-      .map(([key]) => key);
-    if (keysToDelete.length === 0) {
-      return request;
-    }
-    for (const key of keysToDelete) {
-      url.searchParams.delete(key);
-    }
-    return new Request(url, request);
-  });
-};
-
-/** Adds a request interceptor that sets the apiKey query parameter. */
-const addApiKeyAuth = (client: Client, apiKey: string): void => {
-  client.interceptors.request.use((request) => {
-    const url = new URL(request.url);
-    url.searchParams.set("apiKey", apiKey);
-    return new Request(url, request);
-  });
-};
-
-/** Adds a request interceptor that sets the Authorization Bearer header. */
-const addBearerAuth = (client: Client, token: string): void => {
-  client.interceptors.request.use((request) => {
-    request.headers.set("Authorization", `Bearer ${token}`);
-    return request;
-  });
-};
+type BacklogClient = Backlog;
 
 /**
  * Resolves the active space and creates an authenticated API client.
@@ -60,21 +25,17 @@ const getClient = async (): Promise<{
   const resolved = resolveSpace();
 
   if (resolved) {
-    const baseUrl = `https://${resolved.host}/api/v2`;
-
     if (resolved.auth.method === "api-key") {
-      const client = createClient({
-        baseUrl,
-        onResponseError: handleRateLimitError,
+      const client = new Backlog({
+        host: resolved.host,
+        apiKey: resolved.auth.apiKey,
       });
-      addEmptyQueryParamFilter(client);
-      addApiKeyAuth(client, resolved.auth.apiKey);
       return { client, host: resolved.host };
     }
 
     // OAuth: Create client with automatic token refresh on 401
     return {
-      client: createOAuthClient(baseUrl, resolved.host, resolved.auth),
+      client: createOAuthClient(resolved.host, resolved.auth),
       host: resolved.host,
     };
   }
@@ -84,12 +45,7 @@ const getClient = async (): Promise<{
   const envHost = process.env.BACKLOG_SPACE;
 
   if (envApiKey && envHost) {
-    const client = createClient({
-      baseUrl: `https://${envHost}/api/v2`,
-      onResponseError: handleRateLimitError,
-    });
-    addEmptyQueryParamFilter(client);
-    addApiKeyAuth(client, envApiKey);
+    const client = new Backlog({ host: envHost, apiKey: envApiKey });
     return { client, host: envHost };
   }
 
@@ -98,13 +54,12 @@ const getClient = async (): Promise<{
 };
 
 /**
- * Creates an OAuth-authenticated hey-api client with automatic 401 token refresh.
+ * Creates an OAuth-authenticated Backlog client with automatic 401 token refresh.
  *
- * Uses a custom ofetch instance that intercepts 401 responses, refreshes the
- * access token, and retries the original request.
+ * Uses a Proxy that intercepts method calls and retries on 401 after refreshing
+ * the access token.
  */
 const createOAuthClient = (
-  baseUrl: string,
   host: string,
   oauthAuth: {
     accessToken: string;
@@ -112,14 +67,13 @@ const createOAuthClient = (
     clientId?: string;
     clientSecret?: string;
   },
-): Client => {
-  let currentAccessToken = oauthAuth.accessToken;
-  let refreshPromise: Promise<void> | null = null;
+): Backlog => {
+  let currentClient = new Backlog({ host, accessToken: oauthAuth.accessToken });
+  let refreshPromise: Promise<boolean> | null = null;
 
   const refreshTokenIfNeeded = async (): Promise<boolean> => {
     if (refreshPromise) {
-      await refreshPromise;
-      return currentAccessToken !== oauthAuth.accessToken;
+      return refreshPromise;
     }
 
     const { clientId, clientSecret, refreshToken } = oauthAuth;
@@ -131,8 +85,6 @@ const createOAuthClient = (
       return false;
     }
 
-    let succeeded = false;
-
     refreshPromise = (async () => {
       try {
         consola.start("Access token expired. Refreshing...");
@@ -142,7 +94,10 @@ const createOAuthClient = (
           refreshToken,
         });
 
-        currentAccessToken = tokenResponse.access_token;
+        currentClient = new Backlog({
+          host,
+          accessToken: tokenResponse.access_token,
+        });
 
         updateSpaceAuth(host, {
           method: "oauth",
@@ -153,50 +108,54 @@ const createOAuthClient = (
         });
 
         consola.success("Token refreshed successfully.");
-        succeeded = true;
+        return true;
       } catch {
         consola.error(
           "OAuth session has expired. Run `bl auth login -m oauth` to re-authenticate.",
         );
+        return false;
       }
     })();
 
-    await refreshPromise;
+    const result = await refreshPromise;
     refreshPromise = null;
-    return succeeded;
+    return result;
   };
 
-  const customOfetch = ofetch.create({
-    onResponseError: async ({ response }) => {
-      handleRateLimitError({ response });
-
-      if (response.status === 401) {
-        const refreshed = await refreshTokenIfNeeded();
-        if (!refreshed) {
-          process.exit(1);
-        }
+  const proxy = new Proxy(currentClient, {
+    get(_target, prop, receiver) {
+      const value = Reflect.get(currentClient, prop, receiver);
+      if (typeof value !== "function") {
+        return value;
       }
+      return async (...args: unknown[]) => {
+        try {
+          return await value.apply(currentClient, args);
+        } catch (error) {
+          handleRateLimitError(error);
+
+          if (error instanceof BacklogErrors.BacklogAuthError && error.status === 401) {
+            const refreshed = await refreshTokenIfNeeded();
+            if (!refreshed) {
+              process.exit(1);
+            }
+            // Retry with the new client
+            const retryValue = Reflect.get(currentClient, prop, receiver);
+            return await (retryValue as (...a: unknown[]) => unknown).apply(currentClient, args);
+          }
+
+          throw error;
+        }
+      };
     },
-    retry: 1,
-    retryStatusCodes: [401],
   });
 
-  const client = createClient({ baseUrl, ofetch: customOfetch });
-  addEmptyQueryParamFilter(client);
-  client.interceptors.request.use((request) => {
-    request.headers.set("Authorization", `Bearer ${currentAccessToken}`);
-    return request;
-  });
-  return client;
+  return proxy;
 };
 
-const handleRateLimitError = ({
-  response,
-}: {
-  response: { status: number; headers: { get(name: string): string | null } };
-}) => {
-  if (response.status === 429) {
-    const resetEpoch = response.headers.get("X-RateLimit-Reset");
+const handleRateLimitError = (error: unknown): void => {
+  if (error instanceof BacklogErrors.BacklogApiError && error.status === 429) {
+    const resetEpoch = error.response.headers.get("X-RateLimit-Reset");
     const resetMessage = resetEpoch
       ? `Rate limit resets at ${formatResetTime(Number(resetEpoch))}.`
       : "Please wait and try again later.";
@@ -205,4 +164,4 @@ const handleRateLimitError = ({
 };
 
 export type { BacklogClient };
-export { addApiKeyAuth, addBearerAuth, getClient };
+export { getClient };

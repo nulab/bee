@@ -1,6 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
 import { outputArgs, outputResult } from "@repo/cli-utils";
-import { issuesList, usersGetMyself } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -29,18 +28,11 @@ const status = withUsage(
     async run({ args }) {
       const { client } = await getClient();
 
-      const { data: me } = await usersGetMyself({
-        client,
-        throwOnError: true,
-      });
+      const me = await client.getMyself();
 
-      const { data: issues } = await issuesList({
-        client,
-        throwOnError: true,
-        query: {
-          "assigneeId[]": [me.id],
-          count: 100,
-        },
+      const issues = await client.getIssues({
+        assigneeId: [me.id],
+        count: 100,
       });
 
       if (issues.length === 0) {

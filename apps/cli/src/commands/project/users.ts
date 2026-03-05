@@ -1,6 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
 import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { projectsGetUsers } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -13,10 +12,6 @@ Displays each user's ID, user ID, name, and role within the project.`,
 
   examples: [
     { description: "List project members", command: "bee project users PROJECT_KEY" },
-    {
-      description: "Exclude group members",
-      command: "bee project users PROJECT_KEY --exclude-group-members",
-    },
     { description: "Output as JSON", command: "bee project users PROJECT_KEY --json" },
   ],
 
@@ -39,22 +34,11 @@ const users = withUsage(
         required: true,
         default: process.env.BACKLOG_PROJECT,
       },
-      "exclude-group-members": {
-        type: "boolean",
-        description: "Exclude members that are part of project groups",
-      },
     },
     async run({ args }) {
       const { client } = await getClient();
 
-      const { data: members } = await projectsGetUsers({
-        client,
-        throwOnError: true,
-        path: { projectIdOrKey: args.project },
-        query: {
-          excludeGroupMembers: args["exclude-group-members"],
-        },
-      });
+      const members = await client.getProjectUsers(args.project);
 
       outputResult(members, args, (data) => {
         if (data.length === 0) {

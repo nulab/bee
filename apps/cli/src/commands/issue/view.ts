@@ -1,6 +1,5 @@
 import { getClient, issueUrl, openUrl } from "@repo/backlog-utils";
 import { formatDate, outputArgs, outputResult } from "@repo/cli-utils";
-import { issuesGet, issuesGetComments } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -55,21 +54,11 @@ const view = withUsage(
         return;
       }
 
-      const { data: issue } = await issuesGet({
-        client,
-        throwOnError: true,
-        path: { issueIdOrKey: args.issue },
-      });
+      const issue = await client.getIssue(args.issue);
 
-      const commentsResponse = args.comments
-        ? await issuesGetComments({
-            client,
-            throwOnError: true,
-            path: { issueIdOrKey: args.issue },
-            query: { order: "asc" },
-          })
-        : undefined;
-      const comments = commentsResponse?.data ?? [];
+      const comments = args.comments
+        ? await client.getIssueComments(args.issue, { order: "asc" })
+        : [];
 
       outputResult(issue, args, (data) => {
         consola.log("");
@@ -101,8 +90,10 @@ const view = withUsage(
         if (data.milestone.length > 0) {
           consola.log(`    Milestones:  ${data.milestone.map((m) => m.name).join(", ")}`);
         }
-        if (data.version && data.version.length > 0) {
-          consola.log(`    Versions:    ${data.version.map((v) => v.name).join(", ")}`);
+        if (data.versions && data.versions.length > 0) {
+          consola.log(
+            `    Versions:    ${data.versions.map((v: { name: string }) => v.name).join(", ")}`,
+          );
         }
 
         if (data.description) {

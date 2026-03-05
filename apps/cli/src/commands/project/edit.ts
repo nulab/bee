@@ -1,6 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
 import { outputArgs, outputResult } from "@repo/cli-utils";
-import { projectsUpdate } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -79,19 +78,14 @@ const edit = withUsage(
     async run({ args }) {
       const { client } = await getClient();
 
-      const { data: project } = await projectsUpdate({
-        client,
-        throwOnError: true,
-        path: { projectIdOrKey: args.project },
-        body: {
-          name: args.name,
-          key: args.key,
-          chartEnabled: args["chart-enabled"],
-          subtaskingEnabled: args["subtasking-enabled"],
-          projectLeaderCanEditProjectLeader: args["project-leader-can-edit-project-leader"],
-          textFormattingRule: args["text-formatting-rule"] as "backlog" | "markdown" | undefined,
-          archived: args.archived,
-        },
+      const project = await client.patchProject(args.project, {
+        name: args.name,
+        key: args.key,
+        chartEnabled: args["chart-enabled"],
+        subtaskingEnabled: args["subtasking-enabled"],
+        projectLeaderCanEditProjectLeader: args["project-leader-can-edit-project-leader"],
+        textFormattingRule: args["text-formatting-rule"] as "backlog" | "markdown" | undefined,
+        archived: args.archived,
       });
 
       outputResult(project, args, (data) => {
