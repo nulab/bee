@@ -13,11 +13,116 @@ model Project {
   useDocument: boolean;
   useFileSharing: boolean;
   useWikiTreeView: boolean;
-  useSubversion: boolean;
-  useGit: boolean;
+  useSubversion?: boolean;
+  useGit?: boolean;
   useOriginalImageSizeAtWiki: boolean;
-  textFormattingRule: "backlog" | "markdown";
+  textFormattingRule: "backlog" | "markdown" | null;
   archived: boolean;
   displayOrder: int32;
   useDevAttributes: boolean;
+}
+
+/** Request body for Add Project. */
+model AddProjectRequest {
+  @doc("Project Name")
+  name: string;
+
+  @doc("Project Key (Uppercase letters (A-Z), numbers (0-9) and underscore (_) can be used.)")
+  key: string;
+
+  @doc("Enable chart")
+  chartEnabled?: boolean;
+
+  @doc("Consider Resolved and statuses after as Closed")
+  useResolvedForChart?: boolean;
+
+  @doc("Enable subtasking")
+  subtaskingEnabled?: boolean;
+
+  @doc("Allow project administrators to manage each other")
+  projectLeaderCanEditProjectLeader?: boolean;
+
+  @doc("Enable Wiki")
+  useWiki?: boolean;
+
+  @doc("Enable shared files")
+  useFileSharing?: boolean;
+
+  @doc("Enable Wiki tree view")
+  useWikiTreeView?: boolean;
+
+  @doc("Enable Subversion")
+  useSubversion?: boolean;
+
+  @doc("Enable Git")
+  useGit?: boolean;
+
+  @doc("Display images in Wikis in their original size")
+  useOriginalImageSizeAtWiki?: boolean;
+
+  @doc("Formatting rules. {backlog|markdown}")
+  textFormattingRule?: "backlog" | "markdown";
+
+  @doc("Enable priorities, versions and milestones")
+  useDevAttributes?: boolean;
+}
+
+/** Request body for Update Project. */
+model UpdateProjectRequest {
+  @doc("Project Name")
+  name?: string;
+
+  @doc("Project Key")
+  key?: string;
+
+  @doc("Enable chart")
+  chartEnabled?: boolean;
+
+  @doc("Consider Resolved and statuses after as Closed")
+  useResolvedForChart?: boolean;
+
+  @doc("Enable subtasking")
+  subtaskingEnabled?: boolean;
+
+  @doc("Allow project administrators to manage each other")
+  projectLeaderCanEditProjectLeader?: boolean;
+
+  @doc("Enable Wiki")
+  useWiki?: boolean;
+
+  @doc("Enable shared files")
+  useFileSharing?: boolean;
+
+  @doc("Enable Wiki tree view")
+  useWikiTreeView?: boolean;
+
+  @doc("Enable Subversion")
+  useSubversion?: boolean;
+
+  @doc("Enable Git")
+  useGit?: boolean;
+
+  @doc("Display images in Wikis in their original size")
+  useOriginalImageSizeAtWiki?: boolean;
+
+  @doc("Formatting rules. {backlog|markdown}")
+  textFormattingRule?: "backlog" | "markdown";
+
+  @doc("Archive project")
+  archived?: boolean;
+
+  @doc("Enable priorities, versions and milestones")
+  useDevAttributes?: boolean;
+}
+
+/** Request body for Add Project User. */
+model AddProjectUserRequest {
+  @doc("User ID")
+  userId: int64;
+}
+
+/** Request body for Delete Project User. */
+model DeleteProjectUserRequest {
+  @doc("User ID")
+  userId: int64;
 }

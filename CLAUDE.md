@@ -114,6 +114,20 @@ Follow gh CLI conventions for `args` description strings:
 - **Choices use `{x|y}` notation** — write `{api-key|oauth}`, not `api-key or oauth`.
 - **`e.g.,` flows naturally in the sentence** — write `The hostname of the Backlog space. e.g., xxx.backlog.com`, not `Space hostname (e.g., xxx.backlog.com)`.
 - **Same-meaning arguments share the same description across commands** — if `--space` means the same thing in `auth login` and `auth logout`, use the identical description string. Do not vary wording per command context.
+- **Edit/update flags signal intent in the description** — in `edit` / `update` commands, descriptions must make it clear the flag sets a new value:
+  - String flags: `"New X of the Y"` (e.g., `"New name of the project"`)
+  - Boolean toggles: `"Change whether X"` (e.g., `"Change whether the chart is enabled"`)
+  - Enum flags: `"Change X. {a|b}"` (e.g., `"Change text formatting rule. {backlog|markdown}"`)
+
+### Short flag aliases
+
+Following gh CLI conventions, only assign single-letter aliases (`-n`, `-d`, etc.) to flags that are **high-frequency and cross-cutting** — flags users type routinely across many commands (e.g., `--name`, `--body`, `--title`). Leave all other flags long-form only:
+
+- **Settings / toggles** (`--archived`, `--chart-enabled`) — infrequently changed, long-form is fine.
+- **Operation-prefixed flags** (`--add-label`, `--remove-label`) — short aliases would obscure the operation semantics.
+- **Safety / confirmation flags** — intentionally verbose to force deliberate typing.
+
+When two flags in the same command would collide on the same letter, one (or both) must stay long-form. Prefer giving the alias to the more frequently used flag.
 
 ### Environment variable defaults for arguments
 

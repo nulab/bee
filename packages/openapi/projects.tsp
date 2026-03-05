@@ -46,4 +46,51 @@ interface Projects {
     @query count?: int32,
     @query order?: "asc" | "desc",
   ): Activity[] | BacklogErrorResponse;
+
+  @summary("Add Project")
+  @doc("Adds a new project.")
+  @post
+  op create(
+    @header contentType: "application/x-www-form-urlencoded",
+    @body body: AddProjectRequest,
+  ): {
+    @statusCode statusCode: 201;
+    @body body: Project;
+  } | BacklogErrorResponse;
+
+  @summary("Update Project")
+  @doc("Updates information about project.")
+  @patch(#{implicitOptionality: true})
+  @route("/{projectIdOrKey}")
+  op update(
+    @path projectIdOrKey: string,
+    @header contentType: "application/x-www-form-urlencoded",
+    @body body: UpdateProjectRequest,
+  ): Project | BacklogErrorResponse;
+
+  @summary("Delete Project")
+  @doc("Deletes project.")
+  @delete
+  @route("/{projectIdOrKey}")
+  op delete(@path projectIdOrKey: string): Project | BacklogErrorResponse;
+
+  @summary("Add Project User")
+  @doc("Adds user to list of project members.")
+  @post
+  @route("/{projectIdOrKey}/users")
+  op addUser(
+    @path projectIdOrKey: string,
+    @header contentType: "application/x-www-form-urlencoded",
+    @body body: AddProjectUserRequest,
+  ): User | BacklogErrorResponse;
+
+  @summary("Delete Project User")
+  @doc("Removes user from list of project members.")
+  @delete
+  @route("/{projectIdOrKey}/users")
+  op deleteUser(
+    @path projectIdOrKey: string,
+    @header contentType: "application/x-www-form-urlencoded",
+    @body body: DeleteProjectUserRequest,
+  ): User | BacklogErrorResponse;
 }
