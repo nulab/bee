@@ -10,10 +10,8 @@
   },
   "dependencies": {
     "@repo/config": "workspace:*",
-    "@repo/openapi-client": "workspace:*",
     "backlog-js": "^0.16.0",
     "consola": "^3.4.2",
-    "ofetch": "^1.4.1",
     "open": "^10.1.0"
   },
   "devDependencies": {
