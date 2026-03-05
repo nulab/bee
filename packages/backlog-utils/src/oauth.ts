@@ -1,5 +1,4 @@
-import { createClient } from "@repo/openapi-client/client";
-import { oAuthToken } from "@repo/openapi-client";
+import { OAuth2 } from "backlog-js";
 
 /**
  * OAuth token response from Backlog API.
@@ -24,24 +23,19 @@ const exchangeAuthorizationCode = async (
     redirectUri: string;
   },
 ): Promise<OAuthTokenResponse> => {
-  const client = createClient({ baseUrl: `https://${host}/api/v2` });
-  const { data } = await oAuthToken({
-    client,
-    throwOnError: true,
-    body: {
-      grant_type: "authorization_code",
-      code: params.code,
-      client_id: params.clientId,
-      client_secret: params.clientSecret,
-      redirect_uri: params.redirectUri,
-    },
+  const oauth2 = new OAuth2({
+    clientId: params.clientId,
+    clientSecret: params.clientSecret,
   });
-  return data;
+  return oauth2.getAccessToken({
+    host,
+    code: params.code,
+    redirectUri: params.redirectUri,
+  });
 };
 
 /**
  * Refreshes an OAuth access token using a refresh token.
- * Creates a plain client (no retry/interceptors) to avoid 401 retry loops.
  */
 const refreshAccessToken = async (
   host: string,
@@ -51,18 +45,14 @@ const refreshAccessToken = async (
     refreshToken: string;
   },
 ): Promise<OAuthTokenResponse> => {
-  const client = createClient({ baseUrl: `https://${host}/api/v2` });
-  const { data } = await oAuthToken({
-    client,
-    throwOnError: true,
-    body: {
-      grant_type: "refresh_token",
-      client_id: params.clientId,
-      client_secret: params.clientSecret,
-      refresh_token: params.refreshToken,
-    },
+  const oauth2 = new OAuth2({
+    clientId: params.clientId,
+    clientSecret: params.clientSecret,
   });
-  return data;
+  return oauth2.refreshAccessToken({
+    host,
+    refreshToken: params.refreshToken,
+  });
 };
 
 export { exchangeAuthorizationCode, refreshAccessToken };
