@@ -61,6 +61,17 @@ export default defineConfig({
                 { label: "project activities", link: "/commands/project/activities" },
               ],
             },
+            {
+              label: "document",
+              items: [
+                { label: "document list", link: "/commands/document/list" },
+                { label: "document view", link: "/commands/document/view" },
+                { label: "document tree", link: "/commands/document/tree" },
+                { label: "document attachments", link: "/commands/document/attachments" },
+                { label: "document create", link: "/commands/document/create" },
+                { label: "document delete", link: "/commands/document/delete" },
+              ],
+            },
           ],
         },
       ],
