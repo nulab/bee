@@ -32,7 +32,7 @@ const view = withUsage(
       ...outputArgs,
       issue: {
         type: "positional",
-        description: "Issue key or ID. e.g., PROJECT-123",
+        description: "Issue ID or issue key. e.g., PROJECT-123",
         required: true,
       },
       comments: {
