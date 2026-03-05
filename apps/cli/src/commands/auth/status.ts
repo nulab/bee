@@ -2,6 +2,7 @@ import { loadConfig } from "@repo/config";
 import { type Entity, Backlog } from "backlog-js";
 import { defineCommand } from "citty";
 import consola from "consola";
+import { printDefinitionList } from "@repo/cli-utils";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
@@ -79,20 +80,19 @@ const status = withUsage(
 
         consola.log("");
         consola.log(`  ${label}`);
-        consola.log(`    Method: ${space.auth.method}`);
-
-        if (user) {
-          consola.log(`    User:   ${user.name} (${user.userId})`);
-          consola.log("    Status: Authenticated");
-        } else {
-          consola.log("    Status: Authentication failed");
-        }
-
-        if (args["show-token"]) {
-          const token =
-            space.auth.method === "api-key" ? space.auth.apiKey : space.auth.accessToken;
-          consola.log(`    Token:  ${token}`);
-        }
+        printDefinitionList([
+          ["Method", space.auth.method],
+          ["User", user ? `${user.name} (${user.userId})` : undefined],
+          ["Status", user ? "Authenticated" : "Authentication failed"],
+          [
+            "Token",
+            args["show-token"]
+              ? space.auth.method === "api-key"
+                ? space.auth.apiKey
+                : space.auth.accessToken
+              : undefined,
+          ],
+        ]);
       }
 
       consola.log("");

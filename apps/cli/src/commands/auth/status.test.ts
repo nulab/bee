@@ -35,9 +35,9 @@ describe("auth status", () => {
     expect(Backlog).toHaveBeenCalledWith({ host: "example.backlog.com", apiKey: "key" });
     expect(mockGetMyself).toHaveBeenCalled();
     expect(consola.log).toHaveBeenCalledWith("  example.backlog.com (default)");
-    expect(consola.log).toHaveBeenCalledWith("    Method: api-key");
-    expect(consola.log).toHaveBeenCalledWith("    User:   Test User (testuser)");
-    expect(consola.log).toHaveBeenCalledWith("    Status: Authenticated");
+    expect(consola.log).toHaveBeenCalledWith("    Method  api-key");
+    expect(consola.log).toHaveBeenCalledWith("    User    Test User (testuser)");
+    expect(consola.log).toHaveBeenCalledWith("    Status  Authenticated");
   });
 
   it("shows message when no spaces are registered", async () => {
@@ -97,7 +97,7 @@ describe("auth status", () => {
       args: { "show-token": true },
     } as never);
 
-    expect(consola.log).toHaveBeenCalledWith("    Token:  my-secret-key");
+    expect(consola.log).toHaveBeenCalledWith("    Token   my-secret-key");
   });
 
   it("displays Authentication failed when token verification fails", async () => {
@@ -117,7 +117,7 @@ describe("auth status", () => {
     const { status } = await import("./status");
     await status.run?.({ args: {} } as never);
 
-    expect(consola.log).toHaveBeenCalledWith("    Status: Authentication failed");
+    expect(consola.log).toHaveBeenCalledWith("    Status  Authentication failed");
     expect(consola.debug).toHaveBeenCalledWith("Token verification failed:", expect.any(Error));
   });
 
@@ -147,8 +147,8 @@ describe("auth status", () => {
       accessToken: "oauth-access-token",
     });
     expect(mockGetMyself).toHaveBeenCalled();
-    expect(consola.log).toHaveBeenCalledWith("    Method: oauth");
-    expect(consola.log).toHaveBeenCalledWith("    User:   OAuth User (oauthuser)");
+    expect(consola.log).toHaveBeenCalledWith("    Method  oauth");
+    expect(consola.log).toHaveBeenCalledWith("    User    OAuth User (oauthuser)");
   });
 
   it("displays OAuth token with --show-token", async () => {
@@ -174,7 +174,7 @@ describe("auth status", () => {
       args: { "show-token": true },
     } as never);
 
-    expect(consola.log).toHaveBeenCalledWith("    Token:  oauth-access-token");
+    expect(consola.log).toHaveBeenCalledWith("    Token   oauth-access-token");
   });
 
   it("displays only hostname for non-default space", async () => {

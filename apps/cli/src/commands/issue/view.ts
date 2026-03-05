@@ -1,5 +1,5 @@
 import { getClient, issueUrl, openUrl } from "@repo/backlog-utils";
-import { formatDate, outputArgs, outputResult } from "@repo/cli-utils";
+import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -65,37 +65,33 @@ const view = withUsage(
         consola.log("");
         consola.log(`  ${data.issueKey}: ${data.summary}`);
         consola.log("");
-        consola.log(`    Status:      ${data.status.name}`);
-        consola.log(`    Type:        ${data.issueType.name}`);
-        consola.log(`    Priority:    ${data.priority.name}`);
-        consola.log(`    Assignee:    ${data.assignee?.name ?? "Unassigned"}`);
-        consola.log(`    Created by:  ${data.createdUser?.name ?? "Unknown"}`);
-        consola.log(`    Created:     ${formatDate(data.created)}`);
-        consola.log(`    Updated:     ${formatDate(data.updated)}`);
-
-        if (data.startDate) {
-          consola.log(`    Start Date:  ${formatDate(data.startDate)}`);
-        }
-        if (data.dueDate) {
-          consola.log(`    Due Date:    ${formatDate(data.dueDate)}`);
-        }
-        if (data.estimatedHours !== undefined) {
-          consola.log(`    Estimated:   ${data.estimatedHours}h`);
-        }
-        if (data.actualHours !== undefined) {
-          consola.log(`    Actual:      ${data.actualHours}h`);
-        }
-        if (data.category.length > 0) {
-          consola.log(`    Categories:  ${data.category.map((c) => c.name).join(", ")}`);
-        }
-        if (data.milestone.length > 0) {
-          consola.log(`    Milestones:  ${data.milestone.map((m) => m.name).join(", ")}`);
-        }
-        if (data.versions && data.versions.length > 0) {
-          consola.log(
-            `    Versions:    ${data.versions.map((v: { name: string }) => v.name).join(", ")}`,
-          );
-        }
+        printDefinitionList([
+          ["Status", data.status.name],
+          ["Type", data.issueType.name],
+          ["Priority", data.priority.name],
+          ["Assignee", data.assignee?.name ?? "Unassigned"],
+          ["Created by", data.createdUser?.name ?? "Unknown"],
+          ["Created", formatDate(data.created)],
+          ["Updated", formatDate(data.updated)],
+          ["Start Date", data.startDate ? formatDate(data.startDate) : undefined],
+          ["Due Date", data.dueDate ? formatDate(data.dueDate) : undefined],
+          ["Estimated", data.estimatedHours !== undefined ? `${data.estimatedHours}h` : undefined],
+          ["Actual", data.actualHours !== undefined ? `${data.actualHours}h` : undefined],
+          [
+            "Categories",
+            data.category.length > 0 ? data.category.map((c) => c.name).join(", ") : undefined,
+          ],
+          [
+            "Milestones",
+            data.milestone.length > 0 ? data.milestone.map((m) => m.name).join(", ") : undefined,
+          ],
+          [
+            "Versions",
+            data.versions && data.versions.length > 0
+              ? data.versions.map((v: { name: string }) => v.name).join(", ")
+              : undefined,
+          ],
+        ]);
 
         if (data.description) {
           consola.log("");

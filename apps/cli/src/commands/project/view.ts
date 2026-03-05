@@ -1,5 +1,5 @@
 import { getClient, openUrl, projectUrl } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
+import { outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -60,15 +60,17 @@ const view = withUsage(
         consola.log("");
         consola.log(`  ${data.name} (${data.projectKey})`);
         consola.log("");
-        consola.log(`    Status:              ${data.archived ? "Archived" : "Active"}`);
-        consola.log(`    Text Formatting:     ${data.textFormattingRule}`);
-        consola.log(`    Chart:               ${data.chartEnabled ? "Yes" : "No"}`);
-        consola.log(`    Subtasking:          ${data.subtaskingEnabled ? "Yes" : "No"}`);
-        consola.log(`    Wiki:                ${data.useWiki ? "Yes" : "No"}`);
-        consola.log(`    File Sharing:        ${data.useFileSharing ? "Yes" : "No"}`);
-        consola.log(`    Git:                 ${data.useGit ? "Yes" : "No"}`);
-        consola.log(`    Subversion:          ${data.useSubversion ? "Yes" : "No"}`);
-        consola.log(`    Dev Attributes:      ${data.useDevAttributes ? "Yes" : "No"}`);
+        printDefinitionList([
+          ["Status", data.archived ? "Archived" : "Active"],
+          ["Text Formatting", data.textFormattingRule],
+          ["Chart", data.chartEnabled ? "Yes" : "No"],
+          ["Subtasking", data.subtaskingEnabled ? "Yes" : "No"],
+          ["Wiki", data.useWiki ? "Yes" : "No"],
+          ["File Sharing", data.useFileSharing ? "Yes" : "No"],
+          ["Git", data.useGit ? "Yes" : "No"],
+          ["Subversion", data.useSubversion ? "Yes" : "No"],
+          ["Dev Attributes", data.useDevAttributes ? "Yes" : "No"],
+        ]);
         consola.log("");
       });
     },
