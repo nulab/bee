@@ -53,6 +53,14 @@ export default defineConfig({
               ],
             },
             {
+              label: "repo",
+              items: [
+                { label: "repo list", link: "/commands/repo/list" },
+                { label: "repo view", link: "/commands/repo/view" },
+                { label: "repo clone", link: "/commands/repo/clone" },
+              ],
+            },
+            {
               label: "project",
               items: [
                 { label: "project list", link: "/commands/project/list" },
