@@ -24,33 +24,42 @@ describe("notification count", () => {
     expect(consola.log).toHaveBeenCalledWith("42");
   });
 
-  it("passes already-read as true", async () => {
+  it("filters read notifications with --already-read read", async () => {
     mockClient.getNotificationsCount.mockResolvedValue({ count: 10 });
 
     const { count } = await import("./count");
-    await count.run?.({ args: { "already-read": "true" } } as never);
+    await count.run?.({ args: { "already-read": "read" } } as never);
 
     expect(mockClient.getNotificationsCount).toHaveBeenCalledWith(
       expect.objectContaining({ alreadyRead: true }),
     );
   });
 
-  it("passes already-read as false", async () => {
+  it("filters unread notifications with --already-read unread", async () => {
     mockClient.getNotificationsCount.mockResolvedValue({ count: 3 });
 
     const { count } = await import("./count");
-    await count.run?.({ args: { "already-read": "false" } } as never);
+    await count.run?.({ args: { "already-read": "unread" } } as never);
 
     expect(mockClient.getNotificationsCount).toHaveBeenCalledWith(
       expect.objectContaining({ alreadyRead: false }),
     );
   });
 
-  it("passes resource-already-read flag", async () => {
+  it("counts all with --already-read all", async () => {
+    mockClient.getNotificationsCount.mockResolvedValue({ count: 50 });
+
+    const { count } = await import("./count");
+    await count.run?.({ args: { "already-read": "all" } } as never);
+
+    expect(mockClient.getNotificationsCount).toHaveBeenCalledWith({});
+  });
+
+  it("filters by resource-already-read", async () => {
     mockClient.getNotificationsCount.mockResolvedValue({ count: 5 });
 
     const { count } = await import("./count");
-    await count.run?.({ args: { "resource-already-read": "true" } } as never);
+    await count.run?.({ args: { "resource-already-read": "read" } } as never);
 
     expect(mockClient.getNotificationsCount).toHaveBeenCalledWith(
       expect.objectContaining({ resourceAlreadyRead: true }),

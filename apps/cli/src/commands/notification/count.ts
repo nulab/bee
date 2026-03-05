@@ -4,11 +4,11 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 
-const parseBooleanFlag = (value: string | undefined): boolean | undefined => {
-  if (value === undefined) {
+const parseReadFilter = (value: string | undefined): boolean | undefined => {
+  if (value === undefined || value === "all") {
     return undefined;
   }
-  return value !== "false";
+  return value === "read";
 };
 
 const commandUsage: CommandUsage = {
@@ -21,11 +21,11 @@ Use \`--already-read\` and \`--resource-already-read\` to filter by read status.
     { description: "Count all notifications", command: "bee notification count" },
     {
       description: "Count only unread notifications",
-      command: "bee notification count --already-read false",
+      command: "bee notification count --already-read unread",
     },
     {
       description: "Count only read notifications",
-      command: "bee notification count --already-read true",
+      command: "bee notification count --already-read read",
     },
     { description: "Output as JSON", command: "bee notification count --json" },
   ],
@@ -45,22 +45,20 @@ const count = withUsage(
       ...outputArgs,
       "already-read": {
         type: "string",
-        description:
-          "Filter by read status. If true, count only read notifications. If false, count only unread notifications. If omitted, count all.",
-        valueHint: "{true|false}",
+        description: "Filter by read status. If omitted, count all.",
+        valueHint: "{read|unread|all}",
       },
       "resource-already-read": {
         type: "string",
-        description:
-          "Filter by resource read status. If true, count only notifications whose resource is already read. If false, count only notifications whose resource is not yet read. If omitted, count all.",
-        valueHint: "{true|false}",
+        description: "Filter by resource read status. If omitted, count all.",
+        valueHint: "{read|unread|all}",
       },
     },
     async run({ args }) {
       const { client } = await getClient();
 
-      const alreadyRead = parseBooleanFlag(args["already-read"]);
-      const resourceAlreadyRead = parseBooleanFlag(args["resource-already-read"]);
+      const alreadyRead = parseReadFilter(args["already-read"]);
+      const resourceAlreadyRead = parseReadFilter(args["resource-already-read"]);
 
       const params: Record<string, boolean> = {};
       if (alreadyRead !== undefined) {
