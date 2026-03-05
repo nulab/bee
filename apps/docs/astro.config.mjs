@@ -39,6 +39,20 @@ export default defineConfig({
               ],
             },
             {
+              label: "issue",
+              items: [
+                { label: "issue list", link: "/commands/issue/list" },
+                { label: "issue view", link: "/commands/issue/view" },
+                { label: "issue status", link: "/commands/issue/status" },
+                { label: "issue create", link: "/commands/issue/create" },
+                { label: "issue edit", link: "/commands/issue/edit" },
+                { label: "issue close", link: "/commands/issue/close" },
+                { label: "issue reopen", link: "/commands/issue/reopen" },
+                { label: "issue comment", link: "/commands/issue/comment" },
+                { label: "issue delete", link: "/commands/issue/delete" },
+              ],
+            },
+            {
               label: "project",
               items: [
                 { label: "project list", link: "/commands/project/list" },
