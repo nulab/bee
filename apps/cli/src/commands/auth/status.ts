@@ -1,7 +1,5 @@
-import { addApiKeyAuth, addBearerAuth } from "@repo/backlog-utils";
-import { createClient } from "@repo/openapi-client/client";
-import { type User, usersGetMyself } from "@repo/openapi-client";
 import { loadConfig } from "@repo/config";
+import { type Entity, Backlog } from "backlog-js";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -67,15 +65,13 @@ const status = withUsage(
         const isDefault = config.defaultSpace === space.host;
         const label = isDefault ? `${space.host} (default)` : space.host;
 
-        let user: User | null = null;
+        let user: Entity.User.User | null = null;
         try {
-          const client = createClient({ baseUrl: `https://${space.host}/api/v2` });
-          if (space.auth.method === "api-key") {
-            addApiKeyAuth(client, space.auth.apiKey);
-          } else {
-            addBearerAuth(client, space.auth.accessToken);
-          }
-          ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
+          const client =
+            space.auth.method === "api-key"
+              ? new Backlog({ host: space.host, apiKey: space.auth.apiKey })
+              : new Backlog({ host: space.host, accessToken: space.auth.accessToken });
+          user = await client.getMyself();
         } catch (error) {
           consola.debug("Token verification failed:", error);
         }

@@ -1,7 +1,6 @@
-import { addBearerAuth, refreshAccessToken } from "@repo/backlog-utils";
-import { createClient } from "@repo/openapi-client/client";
-import { usersGetMyself } from "@repo/openapi-client";
+import { refreshAccessToken } from "@repo/backlog-utils";
 import { findSpace, loadConfig, resolveSpace, updateSpaceAuth } from "@repo/config";
+import { Backlog } from "backlog-js";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -80,11 +79,8 @@ const refresh = withUsage(
 
       let user;
       try {
-        const client = createClient({
-          baseUrl: `https://${space.host}/api/v2`,
-        });
-        addBearerAuth(client, tokenResponse.access_token);
-        ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
+        const client = new Backlog({ host: space.host, accessToken: tokenResponse.access_token });
+        user = await client.getMyself();
       } catch {
         consola.error("Token verification failed after refresh.");
         return process.exit(1);

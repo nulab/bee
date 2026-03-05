@@ -1,14 +1,7 @@
-import {
-  addApiKeyAuth,
-  addBearerAuth,
-  exchangeAuthorizationCode,
-  openUrl,
-  startCallbackServer,
-} from "@repo/backlog-utils";
+import { exchangeAuthorizationCode, openUrl, startCallbackServer } from "@repo/backlog-utils";
 import { promptRequired, readStdin } from "@repo/cli-utils";
 import { type RcAuth, updateConfig } from "@repo/config";
-import { createClient } from "@repo/openapi-client/client";
-import { usersGetMyself } from "@repo/openapi-client";
+import { Backlog, OAuth2 } from "backlog-js";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
@@ -97,11 +90,8 @@ const loginWithApiKey = async (
 
   let user;
   try {
-    const client = createClient({
-      baseUrl: `https://${hostname}/api/v2`,
-    });
-    addApiKeyAuth(client, apiKey);
-    ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
+    const client = new Backlog({ host: hostname, apiKey });
+    user = await client.getMyself();
   } catch {
     consola.error(
       `Authentication failed. Could not connect to ${hostname} with the provided API key.`,
@@ -131,16 +121,8 @@ const loginWithOAuth = async (
   const redirectUri = `http://localhost:${callbackServer.port}/callback`;
   const state = crypto.randomUUID();
 
-  const oauthClient = createClient({ baseUrl: `https://${hostname}` });
-  const authUrl = oauthClient.buildUrl({
-    url: "/OAuth2AccessRequest.action",
-    query: {
-      response_type: "code" as const,
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      state,
-    },
-  });
+  const oauth2 = new OAuth2({ clientId, clientSecret });
+  const authUrl = oauth2.getAuthorizationURL({ host: hostname, redirectUri, state });
 
   consola.info("Opening browser for authorization...");
   consola.info(`If the browser doesn't open, visit: ${authUrl}`);
@@ -177,11 +159,8 @@ const loginWithOAuth = async (
 
   let user;
   try {
-    const client = createClient({
-      baseUrl: `https://${hostname}/api/v2`,
-    });
-    addBearerAuth(client, tokenResponse.access_token);
-    ({ data: user } = await usersGetMyself({ client, throwOnError: true }));
+    const client = new Backlog({ host: hostname, accessToken: tokenResponse.access_token });
+    user = await client.getMyself();
   } catch {
     consola.error("Authentication verification failed.");
     return process.exit(1);
