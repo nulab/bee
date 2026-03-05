@@ -13,28 +13,36 @@ vi.mock("@repo/backlog-utils", () => ({
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("notification count", () => {
-  it("displays notification count", async () => {
+  it("counts all notifications when no flags are set", async () => {
     mockClient.getNotificationsCount.mockResolvedValue({ count: 42 });
 
     const { count } = await import("./count");
     await count.run?.({ args: {} } as never);
 
     expect(getClient).toHaveBeenCalled();
-    expect(mockClient.getNotificationsCount).toHaveBeenCalledWith({
-      alreadyRead: false,
-      resourceAlreadyRead: false,
-    });
+    expect(mockClient.getNotificationsCount).toHaveBeenCalledWith({});
     expect(consola.log).toHaveBeenCalledWith("42");
   });
 
-  it("passes already-read flag", async () => {
+  it("passes already-read as true", async () => {
     mockClient.getNotificationsCount.mockResolvedValue({ count: 10 });
 
     const { count } = await import("./count");
-    await count.run?.({ args: { "already-read": true } } as never);
+    await count.run?.({ args: { "already-read": "true" } } as never);
 
     expect(mockClient.getNotificationsCount).toHaveBeenCalledWith(
       expect.objectContaining({ alreadyRead: true }),
+    );
+  });
+
+  it("passes already-read as false", async () => {
+    mockClient.getNotificationsCount.mockResolvedValue({ count: 3 });
+
+    const { count } = await import("./count");
+    await count.run?.({ args: { "already-read": "false" } } as never);
+
+    expect(mockClient.getNotificationsCount).toHaveBeenCalledWith(
+      expect.objectContaining({ alreadyRead: false }),
     );
   });
 
@@ -42,7 +50,7 @@ describe("notification count", () => {
     mockClient.getNotificationsCount.mockResolvedValue({ count: 5 });
 
     const { count } = await import("./count");
-    await count.run?.({ args: { "resource-already-read": true } } as never);
+    await count.run?.({ args: { "resource-already-read": "true" } } as never);
 
     expect(mockClient.getNotificationsCount).toHaveBeenCalledWith(
       expect.objectContaining({ resourceAlreadyRead: true }),

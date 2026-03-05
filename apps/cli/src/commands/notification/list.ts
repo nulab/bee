@@ -3,24 +3,7 @@ import { type Row, formatDate, outputArgs, outputResult, printTable } from "@rep
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-
-const REASON_LABELS: Record<number, string> = {
-  1: "Assigned",
-  2: "Commented",
-  3: "Issue created",
-  4: "Issue updated",
-  5: "File attached",
-  6: "Project user added",
-  9: "Other",
-  10: "Pull request assigned",
-  11: "Pull request commented",
-  12: "Pull request added",
-  13: "Pull request updated",
-  14: "Comment mentioned",
-  15: "Pull request comment mentioned",
-  16: "Team mentioned",
-  17: "Team mentioned in PR",
-};
+import { NOTIFICATION_REASON_LABELS } from "../../lib/notification-reason-labels";
 
 const commandUsage: CommandUsage = {
   long: `List notifications for the authenticated user.
@@ -92,7 +75,7 @@ const list = withUsage(
         const rows: Row[] = data.map((n) => [
           { header: "", value: n.alreadyRead ? " " : "*" },
           { header: "ID", value: String(n.id) },
-          { header: "REASON", value: REASON_LABELS[n.reason] ?? String(n.reason) },
+          { header: "REASON", value: NOTIFICATION_REASON_LABELS[n.reason] ?? String(n.reason) },
           { header: "ISSUE", value: n.issue?.issueKey ?? "-" },
           { header: "SUMMARY", value: n.issue?.summary ?? "-" },
           { header: "SENDER", value: n.sender.name },
