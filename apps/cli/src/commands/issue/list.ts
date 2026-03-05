@@ -1,6 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
 import { type Row, outputArgs, outputResult, printTable, splitArg } from "@repo/cli-utils";
-import { issuesList, vIssueSortField } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
@@ -114,29 +113,22 @@ const list = withUsage(
       const statusId = splitArg(args.status, v.number());
       const priorityId = splitArg(args.priority, v.number());
 
-      const sort = args.sort ? v.parse(vIssueSortField, args.sort) : undefined;
-      const order = args.order ? v.parse(v.picklist(["asc", "desc"]), args.order) : undefined;
-
-      const { data: issues } = await issuesList({
-        client,
-        throwOnError: true,
-        query: {
-          "projectId[]": projectId,
-          "assigneeId[]": assigneeId,
-          "statusId[]": statusId,
-          "priorityId[]": priorityId,
-          keyword: args.keyword,
-          sort,
-          order,
-          count: args.count ? Number(args.count) : undefined,
-          offset: args.offset ? Number(args.offset) : undefined,
-          createdSince: args["created-since"],
-          createdUntil: args["created-until"],
-          updatedSince: args["updated-since"],
-          updatedUntil: args["updated-until"],
-          dueDateSince: args["due-since"],
-          dueDateUntil: args["due-until"],
-        },
+      const issues = await client.getIssues({
+        projectId,
+        assigneeId,
+        statusId,
+        priorityId,
+        keyword: args.keyword,
+        sort: args.sort as string | undefined,
+        order: args.order as "asc" | "desc" | undefined,
+        count: args.count ? Number(args.count) : undefined,
+        offset: args.offset ? Number(args.offset) : undefined,
+        createdSince: args["created-since"],
+        createdUntil: args["created-until"],
+        updatedSince: args["updated-since"],
+        updatedUntil: args["updated-until"],
+        dueDateSince: args["due-since"],
+        dueDateUntil: args["due-until"],
       });
 
       outputResult(issues, args, (data) => {

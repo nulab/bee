@@ -1,24 +1,19 @@
 import { getClient, openUrl } from "@repo/backlog-utils";
-import { issuesGet, issuesGetComments } from "@repo/openapi-client";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
+const mockClient = {
+  getIssue: vi.fn(),
+  getIssueComments: vi.fn(),
+};
+
 vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(),
+  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
   openUrl: vi.fn(),
   issueUrl: vi.fn((host: string, key: string) => `https://${host}/view/${key}`),
 }));
 
-vi.mock("@repo/openapi-client", () => ({
-  issuesGet: vi.fn(),
-  issuesGetComments: vi.fn(),
-}));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-const mockClient = {
-  interceptors: { request: { use: vi.fn() } },
-};
 
 const setupMocks = () => {
   vi.mocked(getClient).mockResolvedValue({
@@ -51,20 +46,12 @@ const sampleIssue = {
 describe("issue view", () => {
   it("displays issue details", async () => {
     setupMocks();
-    vi.mocked(issuesGet).mockResolvedValue({
-      data: sampleIssue,
-    } as never);
+    mockClient.getIssue.mockResolvedValue(sampleIssue);
 
     const { view } = await import("./view");
     await view.run?.({ args: { issue: "PROJ-1" } } as never);
 
-    expect(issuesGet).toHaveBeenCalledWith(
-      expect.objectContaining({
-        client: mockClient,
-        throwOnError: true,
-        path: { issueIdOrKey: "PROJ-1" },
-      }),
-    );
+    expect(mockClient.getIssue).toHaveBeenCalledWith("PROJ-1");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Test issue"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Open"));
@@ -75,9 +62,7 @@ describe("issue view", () => {
 
   it("shows Unassigned for issues without assignee", async () => {
     setupMocks();
-    vi.mocked(issuesGet).mockResolvedValue({
-      data: { ...sampleIssue, assignee: null },
-    } as never);
+    mockClient.getIssue.mockResolvedValue({ ...sampleIssue, assignee: null });
 
     const { view } = await import("./view");
     await view.run?.({ args: { issue: "PROJ-1" } } as never);
@@ -87,9 +72,7 @@ describe("issue view", () => {
 
   it("displays description when present", async () => {
     setupMocks();
-    vi.mocked(issuesGet).mockResolvedValue({
-      data: sampleIssue,
-    } as never);
+    mockClient.getIssue.mockResolvedValue(sampleIssue);
 
     const { view } = await import("./view");
     await view.run?.({ args: { issue: "PROJ-1" } } as never);
@@ -100,30 +83,19 @@ describe("issue view", () => {
 
   it("fetches and displays comments with --comments flag", async () => {
     setupMocks();
-    vi.mocked(issuesGet).mockResolvedValue({
-      data: sampleIssue,
-    } as never);
-    vi.mocked(issuesGetComments).mockResolvedValue({
-      data: [
-        {
-          content: "A comment",
-          createdUser: { name: "Charlie" },
-          created: "2025-01-03T00:00:00Z",
-        },
-      ],
-    } as never);
+    mockClient.getIssue.mockResolvedValue(sampleIssue);
+    mockClient.getIssueComments.mockResolvedValue([
+      {
+        content: "A comment",
+        createdUser: { name: "Charlie" },
+        created: "2025-01-03T00:00:00Z",
+      },
+    ]);
 
     const { view } = await import("./view");
     await view.run?.({ args: { issue: "PROJ-1", comments: true } } as never);
 
-    expect(issuesGetComments).toHaveBeenCalledWith(
-      expect.objectContaining({
-        client: mockClient,
-        throwOnError: true,
-        path: { issueIdOrKey: "PROJ-1" },
-        query: { order: "asc" },
-      }),
-    );
+    expect(mockClient.getIssueComments).toHaveBeenCalledWith("PROJ-1", { order: "asc" });
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Comments"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Charlie"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("A comment"));
@@ -139,14 +111,12 @@ describe("issue view", () => {
     expect(consola.info).toHaveBeenCalledWith(
       "Opening https://example.backlog.com/view/PROJ-1 in your browser.",
     );
-    expect(issuesGet).not.toHaveBeenCalled();
+    expect(mockClient.getIssue).not.toHaveBeenCalled();
   });
 
   it("outputs JSON when --json flag is set", async () => {
     setupMocks();
-    vi.mocked(issuesGet).mockResolvedValue({
-      data: sampleIssue,
-    } as never);
+    mockClient.getIssue.mockResolvedValue(sampleIssue);
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
