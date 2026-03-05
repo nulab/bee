@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@astrojs/starlight": "^0.34.0",
+    "@repo/openapi": "workspace:*",
     "astro": "^5.5.0",
     "marked": "^17.0.3",
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.0",
+    "starlight-openapi": "^0.22.0"
   },
   "devDependencies": {
     "jiti": "^2.6.1"
