@@ -69,6 +69,16 @@ describe("promptRequired", () => {
     expect(result).toBe("user-input");
   });
 
+  it("appends valueHint to prompt label when provided", async () => {
+    vi.mocked(consola.prompt).mockResolvedValue("high" as never);
+
+    const result = await promptRequired("Priority:", undefined, {
+      valueHint: "{high|normal|low}",
+    });
+    expect(consola.prompt).toHaveBeenCalledWith("Priority {high|normal|low}:", { type: "text" });
+    expect(result).toBe("high");
+  });
+
   it("passes only type: text when options are not specified", async () => {
     vi.mocked(consola.prompt).mockResolvedValue("user-input" as never);
 

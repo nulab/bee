@@ -5,7 +5,7 @@ const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
 const promptRequired = async (
   label: string,
   existing?: string,
-  options?: { placeholder?: string },
+  options?: { placeholder?: string; valueHint?: string },
 ): Promise<string> => {
   if (existing !== undefined) {
     if (existing) {
@@ -22,7 +22,10 @@ const promptRequired = async (
     return process.exit(1);
   }
 
-  const value = await consola.prompt(label, { type: "text", ...options });
+  const displayLabel = options?.valueHint ? label.replace(/:$/, ` ${options.valueHint}:`) : label;
+  const { valueHint: _, ...promptOptions } = options ?? {};
+
+  const value = await consola.prompt(displayLabel, { type: "text", ...promptOptions });
 
   if (typeof value !== "string" || !value) {
     consola.error(`${label.replace(/:$/, "")} is required.`);

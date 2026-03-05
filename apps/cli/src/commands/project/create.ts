@@ -61,7 +61,8 @@ const create = withUsage(
       },
       "text-formatting-rule": {
         type: "string",
-        description: "Formatting rules. {backlog|markdown}",
+        description: "Formatting rules",
+        valueHint: "{backlog|markdown}",
       },
     },
     async run({ args }) {

@@ -44,7 +44,8 @@ const login = withUsage(
       method: {
         type: "string",
         alias: "m",
-        description: "The authentication method to use: {api-key|oauth}",
+        description: "The authentication method to use",
+        valueHint: "{api-key|oauth}",
         default: "api-key",
       },
       "with-token": {

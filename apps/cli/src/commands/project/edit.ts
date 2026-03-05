@@ -68,7 +68,8 @@ const edit = withUsage(
       },
       "text-formatting-rule": {
         type: "string",
-        description: "Change text formatting rule. {backlog|markdown}",
+        description: "Change text formatting rule",
+        valueHint: "{backlog|markdown}",
       },
       archived: {
         type: "boolean",

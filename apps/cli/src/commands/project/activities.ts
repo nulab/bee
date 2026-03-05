@@ -94,7 +94,8 @@ const activities = withUsage(
       },
       order: {
         type: "string",
-        description: "Sort order. {asc|desc}",
+        description: "Sort order",
+        valueHint: "{asc|desc}",
       },
     },
     async run({ args }) {
