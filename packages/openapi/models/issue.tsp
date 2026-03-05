@@ -131,7 +131,7 @@ model Issue {
   status: Status;
   assignee: User | null;
   category: Category[];
-  version: Version[];
+  version?: Version[];
   milestone: Version[];
   startDate: string | null;
   dueDate: string | null;
@@ -142,12 +142,12 @@ model Issue {
   created: utcDateTime;
   updatedUser: User | null;
   updated: utcDateTime;
-  customFieldValues: CustomFieldValue[];
+  customFieldValues?: CustomFieldValue[];
   attachments: Attachment[];
   sharedFiles: SharedFile[];
-  sharedExternalFileLinks: IssueSharedExternalFileLink[];
+  sharedExternalFileLinks?: IssueSharedExternalFileLink[];
   stars: Star[];
-  childIssueSummary: ChildIssueSummary | null;
+  childIssueSummary?: ChildIssueSummary | null;
 }
 
 // ────────────────────────────────────────────

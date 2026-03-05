@@ -101,7 +101,7 @@ const view = withUsage(
         if (data.milestone.length > 0) {
           consola.log(`    Milestones:  ${data.milestone.map((m) => m.name).join(", ")}`);
         }
-        if (data.version.length > 0) {
+        if (data.version && data.version.length > 0) {
           consola.log(`    Versions:    ${data.version.map((v) => v.name).join(", ")}`);
         }
 
