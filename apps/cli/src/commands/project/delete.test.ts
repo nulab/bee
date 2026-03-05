@@ -12,13 +12,10 @@ vi.mock("@repo/openapi-client", () => ({
   projectsDelete: vi.fn(),
 }));
 
-vi.mock("@repo/cli-utils", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@repo/cli-utils")>();
-  return {
-    ...actual,
-    confirmOrExit: vi.fn(),
-  };
-});
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  confirmOrExit: vi.fn(),
+}));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 

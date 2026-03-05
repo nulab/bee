@@ -12,13 +12,10 @@ vi.mock("@repo/openapi-client", () => ({
   projectsCreate: vi.fn(),
 }));
 
-vi.mock("@repo/cli-utils", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@repo/cli-utils")>();
-  return {
-    ...actual,
-    promptRequired: vi.fn(),
-  };
-});
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  promptRequired: vi.fn(),
+}));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
