@@ -35,8 +35,20 @@ model BacklogErrorResponse {
 }
 
 // ────────────────────────────────────────────
-// Shared scalars
+// Shared enums
 // ────────────────────────────────────────────
+
+/** Sort order. */
+enum SortOrder {
+  asc,
+  desc,
+}
+
+/** Text formatting rule for projects. */
+enum TextFormattingRule {
+  backlog,
+  markdown,
+}
 
 // ────────────────────────────────────────────
 // Shared models

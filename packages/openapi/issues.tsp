@@ -65,7 +65,7 @@ interface Issues {
     @query attachment?: boolean,
     @query sharedFile?: boolean,
     @query sort?: IssueSortField,
-    @query order?: "asc" | "desc",
+    @query order?: SortOrder,
     @query offset?: int32,
     @query count?: int32,
     @query createdSince?: string,
@@ -100,7 +100,7 @@ interface Issues {
     @query attachment?: boolean,
     @query sharedFile?: boolean,
     @query sort?: IssueSortField,
-    @query order?: "asc" | "desc",
+    @query order?: SortOrder,
     @query offset?: int32,
     @query count?: int32,
     @query createdSince?: string,
@@ -133,6 +133,6 @@ interface Issues {
     @query minId?: int64,
     @query maxId?: int64,
     @query count?: int32,
-    @query order?: "asc" | "desc",
+    @query order?: SortOrder,
   ): Comment[] | BacklogErrorResponse;
 }

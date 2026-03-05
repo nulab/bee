@@ -44,7 +44,7 @@ interface Projects {
     @query minId?: int64,
     @query maxId?: int64,
     @query count?: int32,
-    @query order?: "asc" | "desc",
+    @query order?: SortOrder,
   ): Activity[] | BacklogErrorResponse;
 
   @summary("Add Project")

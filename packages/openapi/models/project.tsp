@@ -16,7 +16,7 @@ model Project {
   useSubversion?: boolean;
   useGit?: boolean;
   useOriginalImageSizeAtWiki: boolean;
-  textFormattingRule: "backlog" | "markdown" | null;
+  textFormattingRule: TextFormattingRule | null;
   archived: boolean;
   displayOrder: int32;
   useDevAttributes: boolean;
@@ -61,7 +61,7 @@ model AddProjectRequest {
   useOriginalImageSizeAtWiki?: boolean;
 
   @doc("Formatting rules. {backlog|markdown}")
-  textFormattingRule?: "backlog" | "markdown";
+  textFormattingRule?: TextFormattingRule;
 
   @doc("Enable priorities, versions and milestones")
   useDevAttributes?: boolean;
@@ -106,7 +106,7 @@ model UpdateProjectRequest {
   useOriginalImageSizeAtWiki?: boolean;
 
   @doc("Formatting rules. {backlog|markdown}")
-  textFormattingRule?: "backlog" | "markdown";
+  textFormattingRule?: TextFormattingRule;
 
   @doc("Archive project")
   archived?: boolean;
