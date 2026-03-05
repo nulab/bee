@@ -1,8 +1,9 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
+import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
 import { defineCommand } from "citty";
+import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-import { printUserDetail } from "./view";
+import { ROLE_LABELS } from "../../lib/role-labels";
 
 const commandUsage: CommandUsage = {
   long: `Display details of the authenticated user.
@@ -35,7 +36,20 @@ const me = withUsage(
 
       const myself = await client.getMyself();
 
-      outputResult(myself, args, printUserDetail);
+      outputResult(myself, args, (data) => {
+        consola.log("");
+        consola.log(`  ${data.name}`);
+        consola.log("");
+        printDefinitionList([
+          ["ID", String(data.id)],
+          ["User ID", data.userId],
+          ["Email", data.mailAddress],
+          ["Role", ROLE_LABELS[data.roleType] ?? `Unknown (${data.roleType})`],
+          ["Language", data.lang],
+          ["Last Login", data.lastLoginTime ? formatDate(data.lastLoginTime) : undefined],
+        ]);
+        consola.log("");
+      });
     },
   }),
   commandUsage,

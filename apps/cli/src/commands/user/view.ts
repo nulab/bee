@@ -5,31 +5,6 @@ import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 import { ROLE_LABELS } from "../../lib/role-labels";
 
-type UserLike = {
-  id: number;
-  userId: string;
-  name: string;
-  roleType: number;
-  lang: string | null;
-  mailAddress: string;
-  lastLoginTime: string;
-};
-
-const printUserDetail = (data: UserLike): void => {
-  consola.log("");
-  consola.log(`  ${data.name}`);
-  consola.log("");
-  printDefinitionList([
-    ["ID", String(data.id)],
-    ["User ID", data.userId],
-    ["Email", data.mailAddress],
-    ["Role", ROLE_LABELS[data.roleType] ?? `Unknown (${data.roleType})`],
-    ["Language", data.lang],
-    ["Last Login", data.lastLoginTime ? formatDate(data.lastLoginTime) : undefined],
-  ]);
-  consola.log("");
-};
-
 const commandUsage: CommandUsage = {
   long: `Display details of a Backlog user.
 
@@ -68,10 +43,23 @@ const view = withUsage(
 
       const userData = await client.getUser(Number(args.user));
 
-      outputResult(userData, args, printUserDetail);
+      outputResult(userData, args, (data) => {
+        consola.log("");
+        consola.log(`  ${data.name}`);
+        consola.log("");
+        printDefinitionList([
+          ["ID", String(data.id)],
+          ["User ID", data.userId],
+          ["Email", data.mailAddress],
+          ["Role", ROLE_LABELS[data.roleType] ?? `Unknown (${data.roleType})`],
+          ["Language", data.lang],
+          ["Last Login", data.lastLoginTime ? formatDate(data.lastLoginTime) : undefined],
+        ]);
+        consola.log("");
+      });
     },
   }),
   commandUsage,
 );
 
-export { commandUsage, printUserDetail, view };
+export { commandUsage, view };
