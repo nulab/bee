@@ -1,8 +1,16 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, formatDate, outputArgs, outputResult, printTable } from "@repo/cli-utils";
+import {
+  type Row,
+  formatDate,
+  outputArgs,
+  outputResult,
+  printTable,
+  splitArg,
+} from "@repo/cli-utils";
 import { projectsGetActivities } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
+import * as v from "valibot";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
 import { ACTIVITY_LABELS } from "../../lib/activity-labels";
 
@@ -93,9 +101,7 @@ const activities = withUsage(
     async run({ args }) {
       const { client } = await getClient();
 
-      const activityTypeId = args["activity-type"]
-        ? args["activity-type"].split(",").map(Number)
-        : undefined;
+      const activityTypeId = splitArg(args["activity-type"], v.number());
 
       const { data: activityList } = await projectsGetActivities({
         client,

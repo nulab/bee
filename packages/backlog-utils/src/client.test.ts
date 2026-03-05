@@ -17,11 +17,12 @@ vi.mock("@repo/openapi-client/client", () => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-/** Extract the request interceptor function registered on the latest createClient result. */
-const getRequestInterceptor = (): ((request: Request) => Request) => {
+/** Extract the last request interceptor function registered on the latest createClient result. */
+const getLastRequestInterceptor = (): ((request: Request) => Request) => {
   const client = vi.mocked(createClient).mock.results.at(-1)?.value;
-  expect(client.interceptors.request.use).toHaveBeenCalled();
-  return client.interceptors.request.use.mock.calls[0][0];
+  const { calls } = client.interceptors.request.use.mock;
+  expect(calls.length).toBeGreaterThan(0);
+  return calls.at(-1)[0];
 };
 
 describe("getClient", () => {
@@ -45,7 +46,7 @@ describe("getClient", () => {
       }),
     );
 
-    const interceptor = getRequestInterceptor();
+    const interceptor = getLastRequestInterceptor();
     const req = new Request("https://example.com/test");
     const modified = interceptor(req);
     expect(new URL(modified.url).searchParams.get("apiKey")).toBe("test-key");
@@ -71,7 +72,7 @@ describe("getClient", () => {
       }),
     );
 
-    const interceptor = getRequestInterceptor();
+    const interceptor = getLastRequestInterceptor();
     const req = new Request("https://example.com/test");
     interceptor(req);
     expect(req.headers.get("Authorization")).toBe("Bearer access-token");
@@ -95,7 +96,7 @@ describe("getClient", () => {
       }),
     );
 
-    const interceptor = getRequestInterceptor();
+    const interceptor = getLastRequestInterceptor();
     const req = new Request("https://example.com/test");
     const modified = interceptor(req);
     expect(new URL(modified.url).searchParams.get("apiKey")).toBe("configured-key");
@@ -116,7 +117,7 @@ describe("getClient", () => {
       }),
     );
 
-    const interceptor = getRequestInterceptor();
+    const interceptor = getLastRequestInterceptor();
     const req = new Request("https://example.com/test");
     const modified = interceptor(req);
     expect(new URL(modified.url).searchParams.get("apiKey")).toBe("env-api-key");

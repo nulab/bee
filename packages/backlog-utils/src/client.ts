@@ -8,6 +8,23 @@ import { ofetch } from "ofetch";
 /** The type of the authenticated API client. */
 type BacklogClient = Client;
 
+/** Adds a request interceptor that removes query parameters with empty values. */
+const addEmptyQueryParamFilter = (client: Client): void => {
+  client.interceptors.request.use((request) => {
+    const url = new URL(request.url);
+    const keysToDelete = [...url.searchParams.entries()]
+      .filter(([, value]) => value === "")
+      .map(([key]) => key);
+    if (keysToDelete.length === 0) {
+      return request;
+    }
+    for (const key of keysToDelete) {
+      url.searchParams.delete(key);
+    }
+    return new Request(url, request);
+  });
+};
+
 /** Adds a request interceptor that sets the apiKey query parameter. */
 const addApiKeyAuth = (client: Client, apiKey: string): void => {
   client.interceptors.request.use((request) => {
@@ -50,6 +67,7 @@ const getClient = async (): Promise<{
         baseUrl,
         onResponseError: handleRateLimitError,
       });
+      addEmptyQueryParamFilter(client);
       addApiKeyAuth(client, resolved.auth.apiKey);
       return { client, host: resolved.host };
     }
@@ -70,6 +88,7 @@ const getClient = async (): Promise<{
       baseUrl: `https://${envHost}/api/v2`,
       onResponseError: handleRateLimitError,
     });
+    addEmptyQueryParamFilter(client);
     addApiKeyAuth(client, envApiKey);
     return { client, host: envHost };
   }
@@ -163,6 +182,7 @@ const createOAuthClient = (
   });
 
   const client = createClient({ baseUrl, ofetch: customOfetch });
+  addEmptyQueryParamFilter(client);
   client.interceptors.request.use((request) => {
     request.headers.set("Authorization", `Bearer ${currentAccessToken}`);
     return request;
