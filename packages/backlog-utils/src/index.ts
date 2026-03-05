@@ -1,3 +1,5 @@
+export { formatBacklogError, isBacklogErrorResponse } from "./api-error";
+export type { BacklogErrorResponse } from "./api-error";
 export { addApiKeyAuth, addBearerAuth, getClient } from "./client";
 export type { BacklogClient } from "./client";
 export { exchangeAuthorizationCode, refreshAccessToken } from "./oauth";

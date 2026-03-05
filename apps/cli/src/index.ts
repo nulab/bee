@@ -1,4 +1,5 @@
 import { defineCommand, runCommand, runMain } from "citty";
+import { handleBacklogApiError } from "./lib/api-error-handler";
 import { showCommandUsage } from "./lib/command-usage";
 import { handleValidationError } from "./lib/validation-error";
 import pkg from "../package.json" with { type: "json" };
@@ -24,10 +25,11 @@ const rawArgs = process.argv.slice(2);
 if (rawArgs.includes("--help") || rawArgs.includes("-h") || rawArgs.includes("--version")) {
   void runMain(main, { showUsage: showCommandUsage });
 } else {
+  const useJson = rawArgs.includes("--json") || !process.stdout.isTTY;
   try {
     await runCommand(main, { rawArgs });
   } catch (error) {
-    if (!handleValidationError(error)) {
+    if (!handleBacklogApiError(error, { json: useJson }) && !handleValidationError(error)) {
       consola.error(error);
     }
     process.exit(1);
