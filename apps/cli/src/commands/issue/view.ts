@@ -61,16 +61,15 @@ const view = withUsage(
         path: { issueIdOrKey: args.issue },
       });
 
-      const comments = args.comments
-        ? (
-            await issuesGetComments({
-              client,
-              throwOnError: true,
-              path: { issueIdOrKey: args.issue },
-              query: { order: "asc" },
-            })
-          ).data
-        : [];
+      const commentsResponse = args.comments
+        ? await issuesGetComments({
+            client,
+            throwOnError: true,
+            path: { issueIdOrKey: args.issue },
+            query: { order: "asc" },
+          })
+        : undefined;
+      const comments = commentsResponse?.data ?? [];
 
       outputResult(issue, args, (data) => {
         consola.log("");
@@ -90,10 +89,10 @@ const view = withUsage(
         if (data.dueDate) {
           consola.log(`    Due Date:    ${formatDate(data.dueDate)}`);
         }
-        if (data.estimatedHours != null) {
+        if (data.estimatedHours !== undefined) {
           consola.log(`    Estimated:   ${data.estimatedHours}h`);
         }
-        if (data.actualHours != null) {
+        if (data.actualHours !== undefined) {
           consola.log(`    Actual:      ${data.actualHours}h`);
         }
         if (data.category.length > 0) {
