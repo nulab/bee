@@ -5,6 +5,7 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { resolveProjectIds } from "../../lib/resolve-project";
 
 const commandUsage: CommandUsage = {
   long: `List issues from one or more Backlog projects.
@@ -109,7 +110,7 @@ const list = withUsage(
     async run({ args }) {
       const { client } = await getClient();
 
-      const projectId = splitArg(args.project, v.number());
+      const projectId = await resolveProjectIds(client, splitArg(args.project, v.string()));
       const assigneeId = splitArg(args.assignee, v.number());
       const statusId = splitArg(args.status, v.number());
       const priorityId = splitArg(args.priority, v.number());

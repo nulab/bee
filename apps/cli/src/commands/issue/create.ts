@@ -4,6 +4,7 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { resolveProjectIds } from "../../lib/resolve-project";
 import { resolveUserId } from "../../lib/resolve-user";
 
 const commandUsage: CommandUsage = {
@@ -114,12 +115,13 @@ const create = withUsage(
       const issueTypeId = await promptRequired("Issue type ID:", args.type);
       const priorityId = await promptRequired("Priority ID:", args.priority);
 
+      const [projectId] = await resolveProjectIds(client, [project]);
       const assigneeId = args.assignee ? await resolveUserId(client, args.assignee) : undefined;
       const notifiedUserId = splitArg(args.notify, v.number());
       const attachmentId = splitArg(args.attachment, v.number());
 
       const issue = await client.postIssue({
-        projectId: Number(project),
+        projectId,
         summary: title,
         issueTypeId: Number(issueTypeId),
         priorityId: Number(priorityId),
