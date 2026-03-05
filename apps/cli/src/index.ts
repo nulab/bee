@@ -15,6 +15,7 @@ const main = defineCommand({
     auth: () => import("./commands/auth/index").then((m) => m.auth),
     project: () => import("./commands/project/index").then((m) => m.project),
     issue: () => import("./commands/issue/index").then((m) => m.issue),
+    document: () => import("./commands/document/index").then((m) => m.document),
   },
 });
 
