@@ -3,7 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "tsp-output/**", "src/generated/**"]
+      "outputs": ["dist/**", "tsp-output/**"]
     },
     "typecheck": {
       "dependsOn": ["^typecheck"]

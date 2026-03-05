@@ -76,7 +76,7 @@ const create = withUsage(
         chartEnabled: args["chart-enabled"],
         subtaskingEnabled: args["subtasking-enabled"],
         projectLeaderCanEditProjectLeader: args["project-leader-can-edit-project-leader"],
-        textFormattingRule: args["text-formatting-rule"] as "backlog" | "markdown" | undefined,
+        textFormattingRule: (args["text-formatting-rule"] ?? "markdown") as "backlog" | "markdown",
       });
 
       outputResult(project, args, (data) => {

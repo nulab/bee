@@ -1,5 +1,6 @@
 import { getClient } from "@repo/backlog-utils";
 import { type Row, outputArgs, outputResult, printTable, splitArg } from "@repo/cli-utils";
+import { type Option } from "backlog-js";
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
@@ -119,7 +120,7 @@ const list = withUsage(
         statusId,
         priorityId,
         keyword: args.keyword,
-        sort: args.sort as string | undefined,
+        sort: args.sort as Option.Issue.GetIssuesParams["sort"],
         order: args.order as "asc" | "desc" | undefined,
         count: args.count ? Number(args.count) : undefined,
         offset: args.offset ? Number(args.offset) : undefined,

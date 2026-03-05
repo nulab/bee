@@ -90,8 +90,10 @@ const view = withUsage(
         if (data.milestone.length > 0) {
           consola.log(`    Milestones:  ${data.milestone.map((m) => m.name).join(", ")}`);
         }
-        if (data.version && data.version.length > 0) {
-          consola.log(`    Versions:    ${data.version.map((v) => v.name).join(", ")}`);
+        if (data.versions && data.versions.length > 0) {
+          consola.log(
+            `    Versions:    ${data.versions.map((v: { name: string }) => v.name).join(", ")}`,
+          );
         }
 
         if (data.description) {

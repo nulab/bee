@@ -69,7 +69,6 @@ const view = withUsage(
         consola.log(`    Git:                 ${data.useGit ? "Yes" : "No"}`);
         consola.log(`    Subversion:          ${data.useSubversion ? "Yes" : "No"}`);
         consola.log(`    Dev Attributes:      ${data.useDevAttributes ? "Yes" : "No"}`);
-        consola.log(`    Document:            ${data.useDocument ? "Yes" : "No"}`);
         consola.log("");
       });
     },

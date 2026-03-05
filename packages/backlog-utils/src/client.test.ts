@@ -10,9 +10,9 @@ vi.mock("@repo/config", () => ({
 }));
 
 vi.mock("backlog-js", () => ({
-  Backlog: vi.fn(() => ({
-    getMyself: vi.fn(),
-  })),
+  Backlog: vi.fn(function () {
+    return { getMyself: vi.fn() };
+  }),
   Error: {
     BacklogApiError: class extends globalThis.Error {
       status = 0;

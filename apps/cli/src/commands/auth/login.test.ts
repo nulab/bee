@@ -12,8 +12,12 @@ const mockGetAuthorizationURL = vi.fn(
 );
 
 vi.mock("backlog-js", () => ({
-  Backlog: vi.fn(() => ({ getMyself: mockGetMyself })),
-  OAuth2: vi.fn(() => ({ getAuthorizationURL: mockGetAuthorizationURL })),
+  Backlog: vi.fn(function () {
+    return { getMyself: mockGetMyself };
+  }),
+  OAuth2: vi.fn(function () {
+    return { getAuthorizationURL: mockGetAuthorizationURL };
+  }),
 }));
 
 vi.mock("@repo/backlog-utils", () => ({

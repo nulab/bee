@@ -1,4 +1,4 @@
-import { getClient, openUrl } from "@repo/backlog-utils";
+import { openUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 

@@ -161,12 +161,7 @@
   "overrides": [
     {
       // Tool config files require default exports
-      "files": [
-        "**/astro.config.*",
-        "**/build.config.*",
-        "**/vitest.config.*",
-        "**/openapi-ts.config.*"
-      ],
+      "files": ["**/astro.config.*", "**/build.config.*", "**/vitest.config.*"],
       "rules": {
         "import/no-default-export": "off",
         "import/no-anonymous-default-export": "off"
@@ -191,8 +186,8 @@
       }
     },
     {
-      // Auth commands consume @repo/openapi-client whose generated types cannot be
-      // resolved by oxlint's type checker across workspace packages.
+      // oxlint's type checker cannot reliably resolve types across workspace
+      // packages, causing false positives in command files.
       "files": ["apps/cli/src/commands/**"],
       "rules": {
         "typescript/no-redundant-type-constituents": "off"
@@ -208,5 +203,5 @@
     "builtin": true
   },
   "globals": {},
-  "ignorePatterns": ["**/src/generated"]
+  "ignorePatterns": []
 }

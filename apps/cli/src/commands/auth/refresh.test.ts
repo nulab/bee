@@ -8,7 +8,9 @@ import { describe, expect, it, vi } from "vitest";
 const mockGetMyself = vi.fn();
 
 vi.mock("backlog-js", () => ({
-  Backlog: vi.fn(() => ({ getMyself: mockGetMyself })),
+  Backlog: vi.fn(function () {
+    return { getMyself: mockGetMyself };
+  }),
 }));
 
 vi.mock("@repo/backlog-utils", () => ({

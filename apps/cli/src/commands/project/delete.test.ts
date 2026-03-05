@@ -1,4 +1,3 @@
-import { getClient } from "@repo/backlog-utils";
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
