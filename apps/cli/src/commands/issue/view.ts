@@ -30,9 +30,9 @@ const view = withUsage(
     },
     args: {
       ...outputArgs,
-      issueKey: {
+      issue: {
         type: "positional",
-        description: "Issue key. e.g., PROJECT-123",
+        description: "Issue key or ID. e.g., PROJECT-123",
         required: true,
       },
       comments: {
@@ -49,7 +49,7 @@ const view = withUsage(
       const { client, host } = await getClient();
 
       if (args.web) {
-        const url = issueUrl(host, args.issueKey);
+        const url = issueUrl(host, args.issue);
         await openUrl(url);
         consola.info(`Opening ${url} in your browser.`);
         return;
@@ -58,7 +58,7 @@ const view = withUsage(
       const { data: issue } = await issuesGet({
         client,
         throwOnError: true,
-        path: { issueIdOrKey: args.issueKey },
+        path: { issueIdOrKey: args.issue },
       });
 
       const comments = args.comments
@@ -66,7 +66,7 @@ const view = withUsage(
             await issuesGetComments({
               client,
               throwOnError: true,
-              path: { issueIdOrKey: args.issueKey },
+              path: { issueIdOrKey: args.issue },
               query: { order: "asc" },
             })
           ).data

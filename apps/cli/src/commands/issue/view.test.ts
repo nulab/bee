@@ -56,7 +56,7 @@ describe("issue view", () => {
     } as never);
 
     const { view } = await import("./view");
-    await view.run?.({ args: { issueKey: "PROJ-1" } } as never);
+    await view.run?.({ args: { issue: "PROJ-1" } } as never);
 
     expect(issuesGet).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -80,7 +80,7 @@ describe("issue view", () => {
     } as never);
 
     const { view } = await import("./view");
-    await view.run?.({ args: { issueKey: "PROJ-1" } } as never);
+    await view.run?.({ args: { issue: "PROJ-1" } } as never);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unassigned"));
   });
@@ -92,7 +92,7 @@ describe("issue view", () => {
     } as never);
 
     const { view } = await import("./view");
-    await view.run?.({ args: { issueKey: "PROJ-1" } } as never);
+    await view.run?.({ args: { issue: "PROJ-1" } } as never);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Description"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("A test description"));
@@ -114,7 +114,7 @@ describe("issue view", () => {
     } as never);
 
     const { view } = await import("./view");
-    await view.run?.({ args: { issueKey: "PROJ-1", comments: true } } as never);
+    await view.run?.({ args: { issue: "PROJ-1", comments: true } } as never);
 
     expect(issuesGetComments).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -133,7 +133,7 @@ describe("issue view", () => {
     setupMocks();
 
     const { view } = await import("./view");
-    await view.run?.({ args: { issueKey: "PROJ-1", web: true } } as never);
+    await view.run?.({ args: { issue: "PROJ-1", web: true } } as never);
 
     expect(openUrl).toHaveBeenCalledWith("https://example.backlog.com/view/PROJ-1");
     expect(consola.info).toHaveBeenCalledWith(
@@ -151,7 +151,7 @@ describe("issue view", () => {
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     const { view } = await import("./view");
-    await view.run?.({ args: { issueKey: "PROJ-1", json: "" } } as never);
+    await view.run?.({ args: { issue: "PROJ-1", json: "" } } as never);
 
     expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
     writeSpy.mockRestore();

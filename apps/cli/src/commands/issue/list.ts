@@ -1,8 +1,9 @@
 import { getClient } from "@repo/backlog-utils";
 import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { issuesList } from "@repo/openapi-client";
+import { issuesList, vIssueSortField } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
+import * as v from "valibot";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
@@ -118,6 +119,9 @@ const list = withUsage(
         : undefined;
       const priorityId = args.priority ? [Number(args.priority)] : undefined;
 
+      const sort = args.sort ? v.parse(vIssueSortField, args.sort) : undefined;
+      const order = args.order ? v.parse(v.picklist(["asc", "desc"]), args.order) : undefined;
+
       const { data: issues } = await issuesList({
         client,
         throwOnError: true,
@@ -127,30 +131,8 @@ const list = withUsage(
           "statusId[]": statusId,
           "priorityId[]": priorityId,
           keyword: args.keyword,
-          sort: args.sort as
-            | "id"
-            | "project"
-            | "issueType"
-            | "category"
-            | "version"
-            | "milestone"
-            | "summary"
-            | "status"
-            | "priority"
-            | "attachment"
-            | "sharedFile"
-            | "created"
-            | "createdUser"
-            | "updated"
-            | "updatedUser"
-            | "assignee"
-            | "startDate"
-            | "dueDate"
-            | "estimatedHours"
-            | "actualHours"
-            | "childIssue"
-            | undefined,
-          order: args.order as "asc" | "desc" | undefined,
+          sort,
+          order,
           count: args.count ? Number(args.count) : undefined,
           offset: args.offset ? Number(args.offset) : undefined,
           createdSince: args["created-since"],
