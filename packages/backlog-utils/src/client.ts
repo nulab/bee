@@ -12,10 +12,11 @@ type BacklogClient = Client;
 const addEmptyQueryParamFilter = (client: Client): void => {
   client.interceptors.request.use((request) => {
     const url = new URL(request.url);
-    for (const [key, value] of [...url.searchParams.entries()]) {
-      if (value === "") {
-        url.searchParams.delete(key);
-      }
+    const keysToDelete = [...url.searchParams.entries()]
+      .filter(([, value]) => value === "")
+      .map(([key]) => key);
+    for (const key of keysToDelete) {
+      url.searchParams.delete(key);
     }
     return new Request(url, request);
   });
