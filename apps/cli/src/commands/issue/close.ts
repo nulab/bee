@@ -1,17 +1,16 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
+import { outputArgs, outputResult, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
+import * as v from "valibot";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
-
-const CLOSED_STATUS_ID = 4;
-const RESOLUTION_FIXED_ID = 0;
+import { IssueStatusId, RESOLUTION_NAMES, ResolutionId } from "../../lib/issue-constants";
 
 const commandUsage: CommandUsage = {
   long: `Close a Backlog issue by setting its status to "Closed".
 
-By default the resolution is set to "Fixed" (ID 0). Use --resolution to
-specify a different resolution ID.
+By default the resolution is set to "Fixed". Use --resolution to
+specify a different resolution.
 
 Optionally add a comment with the --comment flag.`,
 
@@ -22,8 +21,8 @@ Optionally add a comment with the --comment flag.`,
       command: 'bee issue close PROJECT-123 -c "Done"',
     },
     {
-      description: "Close with a specific resolution",
-      command: "bee issue close PROJECT-123 --resolution 1",
+      description: "Close as duplicate",
+      command: "bee issue close PROJECT-123 --resolution duplicate",
     },
   ],
 };
@@ -48,16 +47,27 @@ const close = withUsage(
       },
       resolution: {
         type: "string",
-        description: "Resolution ID (default: 0 for Fixed)",
+        description: `Resolution. {${RESOLUTION_NAMES.join("|")}} (default: fixed)`,
+      },
+      notify: {
+        type: "string",
+        description: "User IDs to notify (comma-separated for multiple)",
       },
     },
     async run({ args }) {
       const { client } = await getClient();
 
+      const resolutionId = args.resolution
+        ? (ResolutionId[args.resolution] ?? Number(args.resolution))
+        : ResolutionId.fixed;
+
+      const notifiedUserId = splitArg(args.notify, v.number());
+
       const issue = await client.patchIssue(args.issue, {
-        statusId: CLOSED_STATUS_ID,
-        resolutionId: args.resolution ? Number(args.resolution) : RESOLUTION_FIXED_ID,
+        statusId: IssueStatusId.Closed,
+        resolutionId,
         comment: args.comment,
+        notifiedUserId,
       });
 
       outputResult(issue, args, (data) => {

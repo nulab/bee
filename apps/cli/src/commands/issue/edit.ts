@@ -1,7 +1,8 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
+import { outputArgs, outputResult, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
+import * as v from "valibot";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
@@ -97,9 +98,20 @@ const edit = withUsage(
         alias: "c",
         description: "Comment to add with the update",
       },
+      notify: {
+        type: "string",
+        description: "User IDs to notify (comma-separated for multiple)",
+      },
+      attachment: {
+        type: "string",
+        description: "Attachment IDs (comma-separated for multiple)",
+      },
     },
     async run({ args }) {
       const { client } = await getClient();
+
+      const notifiedUserId = splitArg(args.notify, v.number());
+      const attachmentId = splitArg(args.attachment, v.number());
 
       const issue = await client.patchIssue(args.issue, {
         summary: args.title,
@@ -115,6 +127,8 @@ const edit = withUsage(
         estimatedHours: args["estimated-hours"] ? Number(args["estimated-hours"]) : undefined,
         actualHours: args["actual-hours"] ? Number(args["actual-hours"]) : undefined,
         comment: args.comment,
+        notifiedUserId,
+        attachmentId,
       });
 
       outputResult(issue, args, (data) => {

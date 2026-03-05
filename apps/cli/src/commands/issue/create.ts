@@ -1,8 +1,10 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, promptRequired } from "@repo/cli-utils";
+import { outputArgs, outputResult, promptRequired, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
+import * as v from "valibot";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { resolveUserId } from "../../lib/resolve-user";
 
 const commandUsage: CommandUsage = {
   long: `Create a new Backlog issue.
@@ -23,9 +25,8 @@ valid values for your project.`,
       command: 'bee issue create -p PROJECT --type 1 --priority 3 -t "Title" -d "Details here"',
     },
     {
-      description: "Create an issue with assignee and due date",
-      command:
-        'bee issue create -p PROJECT --type 1 --priority 3 -t "Title" --assignee 12345 --due-date 2025-12-31',
+      description: "Create an issue assigned to yourself",
+      command: 'bee issue create -p PROJECT --type 1 --priority 3 -t "Title" --assignee @me',
     },
     {
       description: "Output as JSON",
@@ -74,7 +75,7 @@ const create = withUsage(
       },
       assignee: {
         type: "string",
-        description: "Assignee user ID",
+        description: "Assignee user ID. Use @me for yourself.",
       },
       "parent-issue": {
         type: "string",
@@ -96,6 +97,14 @@ const create = withUsage(
         type: "string",
         description: "Actual hours",
       },
+      notify: {
+        type: "string",
+        description: "User IDs to notify (comma-separated for multiple)",
+      },
+      attachment: {
+        type: "string",
+        description: "Attachment IDs (comma-separated for multiple)",
+      },
     },
     async run({ args }) {
       const { client } = await getClient();
@@ -105,18 +114,24 @@ const create = withUsage(
       const issueTypeId = await promptRequired("Issue type ID:", args.type);
       const priorityId = await promptRequired("Priority ID:", args.priority);
 
+      const assigneeId = args.assignee ? await resolveUserId(client, args.assignee) : undefined;
+      const notifiedUserId = splitArg(args.notify, v.number());
+      const attachmentId = splitArg(args.attachment, v.number());
+
       const issue = await client.postIssue({
         projectId: Number(project),
         summary: title,
         issueTypeId: Number(issueTypeId),
         priorityId: Number(priorityId),
         description: args.description,
-        assigneeId: args.assignee ? Number(args.assignee) : undefined,
+        assigneeId,
         parentIssueId: args["parent-issue"] ? Number(args["parent-issue"]) : undefined,
         startDate: args["start-date"],
         dueDate: args["due-date"],
         estimatedHours: args["estimated-hours"] ? Number(args["estimated-hours"]) : undefined,
         actualHours: args["actual-hours"] ? Number(args["actual-hours"]) : undefined,
+        notifiedUserId,
+        attachmentId,
       });
 
       outputResult(issue, args, (data) => {

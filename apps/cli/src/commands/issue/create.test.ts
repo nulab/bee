@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 const mockClient = {
   postIssue: vi.fn(),
+  getMyself: vi.fn(),
 };
 
 vi.mock("@repo/backlog-utils", () => ({
@@ -94,6 +95,66 @@ describe("issue create", () => {
         description: "Details",
         assigneeId: 12_345,
         dueDate: "2025-12-31",
+      }),
+    );
+  });
+
+  it("resolves @me to current user ID for assignee", async () => {
+    vi.mocked(promptRequired)
+      .mockResolvedValueOnce("100")
+      .mockResolvedValueOnce("Title")
+      .mockResolvedValueOnce("1")
+      .mockResolvedValueOnce("3");
+    mockClient.getMyself.mockResolvedValue({ id: 99_999, name: "Me" });
+    mockClient.postIssue.mockResolvedValue({
+      issueKey: "TEST-5",
+      summary: "Title",
+    });
+
+    const { create } = await import("./create");
+    await create.run?.({
+      args: {
+        project: "100",
+        title: "Title",
+        type: "1",
+        priority: "3",
+        assignee: "@me",
+      },
+    } as never);
+
+    expect(mockClient.getMyself).toHaveBeenCalled();
+    expect(mockClient.postIssue).toHaveBeenCalledWith(
+      expect.objectContaining({ assigneeId: 99_999 }),
+    );
+  });
+
+  it("passes notifiedUserId and attachmentId to API", async () => {
+    vi.mocked(promptRequired)
+      .mockResolvedValueOnce("100")
+      .mockResolvedValueOnce("Title")
+      .mockResolvedValueOnce("1")
+      .mockResolvedValueOnce("3");
+    mockClient.postIssue.mockResolvedValue({
+      issueKey: "TEST-6",
+      summary: "Title",
+    });
+
+    const { create } = await import("./create");
+    await create.run?.({
+      args: {
+        project: "100",
+        title: "Title",
+        type: "1",
+        priority: "3",
+        notify: "111,222",
+        attachment: "1,2",
+      },
+    } as never);
+
+    expect(mockClient.postIssue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        notifiedUserId: [111, 222],
+        attachmentId: [1, 2],
       }),
     );
   });

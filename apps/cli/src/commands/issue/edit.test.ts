@@ -53,6 +53,23 @@ describe("issue edit", () => {
     );
   });
 
+  it("passes notifiedUserId and attachmentId to API", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
+
+    const { edit } = await import("./edit");
+    await edit.run?.({
+      args: { issue: "TEST-1", title: "Title", notify: "111,222", attachment: "1,2" },
+    } as never);
+
+    expect(mockClient.patchIssue).toHaveBeenCalledWith(
+      "TEST-1",
+      expect.objectContaining({
+        notifiedUserId: [111, 222],
+        attachmentId: [1, 2],
+      }),
+    );
+  });
+
   it("outputs JSON when --json flag is set", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 

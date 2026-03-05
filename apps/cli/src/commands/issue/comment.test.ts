@@ -24,7 +24,10 @@ describe("issue comment", () => {
     const { comment } = await import("./comment");
     await comment.run?.({ args: { issue: "TEST-1", body: "Hello" } } as never);
 
-    expect(mockClient.postIssueComments).toHaveBeenCalledWith("TEST-1", { content: "Hello" });
+    expect(mockClient.postIssueComments).toHaveBeenCalledWith("TEST-1", {
+      content: "Hello",
+      notifiedUserId: [],
+    });
     expect(consola.success).toHaveBeenCalledWith("Added comment to TEST-1");
   });
 
@@ -38,6 +41,19 @@ describe("issue comment", () => {
     expect(readStdin).toHaveBeenCalled();
     expect(mockClient.postIssueComments).toHaveBeenCalledWith("TEST-1", {
       content: "Stdin content",
+      notifiedUserId: [],
+    });
+  });
+
+  it("adds a comment with notified users", async () => {
+    mockClient.postIssueComments.mockResolvedValue({ id: 3, content: "FYI" });
+
+    const { comment } = await import("./comment");
+    await comment.run?.({ args: { issue: "TEST-1", body: "FYI", notify: "111,222" } } as never);
+
+    expect(mockClient.postIssueComments).toHaveBeenCalledWith("TEST-1", {
+      content: "FYI",
+      notifiedUserId: [111, 222],
     });
   });
 

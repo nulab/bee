@@ -21,6 +21,7 @@ describe("issue reopen", () => {
     expect(mockClient.patchIssue).toHaveBeenCalledWith("TEST-1", {
       statusId: 1,
       comment: undefined,
+      notifiedUserId: [],
     });
     expect(consola.success).toHaveBeenCalledWith("Reopened issue TEST-1: Title");
   });
@@ -34,6 +35,18 @@ describe("issue reopen", () => {
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
       expect.objectContaining({ comment: "Regression found" }),
+    );
+  });
+
+  it("reopens an issue with notified users", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
+
+    const { reopen } = await import("./reopen");
+    await reopen.run?.({ args: { issue: "TEST-1", notify: "111,222" } } as never);
+
+    expect(mockClient.patchIssue).toHaveBeenCalledWith(
+      "TEST-1",
+      expect.objectContaining({ notifiedUserId: [111, 222] }),
     );
   });
 

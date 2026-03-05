@@ -1,10 +1,10 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
+import { outputArgs, outputResult, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
+import * as v from "valibot";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
-
-const OPEN_STATUS_ID = 1;
+import { IssueStatusId } from "../../lib/issue-constants";
 
 const commandUsage: CommandUsage = {
   long: `Reopen a closed Backlog issue by setting its status back to "Open".
@@ -38,13 +38,20 @@ const reopen = withUsage(
         alias: "c",
         description: "Comment to add when reopening",
       },
+      notify: {
+        type: "string",
+        description: "User IDs to notify (comma-separated for multiple)",
+      },
     },
     async run({ args }) {
       const { client } = await getClient();
 
+      const notifiedUserId = splitArg(args.notify, v.number());
+
       const issue = await client.patchIssue(args.issue, {
-        statusId: OPEN_STATUS_ID,
+        statusId: IssueStatusId.Open,
         comment: args.comment,
+        notifiedUserId,
       });
 
       outputResult(issue, args, (data) => {

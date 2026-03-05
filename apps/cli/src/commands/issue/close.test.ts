@@ -22,6 +22,7 @@ describe("issue close", () => {
       statusId: 4,
       resolutionId: 0,
       comment: undefined,
+      notifiedUserId: [],
     });
     expect(consola.success).toHaveBeenCalledWith("Closed issue TEST-1: Title");
   });
@@ -38,15 +39,27 @@ describe("issue close", () => {
     );
   });
 
-  it("closes an issue with a specific resolution", async () => {
+  it("closes an issue with a named resolution", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
     const { close } = await import("./close");
-    await close.run?.({ args: { issue: "TEST-1", resolution: "1" } } as never);
+    await close.run?.({ args: { issue: "TEST-1", resolution: "duplicate" } } as never);
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
-      expect.objectContaining({ resolutionId: 1 }),
+      expect.objectContaining({ resolutionId: 3 }),
+    );
+  });
+
+  it("closes an issue with notified users", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
+
+    const { close } = await import("./close");
+    await close.run?.({ args: { issue: "TEST-1", notify: "111,222" } } as never);
+
+    expect(mockClient.patchIssue).toHaveBeenCalledWith(
+      "TEST-1",
+      expect.objectContaining({ notifiedUserId: [111, 222] }),
     );
   });
 
