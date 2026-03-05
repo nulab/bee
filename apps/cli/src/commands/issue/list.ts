@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
+import { type Row, outputArgs, outputResult, printTable, splitArg } from "@repo/cli-utils";
 import { issuesList, vIssueSortField } from "@repo/openapi-client";
 import { defineCommand } from "citty";
 import consola from "consola";
@@ -46,7 +46,7 @@ const list = withUsage(
       assignee: {
         type: "string",
         alias: "a",
-        description: "Assignee user ID. Use @me for yourself.",
+        description: "Assignee user ID (comma-separated for multiple). Use @me for yourself.",
       },
       status: {
         type: "string",
@@ -56,7 +56,7 @@ const list = withUsage(
       priority: {
         type: "string",
         alias: "P",
-        description: "Priority ID",
+        description: "Priority ID (comma-separated for multiple)",
       },
       keyword: {
         type: "string",
@@ -109,15 +109,10 @@ const list = withUsage(
     async run({ args }) {
       const { client } = await getClient();
 
-      const projectId = args.project
-        ? args.project.split(",").map((k) => Number(k.trim()))
-        : undefined;
-
-      const assigneeId = args.assignee ? [Number(args.assignee)] : undefined;
-      const statusId = args.status
-        ? args.status.split(",").map((s) => Number(s.trim()))
-        : undefined;
-      const priorityId = args.priority ? [Number(args.priority)] : undefined;
+      const projectId = splitArg(args.project, v.number());
+      const assigneeId = splitArg(args.assignee, v.number());
+      const statusId = splitArg(args.status, v.number());
+      const priorityId = splitArg(args.priority, v.number());
 
       const sort = args.sort ? v.parse(vIssueSortField, args.sort) : undefined;
       const order = args.order ? v.parse(v.picklist(["asc", "desc"]), args.order) : undefined;
