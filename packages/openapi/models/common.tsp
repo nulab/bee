@@ -6,18 +6,26 @@ namespace Backlog;
 // Error
 // ────────────────────────────────────────────
 
+/** Error code returned by the Backlog API. */
+enum BacklogErrorCode {
+  InternalError: 1,
+  LicenceError: 2,
+  LicenceExpiredError: 3,
+  AccessDeniedError: 4,
+  UnauthorizedOperationError: 5,
+  NoResourceError: 6,
+  InvalidRequestError: 7,
+  SpaceOverCapacityError: 8,
+  ResourceOverflowError: 9,
+  TooLargeFileError: 10,
+  AuthenticationError: 11,
+  RequiredMFAError: 12,
+  TooManyRequestsError: 13,
+}
+
 model BacklogErrorDetail {
   message: string;
-
-  @doc("""
-    1: InternalError, 2: LicenceError, 3: LicenceExpiredError,
-    4: AccessDeniedError, 5: UnauthorizedOperationError, 6: NoResourceError,
-    7: InvalidRequestError, 8: SpaceOverCapacityError, 9: ResourceOverflowError,
-    10: TooLargeFileError, 11: AuthenticationError, 12: RequiredMFAError,
-    13: TooManyRequestsError
-    """)
-  code: int32;
-
+  code: BacklogErrorCode;
   moreInfo: string;
 }
 
