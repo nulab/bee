@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 const mockClient = {
   getIssues: vi.fn(),
+  getProjects: vi.fn().mockResolvedValue([{ id: 123, projectKey: "PROJ" }]),
 };
 
 vi.mock("@repo/backlog-utils", () => ({
