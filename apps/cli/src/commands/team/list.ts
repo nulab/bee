@@ -51,8 +51,8 @@ const list = withUsage(
 
       const teams = await client.getTeams({
         order: args.order as "asc" | "desc" | undefined,
-        offset: args.offset !== undefined ? Number(args.offset) : undefined,
-        count: args.count !== undefined ? Number(args.count) : undefined,
+        offset: args.offset === undefined ? undefined : Number(args.offset),
+        count: args.count === undefined ? undefined : Number(args.count),
       });
 
       outputResult(teams, args, (data) => {
