@@ -128,6 +128,8 @@ const list = withUsage(
           "priorityId[]": priorityId,
           keyword: args.keyword,
           sort: args.sort as
+            | "id"
+            | "project"
             | "issueType"
             | "category"
             | "version"

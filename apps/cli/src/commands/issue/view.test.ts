@@ -45,7 +45,7 @@ const sampleIssue = {
   actualHours: null,
   category: [],
   milestone: [],
-  versions: [],
+  version: [],
 };
 
 describe("issue view", () => {

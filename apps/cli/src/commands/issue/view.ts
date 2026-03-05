@@ -80,7 +80,7 @@ const view = withUsage(
         consola.log(`    Type:        ${data.issueType.name}`);
         consola.log(`    Priority:    ${data.priority.name}`);
         consola.log(`    Assignee:    ${data.assignee?.name ?? "Unassigned"}`);
-        consola.log(`    Created by:  ${data.createdUser.name}`);
+        consola.log(`    Created by:  ${data.createdUser?.name ?? "Unknown"}`);
         consola.log(`    Created:     ${formatDate(data.created)}`);
         consola.log(`    Updated:     ${formatDate(data.updated)}`);
 
@@ -102,8 +102,8 @@ const view = withUsage(
         if (data.milestone.length > 0) {
           consola.log(`    Milestones:  ${data.milestone.map((m) => m.name).join(", ")}`);
         }
-        if (data.versions.length > 0) {
-          consola.log(`    Versions:    ${data.versions.map((v) => v.name).join(", ")}`);
+        if (data.version.length > 0) {
+          consola.log(`    Versions:    ${data.version.map((v) => v.name).join(", ")}`);
         }
 
         if (data.description) {

@@ -10,7 +10,7 @@ model IssueType {
   projectId: int64;
   name: string;
   color: string;
-  displayOrder: int32;
+  displayOrder: int32 | null;
 }
 
 /** Backlog priority. */
@@ -37,8 +37,9 @@ model Resolution {
 /** Backlog category. */
 model Category {
   id: int64;
+  projectId: int64;
   name: string;
-  displayOrder: int32;
+  displayOrder: int32 | null;
 }
 
 /** Backlog version/milestone. */
@@ -50,7 +51,7 @@ model Version {
   startDate: string | null;
   releaseDueDate: string | null;
   archived: boolean;
-  displayOrder: int32;
+  displayOrder: int32 | null;
 }
 
 /** Backlog issue attachment. */
@@ -58,6 +59,8 @@ model Attachment {
   id: int64;
   name: string;
   size: int64;
+  createdUser: User | null;
+  created: utcDateTime;
 }
 
 /** Backlog shared file. */
@@ -67,7 +70,7 @@ model SharedFile {
   type: string;
   dir: string;
   name: string;
-  size: int64;
+  size: int64 | null;
   createdUser: User | null;
   created: utcDateTime;
   updatedUser: User | null;
@@ -92,6 +95,24 @@ model CustomFieldValue {
   value: unknown;
 }
 
+/** Backlog shared external file link on an issue. */
+model IssueSharedExternalFileLink {
+  id: int64;
+  serviceType: string;
+  name: string;
+  url: string;
+  createdUser: User | null;
+  created: utcDateTime;
+  updatedUser: User | null;
+  updated: utcDateTime;
+}
+
+/** Summary of child issues. */
+model ChildIssueSummary {
+  closed: int32;
+  total: int32;
+}
+
 // ────────────────────────────────────────────
 // Issue
 // ────────────────────────────────────────────
@@ -101,30 +122,32 @@ model Issue {
   id: int64;
   projectId: int64;
   issueKey: string;
-  keyId: int64;
+  keyId: int32;
   issueType: IssueType;
   summary: string;
-  description: string | null;
+  description: string;
   resolution: Resolution | null;
   priority: Priority;
   status: Status;
   assignee: User | null;
   category: Category[];
-  versions: Version[];
+  version: Version[];
   milestone: Version[];
   startDate: string | null;
   dueDate: string | null;
-  estimatedHours: float64 | null;
-  actualHours: float64 | null;
+  estimatedHours: float32 | null;
+  actualHours: float32 | null;
   parentIssueId: int64 | null;
-  createdUser: User;
+  createdUser: User | null;
   created: utcDateTime;
   updatedUser: User | null;
   updated: utcDateTime;
-  customFields: CustomFieldValue[];
+  customFieldValues: CustomFieldValue[];
   attachments: Attachment[];
   sharedFiles: SharedFile[];
+  sharedExternalFileLinks: IssueSharedExternalFileLink[];
   stars: Star[];
+  childIssueSummary: ChildIssueSummary | null;
 }
 
 // ────────────────────────────────────────────

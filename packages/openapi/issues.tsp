@@ -17,6 +17,8 @@ enum ParentChildType {
 
 /** Sort field for issue list. */
 enum IssueSortField {
+  id,
+  project,
   issueType,
   category,
   version,
