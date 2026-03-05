@@ -91,12 +91,6 @@ const flagParts = (arg: Arg) => {
               </dt>
               <dd>
                 {arg.description ?? ""}
-                {arg.valueHint && (
-                  <>
-                    {" "}
-                    <code>{arg.valueHint}</code>
-                  </>
-                )}
                 {arg.default !== undefined && (
                   <>
                     {" "}
@@ -128,12 +122,6 @@ const flagParts = (arg: Arg) => {
               </dt>
               <dd>
                 {arg.description ?? ""}
-                {arg.valueHint && (
-                  <>
-                    {" "}
-                    <code>{arg.valueHint}</code>
-                  </>
-                )}
                 {arg.default !== undefined && (
                   <>
                     {" "}
