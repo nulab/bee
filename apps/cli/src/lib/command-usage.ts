@@ -104,8 +104,9 @@ const renderCommandUsage =
       lines.push(colorize("bold", "ARGUMENTS"));
       const rows = positionals.map((a) => {
         const name = a.name.toUpperCase();
+        const valueSuffix = a.valueHint ? ` ${a.valueHint}` : "";
         const hint = a.default ? ` (default: "${a.default}")` : "";
-        return [`  ${name}`, `${a.description ?? ""}${hint}`];
+        return [`  ${name}`, `${a.description ?? ""}${valueSuffix}${hint}`];
       });
       lines.push(...alignColumns(rows));
       lines.push("");

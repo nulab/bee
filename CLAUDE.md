@@ -128,13 +128,53 @@ export const myCommand = withUsage(
 
 Follow gh CLI conventions for `args` description strings:
 
-- **Choices use `{x|y}` notation** — write `{api-key|oauth}`, not `api-key or oauth`.
-- **`e.g.,` flows naturally in the sentence** — write `The hostname of the Backlog space. e.g., xxx.backlog.com`, not `Space hostname (e.g., xxx.backlog.com)`.
+- **`description` is pure prose** — keep it a short, human-readable explanation. Do not embed format hints, examples, or choice lists in the description.
+- **Use `valueHint` for supplementary value information** — choices, formats, examples, and type hints go in the `valueHint` property, not in `description`. `valueHint` is rendered in `--help` (flag column / arguments section), docs, and interactive prompts automatically.
 - **Same-meaning arguments share the same description across commands** — if `--space` means the same thing in `auth login` and `auth logout`, use the identical description string. Do not vary wording per command context.
 - **Edit/update flags signal intent in the description** — in `edit` / `update` commands, descriptions must make it clear the flag sets a new value:
   - String flags: `"New X of the Y"` (e.g., `"New name of the project"`)
   - Boolean toggles: `"Change whether X"` (e.g., `"Change whether the chart is enabled"`)
-  - Enum flags: `"Change X. {a|b}"` (e.g., `"Change text formatting rule. {backlog|markdown}"`)
+  - Enum flags: `"Change X"` with `valueHint: "{a|b}"` (e.g., `description: "Change text formatting rule"`, `valueHint: "{backlog|markdown}"`)
+
+### `valueHint` conventions
+
+`valueHint` provides machine-readable value metadata that is displayed across `--help`, docs, and prompts. Use it for any argument where users need guidance on what values to enter.
+
+| Pattern       | `valueHint`      | Example                                  |
+| ------------- | ---------------- | ---------------------------------------- |
+| Fixed choices | `"{x\|y\|z}"`    | `"{api-key\|oauth}"`, `"{asc\|desc}"`    |
+| Date format   | `"<yyyy-MM-dd>"` | Date fields                              |
+| Example value | `"<example>"`    | `"<PROJECT-123>"`, `"<xxx.backlog.com>"` |
+| Numeric range | `"<min-max>"`    | `"<1-100>"`                              |
+| Type hint     | `"<type>"`       | `"<number>"`                             |
+
+```ts
+// Choices
+method: {
+  type: "string",
+  description: "The authentication method to use",
+  valueHint: "{api-key|oauth}",
+},
+// Date format
+"start-date": {
+  type: "string",
+  description: "Start date",
+  valueHint: "<yyyy-MM-dd>",
+},
+// Example value (positional)
+issue: {
+  type: "positional",
+  description: "Issue ID or issue key",
+  valueHint: "<PROJECT-123>",
+},
+```
+
+Where `valueHint` is rendered:
+
+- **`--help` flags**: after the flag name (e.g., `--sort {issueType|category|...}`)
+- **`--help` arguments**: after the description text
+- **Docs**: as `<code>` next to the description
+- **`promptRequired`**: appended to the prompt label (e.g., `Priority {high|normal|low}:`)
 
 ### Short flag aliases
 
