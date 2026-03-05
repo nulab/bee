@@ -2,7 +2,7 @@ import { getClient } from "@repo/backlog-utils";
 import { outputArgs, outputResult, promptRequired } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
   long: `Create a new Backlog project.
@@ -26,6 +26,10 @@ prompted to enter them interactively.`,
       command: "bee project create",
     },
   ],
+
+  annotations: {
+    environment: [...ENV_AUTH],
+  },
 };
 
 const create = withUsage(

@@ -2,7 +2,7 @@ import { getClient } from "@repo/backlog-utils";
 import { outputArgs, outputResult } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
   long: `Update an existing Backlog project.
@@ -26,7 +26,7 @@ will remain unchanged.`,
   ],
 
   annotations: {
-    environment: [["BACKLOG_PROJECT", "Default project ID or project key"]],
+    environment: [...ENV_AUTH, ENV_PROJECT],
   },
 };
 

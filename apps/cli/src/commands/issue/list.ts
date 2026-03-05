@@ -4,7 +4,7 @@ import { type Option } from "backlog-js";
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
 import { PRIORITY_NAMES, PriorityId } from "../../lib/issue-constants";
 import { resolveProjectIds } from "../../lib/resolve-project";
 
@@ -27,7 +27,7 @@ Multiple project keys can be specified as a comma-separated list.`,
   ],
 
   annotations: {
-    environment: [["BACKLOG_PROJECT", "Default project ID or project key"]],
+    environment: [...ENV_AUTH, ENV_PROJECT],
   },
 };
 

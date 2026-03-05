@@ -2,7 +2,7 @@ import { getClient } from "@repo/backlog-utils";
 import { confirmOrExit, outputArgs, outputResult } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
   long: `Delete a Backlog issue.
@@ -20,6 +20,10 @@ the --yes flag is provided.`,
       command: "bee issue delete PROJECT-123 --yes",
     },
   ],
+
+  annotations: {
+    environment: [...ENV_AUTH],
+  },
 };
 
 const deleteIssue = withUsage(

@@ -3,7 +3,7 @@ import { outputArgs, outputResult, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 import { PRIORITY_NAMES, PriorityId } from "../../lib/issue-constants";
 
 const commandUsage: CommandUsage = {
@@ -26,6 +26,10 @@ will remain unchanged.`,
       command: 'bee issue edit PROJECT-123 -t "New title" --comment "Updated title"',
     },
   ],
+
+  annotations: {
+    environment: [...ENV_AUTH],
+  },
 };
 
 const edit = withUsage(

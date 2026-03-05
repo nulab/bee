@@ -3,7 +3,7 @@ import { outputArgs, outputResult, readStdin, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
   long: `Add a comment to a Backlog issue.
@@ -24,6 +24,10 @@ The comment body is required. Use "-b -" to read the body from stdin.`,
       command: 'bee issue comment PROJECT-123 -b "FYI" --notify 12345,67890',
     },
   ],
+
+  annotations: {
+    environment: [...ENV_AUTH],
+  },
 };
 
 const comment = withUsage(

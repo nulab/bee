@@ -10,7 +10,7 @@ import {
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
 import { ACTIVITY_LABELS } from "../../lib/activity-labels";
 
 const commandUsage: CommandUsage = {
@@ -39,7 +39,7 @@ Use --count to control how many activities are returned (default: 20, max: 100).
   ],
 
   annotations: {
-    environment: [["BACKLOG_PROJECT", "Default project ID or project key"]],
+    environment: [...ENV_AUTH, ENV_PROJECT],
   },
 };
 

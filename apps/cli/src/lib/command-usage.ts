@@ -255,4 +255,23 @@ const indent = (text: string): string =>
     .map((line) => `  ${line}`)
     .join("\n");
 
-export { type CommandUsage, withUsage, getCommandUsage, renderCommandUsage, showCommandUsage };
+// ---------------------------------------------------------------------------
+// Shared environment variable entries
+// ---------------------------------------------------------------------------
+
+const ENV_AUTH: [string, string][] = [
+  ["BACKLOG_API_KEY", "Authenticate with an API key"],
+  ["BACKLOG_SPACE", "Default space hostname"],
+];
+
+const ENV_PROJECT: [string, string] = ["BACKLOG_PROJECT", "Default project ID or project key"];
+
+export {
+  type CommandUsage,
+  withUsage,
+  getCommandUsage,
+  renderCommandUsage,
+  showCommandUsage,
+  ENV_AUTH,
+  ENV_PROJECT,
+};

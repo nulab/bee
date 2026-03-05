@@ -64,7 +64,9 @@ describe("issue create", () => {
     expect(promptRequired).toHaveBeenCalledWith("Project:", undefined);
     expect(promptRequired).toHaveBeenCalledWith("Summary:", undefined);
     expect(promptRequired).toHaveBeenCalledWith("Issue type ID:", undefined);
-    expect(promptRequired).toHaveBeenCalledWith("Priority (high/normal/low):", undefined);
+    expect(promptRequired).toHaveBeenCalledWith("Priority:", undefined, {
+      valueHint: "{high|normal|low}",
+    });
   });
 
   it("passes optional fields to API", async () => {

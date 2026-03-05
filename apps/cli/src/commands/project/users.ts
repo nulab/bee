@@ -2,7 +2,7 @@ import { getClient } from "@repo/backlog-utils";
 import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
 import { ROLE_LABELS } from "../../lib/role-labels";
 
 const commandUsage: CommandUsage = {
@@ -16,7 +16,7 @@ Displays each user's ID, user ID, name, and role within the project.`,
   ],
 
   annotations: {
-    environment: [["BACKLOG_PROJECT", "Default project ID or project key"]],
+    environment: [...ENV_AUTH, ENV_PROJECT],
   },
 };
 

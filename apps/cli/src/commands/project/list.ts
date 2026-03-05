@@ -2,7 +2,7 @@ import { getClient } from "@repo/backlog-utils";
 import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
   long: `List projects accessible to the authenticated user.
@@ -20,6 +20,10 @@ ones they have joined.`,
     { description: "List all projects (admin only)", command: "bee project list --all" },
     { description: "Output as JSON", command: "bee project list --json" },
   ],
+
+  annotations: {
+    environment: [...ENV_AUTH],
+  },
 };
 
 const list = withUsage(

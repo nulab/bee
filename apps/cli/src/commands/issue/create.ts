@@ -3,7 +3,7 @@ import { outputArgs, outputResult, promptRequired, splitArg } from "@repo/cli-ut
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
 import { PRIORITY_NAMES, PriorityId } from "../../lib/issue-constants";
 import { resolveProjectIds } from "../../lib/resolve-project";
 import { resolveUserId } from "../../lib/resolve-user";
@@ -38,7 +38,7 @@ or low.`,
   ],
 
   annotations: {
-    environment: [["BACKLOG_PROJECT", "Default project ID or project key"]],
+    environment: [...ENV_AUTH, ENV_PROJECT],
   },
 };
 

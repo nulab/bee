@@ -3,7 +3,7 @@ import { outputArgs, outputResult, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 import { IssueStatusId, RESOLUTION_NAMES, ResolutionId } from "../../lib/issue-constants";
 
 const commandUsage: CommandUsage = {
@@ -25,6 +25,10 @@ Optionally add a comment with the --comment flag.`,
       command: "bee issue close PROJECT-123 --resolution duplicate",
     },
   ],
+
+  annotations: {
+    environment: [...ENV_AUTH],
+  },
 };
 
 const close = withUsage(

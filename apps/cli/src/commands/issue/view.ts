@@ -2,7 +2,7 @@ import { getClient, issueUrl, openUrl } from "@repo/backlog-utils";
 import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
   long: `Display details of a Backlog issue.
@@ -19,6 +19,10 @@ details in the terminal.`,
     { description: "Open issue in browser", command: "bee issue view PROJECT-123 --web" },
     { description: "Output as JSON", command: "bee issue view PROJECT-123 --json" },
   ],
+
+  annotations: {
+    environment: [...ENV_AUTH],
+  },
 };
 
 const view = withUsage(

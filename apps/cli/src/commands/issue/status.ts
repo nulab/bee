@@ -2,7 +2,7 @@ import { getClient } from "@repo/backlog-utils";
 import { outputArgs, outputResult } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
   long: `Show a summary of issues assigned to you, grouped by status.
@@ -14,6 +14,10 @@ their current status (e.g., Open, In Progress, Resolved).`,
     { description: "Show your issue status summary", command: "bee issue status" },
     { description: "Output as JSON", command: "bee issue status --json" },
   ],
+
+  annotations: {
+    environment: [...ENV_AUTH],
+  },
 };
 
 const status = withUsage(
