@@ -7,6 +7,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "bee",
+      defaultLocale: "ja",
       plugins: [
         starlightOpenAPI([
           {
@@ -29,11 +30,11 @@ export default defineConfig({
       ],
       sidebar: [
         {
-          label: "Guides",
-          items: [{ label: "Getting Started", slug: "guides/getting-started" }],
+          label: "ガイド",
+          items: [{ label: "はじめに", slug: "guides/getting-started" }],
         },
         {
-          label: "Commands",
+          label: "コマンド",
           items: [
             {
               label: "auth",

@@ -1,15 +1,15 @@
 ---
-title: Getting Started
-description: How to install and use bee.
+title: はじめに
+description: bee のインストールと基本的な使い方
 ---
 
-## Installation
+## インストール
 
 ```sh
 npm install -g @nulab/bee
 ```
 
-## Usage
+## 使い方
 
 ```sh
 bee --help
