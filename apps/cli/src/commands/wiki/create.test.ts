@@ -1,4 +1,4 @@
-import { promptRequired, readStdin } from "@repo/cli-utils";
+import { promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -14,7 +14,7 @@ vi.mock("@repo/backlog-utils", () => ({
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
   promptRequired: vi.fn(),
-  readStdin: vi.fn(),
+  resolveStdinArg: vi.fn((v: string | undefined) => Promise.resolve(v)),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -37,16 +37,16 @@ describe("wiki create", () => {
     expect(consola.success).toHaveBeenCalledWith("Created wiki page 1: My Page");
   });
 
-  it("reads body from stdin when --body is -", async () => {
+  it("reads body from stdin when piped", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("My Page");
-    vi.mocked(readStdin).mockResolvedValue("Stdin content");
+    vi.mocked(resolveStdinArg).mockResolvedValueOnce("Stdin content");
     mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
     mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
 
     const { create } = await import("./create");
-    await create.run?.({ args: { project: "TEST", name: "My Page", body: "-" } } as never);
+    await create.run?.({ args: { project: "TEST", name: "My Page", body: "" } } as never);
 
-    expect(readStdin).toHaveBeenCalled();
+    expect(resolveStdinArg).toHaveBeenCalledWith("");
     expect(mockClient.postWiki).toHaveBeenCalledWith(
       expect.objectContaining({ content: "Stdin content" }),
     );

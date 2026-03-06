@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, readStdin, splitArg } from "@repo/cli-utils";
+import { outputArgs, outputResult, resolveStdinArg, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
@@ -14,7 +14,8 @@ import {
 const commandUsage: CommandUsage = {
   long: `Add a comment to a Backlog pull request.
 
-The comment body is required. Use \`-b -\` to read the body from stdin.`,
+The comment body is required. When input is piped, it is used as the body
+automatically.`,
 
   examples: [
     {
@@ -23,7 +24,7 @@ The comment body is required. Use \`-b -\` to read the body from stdin.`,
     },
     {
       description: "Add a comment from stdin",
-      command: 'echo "Comment body" | bee pr comment 42 -p PROJECT -R repo -b -',
+      command: 'echo "Comment body" | bee pr comment 42 -p PROJECT -R repo',
     },
     {
       description: "Add a comment and notify users",
@@ -67,7 +68,7 @@ const comment = withUsage(
       body: {
         type: "string",
         alias: "b",
-        description: "Comment body. Use - to read from stdin.",
+        description: "Comment body",
         required: true,
       },
       notify: {
@@ -79,7 +80,7 @@ const comment = withUsage(
       const { client } = await getClient();
 
       const prNumber = Number(args.number);
-      const content = args.body === "-" ? await readStdin() : args.body;
+      const content = (await resolveStdinArg(args.body)) ?? args.body;
       const notifiedUserId = splitArg(args.notify, v.number());
 
       const result = await client.postPullRequestComments(args.project, args.repo, prNumber, {

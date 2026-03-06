@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { readStdin } from "./stdin";
+import { readStdin, resolveStdinArg } from "./stdin";
 
 /**
  * Create a mock async iterable that yields the given buffers,
@@ -51,5 +51,52 @@ describe("readStdin", () => {
 
     const result = await readStdin();
     expect(result).toBe("single chunk");
+  });
+});
+
+describe("resolveStdinArg", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("reads stdin when value is empty and stdin is piped", async () => {
+    const mock = createMockStdin([Buffer.from("piped content")]);
+    Object.defineProperty(mock, "isTTY", { value: undefined });
+    vi.spyOn(process, "stdin", "get").mockReturnValue(mock);
+
+    const result = await resolveStdinArg("");
+    expect(result).toBe("piped content");
+  });
+
+  it("reads stdin when value is undefined and stdin is piped", async () => {
+    const mock = createMockStdin([Buffer.from("piped content")]);
+    Object.defineProperty(mock, "isTTY", { value: undefined });
+    vi.spyOn(process, "stdin", "get").mockReturnValue(mock);
+
+    const result = await resolveStdinArg(undefined);
+    expect(result).toBe("piped content");
+  });
+
+  it("returns the value as-is when it is a non-empty string", async () => {
+    const result = await resolveStdinArg("explicit body");
+    expect(result).toBe("explicit body");
+  });
+
+  it("returns undefined when value is undefined and stdin is TTY", async () => {
+    const mock = createMockStdin([]);
+    Object.defineProperty(mock, "isTTY", { value: true });
+    vi.spyOn(process, "stdin", "get").mockReturnValue(mock);
+
+    const result = await resolveStdinArg(undefined);
+    expect(result).toBeUndefined();
+  });
+
+  it("returns empty string when value is empty and stdin is TTY", async () => {
+    const mock = createMockStdin([]);
+    Object.defineProperty(mock, "isTTY", { value: true });
+    vi.spyOn(process, "stdin", "get").mockReturnValue(mock);
+
+    const result = await resolveStdinArg("");
+    expect(result).toBe("");
   });
 });

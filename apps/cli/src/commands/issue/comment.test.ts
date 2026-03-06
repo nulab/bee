@@ -1,4 +1,4 @@
-import { readStdin } from "@repo/cli-utils";
+import { resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -12,7 +12,7 @@ vi.mock("@repo/backlog-utils", () => ({
 
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  readStdin: vi.fn(),
+  resolveStdinArg: vi.fn((v: string | undefined) => Promise.resolve(v)),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -31,14 +31,14 @@ describe("issue comment", () => {
     expect(consola.success).toHaveBeenCalledWith("Added comment to TEST-1");
   });
 
-  it("reads body from stdin when body is -", async () => {
-    vi.mocked(readStdin).mockResolvedValue("Stdin content");
+  it("reads body from stdin when piped", async () => {
+    vi.mocked(resolveStdinArg).mockResolvedValueOnce("Stdin content");
     mockClient.postIssueComments.mockResolvedValue({ id: 2, content: "Stdin content" });
 
     const { comment } = await import("./comment");
-    await comment.run?.({ args: { issue: "TEST-1", body: "-" } } as never);
+    await comment.run?.({ args: { issue: "TEST-1", body: "" } } as never);
 
-    expect(readStdin).toHaveBeenCalled();
+    expect(resolveStdinArg).toHaveBeenCalledWith("");
     expect(mockClient.postIssueComments).toHaveBeenCalledWith("TEST-1", {
       content: "Stdin content",
       notifiedUserId: [],

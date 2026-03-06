@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, readStdin } from "@repo/cli-utils";
+import { outputArgs, outputResult, resolveStdinArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
@@ -8,7 +8,8 @@ const commandUsage: CommandUsage = {
   long: `Update an existing Backlog wiki page.
 
 Only the specified fields will be updated. Fields that are not provided
-will remain unchanged. Use \`--body -\` to read body content from stdin.`,
+will remain unchanged. When input is piped, it is used as the body
+automatically.`,
 
   examples: [
     {
@@ -21,7 +22,7 @@ will remain unchanged. Use \`--body -\` to read body content from stdin.`,
     },
     {
       description: "Update body from stdin",
-      command: 'echo "New content" | bee wiki edit 12345 -b -',
+      command: 'echo "New content" | bee wiki edit 12345',
     },
   ],
 
@@ -52,7 +53,7 @@ const edit = withUsage(
       body: {
         type: "string",
         alias: "b",
-        description: "New content of the wiki page. Use - to read from stdin.",
+        description: "New content of the wiki page",
       },
       notify: {
         type: "boolean",
@@ -62,7 +63,7 @@ const edit = withUsage(
     async run({ args }) {
       const { client } = await getClient();
 
-      const content = args.body === "-" ? await readStdin() : args.body;
+      const content = await resolveStdinArg(args.body);
 
       const wiki = await client.patchWiki(Number(args.wiki), {
         name: args.name,
