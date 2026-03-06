@@ -144,7 +144,7 @@ const flagParts = (arg: Arg) => {
           {entry.examples.map((ex: { description: string; command: string }) => (
             <>
               <p>{ex.description}</p>
-              <Code code={`$ ${ex.command}`} lang="sh" />
+              <Code code={ex.command} lang="sh" />
             </>
           ))}
         </>
