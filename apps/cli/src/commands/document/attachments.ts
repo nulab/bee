@@ -1,18 +1,15 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, formatDate, outputArgs, outputResult, printTable } from "@repo/cli-utils";
+import {
+  type Row,
+  formatDate,
+  formatSize,
+  outputArgs,
+  outputResult,
+  printTable,
+} from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-
-const formatSize = (bytes: number): string => {
-  if (bytes < 1024) {
-    return `${bytes} B`;
-  }
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
 
 const commandUsage: CommandUsage = {
   long: "List attachments of a Backlog document.",
