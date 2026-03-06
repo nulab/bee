@@ -85,6 +85,9 @@ const loginWithApiKey = async (
   hostname: string,
   args: { "with-token"?: boolean },
 ): Promise<void> => {
+  if (!args["with-token"]) {
+    consola.info(`Tip: you can generate an API key at https://${hostname}/EditApiSettings.action`);
+  }
   const apiKey = args["with-token"] ? await readStdin() : await promptRequired("API key:");
 
   consola.start(`Authenticating with ${hostname}...`);
