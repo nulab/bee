@@ -23,7 +23,10 @@ export default defineConfig({
       sidebar: [
         {
           label: "ガイド",
-          items: [{ label: "はじめに", slug: "guides/getting-started" }],
+          items: [
+            { label: "はじめに", slug: "guides/getting-started" },
+            { label: "認証", slug: "guides/authentication" },
+          ],
         },
         {
           label: "コマンド",
