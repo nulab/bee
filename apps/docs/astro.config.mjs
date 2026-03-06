@@ -30,6 +30,7 @@ export default defineConfig({
             { label: "出力とフォーマット", slug: "guides/output-formatting" },
             { label: "シェル補完", slug: "guides/shell-completion" },
             { label: "CI/CD での利用", slug: "guides/ci-cd" },
+            { label: "AI エージェントとの連携", slug: "guides/ai-agent" },
           ],
         },
         {
