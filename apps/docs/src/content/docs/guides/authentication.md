@@ -69,21 +69,10 @@ bee auth login --method oauth
 bee auth switch
 ```
 
-```ansi
-? Select a space ›
-❯ xxx.backlog.com
-  yyy.backlog.jp
-```
-
 現在の認証状態は `bee auth status` で確認できます。
 
 ```sh
 bee auth status
-```
-
-```ansi
-xxx.backlog.com
-  ✓ Logged in as John Doe (api-key)
 ```
 
 ## 関連コマンド
