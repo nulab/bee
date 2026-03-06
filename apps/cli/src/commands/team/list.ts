@@ -2,6 +2,7 @@ import { getClient } from "@repo/backlog-utils";
 import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
+import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
@@ -49,11 +50,11 @@ const list = withUsage(
     async run({ args }) {
       const { client } = await getClient();
 
-      const teams = await client.getTeams({
-        order: args.order as "asc" | "desc" | undefined,
-        offset: args.offset === undefined ? undefined : Number(args.offset),
-        count: args.count === undefined ? undefined : Number(args.count),
-      });
+      const order = v.parse(v.optional(v.picklist(["asc", "desc"])), args.order);
+      const offset = v.parse(v.optional(v.pipe(v.string(), v.transform(Number))), args.offset);
+      const count = v.parse(v.optional(v.pipe(v.string(), v.transform(Number))), args.count);
+
+      const teams = await client.getTeams({ order, offset, count });
 
       outputResult(teams, args, (data) => {
         if (data.length === 0) {
