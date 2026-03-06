@@ -3,6 +3,11 @@ name: Deploy docs
 on:
   push:
     branches: [main]
+    paths:
+      - "apps/docs/**"
+      - "apps/cli/src/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/docs.yml"
   workflow_dispatch:
 
 permissions:
@@ -24,6 +29,13 @@ jobs:
       - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
 
       - run: pnpm install --frozen-lockfile
+
+      - name: Restore Astro build cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: apps/docs/node_modules/.astro
+          key: astro-build-${{ hashFiles('apps/docs/**', 'apps/cli/src/**') }}
+          restore-keys: astro-build-
 
       - name: Build docs
         run: pnpm --filter @repo/docs build
