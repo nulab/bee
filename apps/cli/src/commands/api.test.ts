@@ -23,7 +23,7 @@ describe("api", () => {
     const { api } = await import("./api");
     await api.run?.({ args: { endpoint: "/users/myself" } } as never);
 
-    expect(mockClient.get).toHaveBeenCalledWith("/api/v2/users/myself", {});
+    expect(mockClient.get).toHaveBeenCalledWith("/users/myself", {});
     expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining('"name"'));
     writeSpy.mockRestore();
   });
@@ -36,7 +36,7 @@ describe("api", () => {
     const { api } = await import("./api");
     await api.run?.({ args: { endpoint: "/projects" } } as never);
 
-    expect(mockClient.get).toHaveBeenCalledWith("/api/v2/projects", {});
+    expect(mockClient.get).toHaveBeenCalledWith("/projects", {});
     writeSpy.mockRestore();
   });
 
@@ -48,7 +48,7 @@ describe("api", () => {
     const { api } = await import("./api");
     await api.run?.({ args: { endpoint: "/api/v2/space" } } as never);
 
-    expect(mockClient.get).toHaveBeenCalledWith("/api/v2/space", {});
+    expect(mockClient.get).toHaveBeenCalledWith("space", {});
     writeSpy.mockRestore();
   });
 
@@ -60,7 +60,7 @@ describe("api", () => {
     const { api } = await import("./api");
     await api.run?.({ args: { endpoint: "/issues", method: "POST" } } as never);
 
-    expect(mockClient.post).toHaveBeenCalledWith("/api/v2/issues", {});
+    expect(mockClient.post).toHaveBeenCalledWith("/issues", {});
     writeSpy.mockRestore();
   });
 

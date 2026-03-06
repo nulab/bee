@@ -170,10 +170,10 @@ const buildParams = (fields: string[], rawFields: string[]): Params => {
     const key = isArray ? rawKey.slice(0, -2) : rawKey;
 
     const existing = params[key];
-    if (existing !== undefined) {
-      params[key] = Array.isArray(existing) ? [...existing, value] : [existing, value];
-    } else {
+    if (existing === undefined) {
       params[key] = isArray ? [value] : value;
+    } else {
+      params[key] = Array.isArray(existing) ? [...existing, value] : [existing, value];
     }
   };
 
