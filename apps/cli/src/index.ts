@@ -18,6 +18,7 @@ const main = defineCommand({
     notification: () => import("./commands/notification/index").then((m) => m.notification),
     pr: () => import("./commands/pr/index").then((m) => m.pr),
     user: () => import("./commands/user/index").then((m) => m.user),
+    wiki: () => import("./commands/wiki/index").then((m) => m.wiki),
   },
 });
 
