@@ -111,6 +111,16 @@ export default defineConfig({
               ],
             },
             {
+              label: "team",
+              items: [
+                { label: "team list", link: "/commands/team/list" },
+                { label: "team view", link: "/commands/team/view" },
+                { label: "team create", link: "/commands/team/create" },
+                { label: "team edit", link: "/commands/team/edit" },
+                { label: "team delete", link: "/commands/team/delete" },
+              ],
+            },
+            {
               label: "wiki",
               items: [
                 { label: "wiki list", link: "/commands/wiki/list" },
