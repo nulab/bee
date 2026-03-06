@@ -7,8 +7,6 @@ bee は CI/CD 環境でも利用できます。自動テストやデプロイの
 
 ## セットアップ
 
-### 認証
-
 CI/CD では API キー認証を使います。環境変数に API キーとスペース情報を設定してください。
 
 ```sh
@@ -16,64 +14,30 @@ export BACKLOG_API_KEY=your-api-key
 export BACKLOG_SPACE=your-space.backlog.com
 ```
 
-### 対話プロンプトの無効化
-
-CI/CD 環境では対話プロンプトが使えないため、`BACKLOG_NO_INPUT=1` を設定します。
-
-```sh
-export BACKLOG_NO_INPUT=1
-```
-
 ## GitHub Actions での例
 
-### 課題のステータス更新
-
-デプロイ完了時に関連する課題のステータスを更新する例です。
+マージされた PR のタイトルから課題キーを抽出し、課題をクローズする例です。PR タイトルは `PROJECT-123: タイトル` の形式を前提としています。
 
 ```yaml
-name: Update Backlog Issue
+name: Close Backlog Issue
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches: [main]
 
 jobs:
-  update-issue:
+  close-issue:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Extract issue key from PR title
+        id: extract
+        run: echo "issue_key=$(echo '${{ github.event.pull_request.title }}' | grep -oP '^[A-Z_]+-\d+')" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-
-      - run: npm install -g @nulab/bee
-
-      - name: Close related issue
+      - name: Close issue
+        if: steps.extract.outputs.issue_key != ''
         env:
           BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
           BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
-          BACKLOG_NO_INPUT: "1"
-        run: bee issue close PROJECT-123
+        run: npx @nulab/bee issue close ${{ steps.extract.outputs.issue_key }}
 ```
-
-### コミットメッセージから課題キーを抽出
-
-```yaml
-- name: Extract issue key from commit message
-  id: extract
-  run: echo "issue_key=$(git log -1 --pretty=%s | grep -oP '[A-Z_]+-\d+')" >> "$GITHUB_OUTPUT"
-
-- name: Add comment to issue
-  if: steps.extract.outputs.issue_key != ''
-  env:
-    BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
-    BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
-    BACKLOG_NO_INPUT: "1"
-  run: bee issue comment ${{ steps.extract.outputs.issue_key }} --body "Deployed in ${{ github.sha }}"
-```
-
-## セキュリティ上の注意
-
-- API キーは **シークレット** として管理してください（GitHub Actions の場合は Repository secrets）
-- ログに API キーが出力されないよう注意してください
-- CI/CD 専用の API キーを発行し、必要最小限の権限に絞ることを推奨します

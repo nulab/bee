@@ -3,15 +3,36 @@ title: はじめに
 description: bee のインストールと基本的な使い方
 ---
 
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
 ## bee とは
 
-bee は、[Backlog](https://backlog.com/) をターミナルから操作するためのコマンドラインツールです。課題の管理、プルリクエスト、Wiki、通知など、Backlog の主要な機能をコマンドラインから利用できます。
+bee は、[Backlog](https://backlog.com/) をターミナルから操作するためのコマンドラインツールです。課題の管理、プルリクエスト、ドキュメント、通知など、Backlog の主要な機能をコマンドラインから利用できます。
 
 ## インストール
 
-```sh
-npm install -g @nulab/bee
-```
+<Tabs>
+  <TabItem label="nypm">
+    ```sh
+    npx nypm install -g @nulab/bee
+    ```
+  </TabItem>
+  <TabItem label="npm">
+    ```sh
+    npm install -g @nulab/bee
+    ```
+  </TabItem>
+  <TabItem label="pnpm">
+    ```sh
+    pnpm add -g @nulab/bee
+    ```
+  </TabItem>
+  <TabItem label="bun">
+    ```sh
+    bun add -g @nulab/bee
+    ```
+  </TabItem>
+</Tabs>
 
 バージョンを確認してインストールが成功したことを確認します。
 
@@ -39,13 +60,6 @@ API キーは Backlog の「個人設定 > API」から発行できます。
 bee issue list --project YOUR_PROJECT
 ```
 
-`BACKLOG_PROJECT` 環境変数を設定しておくと、`--project` フラグを省略できます。
-
-```sh
-export BACKLOG_PROJECT=YOUR_PROJECT
-bee issue list
-```
-
 ### 3. 課題を作成する
 
 対話形式で新しい課題を作成します。
@@ -59,12 +73,6 @@ bee issue create
 ```sh
 bee issue create --summary "最初の課題" --issue-type Bug --priority High
 ```
-
-### 4. もっと知る
-
-- [認証](/guides/authentication/) — API キーと OAuth の使い分け
-- [環境変数](/guides/environment-variables/) — 便利な設定
-- [出力とフォーマット](/guides/output-formatting/) — `--json` の活用
 
 ## アンインストール
 

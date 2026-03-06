@@ -36,7 +36,7 @@ JSON 出力を `jq` と組み合わせると、柔軟なデータ加工ができ
 bee issue list --project MY_PROJECT --json | jq '.[].summary'
 
 # 優先度が「高」の課題数をカウント
-bee issue list --project MY_PROJECT --json | jq '[.[] | select(.priority.name == "High")] | length'
+bee issue list --project MY_PROJECT --json | jq '[.[] | select(.priority.id == 2)] | length'
 
 # 担当者ごとの課題数
 bee issue list --project MY_PROJECT --json | jq 'group_by(.assignee.name) | map({name: .[0].assignee.name, count: length})'
