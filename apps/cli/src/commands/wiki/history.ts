@@ -3,6 +3,7 @@ import { type Row, formatDate, outputArgs, outputResult, printTable } from "@rep
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `Display the revision history of a Backlog wiki page.
@@ -37,24 +38,10 @@ const history = withUsage(
         valueHint: "<number>",
         required: true,
       },
-      "min-id": {
-        type: "string",
-        description: "Minimum version ID",
-      },
-      "max-id": {
-        type: "string",
-        description: "Maximum version ID",
-      },
-      count: {
-        type: "string",
-        description: "Number of records to retrieve",
-        valueHint: "<number>",
-      },
-      order: {
-        type: "string",
-        description: "Sort order",
-        valueHint: "{asc|desc}",
-      },
+      "min-id": commonArgs.minId,
+      "max-id": commonArgs.maxId,
+      count: commonArgs.count,
+      order: commonArgs.order,
     },
     async run({ args }) {
       const { client } = await getClient();

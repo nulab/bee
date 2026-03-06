@@ -43,8 +43,7 @@ const create = withUsage(
       key: {
         type: "string",
         alias: "k",
-        description:
-          "Project key. Uppercase letters (A-Z), numbers (0-9) and underscore (_) can be used.",
+        description: "Project key",
       },
       name: {
         type: "string",

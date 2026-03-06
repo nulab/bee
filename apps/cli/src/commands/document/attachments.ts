@@ -12,7 +12,9 @@ import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
-  long: "List attachments of a Backlog document.",
+  long: `List attachments of a Backlog document.
+
+Shows file name, size, creator, and creation date.`,
 
   examples: [
     { description: "List attachments", command: "bee document attachments 12345" },
@@ -35,7 +37,7 @@ const attachments = withUsage(
       document: {
         type: "positional",
         description: "Document ID",
-        valueHint: "<DOCUMENT-ID>",
+        valueHint: "<number>",
         required: true,
       },
     },

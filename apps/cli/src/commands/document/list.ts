@@ -17,8 +17,8 @@ import { resolveProjectIds } from "../../lib/resolve-project";
 const commandUsage: CommandUsage = {
   long: `List documents from a Backlog project.
 
-By default, documents are sorted by last updated date. Use \`--keyword\` to
-search within document titles and content.`,
+Use \`--sort\` to change the sort field and \`--keyword\` to search within
+document titles and content.`,
 
   examples: [
     { description: "List documents in a project", command: "bee document list -p PROJECT" },

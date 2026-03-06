@@ -73,7 +73,7 @@ describe("wiki create", () => {
 
     const { create } = await import("./create");
     await create.run?.({
-      args: { project: "TEST", name: "My Page", body: "Hello", notify: true },
+      args: { project: "TEST", name: "My Page", body: "Hello", "mail-notify": true },
     } as never);
 
     expect(mockClient.postWiki).toHaveBeenCalledWith(expect.objectContaining({ mailNotify: true }));

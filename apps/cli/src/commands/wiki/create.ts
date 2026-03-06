@@ -22,8 +22,8 @@ it is used as the body automatically.`,
       command: 'echo "Body" | bee wiki create -p PROJECT -n "Name"',
     },
     {
-      description: "Create and notify",
-      command: 'bee wiki create -p PROJECT -n "Name" -b "Content" --notify',
+      description: "Create and send notification email",
+      command: 'bee wiki create -p PROJECT -n "Name" -b "Content" --mail-notify',
     },
   ],
 
@@ -51,7 +51,7 @@ const create = withUsage(
         alias: "b",
         description: "Wiki page content",
       },
-      notify: {
+      "mail-notify": {
         type: "boolean",
         description: "Send notification email",
       },
@@ -69,7 +69,7 @@ const create = withUsage(
         projectId,
         name,
         content: body,
-        mailNotify: args.notify,
+        mailNotify: args["mail-notify"],
       });
 
       outputResult(wiki, args, (data) => {

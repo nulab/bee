@@ -77,7 +77,7 @@ describe("notification list", () => {
 
     const { list } = await import("./list");
     await list.run?.({
-      args: { limit: "5", "min-id": "10", "max-id": "100", order: "asc" },
+      args: { count: "5", "min-id": "10", "max-id": "100", order: "asc" },
     } as never);
 
     expect(mockClient.getNotifications).toHaveBeenCalledWith({

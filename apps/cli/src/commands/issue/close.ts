@@ -52,7 +52,7 @@ const close = withUsage(
       },
       resolution: {
         type: "string",
-        description: "Resolution (default: fixed)",
+        description: "Resolution",
         valueHint: `{${RESOLUTION_NAMES.join("|")}}`,
       },
       notify: {

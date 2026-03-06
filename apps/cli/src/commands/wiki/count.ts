@@ -6,7 +6,9 @@ import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/c
 import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
-  long: `Display the number of wiki pages in a Backlog project.`,
+  long: `Display the number of wiki pages in a Backlog project.
+
+The count includes all wiki pages regardless of tag or keyword.`,
 
   examples: [
     { description: "Count wiki pages", command: "bee wiki count -p PROJECT" },

@@ -17,9 +17,9 @@ The token output can be used with \`BACKLOG_API_KEY\` or piped to other commands
       command: "bee auth token -s xxx.backlog.com",
     },
     {
-      description: "Use with curl",
+      description: "Use token in a script",
       command:
-        'bee auth token | curl -H "X-Api-Key: $(cat -)" https://xxx.backlog.com/api/v2/users/myself',
+        'TOKEN=$(bee auth token) && curl -H "X-Api-Key: $TOKEN" https://xxx.backlog.com/api/v2/users/myself',
     },
   ],
 

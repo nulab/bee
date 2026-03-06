@@ -45,7 +45,7 @@ const deleteWiki = withUsage(
         alias: "y",
         description: "Skip confirmation prompt",
       },
-      notify: {
+      "mail-notify": {
         type: "boolean",
         description: "Send notification email",
       },
@@ -62,7 +62,7 @@ const deleteWiki = withUsage(
 
       const { client } = await getClient();
 
-      const wiki = await client.deleteWiki(Number(args.wiki), args.notify ?? false);
+      const wiki = await client.deleteWiki(Number(args.wiki), args["mail-notify"] ?? false);
 
       outputResult(wiki, args, (data) => {
         consola.success(`Deleted wiki page ${data.id}: ${data.name}`);

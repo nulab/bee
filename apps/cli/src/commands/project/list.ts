@@ -35,7 +35,7 @@ const list = withUsage(
       ...outputArgs,
       archived: {
         type: "boolean",
-        description: "Include archived projects. Omit to show all projects.",
+        description: "Include archived projects",
       },
       all: {
         type: "boolean",

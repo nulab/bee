@@ -12,7 +12,7 @@ import { resolveUserId } from "../../lib/resolve-user";
 const commandUsage: CommandUsage = {
   long: `Create a new Backlog issue.
 
-Requires a project, summary, issue type, and priority. When run
+Requires a project, title, issue type, and priority. When run
 interactively, omitted required fields will be prompted.
 
 Issue type accepts a numeric ID. Priority accepts a name: \`high\`, \`normal\`,
@@ -55,12 +55,13 @@ const create = withUsage(
       title: {
         type: "string",
         alias: "t",
-        description: "Issue summary",
+        description: "Issue title",
       },
       type: {
         type: "string",
         alias: "T",
         description: "Issue type ID",
+        valueHint: "<number>",
       },
       priority: {
         type: "string",

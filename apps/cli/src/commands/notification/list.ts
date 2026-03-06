@@ -9,13 +9,13 @@ import { NOTIFICATION_REASON_LABELS } from "../../lib/notification-reason-labels
 const commandUsage: CommandUsage = {
   long: `List notifications for the authenticated user.
 
-Unread notifications are marked with an asterisk (\`*\`). Use \`--limit\` to
+Unread notifications are marked with an asterisk (\`*\`). Use \`--count\` to
 control the number of notifications returned, and \`--min-id\` / \`--max-id\`
 for cursor-based pagination.`,
 
   examples: [
     { description: "List recent notifications", command: "bee notification list" },
-    { description: "List the last 5 notifications", command: "bee notification list --limit 5" },
+    { description: "List the last 5 notifications", command: "bee notification list --count 5" },
     {
       description: "List notifications in ascending order",
       command: "bee notification list --order asc",
@@ -36,11 +36,7 @@ const list = withUsage(
     },
     args: {
       ...outputArgs,
-      limit: {
-        type: "string",
-        description: "Maximum number of notifications to return",
-        valueHint: "<1-100>",
-      },
+      count: commonArgs.count,
       "min-id": commonArgs.minId,
       "max-id": commonArgs.maxId,
       order: commonArgs.order,
@@ -49,7 +45,7 @@ const list = withUsage(
       const { client } = await getClient();
 
       const notifications = await client.getNotifications({
-        count: args.limit ? Number(args.limit) : undefined,
+        count: args.count ? Number(args.count) : undefined,
         minId: args["min-id"] ? Number(args["min-id"]) : undefined,
         maxId: args["max-id"] ? Number(args["max-id"]) : undefined,
         order: args.order as "asc" | "desc" | undefined,

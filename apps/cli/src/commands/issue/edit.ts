@@ -15,7 +15,7 @@ will remain unchanged.`,
 
   examples: [
     {
-      description: "Update issue summary",
+      description: "Update issue title",
       command: 'bee issue edit PROJECT-123 -t "New title"',
     },
     {
@@ -50,7 +50,7 @@ const edit = withUsage(
       title: {
         type: "string",
         alias: "t",
-        description: "New summary of the issue",
+        description: "New title of the issue",
       },
       description: {
         type: "string",
@@ -72,8 +72,13 @@ const edit = withUsage(
         type: "string",
         alias: "T",
         description: "New issue type ID",
+        valueHint: "<number>",
       },
-      assignee: { ...commonArgs.assignee, alias: undefined, description: "New assignee user ID" },
+      assignee: {
+        ...commonArgs.assignee,
+        alias: undefined,
+        description: "New assignee user ID. Use @me for yourself.",
+      },
       resolution: {
         type: "string",
         description: "Resolution ID",

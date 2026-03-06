@@ -55,7 +55,7 @@ const edit = withUsage(
         alias: "b",
         description: "New content of the wiki page",
       },
-      notify: {
+      "mail-notify": {
         type: "boolean",
         description: "Send notification email",
       },
@@ -68,7 +68,7 @@ const edit = withUsage(
       const wiki = await client.patchWiki(Number(args.wiki), {
         name: args.name,
         content,
-        mailNotify: args.notify,
+        mailNotify: args["mail-notify"],
       });
 
       outputResult(wiki, args, (data) => {

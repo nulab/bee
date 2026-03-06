@@ -16,7 +16,7 @@ import { resolveUserId } from "../../lib/resolve-user";
 const commandUsage: CommandUsage = {
   long: `Create a new pull request in a Backlog repository.
 
-Requires a base branch, head branch, summary, and description. When run
+Requires a base branch, head branch, title, and description. When run
 interactively, omitted required fields will be prompted.`,
 
   examples: [
@@ -63,7 +63,7 @@ const create = withUsage(
       title: {
         type: "string",
         alias: "t",
-        description: "Pull request summary",
+        description: "Pull request title",
       },
       body: {
         type: "string",

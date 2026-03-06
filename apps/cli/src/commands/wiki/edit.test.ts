@@ -63,7 +63,7 @@ describe("wiki edit", () => {
     mockClient.patchWiki.mockResolvedValue({ id: 123, name: "Page" });
 
     const { edit } = await import("./edit");
-    await edit.run?.({ args: { wiki: "123", name: "Page", notify: true } } as never);
+    await edit.run?.({ args: { wiki: "123", name: "Page", "mail-notify": true } } as never);
 
     expect(mockClient.patchWiki).toHaveBeenCalledWith(
       123,

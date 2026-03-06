@@ -21,7 +21,7 @@ will remain unchanged.`,
 
   examples: [
     {
-      description: "Update pull request summary",
+      description: "Update pull request title",
       command: 'bee pr edit 42 -p PROJECT -R repo -t "New title"',
     },
     {
@@ -58,7 +58,7 @@ const edit = withUsage(
       title: {
         type: "string",
         alias: "t",
-        description: "New summary of the pull request",
+        description: "New title of the pull request",
       },
       body: {
         type: "string",

@@ -49,7 +49,10 @@ issue changes, wiki edits, git pushes, and other activities. Results are
 ordered by most recent first.
 
 Use \`--activity-type\` to filter by specific activity types (comma-separated IDs).
-Use \`--count\` to control how many activities are returned (default: 20, max: 100).`,
+Use \`--count\` to control how many activities are returned (default: 20, max: 100).
+
+For a list of activity type IDs, see:
+https://developer.nulab.com/docs/backlog/api/2/get-user-recent-updates/#activity-type`,
 
   examples: [
     { description: "List user activities", command: "bee user activities 12345" },

@@ -59,32 +59,32 @@ const list = withUsage(
       keyword: commonArgs.keyword,
       "created-since": {
         type: "string",
-        description: "Created since",
+        description: "Show issues created on or after this date",
         valueHint: "<yyyy-MM-dd>",
       },
       "created-until": {
         type: "string",
-        description: "Created until",
+        description: "Show issues created on or before this date",
         valueHint: "<yyyy-MM-dd>",
       },
       "updated-since": {
         type: "string",
-        description: "Updated since",
+        description: "Show issues updated on or after this date",
         valueHint: "<yyyy-MM-dd>",
       },
       "updated-until": {
         type: "string",
-        description: "Updated until",
+        description: "Show issues updated on or before this date",
         valueHint: "<yyyy-MM-dd>",
       },
       "due-since": {
         type: "string",
-        description: "Due date since",
+        description: "Show issues due on or after this date",
         valueHint: "<yyyy-MM-dd>",
       },
       "due-until": {
         type: "string",
-        description: "Due date until",
+        description: "Show issues due on or before this date",
         valueHint: "<yyyy-MM-dd>",
       },
       sort: {

@@ -37,7 +37,7 @@ const deleteDocument = withUsage(
       document: {
         type: "positional",
         description: "Document ID",
-        valueHint: "<DOCUMENT-ID>",
+        valueHint: "<number>",
         required: true,
       },
       yes: {

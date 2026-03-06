@@ -57,7 +57,7 @@ describe("wiki delete", () => {
     mockClient.deleteWiki.mockResolvedValue({ id: 123, name: "Old Page" });
 
     const { deleteWiki } = await import("./delete");
-    await deleteWiki.run?.({ args: { wiki: "123", yes: true, notify: true } } as never);
+    await deleteWiki.run?.({ args: { wiki: "123", yes: true, "mail-notify": true } } as never);
 
     expect(mockClient.deleteWiki).toHaveBeenCalledWith(123, true);
   });
