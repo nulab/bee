@@ -62,6 +62,18 @@ export default defineConfig({
               ],
             },
             {
+              label: "pr",
+              items: [
+                { label: "pr list", link: "/commands/pr/list" },
+                { label: "pr view", link: "/commands/pr/view" },
+                { label: "pr comments", link: "/commands/pr/comments" },
+                { label: "pr status", link: "/commands/pr/status" },
+                { label: "pr create", link: "/commands/pr/create" },
+                { label: "pr edit", link: "/commands/pr/edit" },
+                { label: "pr comment", link: "/commands/pr/comment" },
+              ],
+            },
+            {
               label: "user",
               items: [
                 { label: "user list", link: "/commands/user/list" },
