@@ -27,6 +27,7 @@ export default defineConfig({
             { label: "はじめに", slug: "guides/getting-started" },
             { label: "認証", slug: "guides/authentication" },
             { label: "環境変数", slug: "guides/environment-variables" },
+            { label: "シェル補完", slug: "guides/shell-completion" },
           ],
         },
         {
