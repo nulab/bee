@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "consola": "^3.4.2",
+    "string-width": "^8.2.0",
     "valibot": "^1.2.0"
   },
   "devDependencies": {

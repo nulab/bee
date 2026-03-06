@@ -1,4 +1,5 @@
 import consola from "consola";
+import { stringWidth, widthPadEnd, widthTruncate } from "./string-width";
 
 type Column = {
   header: string;
@@ -6,13 +7,6 @@ type Column = {
 };
 
 type Row = Column[];
-
-const truncate = (str: string, width: number): string => {
-  if (str.length <= width) {
-    return str;
-  }
-  return `${str.slice(0, width - 1)}…`;
-};
 
 const printTable = (rows: Row[]): void => {
   if (rows.length === 0) {
@@ -23,24 +17,25 @@ const printTable = (rows: Row[]): void => {
   const widths: number[] = [];
 
   for (let col = 0; col < columnCount; col++) {
-    let max = rows[0][col].header.length;
+    let max = stringWidth(rows[0][col].header);
     for (const row of rows) {
-      if (row[col].value.length > max) {
-        max = row[col].value.length;
+      const w = stringWidth(row[col].value);
+      if (w > max) {
+        max = w;
       }
     }
     widths.push(max);
   }
 
-  const header = widths.map((w, i) => rows[0][i].header.padEnd(w)).join("  ");
+  const header = widths.map((w, i) => widthPadEnd(rows[0][i].header, w)).join("  ");
   consola.log(header);
 
   for (const row of rows) {
     const line = widths
       .map((w, i) => {
         const isLast = i === widths.length - 1;
-        const val = truncate(row[i].value, w);
-        return isLast ? val : val.padEnd(w);
+        const val = widthTruncate(row[i].value, w);
+        return isLast ? val : widthPadEnd(val, w);
       })
       .join("  ");
     consola.log(line);

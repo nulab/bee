@@ -1,4 +1,5 @@
 import consola from "consola";
+import { stringWidth, widthPadEnd } from "./string-width";
 
 type DefinitionItem = [label: string, value: string | undefined | null];
 
@@ -11,11 +12,11 @@ const printDefinitionList = (items: DefinitionItem[], indent = 4): void => {
     return;
   }
 
-  const maxLabel = Math.max(...filtered.map(([label]) => label.length));
+  const maxLabel = Math.max(...filtered.map(([label]) => stringWidth(label)));
   const pad = " ".repeat(indent);
 
   for (const [label, value] of filtered) {
-    consola.log(`${pad}${label.padEnd(maxLabel)}  ${value}`);
+    consola.log(`${pad}${widthPadEnd(label, maxLabel)}  ${value}`);
   }
 };
 
