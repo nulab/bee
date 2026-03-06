@@ -70,9 +70,10 @@ const add = withUsage(
       const { client } = await getClient();
 
       if (args.issue) {
-        const issueId = /^\d+$/.test(args.issue)
-          ? Number(args.issue)
-          : (await client.getIssue(args.issue)).id;
+        const issue = /^\d+$/.test(args.issue)
+          ? { id: Number(args.issue) }
+          : await client.getIssue(args.issue);
+        const issueId = issue.id;
         await client.postStar({ issueId });
         consola.success(`Starred issue ${args.issue}.`);
       } else if (args.comment) {
