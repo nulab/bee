@@ -5,7 +5,7 @@ export default defineConfig({
   site: "https://nulab.github.io",
   integrations: [
     starlight({
-      title: "bee",
+      title: "Backlog CLI",
       favicon: "/favicon.svg",
       defaultLocale: "ja",
       social: [
