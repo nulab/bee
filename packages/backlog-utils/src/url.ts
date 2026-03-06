@@ -41,7 +41,7 @@ const wikiUrl = (host: string, wikiId: number): string =>
 
 /** Returns the URL for a document page. */
 const documentUrl = (host: string, projectKey: string, documentId: string): string =>
-  buildBacklogUrl(host, `/projects/${projectKey}/document/${documentId}`);
+  buildBacklogUrl(host, `/document/${projectKey}/${documentId}`);
 
 /** Returns the URL for the dashboard. */
 const dashboardUrl = (host: string): string => buildBacklogUrl(host, "/dashboard");

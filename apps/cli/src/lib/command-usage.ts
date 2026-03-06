@@ -266,6 +266,8 @@ const ENV_AUTH: [string, string][] = [
 
 const ENV_PROJECT: [string, string] = ["BACKLOG_PROJECT", "Default project ID or project key"];
 
+const ENV_REPO: [string, string] = ["BACKLOG_REPO", "Default repository name"];
+
 export {
   type CommandUsage,
   withUsage,
@@ -274,4 +276,5 @@ export {
   showCommandUsage,
   ENV_AUTH,
   ENV_PROJECT,
+  ENV_REPO,
 };
