@@ -2,8 +2,7 @@
 
 A CLI for [Backlog](https://backlog.com/) project management service, inspired by GitHub CLI.
 
-> [!NOTE]
-> This is not an officially supported Nulab product. It is maintained by volunteers.
+**Note:** This is not an officially supported Nulab product. It is maintained by volunteers.
 
 ## Install
 
