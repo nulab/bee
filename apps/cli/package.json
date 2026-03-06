@@ -1,7 +1,6 @@
 {
   "name": "@nulab/bee",
   "version": "0.0.0",
-  "private": true,
   "description": "bee — a CLI for Backlog",
   "bin": {
     "bee": "./bin/cli.mjs"

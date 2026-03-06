@@ -1,0 +1,136 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+        description: Environment to publish package
+        default: dry-run
+        required: true
+      newversion:
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        description: New version
+        default: patch
+        required: true
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.bump_version.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+
+      - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get the latest tag
+        id: get_latest_tag
+        run: |
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "latest_tag=${latest_tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Bump version
+        id: bump_version
+        working-directory: apps/cli
+        env:
+          LATEST_TAG: ${{ steps.get_latest_tag.outputs.latest_tag }}
+          NEW_VERSION_TYPE: ${{ github.event.inputs.newversion }}
+        run: |
+          npm version "$LATEST_TAG" --no-git-tag-version --allow-same-version
+          npm version "$NEW_VERSION_TYPE" --no-git-tag-version
+
+          new_version=$(node -p "require('./package.json').version")
+          new_tag="v${new_version}"
+          git tag "${new_tag}"
+
+          echo "Created new tag: ${new_tag}"
+          echo "new_tag=${new_tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: pnpm --filter @nulab/bee build
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cli-build
+          path: apps/cli/dist
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: cli-build
+          path: apps/cli/dist
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update version
+        working-directory: apps/cli
+        env:
+          NEW_TAG: ${{ needs.build.outputs.new_tag }}
+        run: npm version "$NEW_TAG" --no-git-tag-version
+
+      - name: Publish to npm
+        if: inputs.environment != 'dry-run'
+        working-directory: apps/cli
+        run: npm publish --provenance --access public
+
+      - name: Publish dry run
+        if: inputs.environment == 'dry-run'
+        working-directory: apps/cli
+        run: npm publish --provenance --access public --dry-run
+
+      - name: Push version commit and tag
+        if: inputs.environment != 'dry-run'
+        env:
+          NEW_TAG: ${{ needs.build.outputs.new_tag }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          cd apps/cli
+          git add package.json
+          git commit -m "${NEW_TAG}"
+          cd ../..
+          git tag -f "${NEW_TAG}"
+          git push origin "HEAD:refs/heads/${REF_NAME}"
+          git push origin "${NEW_TAG}"
+
+      - name: Create GitHub release
+        if: inputs.environment != 'dry-run'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_TAG: ${{ needs.build.outputs.new_tag }}
+        run: gh release create "$NEW_TAG" --generate-notes
