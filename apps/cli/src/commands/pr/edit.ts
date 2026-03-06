@@ -10,6 +10,7 @@ import {
   ENV_REPO,
   withUsage,
 } from "../../lib/command-usage";
+import { resolveUserId } from "../../lib/resolve-user";
 
 const commandUsage: CommandUsage = {
   long: `Update an existing Backlog pull request.
@@ -77,7 +78,7 @@ const edit = withUsage(
       },
       assignee: {
         type: "string",
-        description: "New assignee user ID",
+        description: "New assignee user ID. Use @me for yourself.",
       },
       issue: {
         type: "string",
@@ -114,8 +115,9 @@ const edit = withUsage(
         summary: args.title,
         description: args.body,
         issueId,
-        assigneeId: args.assignee ? Number(args.assignee) : undefined,
-        comment: args.comment ? [args.comment] : undefined,
+        assigneeId: args.assignee ? await resolveUserId(client, args.assignee) : undefined,
+        // @ts-expect-error backlog-js types say string[] but Backlog API accepts a single string
+        comment: args.comment ?? undefined,
         notifiedUserId,
       });
 

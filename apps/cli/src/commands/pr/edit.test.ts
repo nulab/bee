@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 const mockClient = {
   patchPullRequest: vi.fn(),
   getIssue: vi.fn(),
+  getMyself: vi.fn(),
 };
 
 vi.mock("@repo/backlog-utils", () => ({
@@ -60,7 +61,7 @@ describe("pr edit", () => {
       "PROJ",
       "repo",
       42,
-      expect.objectContaining({ comment: ["Updated"] }),
+      expect.objectContaining({ comment: "Updated" }),
     );
   });
 
