@@ -14,9 +14,18 @@ The generated script should be sourced in your shell's configuration file.
 Follow the instructions in the output for your specific shell.`,
 
   examples: [
-    { description: "Generate bash completions", command: "bee completion bash" },
-    { description: "Generate zsh completions", command: "bee completion zsh" },
-    { description: "Generate fish completions", command: "bee completion fish" },
+    {
+      description: "Set up completions for bash (add to ~/.bashrc)",
+      command: "echo 'eval \"$(bee completion bash)\"' >> ~/.bashrc",
+    },
+    {
+      description: "Set up completions for zsh (add to ~/.zshrc)",
+      command: "echo 'eval \"$(bee completion zsh)\"' >> ~/.zshrc",
+    },
+    {
+      description: "Set up completions for fish",
+      command: "bee completion fish > ~/.config/fish/completions/bee.fish",
+    },
   ],
 };
 
