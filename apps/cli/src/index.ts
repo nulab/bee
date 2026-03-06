@@ -28,6 +28,8 @@ const main = defineCommand({
     "issue-type": () => import("./commands/issue-type/index").then((m) => m.issueType),
     space: () => import("./commands/space/index").then((m) => m.space),
     status: () => import("./commands/status/index").then((m) => m.status),
+    star: () => import("./commands/star/index").then((m) => m.star),
+    watching: () => import("./commands/watching/index").then((m) => m.watching),
   },
 });
 
