@@ -7,10 +7,12 @@ const commandUsage: CommandUsage = {
   long: `Add a star to an issue, comment, wiki page, or pull request comment.
 
 Exactly one of \`--issue\`, \`--comment\`, \`--wiki\`, or \`--pr-comment\` must be
-provided. Use the corresponding resource ID as the value.`,
+provided. The \`--issue\` flag accepts an issue key (e.g., PROJECT-123) or a
+numeric ID. Other flags require numeric IDs.`,
 
   examples: [
-    { description: "Star an issue", command: "bee star add --issue 12345" },
+    { description: "Star an issue by key", command: "bee star add --issue PROJECT-123" },
+    { description: "Star an issue by ID", command: "bee star add --issue 12345" },
     { description: "Star a comment", command: "bee star add --comment 67890" },
     { description: "Star a wiki page", command: "bee star add --wiki 111" },
     { description: "Star a pull request comment", command: "bee star add --pr-comment 222" },
@@ -30,8 +32,8 @@ const add = withUsage(
     args: {
       issue: {
         type: "string",
-        description: "Issue ID to star",
-        valueHint: "<number>",
+        description: "Issue ID or issue key to star",
+        valueHint: "<PROJECT-123>",
       },
       comment: {
         type: "string",
@@ -71,7 +73,10 @@ const add = withUsage(
       const { client } = await getClient();
 
       if (args.issue) {
-        await client.postStar({ issueId: Number(args.issue) });
+        const issueId = /^\d+$/.test(args.issue)
+          ? Number(args.issue)
+          : (await client.getIssue(args.issue)).id;
+        await client.postStar({ issueId });
         consola.success(`Starred issue ${args.issue}.`);
       } else if (args.comment) {
         await client.postStar({ commentId: Number(args.comment) });

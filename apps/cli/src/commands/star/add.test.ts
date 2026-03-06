@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 const mockClient = {
   postStar: vi.fn(),
+  getIssue: vi.fn(),
 };
 
 vi.mock("@repo/backlog-utils", () => ({
@@ -22,6 +23,18 @@ describe("star add", () => {
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.postStar).toHaveBeenCalledWith({ issueId: 12_345 });
     expect(consola.success).toHaveBeenCalledWith("Starred issue 12345.");
+  });
+
+  it("stars an issue by issue key", async () => {
+    mockClient.getIssue.mockResolvedValue({ id: 99_999 });
+    mockClient.postStar.mockResolvedValue(undefined);
+
+    const { add } = await import("./add");
+    await add.run?.({ args: { issue: "PROJECT-123" } } as never);
+
+    expect(mockClient.getIssue).toHaveBeenCalledWith("PROJECT-123");
+    expect(mockClient.postStar).toHaveBeenCalledWith({ issueId: 99_999 });
+    expect(consola.success).toHaveBeenCalledWith("Starred issue PROJECT-123.");
   });
 
   it("stars a comment", async () => {
