@@ -20,8 +20,14 @@ Follow the instructions in the output for your specific shell.`,
   ],
 };
 
+const shellExtensions: Record<string, string> = {
+  bash: "sh",
+  zsh: "zsh",
+  fish: "fish",
+};
+
 const loadCompletionScript = (shell: string): string =>
-  readFileSync(resolve(__dirname, `completions/${shell}.txt`), "utf8");
+  readFileSync(resolve(__dirname, `completions/${shell}.${shellExtensions[shell]}`), "utf8");
 
 const completion = withUsage(
   defineCommand({
