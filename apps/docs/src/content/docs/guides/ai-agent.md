@@ -24,18 +24,17 @@ npx skills add nulab/bee --skill using-bee
 [Backlog MCP Server](https://github.com/nulab/backlog-mcp-server) は、Backlog API をネイティブに MCP（Model Context Protocol）化したサーバーです。
 
 - 構造化されたツール定義により、エージェントが課題の検索・作成・更新などを直接実行できる
-- API 操作の精度・網羅性が高い
 - MCP 対応のクライアント（Claude Desktop 等）からそのまま使える
 
 ### 選び方
 
-| 観点           | bee + Skills                       | Backlog MCP Server |
-| -------------- | ---------------------------------- | ------------------ |
-| セットアップ   | Node.js + bee インストール         | MCP 設定のみ       |
-| 柔軟性         | シェルパイプライン、外部ツール連携 | API スコープ内     |
-| ブラウザ操作   | `bee browse` で可能                | 不可               |
-| 人間向け出力   | テーブル / JSON 切り替え           | JSON のみ          |
-| API 操作の精度 | CLI 経由                           | 高い（ネイティブ） |
+| 観点         | bee + Skills                             | Backlog MCP Server                      |
+| ------------ | ---------------------------------------- | --------------------------------------- |
+| 利用環境     | Claude Code などターミナル操作可能な環境 | Claude Desktop などMCP 対応クライアント |
+| セットアップ | Node.js + bee インストール               | MCP 設定のみ                            |
+| 柔軟性       | シェルパイプライン、外部ツール連携       | API スコープ内                          |
+| ブラウザ操作 | `bee browse` で可能                      | 不可                                    |
+| 人間向け出力 | テーブル / JSON 切り替え                 | JSON のみ                               |
 
 ## `bee api` で柔軟な API アクセス
 
@@ -84,4 +83,4 @@ bee の Skill (`/using-bee`) を導入していれば、エージェントが適
 期限切れの課題を見つけて、それぞれに「期限を確認してください」というコメントを追加してください。
 ```
 
-不安な場合は、プロンプトに `/using-bee` を含めてください。
+エージェントがうまく bee を使えない場合は、プロンプトに `/using-bee` を含めてください。
