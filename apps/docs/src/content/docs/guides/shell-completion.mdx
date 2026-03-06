@@ -3,29 +3,31 @@ title: シェル補完
 description: bee のタブ補完をセットアップする
 ---
 
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
 bee はシェルのタブ補完をサポートしています。コマンド名やフラグ名を途中まで入力して Tab キーを押すと、候補が自動補完されます。
 
 ## セットアップ
 
-### Bash
-
-```sh
-echo 'eval "$(bee completion bash)"' >> ~/.bashrc
-source ~/.bashrc
-```
-
-### Zsh
-
-```sh
-echo 'eval "$(bee completion zsh)"' >> ~/.zshrc
-source ~/.zshrc
-```
-
-### Fish
-
-```sh
-bee completion fish > ~/.config/fish/completions/bee.fish
-```
+<Tabs>
+  <TabItem label="Bash">
+    ```sh
+    echo 'eval "$(bee completion bash)"' >> ~/.bashrc
+    source ~/.bashrc
+    ```
+  </TabItem>
+  <TabItem label="Zsh">
+    ```sh
+    echo 'eval "$(bee completion zsh)"' >> ~/.zshrc
+    source ~/.zshrc
+    ```
+  </TabItem>
+  <TabItem label="Fish">
+    ```sh
+    bee completion fish > ~/.config/fish/completions/bee.fish
+    ```
+  </TabItem>
+</Tabs>
 
 ## 確認
 

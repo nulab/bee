@@ -3,16 +3,36 @@ title: CI/CD での利用
 description: CI/CD パイプラインから bee を使う
 ---
 
+import { Steps } from "@astrojs/starlight/components";
+
 bee は CI/CD 環境でも利用できます。自動テストやデプロイのパイプラインから Backlog の課題やプルリクエストを操作できます。
 
 ## セットアップ
 
-CI/CD では API キー認証を使います。環境変数に API キーとスペース情報を設定してください。
+<Steps>
 
-```sh
-export BACKLOG_API_KEY=your-api-key
-export BACKLOG_SPACE=your-space.backlog.com
-```
+1. **API キー認証を設定する**
+
+   CI/CD では API キー認証を使います。環境変数に API キーとスペース情報を設定してください。
+
+   ```sh
+   export BACKLOG_API_KEY=your-api-key
+   export BACKLOG_SPACE=your-space.backlog.com
+   ```
+
+2. **パイプラインから bee を呼び出す**
+
+   `npx` を使えばインストール不要で bee を実行できます。
+
+   ```sh
+   npx @nulab/bee issue list --project MY_PROJECT
+   ```
+
+</Steps>
+
+:::caution
+API キーをコードにハードコードせず、CI/CD サービスのシークレット機能を使って管理してください。
+:::
 
 ## GitHub Actions での例
 

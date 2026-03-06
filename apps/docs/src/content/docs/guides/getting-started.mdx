@@ -3,7 +3,7 @@ title: はじめに
 description: bee のインストールと基本的な使い方
 ---
 
-import { Tabs, TabItem } from "@astrojs/starlight/components";
+import { Tabs, TabItem, Steps, Aside, LinkCard, CardGrid } from "@astrojs/starlight/components";
 
 bee は、[Backlog](https://backlog.com/) をターミナルから操作するためのコマンドラインツールです。課題の管理、プルリクエスト、ドキュメント、通知など、Backlog の主要な機能をコマンドラインから利用できます。
 
@@ -40,37 +40,52 @@ bee --version
 
 ## クイックスタート
 
-### 1. ログイン
+<Steps>
 
-Backlog スペースにログインします。対話形式でスペースのホスト名と API キーを入力します。
+1. **ログイン**
 
-```sh
-bee auth login
-```
+   Backlog スペースにログインします。対話形式でスペースのホスト名と API キーを入力します。
 
-API キーは Backlog の「個人設定 > API」から発行できます。
+   ```sh
+   bee auth login
+   ```
 
-### 2. 課題を一覧表示する
+   :::tip
+   API キーは Backlog の「個人設定 > API」から発行できます。
+   :::
 
-プロジェクトの課題を一覧表示してみましょう。
+2. **課題を一覧表示する**
 
-```sh
-bee issue list --project YOUR_PROJECT
-```
+   プロジェクトの課題を一覧表示してみましょう。
 
-### 3. 課題を作成する
+   ```sh
+   bee issue list --project YOUR_PROJECT
+   ```
 
-対話形式で新しい課題を作成します。
+3. **課題を作成する**
 
-```sh
-bee issue create
-```
+   対話形式で新しい課題を作成します。
 
-フラグを指定して非対話的に作成することもできます。
+   ```sh
+   bee issue create
+   ```
 
-```sh
-bee issue create --summary "最初の課題" --issue-type Bug --priority High
-```
+   フラグを指定して非対話的に作成することもできます。
+
+   ```sh
+   bee issue create --summary "最初の課題" --issue-type Bug --priority High
+   ```
+
+</Steps>
+
+## 次のステップ
+
+<CardGrid>
+  <LinkCard title="認証" href="/guides/authentication/" description="OAuth や API キーなど、認証方法の詳細を確認する" />
+  <LinkCard title="環境変数" href="/guides/environment-variables/" description="環境変数でデフォルトのプロジェクトなどを設定する" />
+  <LinkCard title="出力フォーマット" href="/guides/output-formatting/" description="JSON 出力やテーブル表示のカスタマイズ方法" />
+  <LinkCard title="シェル補完" href="/guides/shell-completion/" description="タブ補完を設定してコマンド入力を効率化する" />
+</CardGrid>
 
 ## アンインストール
 

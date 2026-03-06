@@ -3,28 +3,29 @@ title: AI エージェントとの連携
 description: AI エージェントから bee や Backlog MCP Server を活用する
 ---
 
+import { Card } from "@astrojs/starlight/components";
+
 bee はターミナルツールとして、AI エージェントの「手足」としても活用できます。LLM ベースのエージェントが Backlog のデータを取得・操作する手段として、大きく 2 つのアプローチがあります。
 
 ## どちらを使うべきか
 
-### bee + Skills（CLI ベース）
+<Card title="bee + Skills" icon="seti:shell">
+  bee の CLI コマンドを AI エージェントの Skill として登録し、エージェントが直接呼び出せるようにする方法です。
 
-bee の CLI コマンドを AI エージェントの Skill として登録し、エージェントが直接呼び出せるようにする方法です。
+  - シェルパイプラインとの組み合わせなど、柔軟な操作が可能
+  - `bee browse` や `bee api` など、CLI 固有の機能でブラウザ操作や任意の API 呼び出しが可能
 
-```sh
-npx skills add nulab/bee --skill using-bee
-```
+  ```sh
+  npx skills add nulab/bee --skill using-bee
+  ```
+</Card>
 
-- シェルパイプラインとの組み合わせなど、柔軟な操作が可能
-- `bee browse` でブラウザを開くなど、CLI 固有の機能を利用できる
-- Skill が適切なコマンドの使い方をエージェントに教えるため、プロンプトでコマンド詳細を指定する必要がない
+<Card title="Backlog MCP Server" icon="puzzle">
+  [Backlog MCP Server](https://github.com/nulab/backlog-mcp-server) は、Backlog API をネイティブに MCP（Model Context Protocol）化したサーバーです。
 
-### Backlog MCP Server
-
-[Backlog MCP Server](https://github.com/nulab/backlog-mcp-server) は、Backlog API をネイティブに MCP（Model Context Protocol）化したサーバーです。
-
-- 構造化されたツール定義により、エージェントが課題の検索・作成・更新などを直接実行できる
-- MCP 対応のクライアント（Claude Desktop 等）からそのまま使える
+  - 構造化されたツール定義により、エージェントが課題の検索・作成・更新などを直接実行できる
+  - MCP 対応のクライアント（Claude Desktop 等）からそのまま使える
+</Card>
 
 ### 選び方
 
@@ -68,7 +69,9 @@ bee issue list --project MY_PROJECT --json id,summary,status,assignee
 
 ## プロンプト例
 
+:::tip
 bee の Skill (`/using-bee`) を導入していれば、エージェントが適切なコマンドを自動的に選択します。プロンプトでは具体的なコマンドを指定する必要はありません。
+:::
 
 ```
 プロジェクト MY_PROJECT の未完了課題を担当者ごとにグループ化して、

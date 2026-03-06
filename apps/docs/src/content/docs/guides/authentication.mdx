@@ -3,6 +3,8 @@ title: 認証
 description: bee の認証方式とセットアップ
 ---
 
+import { Tabs, TabItem, LinkCard, CardGrid } from "@astrojs/starlight/components";
+
 bee は 2 つの認証方式をサポートしています。
 
 ## API キー認証
@@ -15,7 +17,9 @@ bee auth login
 
 対話形式でスペースのホスト名（例: `xxx.backlog.com`）と API キーの入力を求められます。API キーは Backlog の **個人設定 > API** から発行できます。
 
+:::tip
 `BACKLOG_API_KEY` と `BACKLOG_SPACE` 環境変数を設定しておけば、`bee auth login` を実行しなくても認証済みの状態で bee を使えます。
+:::
 
 ```sh
 export BACKLOG_API_KEY=your-api-key
@@ -43,15 +47,20 @@ bee auth login --method oauth
 
 OAuth クライアント ID とシークレットは、フラグまたは環境変数で指定できます。
 
-```sh
-bee auth login --method oauth --client-id YOUR_ID --client-secret YOUR_SECRET
-```
-
-```sh
-export BACKLOG_OAUTH_CLIENT_ID=YOUR_ID
-export BACKLOG_OAUTH_CLIENT_SECRET=YOUR_SECRET
-bee auth login --method oauth
-```
+<Tabs>
+  <TabItem label="フラグ">
+    ```sh
+    bee auth login --method oauth --client-id YOUR_ID --client-secret YOUR_SECRET
+    ```
+  </TabItem>
+  <TabItem label="環境変数">
+    ```sh
+    export BACKLOG_OAUTH_CLIENT_ID=YOUR_ID
+    export BACKLOG_OAUTH_CLIENT_SECRET=YOUR_SECRET
+    bee auth login --method oauth
+    ```
+  </TabItem>
+</Tabs>
 
 ## どちらを選ぶべきか
 
@@ -77,9 +86,11 @@ bee auth status
 
 ## 関連コマンド
 
-- [`bee auth login`](/commands/auth/login) — ログイン
-- [`bee auth logout`](/commands/auth/logout) — ログアウト
-- [`bee auth status`](/commands/auth/status) — 認証状態の確認
-- [`bee auth switch`](/commands/auth/switch) — スペースの切り替え
-- [`bee auth token`](/commands/auth/token) — トークンの表示
-- [`bee auth refresh`](/commands/auth/refresh) — OAuth トークンの更新
+<CardGrid>
+  <LinkCard title="auth login" href="/commands/auth/login" description="ログイン" />
+  <LinkCard title="auth logout" href="/commands/auth/logout" description="ログアウト" />
+  <LinkCard title="auth status" href="/commands/auth/status" description="認証状態の確認" />
+  <LinkCard title="auth switch" href="/commands/auth/switch" description="スペースの切り替え" />
+  <LinkCard title="auth token" href="/commands/auth/token" description="トークンの表示" />
+  <LinkCard title="auth refresh" href="/commands/auth/refresh" description="OAuth トークンの更新" />
+</CardGrid>
