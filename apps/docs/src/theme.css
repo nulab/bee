@@ -1,0 +1,205 @@
+:root,
+::backdrop {
+  /* Colors (dark mode) */
+  --sl-color-white: hsl(0, 0%, 100%);
+  --sl-color-gray-1: hsl(0, 0%, 93%); /* #ededed */
+  --sl-color-gray-2: hsl(0, 0%, 74%); /* #bdbdbd */
+  --sl-color-gray-3: hsl(0, 0%, 46%); /* #767676 */
+  --sl-color-gray-4: hsl(0, 0%, 34%); /* #575757 */
+  --sl-color-gray-5: hsl(0, 0%, 18%); /* #2f2f2f */
+  --sl-color-gray-6: hsl(0, 0%, 13%); /* #222222 */
+  --sl-color-black: hsl(0, 0%, 7%); /* #111111 */
+
+  /* Accent hue — Backlog green (160deg) */
+  --sl-color-accent-low: hsl(160, 30%, 20%);
+  --sl-color-accent: hsl(160, 42%, 49%); /* ~#4caf93 */
+  --sl-color-accent-high: hsl(160, 42%, 82%);
+
+  /* Semantic hue colors — from Backlog palette */
+  --sl-hue-orange: 18;
+  --sl-color-orange-low: hsl(var(--sl-hue-orange), 39%, 22%);
+  --sl-color-orange: hsl(var(--sl-hue-orange), 80%, 57%); /* ~#ea733b */
+  --sl-color-orange-high: hsl(var(--sl-hue-orange), 80%, 85%);
+
+  --sl-hue-green: 160;
+  --sl-color-green-low: hsl(var(--sl-hue-green), 30%, 20%);
+  --sl-color-green: hsl(var(--sl-hue-green), 42%, 49%); /* ~#4caf93 */
+  --sl-color-green-high: hsl(var(--sl-hue-green), 42%, 80%);
+
+  --sl-hue-blue: 213;
+  --sl-color-blue-low: hsl(var(--sl-hue-blue), 50%, 22%);
+  --sl-color-blue: hsl(var(--sl-hue-blue), 52%, 52%); /* ~#4488c5 */
+  --sl-color-blue-high: hsl(var(--sl-hue-blue), 52%, 85%);
+
+  --sl-hue-purple: 234;
+  --sl-color-purple-low: hsl(var(--sl-hue-purple), 25%, 22%);
+  --sl-color-purple: hsl(var(--sl-hue-purple), 24%, 62%); /* ~#868cb7 */
+  --sl-color-purple-high: hsl(var(--sl-hue-purple), 24%, 85%);
+
+  --sl-hue-red: 10;
+  --sl-color-red-low: hsl(var(--sl-hue-red), 80%, 22%);
+  --sl-color-red: hsl(var(--sl-hue-red), 100%, 46%); /* ~#ea2c00 */
+  --sl-color-red-high: hsl(var(--sl-hue-red), 100%, 85%);
+
+  /* Semantic assignments (dark mode default) */
+  --sl-color-text: var(--sl-color-gray-2);
+  --sl-color-text-accent: var(--sl-color-accent-high);
+  --sl-color-text-invert: var(--sl-color-accent-low);
+  --sl-color-bg: var(--sl-color-black);
+  --sl-color-bg-nav: var(--sl-color-gray-6);
+  --sl-color-bg-sidebar: var(--sl-color-gray-6);
+  --sl-color-bg-inline-code: var(--sl-color-gray-5);
+  --sl-color-bg-accent: var(--sl-color-accent-high);
+  --sl-color-hairline-light: var(--sl-color-gray-5);
+  --sl-color-hairline: var(--sl-color-gray-6);
+  --sl-color-hairline-shade: var(--sl-color-black);
+
+  --sl-color-backdrop-overlay: hsla(0, 0%, 7%, 0.66);
+
+  /* Shadows (dark mode) */
+  --sl-shadow-sm: 0px 1px 1px hsla(0, 0%, 0%, 0.12), 0px 2px 1px hsla(0, 0%, 0%, 0.24);
+  --sl-shadow-md:
+    0px 8px 4px hsla(0, 0%, 0%, 0.08), 0px 5px 2px hsla(0, 0%, 0%, 0.08),
+    0px 3px 2px hsla(0, 0%, 0%, 0.12), 0px 1px 1px hsla(0, 0%, 0%, 0.15);
+  --sl-shadow-lg:
+    0px 25px 7px hsla(0, 0%, 0%, 0.03), 0px 16px 6px hsla(0, 0%, 0%, 0.1),
+    0px 9px 5px hsla(0, 0%, 7%, 0.33), 0px 4px 4px hsla(0, 0%, 0%, 0.75),
+    0px 4px 2px hsla(0, 0%, 0%, 0.25);
+
+  /* Text size and line height */
+  --sl-text-2xs: 0.75rem; /* 12px */
+  --sl-text-xs: 0.8125rem; /* 13px */
+  --sl-text-sm: 0.875rem; /* 14px */
+  --sl-text-base: 1rem; /* 16px */
+  --sl-text-lg: 1.125rem; /* 18px */
+  --sl-text-xl: 1.25rem; /* 20px */
+  --sl-text-2xl: 1.5rem; /* 24px */
+  --sl-text-3xl: 1.8125rem; /* 29px */
+  --sl-text-4xl: 2.1875rem; /* 35px */
+  --sl-text-5xl: 2.625rem; /* 42px */
+  --sl-text-6xl: 4rem; /* 64px */
+
+  --sl-text-body: var(--sl-text-base);
+  --sl-text-body-sm: var(--sl-text-xs);
+  --sl-text-code: var(--sl-text-sm);
+  --sl-text-code-sm: var(--sl-text-xs);
+  --sl-text-h1: var(--sl-text-4xl);
+  --sl-text-h2: var(--sl-text-3xl);
+  --sl-text-h3: var(--sl-text-2xl);
+  --sl-text-h4: var(--sl-text-xl);
+  --sl-text-h5: var(--sl-text-lg);
+
+  --sl-line-height: 1.75;
+  --sl-line-height-headings: 1.2;
+
+  --sl-font-system:
+    ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --sl-font-system-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
+  --__sl-font: var(--sl-font, var(--sl-font-system)), var(--sl-font-system);
+  --__sl-font-mono: var(--sl-font-mono, var(--sl-font-system-mono)), var(--sl-font-system-mono);
+
+  /** Key layout values */
+  --sl-nav-height: 3.5rem;
+  --sl-nav-pad-x: 1rem;
+  --sl-nav-pad-y: 0.75rem;
+  --sl-mobile-toc-height: 3rem;
+  --sl-sidebar-width: 18.75rem;
+  --sl-sidebar-pad-x: 1rem;
+  --sl-content-width: 45rem;
+  --sl-content-pad-x: 1rem;
+  --sl-content-gap-y: 1rem;
+  --sl-main-pad: 0 0 3vh 0;
+  --sl-menu-button-size: 2rem;
+  --sl-nav-gap: var(--sl-content-pad-x);
+  --sl-outline-offset-inside: -0.1875rem;
+
+  /* Global z-index values */
+  --sl-z-index-toc: 4;
+  --sl-z-index-menu: 5;
+  --sl-z-index-navbar: 10;
+  --sl-z-index-skiplink: 20;
+}
+
+:root[data-theme="light"],
+[data-theme="light"] ::backdrop {
+  /* Colours (light mode) */
+  --sl-color-white: hsl(0, 0%, 7%); /* #111 — inverted */
+  --sl-color-gray-1: hsl(0, 0%, 13%); /* #222 */
+  --sl-color-gray-2: hsl(0, 0%, 18%); /* #2f2f2f */
+  --sl-color-gray-3: hsl(0, 0%, 34%); /* #575757 */
+  --sl-color-gray-4: hsl(0, 0%, 46%); /* #767676 */
+  --sl-color-gray-5: hsl(0, 0%, 74%); /* #bdbdbd */
+  --sl-color-gray-6: hsl(0, 0%, 94%); /* #f0f0f0 */
+  --sl-color-gray-7: hsl(0, 0%, 97%); /* #f8f8f8 */
+  --sl-color-black: hsl(0, 0%, 100%); /* #fff — inverted */
+
+  /* Accent — light mode: richer saturation */
+  --sl-color-accent-high: hsl(160, 55%, 30%); /* deep green for text */
+  --sl-color-accent: hsl(160, 42%, 49%); /* #4caf93 */
+  --sl-color-accent-low: hsl(160, 40%, 90%); /* pale green bg */
+
+  /* Hue color light mode overrides */
+  --sl-color-orange-high: hsl(var(--sl-hue-orange), 70%, 30%);
+  --sl-color-orange: hsl(var(--sl-hue-orange), 80%, 57%);
+  --sl-color-orange-low: hsl(var(--sl-hue-orange), 60%, 92%);
+
+  --sl-color-green-high: hsl(var(--sl-hue-green), 80%, 22%);
+  --sl-color-green: hsl(var(--sl-hue-green), 42%, 49%);
+  --sl-color-green-low: hsl(var(--sl-hue-green), 40%, 92%);
+
+  --sl-color-blue-high: hsl(var(--sl-hue-blue), 75%, 28%);
+  --sl-color-blue: hsl(var(--sl-hue-blue), 52%, 52%);
+  --sl-color-blue-low: hsl(var(--sl-hue-blue), 45%, 92%);
+
+  --sl-color-purple-high: hsl(var(--sl-hue-purple), 35%, 32%);
+  --sl-color-purple: hsl(var(--sl-hue-purple), 24%, 62%);
+  --sl-color-purple-low: hsl(var(--sl-hue-purple), 20%, 93%);
+
+  --sl-color-red-high: hsl(var(--sl-hue-red), 80%, 30%);
+  --sl-color-red: hsl(var(--sl-hue-red), 100%, 46%);
+  --sl-color-red-low: hsl(var(--sl-hue-red), 80%, 93%);
+
+  /* Semantic reassignments for light */
+  --sl-color-text-accent: var(--sl-color-accent);
+  --sl-color-text-invert: var(--sl-color-black);
+  --sl-color-bg-nav: var(--sl-color-gray-7);
+  --sl-color-bg-sidebar: var(--sl-color-bg);
+  --sl-color-bg-inline-code: var(--sl-color-gray-6);
+  --sl-color-bg-accent: var(--sl-color-accent);
+  --sl-color-hairline-light: var(--sl-color-gray-6);
+  --sl-color-hairline-shade: var(--sl-color-gray-6);
+
+  --sl-color-backdrop-overlay: hsla(0, 0%, 34%, 0.66);
+
+  /* Shadows (light mode) */
+  --sl-shadow-sm: 0px 1px 1px hsla(0, 0%, 0%, 0.06), 0px 2px 1px hsla(0, 0%, 0%, 0.06);
+  --sl-shadow-md:
+    0px 8px 4px hsla(0, 0%, 0%, 0.03), 0px 5px 2px hsla(0, 0%, 0%, 0.03),
+    0px 3px 2px hsla(0, 0%, 0%, 0.06), 0px 1px 1px hsla(0, 0%, 0%, 0.06);
+  --sl-shadow-lg:
+    0px 25px 7px rgba(0, 0, 0, 0.01), 0px 16px 6px hsla(0, 0%, 0%, 0.03),
+    0px 9px 5px hsla(0, 0%, 7%, 0.08), 0px 4px 4px hsla(0, 0%, 0%, 0.16),
+    0px 4px 2px hsla(0, 0%, 0%, 0.04);
+}
+
+@media (min-width: 50em) {
+  :root {
+    --sl-nav-height: 4rem;
+    --sl-nav-pad-x: 1.5rem;
+    --sl-text-h1: var(--sl-text-5xl);
+    --sl-text-h2: var(--sl-text-4xl);
+    --sl-text-h3: var(--sl-text-3xl);
+    --sl-text-h4: var(--sl-text-2xl);
+  }
+}
+
+@media (min-width: 72rem) {
+  :root {
+    --sl-content-pad-x: 1.5rem;
+    --sl-mobile-toc-height: 0rem;
+  }
+}
