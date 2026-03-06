@@ -6,16 +6,6 @@ import { createJiti } from "jiti";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const CLI_COMMANDS_DIR = resolve(__dirname, "../../../cli/src/commands");
 
-type NormalizedArg = {
-  name: string;
-  type?: "string" | "boolean" | "positional";
-  description?: string;
-  alias: string[];
-  default?: string | boolean;
-  required?: boolean;
-  valueHint?: string;
-};
-
 type CommandEntry = {
   id: string;
   title: string;
@@ -23,7 +13,15 @@ type CommandEntry = {
   long?: string;
   parent: string;
   name: string;
-  args: NormalizedArg[];
+  args: {
+    name: string;
+    type?: "string" | "boolean" | "positional";
+    description?: string;
+    alias: string[];
+    default?: string | boolean;
+    required?: boolean;
+    valueHint?: string;
+  }[];
   examples?: { description: string; command: string }[];
   environment?: [string, string][];
 };
@@ -49,7 +47,40 @@ const normalizeArgs = (argsDef: Record<string, Record<string, unknown>>): Normal
     valueHint: def.valueHint as string | undefined,
   }));
 
-const loadCommands = async (): Promise<CommandEntry[]> => {
+type NormalizedArg = CommandEntry["args"][number];
+
+const buildUsageLine = (title: string, args: NormalizedArg[]): string => {
+  const flags = args.filter((a) => a.type !== "positional");
+  const positionals = args.filter((a) => a.type === "positional");
+  const parts: string[] = [];
+  if (flags.length > 0) {
+    parts.push("[flags]");
+  }
+  for (const arg of positionals) {
+    const name = arg.name.toUpperCase();
+    parts.push(arg.required !== false && arg.default === undefined ? `<${name}>` : `[${name}]`);
+  }
+  return `${title} ${parts.join(" ")}`.trim();
+};
+
+const buildFlagParts = (arg: NormalizedArg): string[] => {
+  const parts: string[] = arg.alias.map((a) => `-${a}`);
+  let hint = "";
+  if (arg.type === "string") {
+    hint = arg.valueHint ? ` ${arg.valueHint}` : " <string>";
+  }
+  parts.push(`--${arg.name}${hint}`);
+  return parts;
+};
+
+let cached: Promise<CommandEntry[]> | undefined;
+
+const loadCommands = (): Promise<CommandEntry[]> => {
+  cached ??= loadCommandsImpl();
+  return cached;
+};
+
+const loadCommandsImpl = async (): Promise<CommandEntry[]> => {
   const jiti = createJiti(import.meta.url, {
     moduleCache: false,
     fsCache: false,
@@ -128,5 +159,5 @@ const loadCommands = async (): Promise<CommandEntry[]> => {
   return results;
 };
 
-export { loadCommands };
-export type { CommandEntry };
+export { buildFlagParts, buildUsageLine, loadCommands };
+export type { CommandEntry, NormalizedArg };

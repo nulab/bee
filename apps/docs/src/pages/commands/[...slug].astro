@@ -3,7 +3,7 @@ import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 import AnchorHeading from "@astrojs/starlight/components/AnchorHeading.astro";
 import { Code } from "@astrojs/starlight/components";
 import { marked } from "marked";
-import { type CommandEntry, loadCommands } from "../../lib/commands";
+import { type CommandEntry, type NormalizedArg, buildFlagParts, buildUsageLine, loadCommands } from "../../lib/commands";
 
 const renderMarkdown = (text: string) => marked.parse(text, { async: false }) as string;
 
@@ -17,24 +17,9 @@ export const getStaticPaths = async () => {
 
 const { entry } = Astro.props;
 
-type Arg = CommandEntry["args"][number];
-
-// Build usage line
-const flags = entry.args.filter((a: Arg) => a.type !== "positional");
-const positionals = entry.args.filter((a: Arg) => a.type === "positional");
-const usageParts: string[] = [];
-if (flags.length > 0) {
-  usageParts.push("[flags]");
-}
-for (const arg of positionals) {
-  const name = arg.name.toUpperCase();
-  usageParts.push(
-    arg.required !== false && arg.default === undefined
-      ? `<${name}>`
-      : `[${name}]`,
-  );
-}
-const usageLine = `${entry.title} ${usageParts.join(" ")}`.trim();
+const flags = entry.args.filter((a: NormalizedArg) => a.type !== "positional");
+const positionals = entry.args.filter((a: NormalizedArg) => a.type === "positional");
+const usageLine = buildUsageLine(entry.title, entry.args);
 
 // Build headings for table of contents
 const headings: { depth: number; slug: string; text: string }[] = [
@@ -52,18 +37,6 @@ if (entry.examples && entry.examples.length > 0) {
 if (entry.environment && entry.environment.length > 0) {
   headings.push({ depth: 2, slug: "environment-variables", text: "Environment variables" });
 }
-
-// Build flag parts for rendering: each flag as a separate code element
-const flagParts = (arg: Arg) => {
-  const parts: string[] = arg.alias.map((a: string) => `-${a}`);
-  const long = `--${arg.name}`;
-  let hint = "";
-  if (arg.type === "string") {
-    hint = arg.valueHint ? ` ${arg.valueHint}` : " <string>";
-  }
-  parts.push(`${long}${hint}`);
-  return parts;
-};
 
 ---
 
@@ -84,13 +57,14 @@ const flagParts = (arg: Arg) => {
       <>
         <AnchorHeading level="2" id="arguments">Arguments</AnchorHeading>
         <dl>
-          {positionals.map((arg: Arg) => (
+          {positionals.map((arg: NormalizedArg) => (
             <>
               <dt>
                 <code>{arg.name.toUpperCase()}</code>
               </dt>
               <dd>
                 {arg.description ?? ""}
+                {arg.valueHint && <> <code>{arg.valueHint}</code></>}
                 {arg.default !== undefined && (
                   <>
                     {" "}
@@ -110,10 +84,10 @@ const flagParts = (arg: Arg) => {
       <>
         <AnchorHeading level="2" id="flags">Flags</AnchorHeading>
         <dl>
-          {flags.map((arg: Arg) => (
+          {flags.map((arg: NormalizedArg) => (
             <>
               <dt>
-                {flagParts(arg).map((part, i) => (
+                {buildFlagParts(arg).map((part, i) => (
                   <>
                     {i > 0 && ", "}
                     <code>{part}</code>
