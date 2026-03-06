@@ -10,7 +10,7 @@ export default defineConfig({
     starlight({
       title: "Backlog CLI",
       favicon: "/favicon.svg",
-      customCss: ['./src/theme.css'],
+      customCss: ["./src/theme.css"],
       defaultLocale: "ja",
       social: [
         {
