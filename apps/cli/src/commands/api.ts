@@ -7,9 +7,10 @@ import { type CommandUsage, ENV_AUTH, withUsage } from "../lib/command-usage";
 const commandUsage: CommandUsage = {
   long: `Make an authenticated Backlog API request.
 
-The endpoint argument should be a path relative to the API base URL
-(e.g. \`/api/v2/users/myself\`). The \`/api/v2\` prefix can be omitted —
-it is added automatically when the path does not start with \`/api/\`.
+The endpoint argument should be a path of the Backlog API
+(e.g. \`users/myself\`). If the path includes the \`/api/v2/\` prefix
+it is stripped automatically — both \`users/myself\` and
+\`/api/v2/users/myself\` work the same way.
 
 Use \`--field\` / \`-f\` to pass parameters with automatic type inference:
 numeric strings become numbers, \`true\`/\`false\` become booleans, and
@@ -17,6 +18,8 @@ everything else stays a string. Use \`--raw-field\` / \`-F\` to force a
 value to remain a string. Both flags can be specified multiple times.
 When the same key is repeated, values are collected into an array
 (e.g. \`-f statusId=1 -f statusId=2 -f statusId=3\`).
+To send a single-element array, append \`[]\` to the key name
+(e.g. \`-f projectId[]=12345\`).
 
 For GET requests, fields are sent as query parameters. For POST, PUT,
 PATCH, and DELETE requests, fields are sent as the request body.`,
@@ -24,8 +27,12 @@ PATCH, and DELETE requests, fields are sent as the request body.`,
   examples: [
     { description: "Get your user profile", command: "bee api users/myself" },
     {
-      description: "List projects with a limit",
-      command: "bee api projects -f count=5",
+      description: "List issues in a project",
+      command: "bee api issues -f 'projectId[]=12345' -f count=5",
+    },
+    {
+      description: "Filter by multiple statuses",
+      command: "bee api issues -f 'projectId[]=12345' -f statusId=1 -f statusId=2",
     },
     {
       description: "Create an issue",
@@ -108,14 +115,14 @@ const api = withUsage(
 );
 
 /**
- * Normalize API endpoint path. Adds `/api/v2` prefix if missing.
+ * Normalize API endpoint path for backlog-js client methods.
+ * backlog-js prepends `restBaseURL` (which includes `/api/v2`), so
+ * the path passed to `client.get()` etc. must be relative (e.g. `users/myself`).
+ * This function strips a leading `/api/v2/` prefix if the user supplied one.
  */
 const normalizeEndpoint = (endpoint: string): string => {
-  if (endpoint.startsWith("/api/")) {
-    return endpoint;
-  }
-  const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  return `/api/v2${path}`;
+  const stripped = endpoint.replace(/^\/?(api\/v2\/?)/, "");
+  return stripped;
 };
 
 /**
@@ -156,12 +163,17 @@ const collectMultiValues = (flagName: string, argv: string[]): string[] => {
 const buildParams = (fields: string[], rawFields: string[]): Params => {
   const params: Params = {};
 
-  const addParam = (key: string, value: ParamValue) => {
+  const addParam = (rawKey: string, value: ParamValue) => {
+    // Strip trailing `[]` — backlog-js adds brackets automatically for arrays
+    // via qs.stringify({ arrayFormat: 'brackets' }).
+    const isArray = rawKey.endsWith("[]");
+    const key = isArray ? rawKey.slice(0, -2) : rawKey;
+
     const existing = params[key];
     if (existing !== undefined) {
       params[key] = Array.isArray(existing) ? [...existing, value] : [existing, value];
     } else {
-      params[key] = value;
+      params[key] = isArray ? [value] : value;
     }
   };
 
