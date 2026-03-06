@@ -1,20 +1,22 @@
 import consola from "consola";
 
 /**
- * Logs a hint when a team write API call fails with an empty 400 response,
- * which typically indicates a plan restriction or insufficient permissions.
+ * Returns true if the error is a 400 with an empty body (typical of plan
+ * restrictions or insufficient permissions for team write operations).
+ * Logs a human-readable error message and calls process.exit(1).
  *
- * Team write operations (create/edit) require Administrator role and are
- * not available on new plan spaces.
+ * Returns false for all other errors so the caller can re-throw them.
  */
-export const warnTeamWriteRestriction = (error: unknown): void => {
-  if (
-    error instanceof Error &&
-    "_status" in error &&
-    (error as unknown as Record<string, unknown>)._status === 400
-  ) {
-    consola.info(
-      "Hint: Team write operations require Administrator role and are not available on new plan spaces.",
-    );
+export const handleTeamWriteError = (error: unknown): boolean => {
+  if (error instanceof Error && "_status" in error) {
+    const record = error as unknown as Record<string, unknown>;
+    if (record._status === 400 && !record._body) {
+      consola.error(
+        "Team write operations require Administrator role and are not available on new plan spaces.",
+      );
+      process.exit(1);
+      return true;
+    }
   }
+  return false;
 };
