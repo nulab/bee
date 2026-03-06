@@ -55,6 +55,8 @@ apps/cli             — CLI entry point (citty framework, consola logging)
 apps/docs            — Astro Starlight documentation site
 packages/backlog-utils — Backlog API client wrapper (backlog-js, OAuth auto-refresh, rate-limit handling)
 packages/cli-utils   — Shared CLI utilities (output formatting, table, splitArg, prompts)
+packages/config      — CLI configuration management (~/.config/bee RC file, space/auth resolution)
+packages/test-utils  — Shared test helpers (mock client, mock consola, process.exit spy, vi.clearAllMocks setup)
 packages/tsconfigs   — Shared TypeScript base config
 ```
 
@@ -242,6 +244,15 @@ View commands support `--web` to open the resource in a browser. Build the URL (
 ### `@me` replacement
 
 `--assignee @me` resolves the current user's ID via `client.getMyself()`. Apply this pattern wherever user IDs accept `@me`.
+
+### Interactive prompts (`promptRequired` / `confirmOrExit`)
+
+- **`promptRequired(label, existing, options?)`** — if the flag value is provided, returns it; otherwise prompts interactively. Honors `BACKLOG_NO_INPUT=1` for non-interactive environments.
+- **`confirmOrExit(message, skipConfirm?)`** — confirmation prompt for destructive actions. `--yes` flag skips via `skipConfirm`. Returns `false` if cancelled.
+
+### Stdin pipe support (`resolveStdinArg`)
+
+Use `resolveStdinArg(value)` for flags that accept piped input (e.g., `--body`). Returns stdin content when the flag is empty and stdin is piped, otherwise returns the original value.
 
 ## Test Conventions
 

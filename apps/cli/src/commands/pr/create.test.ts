@@ -9,7 +9,7 @@ const mockClient = {
 };
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@repo/backlog-utils")>()),
+  ...(await importOriginal()),
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
 }));
 
