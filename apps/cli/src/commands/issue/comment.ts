@@ -4,6 +4,7 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `Add a comment to a Backlog issue.
@@ -50,10 +51,7 @@ const comment = withUsage(
         description: "Comment body. Use - to read from stdin.",
         required: true,
       },
-      notify: {
-        type: "string",
-        description: "User IDs to notify (comma-separated for multiple)",
-      },
+      notify: commonArgs.notify,
     },
     async run({ args }) {
       const { client } = await getClient();

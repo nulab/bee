@@ -3,6 +3,7 @@ import { outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `Display details of a Backlog project.
@@ -31,17 +32,8 @@ const view = withUsage(
     },
     args: {
       ...outputArgs,
-      project: {
-        type: "positional",
-        description: "Project ID or project key",
-        required: true,
-        default: process.env.BACKLOG_PROJECT,
-      },
-      web: {
-        type: "boolean",
-        alias: "w",
-        description: "Open the project in the browser",
-      },
+      project: commonArgs.projectPositional,
+      web: commonArgs.web("project"),
     },
     async run({ args }) {
       const { client, host } = await getClient();

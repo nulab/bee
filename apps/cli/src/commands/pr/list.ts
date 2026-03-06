@@ -10,6 +10,7 @@ import {
   ENV_REPO,
   withUsage,
 } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 import { PR_STATUS_NAMES, PrStatusName } from "../../lib/pr-constants";
 
 const commandUsage: CommandUsage = {
@@ -44,31 +45,15 @@ const list = withUsage(
     },
     args: {
       ...outputArgs,
-      project: {
-        type: "string",
-        alias: "p",
-        description: "Project ID or project key",
-        default: process.env.BACKLOG_PROJECT,
-        required: true,
-      },
-      repo: {
-        type: "string",
-        alias: "R",
-        description: "Repository name or ID",
-        default: process.env.BACKLOG_REPO,
-        required: true,
-      },
+      project: { ...commonArgs.project, required: true },
+      repo: commonArgs.repo,
       status: {
         type: "string",
         alias: "S",
         description: "Status name (comma-separated for multiple)",
         valueHint: `{${PR_STATUS_NAMES.join("|")}}`,
       },
-      assignee: {
-        type: "string",
-        alias: "a",
-        description: "Assignee user ID (comma-separated for multiple). Use @me for yourself.",
-      },
+      assignee: commonArgs.assigneeList,
       issue: {
         type: "string",
         description: "Issue ID (comma-separated for multiple)",
@@ -77,16 +62,8 @@ const list = withUsage(
         type: "string",
         description: "Created user ID (comma-separated for multiple)",
       },
-      count: {
-        type: "string",
-        alias: "L",
-        description: "Number of results (default: 20)",
-        valueHint: "<1-100>",
-      },
-      offset: {
-        type: "string",
-        description: "Offset for pagination",
-      },
+      count: commonArgs.count,
+      offset: commonArgs.offset,
     },
     async run({ args }) {
       const { client } = await getClient();

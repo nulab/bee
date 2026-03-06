@@ -3,6 +3,7 @@ import { outputArgs, outputResult, promptRequired, readStdin } from "@repo/cli-u
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 import { resolveProjectIds } from "../../lib/resolve-project";
 
 const commandUsage: CommandUsage = {
@@ -39,12 +40,7 @@ const create = withUsage(
     },
     args: {
       ...outputArgs,
-      project: {
-        type: "string",
-        alias: "p",
-        description: "Project ID or project key",
-        default: process.env.BACKLOG_PROJECT,
-      },
+      project: commonArgs.project,
       name: {
         type: "string",
         alias: "n",

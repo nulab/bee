@@ -3,6 +3,7 @@ import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `Display details of a Backlog issue.
@@ -42,11 +43,7 @@ const view = withUsage(
         type: "boolean",
         description: "Include comments",
       },
-      web: {
-        type: "boolean",
-        alias: "w",
-        description: "Open the issue in the browser",
-      },
+      web: commonArgs.web("issue"),
     },
     async run({ args }) {
       const { client, host } = await getClient();

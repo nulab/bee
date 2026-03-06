@@ -3,6 +3,7 @@ import { type Row, formatDate, outputArgs, outputResult, printTable } from "@rep
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 import { NOTIFICATION_REASON_LABELS } from "../../lib/notification-reason-labels";
 
 const commandUsage: CommandUsage = {
@@ -40,21 +41,9 @@ const list = withUsage(
         description: "Maximum number of notifications to return",
         valueHint: "<1-100>",
       },
-      "min-id": {
-        type: "string",
-        description: "Minimum notification ID",
-        valueHint: "<number>",
-      },
-      "max-id": {
-        type: "string",
-        description: "Maximum notification ID",
-        valueHint: "<number>",
-      },
-      order: {
-        type: "string",
-        description: "Sort order",
-        valueHint: "{asc|desc}",
-      },
+      "min-id": commonArgs.minId,
+      "max-id": commonArgs.maxId,
+      order: commonArgs.order,
     },
     async run({ args }) {
       const { client } = await getClient();

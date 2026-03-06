@@ -3,6 +3,7 @@ import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils"
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `List wiki pages in a Backlog project.
@@ -31,16 +32,8 @@ const list = withUsage(
     },
     args: {
       ...outputArgs,
-      project: {
-        type: "positional",
-        description: "Project ID or project key",
-        required: true,
-        default: process.env.BACKLOG_PROJECT,
-      },
-      keyword: {
-        type: "string",
-        description: "Filter pages by keyword",
-      },
+      project: commonArgs.projectPositional,
+      keyword: commonArgs.keyword,
     },
     async run({ args }) {
       const { client } = await getClient();

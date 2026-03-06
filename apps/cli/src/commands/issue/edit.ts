@@ -4,6 +4,7 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 import { PRIORITY_NAMES, PriorityId } from "../../lib/issue-constants";
 
 const commandUsage: CommandUsage = {
@@ -72,10 +73,7 @@ const edit = withUsage(
         alias: "T",
         description: "New issue type ID",
       },
-      assignee: {
-        type: "string",
-        description: "New assignee user ID",
-      },
+      assignee: { ...commonArgs.assignee, alias: undefined, description: "New assignee user ID" },
       resolution: {
         type: "string",
         description: "Resolution ID",
@@ -102,19 +100,9 @@ const edit = withUsage(
         type: "string",
         description: "New actual hours",
       },
-      comment: {
-        type: "string",
-        alias: "c",
-        description: "Comment to add with the update",
-      },
-      notify: {
-        type: "string",
-        description: "User IDs to notify (comma-separated for multiple)",
-      },
-      attachment: {
-        type: "string",
-        description: "Attachment IDs (comma-separated for multiple)",
-      },
+      comment: commonArgs.comment,
+      notify: commonArgs.notify,
+      attachment: commonArgs.attachment,
     },
     async run({ args }) {
       const { client } = await getClient();

@@ -10,6 +10,7 @@ import {
   ENV_REPO,
   withUsage,
 } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `Add a comment to a Backlog pull request.
@@ -50,30 +51,15 @@ const comment = withUsage(
         valueHint: "<number>",
         required: true,
       },
-      project: {
-        type: "string",
-        alias: "p",
-        description: "Project ID or project key",
-        default: process.env.BACKLOG_PROJECT,
-        required: true,
-      },
-      repo: {
-        type: "string",
-        alias: "R",
-        description: "Repository name or ID",
-        default: process.env.BACKLOG_REPO,
-        required: true,
-      },
+      project: { ...commonArgs.project, required: true },
+      repo: commonArgs.repo,
       body: {
         type: "string",
         alias: "b",
         description: "Comment body. Use - to read from stdin.",
         required: true,
       },
-      notify: {
-        type: "string",
-        description: "User IDs to notify (comma-separated for multiple)",
-      },
+      notify: commonArgs.notify,
     },
     async run({ args }) {
       const { client } = await getClient();

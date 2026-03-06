@@ -3,6 +3,7 @@ import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `Display details of a Backlog wiki page.
@@ -37,11 +38,7 @@ const view = withUsage(
         valueHint: "<number>",
         required: true,
       },
-      web: {
-        type: "boolean",
-        alias: "w",
-        description: "Open the wiki page in the browser",
-      },
+      web: commonArgs.web("wiki page"),
     },
     async run({ args }) {
       const { client, host } = await getClient();

@@ -4,6 +4,7 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `List teams in the space.
@@ -31,21 +32,9 @@ const list = withUsage(
     },
     args: {
       ...outputArgs,
-      order: {
-        type: "string",
-        description: "Sort order",
-        valueHint: "{asc|desc}",
-      },
-      offset: {
-        type: "string",
-        description: "Number of records to skip",
-        valueHint: "<number>",
-      },
-      count: {
-        type: "string",
-        description: "Maximum number of records to return",
-        valueHint: "<1-100>",
-      },
+      order: commonArgs.order,
+      offset: commonArgs.offset,
+      count: commonArgs.count,
     },
     async run({ args }) {
       const { client } = await getClient();

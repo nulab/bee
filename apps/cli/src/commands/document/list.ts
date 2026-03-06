@@ -11,6 +11,7 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 import { resolveProjectIds } from "../../lib/resolve-project";
 
 const commandUsage: CommandUsage = {
@@ -42,36 +43,18 @@ const list = withUsage(
     args: {
       ...outputArgs,
       project: {
-        type: "string",
-        alias: "p",
+        ...commonArgs.project,
         description: "Project ID or project key (comma-separated for multiple)",
-        default: process.env.BACKLOG_PROJECT,
       },
-      keyword: {
-        type: "string",
-        alias: "k",
-        description: "Keyword search",
-      },
+      keyword: commonArgs.keyword,
       sort: {
         type: "string",
         description: "Sort field",
         valueHint: "{created|updated}",
       },
-      order: {
-        type: "string",
-        description: "Sort order",
-        valueHint: "{asc|desc}",
-      },
-      count: {
-        type: "string",
-        alias: "L",
-        description: "Number of results (default: 20)",
-        valueHint: "<1-100>",
-      },
-      offset: {
-        type: "string",
-        description: "Offset for pagination",
-      },
+      order: commonArgs.order,
+      count: commonArgs.count,
+      offset: commonArgs.offset,
     },
     async run({ args }) {
       const { client } = await getClient();
