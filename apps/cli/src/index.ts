@@ -25,6 +25,7 @@ const main = defineCommand({
     category: () => import("./commands/category/index").then((m) => m.category),
     milestone: () => import("./commands/milestone/index").then((m) => m.milestone),
     "issue-type": () => import("./commands/issue-type/index").then((m) => m.issueType),
+    status: () => import("./commands/status/index").then((m) => m.status),
   },
 });
 
