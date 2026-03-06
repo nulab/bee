@@ -26,16 +26,21 @@ export default defineConfig({
       ],
       sidebar: [
         {
-          label: "Introduction",
+          label: "Getting Started",
           items: [{ label: "はじめに", slug: "guides/getting-started" }],
         },
         {
           label: "Guides",
           items: [
             { label: "認証", slug: "guides/authentication" },
-            { label: "環境変数", slug: "guides/environment-variables" },
             { label: "出力とフォーマット", slug: "guides/output-formatting" },
             { label: "シェル補完", slug: "guides/shell-completion" },
+            { label: "環境変数", slug: "guides/environment-variables" },
+          ],
+        },
+        {
+          label: "Integrations",
+          items: [
             { label: "CI/CD での利用", slug: "guides/ci-cd" },
             { label: "AI エージェントとの連携", slug: "guides/ai-agent" },
           ],

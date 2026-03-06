@@ -1,9 +1,9 @@
 ---
 title: CI/CD での利用
-description: CI/CD パイプラインから bee を使う
+description: GitHub Actions などの CI/CD パイプラインから bee を使って Backlog の課題やプルリクエストを自動操作する方法
 ---
 
-import { Steps } from "@astrojs/starlight/components";
+import { Steps, Tabs, TabItem } from "@astrojs/starlight/components";
 
 bee は CI/CD 環境でも利用できます。自動テストやデプロイのパイプラインから Backlog の課題やプルリクエストを操作できます。
 
@@ -13,7 +13,7 @@ bee は CI/CD 環境でも利用できます。自動テストやデプロイの
 
 1. **API キー認証を設定する**
 
-   CI/CD では API キー認証を使います。環境変数に API キーとスペース情報を設定してください。
+   CI/CD では API キー認証を使います。CI/CD サービスのシークレット機能を使って、環境変数に API キーとスペース情報を設定してください。
 
    ```sh
    export BACKLOG_API_KEY=your-api-key
@@ -34,7 +34,39 @@ bee は CI/CD 環境でも利用できます。自動テストやデプロイの
 API キーをコードにハードコードせず、CI/CD サービスのシークレット機能を使って管理してください。
 :::
 
+:::tip[実行速度を上げるには]
+`npx` は毎回パッケージをダウンロードするため、ジョブが遅くなることがあります。頻繁に使う場合は、事前にインストールしてキャッシュするのがおすすめです。
+
+```yaml
+- run: npm install -g @nulab/bee
+- run: bee issue list --project MY_PROJECT
+```
+:::
+
 ## GitHub Actions での例
+
+### 基本: デプロイ後に課題にコメントする
+
+デプロイ完了後に、関連する Backlog 課題へ自動でコメントを追加する例です。
+
+```yaml
+name: Notify Backlog
+on:
+  push:
+    branches: [main]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment on issue
+        env:
+          BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+          BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+        run: npx @nulab/bee issue comment PROJECT-123 --body "main ブランチにデプロイしました (${{ github.sha }})"
+```
+
+### 応用: PR マージ時に課題をクローズする
 
 マージされた PR のタイトルから課題キーを抽出し、課題をクローズする例です。PR タイトルは `PROJECT-123: タイトル` の形式を前提としています。
 
@@ -52,7 +84,7 @@ jobs:
     steps:
       - name: Extract issue key from PR title
         id: extract
-        run: echo "issue_key=$(echo '${{ github.event.pull_request.title }}' | grep -oP '^[A-Z_]+-\d+')" >> "$GITHUB_OUTPUT"
+        run: echo "issue_key=$(echo '${{ github.event.pull_request.title }}' | grep -oE '^[A-Z_]+-[0-9]+')" >> "$GITHUB_OUTPUT"
 
       - name: Close issue
         if: steps.extract.outputs.issue_key != ''
