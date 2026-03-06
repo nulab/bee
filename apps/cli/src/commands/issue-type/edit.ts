@@ -18,7 +18,7 @@ will remain unchanged.`,
     },
     {
       description: "Change issue type color",
-      command: 'bee issue-type edit 12345 -p PROJECT --color "#ff0000"',
+      command: 'bee issue-type edit 12345 -p PROJECT --color "#e30000"',
     },
   ],
 
@@ -50,7 +50,8 @@ const edit = withUsage(
       color: {
         type: "string",
         description: "Change display color",
-        valueHint: "<#hex>",
+        valueHint:
+          "{#e30000|#990000|#934981|#814fbc|#2779ca|#007e9a|#7ea800|#ff9200|#ff3265|#666665}",
       },
     },
     async run({ args }) {

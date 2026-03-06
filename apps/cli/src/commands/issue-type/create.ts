@@ -9,16 +9,16 @@ const commandUsage: CommandUsage = {
   long: `Create a new issue type in a Backlog project.
 
 If \`--name\` is not provided, you will be prompted interactively.
-The \`--color\` flag must be a hex color code with \`#\` prefix.`,
+The \`--color\` flag must be one of the predefined Backlog colors.`,
 
   examples: [
     {
       description: "Create an issue type",
-      command: 'bee issue-type create -p PROJECT -n "Enhancement" --color "#4488cc"',
+      command: 'bee issue-type create -p PROJECT -n "Enhancement" --color "#2779ca"',
     },
     {
       description: "Create interactively",
-      command: 'bee issue-type create -p PROJECT --color "#4488cc"',
+      command: 'bee issue-type create -p PROJECT --color "#2779ca"',
     },
   ],
 
@@ -44,7 +44,8 @@ const create = withUsage(
       color: {
         type: "string",
         description: "Display color",
-        valueHint: "<#hex>",
+        valueHint:
+          "{#e30000|#990000|#934981|#814fbc|#2779ca|#007e9a|#7ea800|#ff9200|#ff3265|#666665}",
         required: true,
       },
     },

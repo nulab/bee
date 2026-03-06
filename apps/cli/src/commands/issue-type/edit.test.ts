@@ -27,15 +27,15 @@ describe("issue-type edit", () => {
   });
 
   it("updates issue type color", async () => {
-    mockClient.patchIssueType.mockResolvedValue({ id: 1, name: "Bug", color: "#ff0000" });
+    mockClient.patchIssueType.mockResolvedValue({ id: 1, name: "Bug", color: "#e30000" });
 
     const { edit } = await import("./edit");
-    await edit.run?.({ args: { issueType: "1", project: "TEST", color: "#ff0000" } } as never);
+    await edit.run?.({ args: { issueType: "1", project: "TEST", color: "#e30000" } } as never);
 
     expect(mockClient.patchIssueType).toHaveBeenCalledWith(
       "TEST",
       1,
-      expect.objectContaining({ color: "#ff0000" }),
+      expect.objectContaining({ color: "#e30000" }),
     );
   });
 

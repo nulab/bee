@@ -20,26 +20,26 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 describe("issue-type create", () => {
   it("creates an issue type with provided name and color", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("Enhancement");
-    mockClient.postIssueType.mockResolvedValue({ id: 1, name: "Enhancement", color: "#4488cc" });
+    mockClient.postIssueType.mockResolvedValue({ id: 1, name: "Enhancement", color: "#2779ca" });
 
     const { create } = await import("./create");
     await create.run?.({
-      args: { project: "TEST", name: "Enhancement", color: "#4488cc" },
+      args: { project: "TEST", name: "Enhancement", color: "#2779ca" },
     } as never);
 
     expect(mockClient.postIssueType).toHaveBeenCalledWith("TEST", {
       name: "Enhancement",
-      color: "#4488cc",
+      color: "#2779ca",
     });
     expect(consola.success).toHaveBeenCalledWith("Created issue type Enhancement (ID: 1)");
   });
 
   it("prompts for name when not provided", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("Prompted Type");
-    mockClient.postIssueType.mockResolvedValue({ id: 2, name: "Prompted Type", color: "#4488cc" });
+    mockClient.postIssueType.mockResolvedValue({ id: 2, name: "Prompted Type", color: "#2779ca" });
 
     const { create } = await import("./create");
-    await create.run?.({ args: { project: "TEST", color: "#4488cc" } } as never);
+    await create.run?.({ args: { project: "TEST", color: "#2779ca" } } as never);
 
     expect(promptRequired).toHaveBeenCalledWith("Issue type name:", undefined);
   });
