@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, promptRequired, readStdin } from "@repo/cli-utils";
+import { outputArgs, outputResult, promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
@@ -11,7 +11,7 @@ const commandUsage: CommandUsage = {
 Requires a project and title. When run interactively, omitted required
 fields will be prompted.
 
-Use \`--body -\` to read content from standard input.`,
+When input is piped, it is used as the body automatically.`,
 
   examples: [
     {
@@ -20,7 +20,7 @@ Use \`--body -\` to read content from standard input.`,
     },
     {
       description: "Create a document from stdin",
-      command: 'echo "Content" | bee document create -p PROJECT -t "Notes" --body -',
+      command: 'echo "Content" | bee document create -p PROJECT -t "Notes"',
     },
     {
       description: "Create a child document",
@@ -82,7 +82,7 @@ const create = withUsage(
 
       const [projectId] = await resolveProjectIds(client, [project]);
 
-      const body = args.body === "-" ? await readStdin() : args.body;
+      const body = await resolveStdinArg(args.body);
 
       const doc = await client.addDocument({
         projectId,

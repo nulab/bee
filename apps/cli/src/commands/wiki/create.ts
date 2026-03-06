@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, promptRequired, readStdin } from "@repo/cli-utils";
+import { outputArgs, outputResult, promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
@@ -8,8 +8,8 @@ import { resolveProjectIds } from "../../lib/resolve-project";
 const commandUsage: CommandUsage = {
   long: `Create a new Backlog wiki page.
 
-Requires a project, page name, and body content. Use \`--body -\` to read
-body content from stdin.`,
+Requires a project, page name, and body content. When input is piped,
+it is used as the body automatically.`,
 
   examples: [
     {
@@ -18,7 +18,7 @@ body content from stdin.`,
     },
     {
       description: "Create a wiki page from stdin",
-      command: 'echo "Body" | bee wiki create -p PROJECT -n "Name" -b -',
+      command: 'echo "Body" | bee wiki create -p PROJECT -n "Name"',
     },
     {
       description: "Create and notify",
@@ -53,7 +53,7 @@ const create = withUsage(
       body: {
         type: "string",
         alias: "b",
-        description: "Wiki page content. Use - to read from stdin.",
+        description: "Wiki page content",
       },
       notify: {
         type: "boolean",
@@ -65,7 +65,7 @@ const create = withUsage(
 
       const project = await promptRequired("Project:", args.project);
       const name = await promptRequired("Page name:", args.name);
-      const body = args.body === "-" ? await readStdin() : (args.body ?? "");
+      const body = (await resolveStdinArg(args.body)) ?? "";
 
       const [projectId] = await resolveProjectIds(client, [project]);
 

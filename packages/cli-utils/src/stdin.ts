@@ -5,4 +5,17 @@ const readStdin = async (): Promise<string> => {
   return content.trim();
 };
 
-export { readStdin };
+/**
+ * Resolve a flag value that supports reading from stdin.
+ *
+ * Returns the stdin content when the flag value is falsy (empty or
+ * omitted) and stdin is piped. Otherwise returns the original value.
+ */
+const resolveStdinArg = async (value: string | undefined): Promise<string | undefined> => {
+  if (!value && !process.stdin.isTTY) {
+    return readStdin();
+  }
+  return value;
+};
+
+export { readStdin, resolveStdinArg };

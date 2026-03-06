@@ -1,4 +1,4 @@
-import { promptRequired, readStdin } from "@repo/cli-utils";
+import { promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -14,7 +14,7 @@ vi.mock("@repo/backlog-utils", () => ({
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
   promptRequired: vi.fn(),
-  readStdin: vi.fn(),
+  resolveStdinArg: vi.fn((v: string | undefined) => Promise.resolve(v)),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -56,9 +56,9 @@ describe("document create", () => {
     expect(promptRequired).toHaveBeenCalledWith("Title:", undefined);
   });
 
-  it("reads body from stdin when --body is -", async () => {
+  it("reads body from stdin when piped", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("100").mockResolvedValueOnce("Title");
-    vi.mocked(readStdin).mockResolvedValue("Stdin content");
+    vi.mocked(resolveStdinArg).mockResolvedValueOnce("Stdin content");
     mockClient.addDocument.mockResolvedValue({
       id: "3",
       title: "Title",
@@ -66,10 +66,10 @@ describe("document create", () => {
 
     const { create } = await import("./create");
     await create.run?.({
-      args: { project: "100", title: "Title", body: "-" },
+      args: { project: "100", title: "Title", body: "" },
     } as never);
 
-    expect(readStdin).toHaveBeenCalled();
+    expect(resolveStdinArg).toHaveBeenCalledWith("");
     expect(mockClient.addDocument).toHaveBeenCalledWith(
       expect.objectContaining({
         content: "Stdin content",
