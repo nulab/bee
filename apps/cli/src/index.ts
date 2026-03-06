@@ -21,6 +21,7 @@ const main = defineCommand({
     repo: () => import("./commands/repo/index").then((m) => m.repo),
     team: () => import("./commands/team/index").then((m) => m.team),
     user: () => import("./commands/user/index").then((m) => m.user),
+    webhook: () => import("./commands/webhook/index").then((m) => m.webhook),
     wiki: () => import("./commands/wiki/index").then((m) => m.wiki),
     category: () => import("./commands/category/index").then((m) => m.category),
     milestone: () => import("./commands/milestone/index").then((m) => m.milestone),
