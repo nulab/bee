@@ -2,10 +2,34 @@
   "name": "@nulab/bee",
   "version": "0.0.0",
   "description": "bee — a CLI for Backlog",
-  "bin": {
-    "bee": "./bin/cli.mjs"
+  "keywords": [
+    "backlog",
+    "cli",
+    "nulab",
+    "project-management"
+  ],
+  "homepage": "https://nulab.github.io/bee",
+  "bugs": {
+    "url": "https://github.com/nulab/bee/issues"
   },
+  "license": "MIT",
+  "author": "Nulab Inc.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nulab/bee.git",
+    "directory": "apps/cli"
+  },
+  "bin": {
+    "bee": "bin/cli.mjs"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "unbuild",
     "dev": "tsx src/index.ts",
@@ -30,5 +54,8 @@
     "tsx": "^4.19.0",
     "unbuild": "^3.5.0",
     "vitest": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
