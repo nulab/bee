@@ -54,6 +54,17 @@ describe("team create", () => {
     );
   });
 
+  it("shows hint when API returns 400", async () => {
+    vi.mocked(promptRequired).mockResolvedValueOnce("Team");
+    const apiError = Object.assign(new Error("Bad Request"), { _status: 400 });
+    mockClient.postTeam.mockRejectedValue(apiError);
+
+    const { create } = await import("./create");
+    await expect(create.run?.({ args: { name: "Team" } } as never)).rejects.toThrow("Bad Request");
+
+    expect(consola.info).toHaveBeenCalledWith(expect.stringContaining("Administrator role"));
+  });
+
   it("outputs JSON when --json flag is set", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("Team");
     mockClient.postTeam.mockResolvedValue({ id: 1, name: "Team", members: [] });

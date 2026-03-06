@@ -4,6 +4,7 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { warnTeamWriteRestriction } from "./warn-team-write-restriction";
 
 const commandUsage: CommandUsage = {
   long: `Create a new Backlog team.
@@ -52,10 +53,16 @@ const create = withUsage(
       const name = await promptRequired("Team name:", args.name);
       const members = splitArg(args.members, v.number());
 
-      const t = await client.postTeam({
-        name,
-        members,
-      });
+      let t;
+      try {
+        t = await client.postTeam({
+          name,
+          members: members.length > 0 ? members : undefined,
+        });
+      } catch (error) {
+        warnTeamWriteRestriction(error);
+        throw error;
+      }
 
       outputResult(t, args, (data) => {
         consola.success(`Created team ${data.name} (ID: ${data.id})`);

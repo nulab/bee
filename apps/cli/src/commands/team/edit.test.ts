@@ -37,6 +37,18 @@ describe("team edit", () => {
     );
   });
 
+  it("shows hint when API returns 400", async () => {
+    const apiError = Object.assign(new Error("Bad Request"), { _status: 400 });
+    mockClient.patchTeam.mockRejectedValue(apiError);
+
+    const { edit } = await import("./edit");
+    await expect(edit.run?.({ args: { team: "1", name: "X" } } as never)).rejects.toThrow(
+      "Bad Request",
+    );
+
+    expect(consola.info).toHaveBeenCalledWith(expect.stringContaining("Administrator role"));
+  });
+
   it("outputs JSON when --json flag is set", async () => {
     mockClient.patchTeam.mockResolvedValue({ id: 1, name: "Team", members: [] });
 

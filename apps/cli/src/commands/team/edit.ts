@@ -4,6 +4,7 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { warnTeamWriteRestriction } from "./warn-team-write-restriction";
 
 const commandUsage: CommandUsage = {
   long: `Update an existing Backlog team.
@@ -60,10 +61,16 @@ const edit = withUsage(
 
       const members = splitArg(args.members, v.number());
 
-      const t = await client.patchTeam(Number(args.team), {
-        name: args.name,
-        members,
-      });
+      let t;
+      try {
+        t = await client.patchTeam(Number(args.team), {
+          name: args.name,
+          members: members.length > 0 ? members : undefined,
+        });
+      } catch (error) {
+        warnTeamWriteRestriction(error);
+        throw error;
+      }
 
       outputResult(t, args, (data) => {
         consola.success(`Updated team ${data.name} (ID: ${data.id})`);
