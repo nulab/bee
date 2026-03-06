@@ -71,7 +71,7 @@ describe("wikiUrl", () => {
 describe("documentUrl", () => {
   it("builds document URL", () => {
     expect(documentUrl("example.backlog.com", "PROJ", "abc-123")).toBe(
-      "https://example.backlog.com/projects/PROJ/document/abc-123",
+      "https://example.backlog.com/document/PROJ/abc-123",
     );
   });
 });

@@ -11,7 +11,7 @@ vi.mock("@repo/backlog-utils", () => ({
   openUrl: vi.fn(),
   documentUrl: vi.fn(
     (host: string, projectKey: string, docId: string) =>
-      `https://${host}/projects/${projectKey}/document/${docId}`,
+      `https://${host}/document/${projectKey}/${docId}`,
   ),
 }));
 
@@ -82,11 +82,9 @@ describe("document view", () => {
     const { view } = await import("./view");
     await view.run?.({ args: { document: "doc-1", project: "PROJECT", web: true } } as never);
 
-    expect(openUrl).toHaveBeenCalledWith(
-      "https://example.backlog.com/projects/PROJECT/document/doc-1",
-    );
+    expect(openUrl).toHaveBeenCalledWith("https://example.backlog.com/document/PROJECT/doc-1");
     expect(consola.info).toHaveBeenCalledWith(
-      "Opening https://example.backlog.com/projects/PROJECT/document/doc-1 in your browser.",
+      "Opening https://example.backlog.com/document/PROJECT/doc-1 in your browser.",
     );
     expect(mockClient.getDocument).not.toHaveBeenCalled();
   });
