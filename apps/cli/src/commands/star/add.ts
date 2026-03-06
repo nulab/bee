@@ -2,6 +2,7 @@ import { getClient } from "@repo/backlog-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `Add a star to an issue, comment, wiki page, or pull request comment.
@@ -30,11 +31,7 @@ const add = withUsage(
       description: "Add a star",
     },
     args: {
-      issue: {
-        type: "string",
-        description: "Issue ID or issue key to star",
-        valueHint: "<PROJECT-123>",
-      },
+      issue: commonArgs.issue,
       comment: {
         type: "string",
         description: "Comment ID to star",

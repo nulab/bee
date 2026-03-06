@@ -3,6 +3,7 @@ import { outputArgs, outputResult } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `Add an issue to your watching list.
@@ -31,12 +32,7 @@ const add = withUsage(
     },
     args: {
       ...outputArgs,
-      issue: {
-        type: "string",
-        description: "Issue ID or issue key to watch",
-        required: true,
-        valueHint: "<PROJECT-123>",
-      },
+      issue: { ...commonArgs.issue, required: true },
       note: {
         type: "string",
         description: "Note to attach to the watching item",
