@@ -22,6 +22,9 @@ const main = defineCommand({
     team: () => import("./commands/team/index").then((m) => m.team),
     user: () => import("./commands/user/index").then((m) => m.user),
     wiki: () => import("./commands/wiki/index").then((m) => m.wiki),
+    category: () => import("./commands/category/index").then((m) => m.category),
+    milestone: () => import("./commands/milestone/index").then((m) => m.milestone),
+    "issue-type": () => import("./commands/issue-type/index").then((m) => m.issueType),
   },
 });
 

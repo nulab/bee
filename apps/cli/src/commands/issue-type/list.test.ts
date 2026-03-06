@@ -1,0 +1,63 @@
+import { getClient } from "@repo/backlog-utils";
+import consola from "consola";
+import { describe, expect, it, vi } from "vitest";
+
+const mockClient = {
+  getIssueTypes: vi.fn(),
+};
+
+vi.mock("@repo/backlog-utils", () => ({
+  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+}));
+
+vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
+
+const sampleIssueTypes = [
+  { id: 1, name: "Bug", color: "#e30000" },
+  { id: 2, name: "Task", color: "#006e00" },
+];
+
+describe("issue-type list", () => {
+  it("displays issue type list in tabular format", async () => {
+    mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes);
+
+    const { list } = await import("./list");
+    await list.run?.({ args: { project: "TEST" } } as never);
+
+    expect(getClient).toHaveBeenCalled();
+    expect(mockClient.getIssueTypes).toHaveBeenCalledWith("TEST");
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Bug"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Task"));
+  });
+
+  it("shows message when no issue types found", async () => {
+    mockClient.getIssueTypes.mockResolvedValue([]);
+
+    const { list } = await import("./list");
+    await list.run?.({ args: { project: "TEST" } } as never);
+
+    expect(consola.info).toHaveBeenCalledWith("No issue types found.");
+  });
+
+  it("displays color column", async () => {
+    mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes);
+
+    const { list } = await import("./list");
+    await list.run?.({ args: { project: "TEST" } } as never);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("#e30000"));
+  });
+
+  it("outputs JSON when --json flag is set", async () => {
+    mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes);
+
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    const { list } = await import("./list");
+    await list.run?.({ args: { project: "TEST", json: "" } } as never);
+
+    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Bug"));
+    writeSpy.mockRestore();
+  });
+});

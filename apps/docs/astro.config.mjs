@@ -121,6 +121,33 @@ export default defineConfig({
               ],
             },
             {
+              label: "category",
+              items: [
+                { label: "category list", link: "/commands/category/list" },
+                { label: "category create", link: "/commands/category/create" },
+                { label: "category edit", link: "/commands/category/edit" },
+                { label: "category delete", link: "/commands/category/delete" },
+              ],
+            },
+            {
+              label: "milestone",
+              items: [
+                { label: "milestone list", link: "/commands/milestone/list" },
+                { label: "milestone create", link: "/commands/milestone/create" },
+                { label: "milestone edit", link: "/commands/milestone/edit" },
+                { label: "milestone delete", link: "/commands/milestone/delete" },
+              ],
+            },
+            {
+              label: "issue-type",
+              items: [
+                { label: "issue-type list", link: "/commands/issue-type/list" },
+                { label: "issue-type create", link: "/commands/issue-type/create" },
+                { label: "issue-type edit", link: "/commands/issue-type/edit" },
+                { label: "issue-type delete", link: "/commands/issue-type/delete" },
+              ],
+            },
+            {
               label: "wiki",
               items: [
                 { label: "wiki list", link: "/commands/wiki/list" },
