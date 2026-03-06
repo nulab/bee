@@ -30,6 +30,10 @@ const main = defineCommand({
     status: () => import("./commands/status/index").then((m) => m.status),
     star: () => import("./commands/star/index").then((m) => m.star),
     watching: () => import("./commands/watching/index").then((m) => m.watching),
+    dashboard: () => import("./commands/dashboard").then((m) => m.dashboard),
+    browse: () => import("./commands/browse").then((m) => m.browse),
+    api: () => import("./commands/api").then((m) => m.api),
+    completion: () => import("./commands/completion").then((m) => m.completion),
   },
 });
 

@@ -105,58 +105,95 @@ const loadCommandsImpl = async (): Promise<CommandEntry[]> => {
       const commandName = basename(file, ".ts");
       const id = `${parent}/${commandName}`;
 
-      try {
-        const mod = (await jiti.import(filePath)) as Record<string, unknown>;
-
-        const commandUsage = mod.commandUsage as
-          | {
-              long?: string;
-              examples?: { description: string; command: string }[];
-              annotations?: {
-                arguments?: string;
-                environment?: [string, string][];
-              };
-            }
-          | undefined;
-
-        // Find the command definition: an exported object with a `.meta` property
-        let meta: { name?: string; description?: string } | undefined;
-        let args: Record<string, Record<string, unknown>> = {};
-
-        for (const value of Object.values(mod)) {
-          if (value !== null && typeof value === "object" && "meta" in value) {
-            const cmdDef = value as {
-              meta: { name?: string; description?: string };
-              args?: Record<string, Record<string, unknown>>;
-            };
-            ({ meta } = cmdDef);
-            args = cmdDef.args ?? {};
-            break;
-          }
-        }
-
-        if (!meta) {
-          continue;
-        }
-
-        results.push({
-          id,
-          title: `bee ${parent} ${meta.name ?? commandName}`,
-          description: meta.description ?? "",
-          long: commandUsage?.long,
-          parent,
-          name: meta.name ?? commandName,
-          args: normalizeArgs(args),
-          examples: commandUsage?.examples,
-          environment: commandUsage?.annotations?.environment,
-        });
-      } catch {
-        // Skip commands that fail to load
+      const entry = await loadCommandEntry(jiti, filePath, {
+        id,
+        parent,
+        commandName,
+        titlePrefix: `bee ${parent}`,
+      });
+      if (entry) {
+        results.push(entry);
       }
     }
   }
 
+  // Top-level command files (e.g. dashboard.ts, browse.ts)
+  const topLevelFiles = entries.filter(
+    (e) => e.isFile() && e.name.endsWith(".ts") && !e.name.endsWith(".test.ts"),
+  );
+
+  for (const file of topLevelFiles) {
+    const filePath = resolve(CLI_COMMANDS_DIR, file.name);
+    const commandName = basename(file.name, ".ts");
+
+    const entry = await loadCommandEntry(jiti, filePath, {
+      id: commandName,
+      parent: "",
+      commandName,
+      titlePrefix: "bee",
+    });
+    if (entry) {
+      results.push(entry);
+    }
+  }
+
   return results;
+};
+
+const loadCommandEntry = async (
+  jiti: ReturnType<typeof createJiti>,
+  filePath: string,
+  opts: { id: string; parent: string; commandName: string; titlePrefix: string },
+): Promise<CommandEntry | undefined> => {
+  try {
+    const mod = (await jiti.import(filePath)) as Record<string, unknown>;
+
+    const commandUsage = mod.commandUsage as
+      | {
+          long?: string;
+          examples?: { description: string; command: string }[];
+          annotations?: {
+            arguments?: string;
+            environment?: [string, string][];
+          };
+        }
+      | undefined;
+
+    // Find the command definition: an exported object with a `.meta` property
+    let meta: { name?: string; description?: string } | undefined;
+    let args: Record<string, Record<string, unknown>> = {};
+
+    for (const value of Object.values(mod)) {
+      if (value !== null && typeof value === "object" && "meta" in value) {
+        const cmdDef = value as {
+          meta: { name?: string; description?: string };
+          args?: Record<string, Record<string, unknown>>;
+        };
+        ({ meta } = cmdDef);
+        args = cmdDef.args ?? {};
+        break;
+      }
+    }
+
+    if (!meta) {
+      return undefined;
+    }
+
+    return {
+      id: opts.id,
+      title: `${opts.titlePrefix} ${meta.name ?? opts.commandName}`,
+      description: meta.description ?? "",
+      long: commandUsage?.long,
+      parent: opts.parent,
+      name: meta.name ?? opts.commandName,
+      args: normalizeArgs(args),
+      examples: commandUsage?.examples,
+      environment: commandUsage?.annotations?.environment,
+    };
+  } catch {
+    // Skip commands that fail to load
+    return undefined;
+  }
 };
 
 export { buildFlagParts, buildUsageLine, loadCommands };
