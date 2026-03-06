@@ -1,13 +1,16 @@
-import { getClient } from "@repo/backlog-utils";
+import {
+  PRIORITY_NAMES,
+  PriorityId,
+  getClient,
+  resolveProjectIds,
+  resolveUserId,
+} from "@repo/backlog-utils";
 import { outputArgs, outputResult, promptRequired, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
 import * as commonArgs from "../../lib/common-args";
-import { PRIORITY_NAMES, PriorityId } from "../../lib/issue-constants";
-import { resolveProjectIds } from "../../lib/resolve-project";
-import { resolveUserId } from "../../lib/resolve-user";
 
 const commandUsage: CommandUsage = {
   long: `Create a new Backlog issue.

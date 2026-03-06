@@ -1,4 +1,4 @@
-import { getClient } from "@repo/backlog-utils";
+import { getClient, resolveProjectIds } from "@repo/backlog-utils";
 import {
   type Row,
   formatDate,
@@ -12,7 +12,6 @@ import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
 import * as commonArgs from "../../lib/common-args";
-import { resolveProjectIds } from "../../lib/resolve-project";
 
 const commandUsage: CommandUsage = {
   long: `List documents from a Backlog project.

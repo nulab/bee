@@ -1,10 +1,9 @@
-import { getClient } from "@repo/backlog-utils";
+import { getClient, resolveProjectIds } from "@repo/backlog-utils";
 import { outputArgs, outputResult, promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
 import * as commonArgs from "../../lib/common-args";
-import { resolveProjectIds } from "../../lib/resolve-project";
 
 const commandUsage: CommandUsage = {
   long: `Create a new Backlog document.

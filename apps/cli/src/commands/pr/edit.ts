@@ -1,4 +1,4 @@
-import { getClient } from "@repo/backlog-utils";
+import { getClient, resolveUserId } from "@repo/backlog-utils";
 import { outputArgs, outputResult, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
@@ -11,7 +11,6 @@ import {
   withUsage,
 } from "../../lib/command-usage";
 import * as commonArgs from "../../lib/common-args";
-import { resolveUserId } from "../../lib/resolve-user";
 
 const commandUsage: CommandUsage = {
   long: `Update an existing Backlog pull request.

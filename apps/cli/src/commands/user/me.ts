@@ -1,9 +1,8 @@
-import { getClient } from "@repo/backlog-utils";
+import { ROLE_LABELS, getClient } from "@repo/backlog-utils";
 import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-import { ROLE_LABELS } from "../../lib/role-labels";
 
 const commandUsage: CommandUsage = {
   long: `Display details of the authenticated user.

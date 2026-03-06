@@ -1,4 +1,4 @@
-import { getClient } from "@repo/backlog-utils";
+import { PR_STATUS_NAMES, PrStatusName, getClient } from "@repo/backlog-utils";
 import { type Row, outputArgs, outputResult, printTable, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
@@ -11,7 +11,6 @@ import {
   withUsage,
 } from "../../lib/command-usage";
 import * as commonArgs from "../../lib/common-args";
-import { PR_STATUS_NAMES, PrStatusName } from "../../lib/pr-constants";
 
 const commandUsage: CommandUsage = {
   long: `List pull requests in a Backlog repository.

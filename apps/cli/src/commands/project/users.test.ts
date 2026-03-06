@@ -5,7 +5,8 @@ const mockClient = {
   getProjectUsers: vi.fn(),
 };
 
-vi.mock("@repo/backlog-utils", () => ({
+vi.mock("@repo/backlog-utils", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@repo/backlog-utils")>()),
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
 }));
 

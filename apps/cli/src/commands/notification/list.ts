@@ -1,10 +1,9 @@
-import { getClient } from "@repo/backlog-utils";
+import { NOTIFICATION_REASON_LABELS, getClient } from "@repo/backlog-utils";
 import { type Row, formatDate, outputArgs, outputResult, printTable } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 import * as commonArgs from "../../lib/common-args";
-import { NOTIFICATION_REASON_LABELS } from "../../lib/notification-reason-labels";
 
 const commandUsage: CommandUsage = {
   long: `List notifications for the authenticated user.

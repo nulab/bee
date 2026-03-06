@@ -1,11 +1,10 @@
-import { getClient } from "@repo/backlog-utils";
+import { PRIORITY_NAMES, PriorityId, getClient } from "@repo/backlog-utils";
 import { outputArgs, outputResult, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 import * as commonArgs from "../../lib/common-args";
-import { PRIORITY_NAMES, PriorityId } from "../../lib/issue-constants";
 
 const commandUsage: CommandUsage = {
   long: `Update an existing Backlog issue.

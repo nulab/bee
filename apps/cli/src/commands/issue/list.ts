@@ -1,4 +1,4 @@
-import { getClient } from "@repo/backlog-utils";
+import { PRIORITY_NAMES, PriorityId, getClient, resolveProjectIds } from "@repo/backlog-utils";
 import { type Row, outputArgs, outputResult, printTable, splitArg } from "@repo/cli-utils";
 import { type Option } from "backlog-js";
 import { defineCommand } from "citty";
@@ -6,8 +6,6 @@ import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
 import * as commonArgs from "../../lib/common-args";
-import { PRIORITY_NAMES, PriorityId } from "../../lib/issue-constants";
-import { resolveProjectIds } from "../../lib/resolve-project";
 
 const commandUsage: CommandUsage = {
   long: `List issues from one or more Backlog projects.

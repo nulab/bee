@@ -7,7 +7,8 @@ const mockClient = {
   getProjects: vi.fn().mockResolvedValue([{ id: 123, projectKey: "PROJ" }]),
 };
 
-vi.mock("@repo/backlog-utils", () => ({
+vi.mock("@repo/backlog-utils", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@repo/backlog-utils")>()),
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
 }));
 

@@ -1,4 +1,4 @@
-import { getClient } from "@repo/backlog-utils";
+import { PrStatusId, getClient } from "@repo/backlog-utils";
 import { outputArgs, outputResult } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
@@ -9,7 +9,6 @@ import {
   ENV_REPO,
   withUsage,
 } from "../../lib/command-usage";
-import { PrStatusId } from "../../lib/pr-constants";
 
 const commandUsage: CommandUsage = {
   long: `Show a summary of pull requests assigned to you, grouped by status.

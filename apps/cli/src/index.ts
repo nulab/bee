@@ -1,7 +1,7 @@
+import { handleBacklogApiError } from "@repo/backlog-utils";
+import { handleValidationError } from "@repo/cli-utils";
 import { defineCommand, runCommand, runMain } from "citty";
-import { handleBacklogApiError } from "./lib/api-error-handler";
 import { showCommandUsage } from "./lib/command-usage";
-import { handleValidationError } from "./lib/validation-error";
 import pkg from "../package.json" with { type: "json" };
 import consola from "consola";
 

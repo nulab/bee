@@ -1,4 +1,4 @@
-import { getClient } from "@repo/backlog-utils";
+import { ACTIVITY_LABELS, getClient } from "@repo/backlog-utils";
 import {
   type Row,
   formatDate,
@@ -11,7 +11,6 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-import { ACTIVITY_LABELS } from "../../lib/activity-labels";
 import * as commonArgs from "../../lib/common-args";
 
 const getActivitySummary = (activity: {

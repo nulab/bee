@@ -1,10 +1,9 @@
-import { getClient } from "@repo/backlog-utils";
+import { IssueStatusId, RESOLUTION_NAMES, ResolutionId, getClient } from "@repo/backlog-utils";
 import { outputArgs, outputResult, splitArg } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-import { IssueStatusId, RESOLUTION_NAMES, ResolutionId } from "../../lib/issue-constants";
 
 const commandUsage: CommandUsage = {
   long: `Close a Backlog issue by setting its status to \`Closed\`.
