@@ -53,6 +53,15 @@ export default defineConfig({
               ],
             },
             {
+              label: "notification",
+              items: [
+                { label: "notification list", link: "/commands/notification/list" },
+                { label: "notification count", link: "/commands/notification/count" },
+                { label: "notification read", link: "/commands/notification/read" },
+                { label: "notification read-all", link: "/commands/notification/read-all" },
+              ],
+            },
+            {
               label: "pr",
               items: [
                 { label: "pr list", link: "/commands/pr/list" },
@@ -62,6 +71,15 @@ export default defineConfig({
                 { label: "pr create", link: "/commands/pr/create" },
                 { label: "pr edit", link: "/commands/pr/edit" },
                 { label: "pr comment", link: "/commands/pr/comment" },
+              ],
+            },
+            {
+              label: "user",
+              items: [
+                { label: "user list", link: "/commands/user/list" },
+                { label: "user view", link: "/commands/user/view" },
+                { label: "user me", link: "/commands/user/me" },
+                { label: "user activities", link: "/commands/user/activities" },
               ],
             },
             {
