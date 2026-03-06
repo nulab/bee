@@ -11,7 +11,8 @@ const commandUsage: CommandUsage = {
 
 If \`--name\` is not provided, you will be prompted interactively.
 
-Use \`--all-event\` to subscribe to all activity types, or specify individual
+Either \`--all-event\` or \`--activity-type-ids\` must be specified. Use
+\`--all-event\` to subscribe to all activity types, or specify individual
 activity type IDs with \`--activity-type-ids\`.`,
 
   examples: [

@@ -1,0 +1,65 @@
+import { getClient } from "@repo/backlog-utils";
+import consola from "consola";
+import { describe, expect, it, vi } from "vitest";
+
+const mockClient = {
+  getWatchingListItems: vi.fn(),
+  getMyself: vi.fn(),
+};
+
+vi.mock("@repo/backlog-utils", () => ({
+  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+}));
+
+vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
+
+const sampleWatchings = [
+  {
+    id: 1,
+    resourceAlreadyRead: false,
+    issue: { issueKey: "TEST-1", summary: "Fix bug" },
+  },
+  {
+    id: 2,
+    resourceAlreadyRead: true,
+    issue: { issueKey: "TEST-2", summary: "Add feature" },
+  },
+];
+
+describe("watching list", () => {
+  it("lists watching items for the authenticated user", async () => {
+    mockClient.getMyself.mockResolvedValue({ id: 100 });
+    mockClient.getWatchingListItems.mockResolvedValue(sampleWatchings);
+
+    const { list } = await import("./list");
+    await list.run?.({ args: {} } as never);
+
+    expect(getClient).toHaveBeenCalled();
+    expect(mockClient.getMyself).toHaveBeenCalled();
+    expect(mockClient.getWatchingListItems).toHaveBeenCalledWith(100);
+    expect(consola.log).toHaveBeenCalled();
+  });
+
+  it("shows message when no watching items found", async () => {
+    mockClient.getMyself.mockResolvedValue({ id: 100 });
+    mockClient.getWatchingListItems.mockResolvedValue([]);
+
+    const { list } = await import("./list");
+    await list.run?.({ args: {} } as never);
+
+    expect(consola.info).toHaveBeenCalledWith("No watching items found.");
+  });
+
+  it("outputs JSON when --json flag is set", async () => {
+    mockClient.getMyself.mockResolvedValue({ id: 100 });
+    mockClient.getWatchingListItems.mockResolvedValue(sampleWatchings);
+
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    const { list } = await import("./list");
+    await list.run?.({ args: { json: "" } } as never);
+
+    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("TEST-1"));
+    writeSpy.mockRestore();
+  });
+});

@@ -14,11 +14,11 @@ The \`--color\` flag must be one of the predefined Backlog colors.`,
   examples: [
     {
       description: "Create a status",
-      command: 'bee status create -p PROJECT -n "In Review" --color "#2779ca"',
+      command: 'bee status create -p PROJECT -n "In Review" --color "#3b9dbd"',
     },
     {
       description: "Create interactively",
-      command: 'bee status create -p PROJECT --color "#2779ca"',
+      command: 'bee status create -p PROJECT --color "#3b9dbd"',
     },
   ],
 
