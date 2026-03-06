@@ -12,7 +12,7 @@ type Props = Awaited<ReturnType<typeof getStaticPaths>>[number]["props"];
 
 export const GET = ({ props }: { props: Props }) => {
   const { entry } = props;
-  const {title} = entry.data;
+  const { title } = entry.data;
   const content = `# ${title}\n\n${entry.body}`;
   return new Response(content, {
     headers: { "content-type": "text/markdown; charset=utf-8" },
