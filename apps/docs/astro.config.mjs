@@ -161,6 +161,52 @@ export default defineConfig({
                 { label: "wiki delete", link: "/commands/wiki/delete" },
               ],
             },
+            {
+              label: "status",
+              items: [
+                { label: "status list", link: "/commands/status/list" },
+                { label: "status create", link: "/commands/status/create" },
+                { label: "status edit", link: "/commands/status/edit" },
+                { label: "status delete", link: "/commands/status/delete" },
+              ],
+            },
+            {
+              label: "space",
+              items: [
+                { label: "space info", link: "/commands/space/info" },
+                { label: "space activities", link: "/commands/space/activities" },
+                { label: "space disk-usage", link: "/commands/space/disk-usage" },
+                { label: "space notification", link: "/commands/space/notification" },
+              ],
+            },
+            {
+              label: "webhook",
+              items: [
+                { label: "webhook list", link: "/commands/webhook/list" },
+                { label: "webhook view", link: "/commands/webhook/view" },
+                { label: "webhook create", link: "/commands/webhook/create" },
+                { label: "webhook edit", link: "/commands/webhook/edit" },
+                { label: "webhook delete", link: "/commands/webhook/delete" },
+              ],
+            },
+            {
+              label: "star",
+              items: [
+                { label: "star add", link: "/commands/star/add" },
+                { label: "star list", link: "/commands/star/list" },
+                { label: "star count", link: "/commands/star/count" },
+              ],
+            },
+            {
+              label: "watching",
+              items: [
+                { label: "watching list", link: "/commands/watching/list" },
+                { label: "watching add", link: "/commands/watching/add" },
+                { label: "watching view", link: "/commands/watching/view" },
+                { label: "watching delete", link: "/commands/watching/delete" },
+                { label: "watching read", link: "/commands/watching/read" },
+              ],
+            },
           ],
         },
       ],
