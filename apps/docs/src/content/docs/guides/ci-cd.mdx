@@ -34,14 +34,6 @@ bee は CI/CD 環境でも利用できます。自動テストやデプロイの
 API キーをコードにハードコードせず、CI/CD サービスのシークレット機能を使って管理してください。
 :::
 
-:::tip[実行速度を上げるには]
-`npx` は毎回パッケージをダウンロードするため、ジョブが遅くなることがあります。頻繁に使う場合は、事前にインストールしてキャッシュするのがおすすめです。
-
-```yaml
-- run: npm install -g @nulab/bee
-- run: bee issue list --project MY_PROJECT
-```
-:::
 
 ## GitHub Actions での例
 
