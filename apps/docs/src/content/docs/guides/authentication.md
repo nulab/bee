@@ -13,9 +13,13 @@ bee は 2 つの認証方式をサポートしています。
 bee auth login
 ```
 
-対話形式でスペースのホスト名（例: `xxx.backlog.com`）と API キーの入力を求められます。
+対話形式でスペースのホスト名（例: `xxx.backlog.com`）と API キーの入力を求められます。API キーは Backlog の **個人設定 > API** から発行できます。
 
-API キーは Backlog の **個人設定 > API** (`https://<your-space>.backlog.com/EditApiSettings.action`) から発行できます。
+環境変数を使って非対話的にログインすることもできます。
+
+```sh
+BACKLOG_API_KEY=your-api-key BACKLOG_SPACE=xxx.backlog.com bee auth login
+```
 
 ### パイプで API キーを渡す
 
@@ -55,20 +59,29 @@ bee auth login --method oauth
 | セキュリティ | API キーを直接管理 | トークンの自動更新             |
 | 用途         | 個人利用、CI/CD    | チームでの利用、長期運用       |
 
-迷ったら **API キー認証** から始めましょう。
-
 ## 複数スペースの管理
 
 複数の Backlog スペースにログインしている場合、`bee auth switch` でアクティブなスペースを切り替えられます。
 
-```sh
+```sh title="スペースの切り替え"
 bee auth switch
+```
+
+```txt title="出力例"
+? Select a space ›
+❯ xxx.backlog.com
+  yyy.backlog.jp
 ```
 
 現在の認証状態は `bee auth status` で確認できます。
 
-```sh
+```sh title="認証状態の確認"
 bee auth status
+```
+
+```txt title="出力例"
+xxx.backlog.com
+  ✓ Logged in as Ryoya Tamura (api-key)
 ```
 
 ## 関連コマンド
