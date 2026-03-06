@@ -4,6 +4,7 @@ import { defineCommand } from "citty";
 import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 import { PRIORITY_NAMES, PriorityId } from "../../lib/issue-constants";
 import { resolveProjectIds } from "../../lib/resolve-project";
 import { resolveUserId } from "../../lib/resolve-user";
@@ -50,12 +51,7 @@ const create = withUsage(
     },
     args: {
       ...outputArgs,
-      project: {
-        type: "string",
-        alias: "p",
-        description: "Project ID or project key",
-        default: process.env.BACKLOG_PROJECT,
-      },
+      project: commonArgs.project,
       title: {
         type: "string",
         alias: "t",
@@ -77,10 +73,7 @@ const create = withUsage(
         alias: "d",
         description: "Issue description",
       },
-      assignee: {
-        type: "string",
-        description: "Assignee user ID. Use @me for yourself.",
-      },
+      assignee: commonArgs.assignee,
       "parent-issue": {
         type: "string",
         description: "Parent issue ID",
@@ -103,14 +96,8 @@ const create = withUsage(
         type: "string",
         description: "Actual hours",
       },
-      notify: {
-        type: "string",
-        description: "User IDs to notify (comma-separated for multiple)",
-      },
-      attachment: {
-        type: "string",
-        description: "Attachment IDs (comma-separated for multiple)",
-      },
+      notify: commonArgs.notify,
+      attachment: commonArgs.attachment,
     },
     async run({ args }) {
       const { client } = await getClient();

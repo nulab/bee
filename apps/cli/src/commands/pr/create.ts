@@ -10,6 +10,7 @@ import {
   ENV_REPO,
   withUsage,
 } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 import { resolveUserId } from "../../lib/resolve-user";
 
 const commandUsage: CommandUsage = {
@@ -49,20 +50,8 @@ const create = withUsage(
     },
     args: {
       ...outputArgs,
-      project: {
-        type: "string",
-        alias: "p",
-        description: "Project ID or project key",
-        default: process.env.BACKLOG_PROJECT,
-        required: true,
-      },
-      repo: {
-        type: "string",
-        alias: "R",
-        description: "Repository name or ID",
-        default: process.env.BACKLOG_REPO,
-        required: true,
-      },
+      project: { ...commonArgs.project, required: true },
+      repo: commonArgs.repo,
       base: {
         type: "string",
         description: "Base branch name",
@@ -81,23 +70,14 @@ const create = withUsage(
         alias: "b",
         description: "Pull request description",
       },
-      assignee: {
-        type: "string",
-        description: "Assignee user ID. Use @me for yourself.",
-      },
+      assignee: commonArgs.assignee,
       issue: {
         type: "string",
         description: "Related issue ID or issue key",
         valueHint: "<PROJECT-123>",
       },
-      notify: {
-        type: "string",
-        description: "User IDs to notify (comma-separated for multiple)",
-      },
-      attachment: {
-        type: "string",
-        description: "Attachment IDs (comma-separated for multiple)",
-      },
+      notify: commonArgs.notify,
+      attachment: commonArgs.attachment,
     },
     async run({ args }) {
       const { client } = await getClient();

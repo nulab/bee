@@ -3,6 +3,7 @@ import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `Display details of a Backlog document.
@@ -41,16 +42,10 @@ const view = withUsage(
         required: true,
       },
       project: {
-        type: "string",
-        alias: "p",
+        ...commonArgs.project,
         description: "Project ID or project key (required for --web)",
-        default: process.env.BACKLOG_PROJECT,
       },
-      web: {
-        type: "boolean",
-        alias: "w",
-        description: "Open the document in the browser",
-      },
+      web: commonArgs.web("document"),
     },
     async run({ args }) {
       const { client, host } = await getClient();

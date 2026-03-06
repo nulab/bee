@@ -9,6 +9,7 @@ import {
   ENV_REPO,
   withUsage,
 } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `Display details of a Backlog pull request.
@@ -46,25 +47,9 @@ const view = withUsage(
         valueHint: "<number>",
         required: true,
       },
-      project: {
-        type: "string",
-        alias: "p",
-        description: "Project ID or project key",
-        default: process.env.BACKLOG_PROJECT,
-        required: true,
-      },
-      repo: {
-        type: "string",
-        alias: "R",
-        description: "Repository name or ID",
-        default: process.env.BACKLOG_REPO,
-        required: true,
-      },
-      web: {
-        type: "boolean",
-        alias: "w",
-        description: "Open the pull request in the browser",
-      },
+      project: { ...commonArgs.project, required: true },
+      repo: commonArgs.repo,
+      web: commonArgs.web("pull request"),
     },
     async run({ args }) {
       const { client, host } = await getClient();

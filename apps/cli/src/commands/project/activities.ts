@@ -12,6 +12,7 @@ import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
 import { ACTIVITY_LABELS } from "../../lib/activity-labels";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `List recent activities of a Backlog project.
@@ -78,27 +79,14 @@ const activities = withUsage(
     },
     args: {
       ...outputArgs,
-      project: {
-        type: "positional",
-        description: "Project ID or project key",
-        required: true,
-        default: process.env.BACKLOG_PROJECT,
-      },
+      project: commonArgs.projectPositional,
       "activity-type": {
         type: "string",
         description: "Filter by activity type IDs (comma-separated)",
         valueHint: "<1,2,3>",
       },
-      count: {
-        type: "string",
-        description: "Number of activities to return (default: 20)",
-        valueHint: "<1-100>",
-      },
-      order: {
-        type: "string",
-        description: "Sort order",
-        valueHint: "{asc|desc}",
-      },
+      count: commonArgs.count,
+      order: commonArgs.order,
     },
     async run({ args }) {
       const { client } = await getClient();

@@ -9,6 +9,7 @@ import {
   ENV_REPO,
   withUsage,
 } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `List comments on a Backlog pull request.
@@ -42,39 +43,12 @@ const comments = withUsage(
         valueHint: "<number>",
         required: true,
       },
-      project: {
-        type: "string",
-        alias: "p",
-        description: "Project ID or project key",
-        default: process.env.BACKLOG_PROJECT,
-        required: true,
-      },
-      repo: {
-        type: "string",
-        alias: "R",
-        description: "Repository name or ID",
-        default: process.env.BACKLOG_REPO,
-        required: true,
-      },
-      "min-id": {
-        type: "string",
-        description: "Minimum comment ID",
-      },
-      "max-id": {
-        type: "string",
-        description: "Maximum comment ID",
-      },
-      count: {
-        type: "string",
-        alias: "L",
-        description: "Number of results (default: 20)",
-        valueHint: "<1-100>",
-      },
-      order: {
-        type: "string",
-        description: "Sort order",
-        valueHint: "{asc|desc}",
-      },
+      project: { ...commonArgs.project, required: true },
+      repo: commonArgs.repo,
+      "min-id": commonArgs.minId,
+      "max-id": commonArgs.maxId,
+      count: commonArgs.count,
+      order: commonArgs.order,
     },
     async run({ args }) {
       const { client } = await getClient();

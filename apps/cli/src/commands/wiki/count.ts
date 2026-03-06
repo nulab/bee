@@ -3,6 +3,7 @@ import { outputArgs, outputResult } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import * as commonArgs from "../../lib/common-args";
 
 const commandUsage: CommandUsage = {
   long: `Display the number of wiki pages in a Backlog project.`,
@@ -25,12 +26,7 @@ const count = withUsage(
     },
     args: {
       ...outputArgs,
-      project: {
-        type: "positional",
-        description: "Project ID or project key",
-        required: true,
-        default: process.env.BACKLOG_PROJECT,
-      },
+      project: commonArgs.projectPositional,
     },
     async run({ args }) {
       const { client } = await getClient();

@@ -12,6 +12,7 @@ import consola from "consola";
 import * as v from "valibot";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
 import { ACTIVITY_LABELS } from "../../lib/activity-labels";
+import * as commonArgs from "../../lib/common-args";
 
 const getActivitySummary = (activity: {
   type: number;
@@ -90,24 +91,10 @@ const activities = withUsage(
         description: "Filter by activity type IDs (comma-separated)",
         valueHint: "<1,2,3>",
       },
-      count: {
-        type: "string",
-        description: "Number of activities to return (default: 20)",
-        valueHint: "<1-100>",
-      },
-      order: {
-        type: "string",
-        description: "Sort order",
-        valueHint: "{asc|desc}",
-      },
-      "min-id": {
-        type: "string",
-        description: "Minimum activity ID",
-      },
-      "max-id": {
-        type: "string",
-        description: "Maximum activity ID",
-      },
+      count: commonArgs.count,
+      order: commonArgs.order,
+      "min-id": commonArgs.minId,
+      "max-id": commonArgs.maxId,
     },
     async run({ args }) {
       const { client } = await getClient();
