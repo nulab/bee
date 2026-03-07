@@ -9,5 +9,6 @@ export const star = defineCommand({
     add: () => import("./add").then((m) => m.add),
     list: () => import("./list").then((m) => m.list),
     count: () => import("./count").then((m) => m.count),
+    remove: () => import("./remove").then((m) => m.remove),
   },
 });
