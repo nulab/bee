@@ -84,22 +84,49 @@ const renderCommandMarkdown = (entry: CommandEntry): string => {
   return lines.join("\n");
 };
 
-const OPTIONAL_GROUPS = new Set([
-  "webhook",
-  "wiki",
-  "space",
-  "project",
-  "team",
-  "category",
-  "milestone",
-  "issue-type",
-  "status",
-]);
+type Category = "core" | "project-management" | "config" | "additional";
+
+const CATEGORY_MAP: Record<string, Category> = {
+  // Core commands — main Backlog features + authentication
+  auth: "core",
+  issue: "core",
+  pr: "core",
+  wiki: "core",
+  document: "core",
+  notification: "core",
+  star: "core",
+  watching: "core",
+  dashboard: "core",
+  browse: "core",
+  // Project management — space, project & team administration
+  project: "project-management",
+  space: "project-management",
+  repo: "project-management",
+  team: "project-management",
+  user: "project-management",
+  // Config — Backlog project settings
+  category: "config",
+  milestone: "config",
+  "issue-type": "config",
+  status: "config",
+  webhook: "config",
+  // Additional commands — CLI utilities
+  api: "additional",
+  completion: "additional",
+};
+
+const SECTIONS: { category: Category; heading: string }[] = [
+  { category: "core", heading: "Core commands" },
+  { category: "project-management", heading: "Project management" },
+  { category: "config", heading: "Config" },
+  { category: "additional", heading: "Additional commands" },
+];
+
+const categoryOf = (entry: CommandEntry): Category =>
+  CATEGORY_MAP[entry.parent || entry.name] ?? "additional";
 
 const buildLlmsTxt = async (siteUrl: string): Promise<string> => {
   const commands = await loadCommands();
-  const coreCommands = commands.filter((e) => !OPTIONAL_GROUPS.has(e.parent));
-  const optionalCommands = commands.filter((e) => OPTIONAL_GROUPS.has(e.parent));
   const lines: string[] = [HEADER];
 
   lines.push("## Docs");
@@ -114,17 +141,19 @@ const buildLlmsTxt = async (siteUrl: string): Promise<string> => {
 
   lines.push("## Commands");
   lines.push("");
-  for (const entry of coreCommands) {
-    lines.push(`- [${entry.title}](${siteUrl}/commands/${entry.id}.md): ${entry.description}`);
-  }
-  lines.push("");
 
-  lines.push("## Optional");
-  lines.push("");
-  for (const entry of optionalCommands) {
-    lines.push(`- [${entry.title}](${siteUrl}/commands/${entry.id}.md): ${entry.description}`);
+  for (const { category, heading } of SECTIONS) {
+    const entries = commands.filter((e) => categoryOf(e) === category);
+    if (entries.length === 0) {
+      continue;
+    }
+    lines.push(`### ${heading}`);
+    lines.push("");
+    for (const entry of entries) {
+      lines.push(`- [${entry.title}](${siteUrl}/commands/${entry.id}.md): ${entry.description}`);
+    }
+    lines.push("");
   }
-  lines.push("");
 
   return lines.join("\n");
 };

@@ -25,11 +25,11 @@
       const MAX_TILT = 20;
 
       const applyTransform = (rx: number, ry: number) => {
-        const shadowX = ry * -0.6;
-        const shadowY = rx * 0.6;
-        const shadowBlur = 10 + (Math.abs(rx) + Math.abs(ry)) * 0.2;
+        const shadowX = ry * -0.3;
+        const shadowY = rx * 0.3;
+        const shadowBlur = 6 + (Math.abs(rx) + Math.abs(ry)) * 0.1;
         img.style.transform = `perspective(500px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02, 1.02, 1)`;
-        img.style.filter = `drop-shadow(${shadowX}px ${shadowY}px ${shadowBlur}px rgba(0, 0, 0, 0.35))`;
+        img.style.filter = `drop-shadow(${shadowX}px ${shadowY}px ${shadowBlur}px rgba(0, 0, 0, 0.15))`;
       };
 
       applyTransform(BASE_RX, BASE_RY);
