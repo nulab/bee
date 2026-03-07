@@ -4,7 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        type: environment
+        type: choice
+        options:
+          - dry-run
+          - production
         description: Environment to publish package
         default: dry-run
         required: true
