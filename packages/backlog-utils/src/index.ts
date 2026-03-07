@@ -30,3 +30,11 @@ export {
   repositoryUrl,
   wikiUrl,
 } from "./url";
+export {
+  type GitContext,
+  detectGitContext,
+  getCurrentBranch,
+  getLatestCommit,
+  getRepoRelativePath,
+  parseBacklogRemoteUrl,
+} from "./git-context";
