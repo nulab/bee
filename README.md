@@ -1,10 +1,10 @@
 # Backlog CLI
 
-[![CI](https://github.com/nulab/bee/actions/workflows/ci.yml/badge.svg)](https://github.com/nulab/bee/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/@nulab/bee?style=flat)](https://www.npmjs.com/package/@nulab/bee)
-[![node](https://img.shields.io/node/v/@nulab/bee?style=flat)](https://nodejs.org/)
-[![last commit](https://img.shields.io/github/last-commit/nulab/bee?style=flat)](https://github.com/nulab/bee/commits/main)
-[![license](https://img.shields.io/github/license/nulab/bee?style=flat)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/nulab/bee/ci.yml?style=for-the-badge&logo=github&label=CI)](https://github.com/nulab/bee/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@nulab/bee?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@nulab/bee)
+[![node](https://img.shields.io/node/v/@nulab/bee?style=for-the-badge&logo=nodedotjs)](https://nodejs.org/)
+[![last commit](https://img.shields.io/github/last-commit/nulab/bee?style=for-the-badge&logo=github)](https://github.com/nulab/bee/commits/main)
+[![license](https://img.shields.io/github/license/nulab/bee?style=for-the-badge)](LICENSE)
 
 Command-line tool to view and manage [Backlog](https://backlog.com/), inspired by GitHub CLI.
 
