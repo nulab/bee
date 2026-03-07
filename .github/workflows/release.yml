@@ -134,3 +134,18 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NEW_TAG: ${{ needs.build.outputs.new_tag }}
         run: gh release create "$NEW_TAG" --generate-notes
+
+      - name: Preview release notes (dry-run)
+        if: inputs.environment == 'dry-run'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_TAG: ${{ needs.build.outputs.new_tag }}
+          REPOSITORY: ${{ github.repository }}
+          TARGET_COMMITISH: ${{ github.sha }}
+        run: |
+          echo "## Release notes for ${NEW_TAG}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          gh api "repos/${REPOSITORY}/releases/generate-notes" \
+            -f tag_name="$NEW_TAG" \
+            -f target_commitish="$TARGET_COMMITISH" \
+            --jq '.body' >> "$GITHUB_STEP_SUMMARY"

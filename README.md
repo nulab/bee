@@ -1,5 +1,11 @@
 # Backlog CLI
 
+[![CI](https://github.com/nulab/bee/actions/workflows/ci.yml/badge.svg)](https://github.com/nulab/bee/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@nulab/bee?style=flat)](https://www.npmjs.com/package/@nulab/bee)
+[![node](https://img.shields.io/node/v/@nulab/bee?style=flat)](https://nodejs.org/)
+[![last commit](https://img.shields.io/github/last-commit/nulab/bee?style=flat)](https://github.com/nulab/bee/commits/main)
+[![license](https://img.shields.io/github/license/nulab/bee?style=flat)](LICENSE)
+
 Command-line tool to view and manage [Backlog](https://backlog.com/), inspired by GitHub CLI.
 
 > [!NOTE]
@@ -8,20 +14,6 @@ Command-line tool to view and manage [Backlog](https://backlog.com/), inspired b
 **Looking to install and use bee?** See the [CLI package README](apps/cli/README.md) or the [documentation site](https://nulab.github.io).
 
 ## Development
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) 20+
-- [pnpm](https://pnpm.io/) (enabled via Corepack)
-
-### Setup
-
-```sh
-corepack enable
-pnpm install
-```
-
-### Monorepo Structure
 
 This is a pnpm workspace monorepo managed with [Turborepo](https://turbo.build/).
 
@@ -35,19 +27,7 @@ This is a pnpm workspace monorepo managed with [Turborepo](https://turbo.build/)
 | `@repo/test-utils`    | `packages/test-utils`    | Shared test helpers                               |
 | `@repo/tsconfigs`     | `packages/tsconfigs`     | Shared TypeScript config                          |
 
-### Scripts
-
-```sh
-pnpm install                       # Install dependencies
-pnpm run typecheck                 # Type check all packages (tsc via turbo)
-pnpm run test                      # Run all tests (vitest)
-pnpm run lint                      # Lint (oxlint)
-pnpm run format:check              # Check formatting (oxfmt)
-pnpm --filter @nulab/bee build     # Build CLI
-pnpm --filter @nulab/bee dev       # Run CLI in dev mode
-```
-
-Lint and format run automatically on staged files at commit time via [lefthook](https://github.com/evilmartians/lefthook). You typically only need to run `typecheck` and `test` manually.
+For setup instructions, scripts, and contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
