@@ -79,6 +79,25 @@ const gitCommitUrl = (
   commitSha: string,
 ): string => buildBacklogUrl(host, `/git/${projectKey}/${repoName}/commit/${commitSha}`);
 
+/**
+ * Opens a URL in the browser or prints it to stdout.
+ *
+ * When `noBrowser` is true, the URL is logged via `consola.log` for piping.
+ * Otherwise it opens in the default browser and logs an info message.
+ */
+const openOrPrintUrl = async (
+  url: string,
+  noBrowser: boolean,
+  log: { log: (msg: string) => void; info: (msg: string) => void },
+): Promise<void> => {
+  if (noBrowser) {
+    log.log(url);
+    return;
+  }
+  await openUrl(url);
+  log.info(`Opening ${url} in your browser.`);
+};
+
 export {
   buildBacklogUrl,
   dashboardUrl,
@@ -87,6 +106,7 @@ export {
   gitCommitUrl,
   gitTreeUrl,
   issueUrl,
+  openOrPrintUrl,
   openUrl,
   projectUrl,
   pullRequestUrl,

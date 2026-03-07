@@ -27,6 +27,7 @@ export {
   gitCommitUrl,
   gitTreeUrl,
   issueUrl,
+  openOrPrintUrl,
   openUrl,
   projectUrl,
   pullRequestUrl,

@@ -1,24 +1,16 @@
 import {
-  type GitContext,
-  buildBacklogUrl,
-  dashboardUrl,
   detectGitContext,
   getCurrentBranch,
   getLatestCommit,
   getRepoRelativePath,
   getClient,
-  gitBlobUrl,
-  gitCommitUrl,
-  gitTreeUrl,
-  issueUrl,
-  openUrl,
-  projectUrl,
-  repositoryUrl,
+  openOrPrintUrl,
 } from "@repo/backlog-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../lib/command-usage";
 import * as commonArgs from "../lib/common-args";
+import { resolveUrl } from "./browse-url";
 
 const commandUsage: CommandUsage = {
   long: `Open a Backlog page in the browser.
@@ -56,10 +48,6 @@ Paths ending with \`/\` open the directory tree view.`,
   },
 };
 
-const ISSUE_KEY_PATTERN = /^[A-Z][A-Z0-9_]+-\d+$/;
-const ISSUE_NUMBER_PATTERN = /^\d+$/;
-const FILE_LINE_PATTERN = /^(.+):(\d+)$/;
-
 const browse = withUsage(
   defineCommand({
     meta: {
@@ -84,11 +72,7 @@ const browse = withUsage(
         alias: "c",
         description: "View file at the latest commit",
       },
-      "no-browser": {
-        type: "boolean",
-        alias: "n",
-        description: "Print the URL instead of opening the browser",
-      },
+      "no-browser": commonArgs.noBrowser,
       issues: {
         type: "boolean",
         description: "Open the issues page",
@@ -128,186 +112,30 @@ const browse = withUsage(
     },
     async run({ args }) {
       const { host } = await getClient();
-      const gitContext = await detectGitContext();
 
-      const url = await resolveUrl(host, args, gitContext);
+      const [context, currentBranch, latestCommit, repoRelativePath] = await Promise.all([
+        detectGitContext(),
+        getCurrentBranch(),
+        getLatestCommit(),
+        getRepoRelativePath(),
+      ]);
 
-      if (args["no-browser"]) {
-        consola.log(url);
-        return;
+      const result = resolveUrl(host, args, {
+        context,
+        currentBranch,
+        latestCommit,
+        repoRelativePath,
+      });
+
+      if (!result.ok) {
+        consola.error(result.error);
+        process.exit(1);
       }
 
-      await openUrl(url);
-      consola.info(`Opening ${url} in your browser.`);
+      await openOrPrintUrl(result.url, Boolean(args["no-browser"]), consola);
     },
   }),
   commandUsage,
 );
-
-type BrowseArgs = {
-  target?: string;
-  project?: string;
-  branch?: string;
-  commit?: boolean;
-  issues?: boolean;
-  board?: boolean;
-  gantt?: boolean;
-  wiki?: boolean;
-  documents?: boolean;
-  files?: boolean;
-  git?: boolean;
-  svn?: boolean;
-  settings?: boolean;
-};
-
-const resolveUrl = async (
-  host: string,
-  args: BrowseArgs,
-  gitContext: GitContext | undefined,
-): Promise<string> => {
-  // Issue key target takes priority (e.g. PROJECT-123)
-  if (args.target && ISSUE_KEY_PATTERN.test(args.target)) {
-    return issueUrl(host, args.target);
-  }
-
-  // Bare issue number (e.g. 123) — requires project from git context or --project
-  if (args.target && ISSUE_NUMBER_PATTERN.test(args.target)) {
-    const projectKey = args.project ?? gitContext?.projectKey;
-    if (projectKey) {
-      return issueUrl(host, `${projectKey}-${args.target}`);
-    }
-    consola.error(
-      "Cannot resolve issue number without a project. Use --project or run inside a Backlog repository.",
-    );
-    process.exit(1);
-  }
-
-  // File/directory path target (contains / or . or ends with specific patterns)
-  if (args.target && isFilePath(args.target)) {
-    return resolveFileUrl(host, args, gitContext);
-  }
-
-  // Project section pages require --project or target
-  const projectKey = args.target ?? args.project ?? gitContext?.projectKey;
-
-  if (projectKey) {
-    if (args.issues) {
-      return buildBacklogUrl(host, `/find/${projectKey}`);
-    }
-    if (args.board) {
-      return buildBacklogUrl(host, `/board/${projectKey}`);
-    }
-    if (args.gantt) {
-      return buildBacklogUrl(host, `/gantt/${projectKey}`);
-    }
-    if (args.wiki) {
-      return buildBacklogUrl(host, `/wiki/${projectKey}`);
-    }
-    if (args.documents) {
-      return buildBacklogUrl(host, `/document/${projectKey}`);
-    }
-    if (args.files) {
-      return buildBacklogUrl(host, `/file/${projectKey}`);
-    }
-    if (args.git) {
-      return buildBacklogUrl(host, `/git/${projectKey}`);
-    }
-    if (args.svn) {
-      return buildBacklogUrl(host, `/subversion/${projectKey}`);
-    }
-    if (args.settings) {
-      return buildBacklogUrl(host, `/EditProject.action?project.id=${projectKey}`);
-    }
-  }
-
-  // --branch or --commit without target opens the tree at that ref
-  if (args.branch || args.commit) {
-    return resolveFileUrl(host, args, gitContext);
-  }
-
-  // target is a project key (no section flag)
-  if (args.target) {
-    return projectUrl(host, args.target);
-  }
-
-  // No target: inside a Backlog repo → open repo page; otherwise → dashboard
-  if (gitContext) {
-    return repositoryUrl(host, gitContext.projectKey, gitContext.repoName);
-  }
-
-  return dashboardUrl(host);
-};
-
-const isFilePath = (target: string): boolean => {
-  // Heuristic: contains path separators, file extensions, or line number suffix
-  if (target.includes("/")) {
-    return true;
-  }
-  if (FILE_LINE_PATTERN.test(target)) {
-    return true;
-  }
-  if (target.includes(".") && !ISSUE_KEY_PATTERN.test(target)) {
-    return true;
-  }
-  return false;
-};
-
-const resolveFileUrl = async (
-  host: string,
-  args: BrowseArgs,
-  gitContext: GitContext | undefined,
-): Promise<string> => {
-  if (!gitContext) {
-    consola.error("Not inside a Backlog Git repository. Cannot resolve file path.");
-    process.exit(1);
-  }
-
-  let ref: string;
-  if (args.commit) {
-    const sha = await getLatestCommit();
-    if (!sha) {
-      consola.error("Could not determine the latest commit.");
-      process.exit(1);
-    }
-    // For --commit without target, open the commit page directly
-    if (!args.target) {
-      return gitCommitUrl(host, gitContext.projectKey, gitContext.repoName, sha);
-    }
-    ref = sha;
-  } else if (args.branch) {
-    ref = args.branch;
-  } else {
-    const branch = await getCurrentBranch();
-    ref = branch ?? "main";
-  }
-
-  // No target with --branch: open tree at branch root
-  if (!args.target) {
-    return gitTreeUrl(host, gitContext.projectKey, gitContext.repoName, ref);
-  }
-
-  // Parse line number from target (e.g. src/main.ts:42)
-  const lineMatch = args.target.match(FILE_LINE_PATTERN);
-  const filePath = lineMatch ? lineMatch[1] : args.target;
-  const line = lineMatch ? Number(lineMatch[2]) : undefined;
-
-  // Resolve repo-relative path
-  const prefix = await getRepoRelativePath();
-  const fullPath = prefix ? `${prefix}${filePath}` : filePath;
-  // Normalize: remove trailing slash for blob, keep for tree
-  const isDir = filePath.endsWith("/");
-
-  if (isDir) {
-    return gitTreeUrl(
-      host,
-      gitContext.projectKey,
-      gitContext.repoName,
-      ref,
-      fullPath.replace(/\/$/, ""),
-    );
-  }
-
-  return gitBlobUrl(host, gitContext.projectKey, gitContext.repoName, ref, fullPath, line);
-};
 
 export { commandUsage, browse };

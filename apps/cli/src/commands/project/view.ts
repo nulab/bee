@@ -1,4 +1,4 @@
-import { getClient, openUrl, projectUrl } from "@repo/backlog-utils";
+import { getClient, openOrPrintUrl, projectUrl } from "@repo/backlog-utils";
 import { outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
@@ -34,14 +34,14 @@ const view = withUsage(
       ...outputArgs,
       project: commonArgs.projectPositional,
       web: commonArgs.web("project"),
+      "no-browser": commonArgs.noBrowser,
     },
     async run({ args }) {
       const { client, host } = await getClient();
 
-      if (args.web) {
+      if (args.web || args["no-browser"]) {
         const url = projectUrl(host, args.project);
-        await openUrl(url);
-        consola.info(`Opening ${url} in your browser.`);
+        await openOrPrintUrl(url, Boolean(args["no-browser"]), consola);
         return;
       }
 

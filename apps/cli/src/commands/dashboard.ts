@@ -1,4 +1,4 @@
-import { dashboardUrl, getClient, openUrl } from "@repo/backlog-utils";
+import { dashboardUrl, getClient, openOrPrintUrl } from "@repo/backlog-utils";
 import { type Row, formatDate, outputArgs, outputResult, printTable } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
@@ -33,14 +33,14 @@ const dashboard = withUsage(
     args: {
       ...outputArgs,
       web: commonArgs.web("dashboard"),
+      "no-browser": commonArgs.noBrowser,
     },
     async run({ args }) {
       const { client, host } = await getClient();
 
-      if (args.web) {
+      if (args.web || args["no-browser"]) {
         const url = dashboardUrl(host);
-        await openUrl(url);
-        consola.info(`Opening ${url} in your browser.`);
+        await openOrPrintUrl(url, Boolean(args["no-browser"]), consola);
         return;
       }
 

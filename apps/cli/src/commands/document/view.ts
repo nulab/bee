@@ -1,4 +1,4 @@
-import { documentUrl, getClient, openUrl } from "@repo/backlog-utils";
+import { documentUrl, getClient, openOrPrintUrl } from "@repo/backlog-utils";
 import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
@@ -46,18 +46,18 @@ const view = withUsage(
         description: "Project ID or project key (required for --web)",
       },
       web: commonArgs.web("document"),
+      "no-browser": commonArgs.noBrowser,
     },
     async run({ args }) {
       const { client, host } = await getClient();
 
-      if (args.web) {
+      if (args.web || args["no-browser"]) {
         if (!args.project) {
           consola.error("The --project flag is required when using --web.");
           process.exit(1);
         }
         const url = documentUrl(host, args.project, args.document);
-        await openUrl(url);
-        consola.info(`Opening ${url} in your browser.`);
+        await openOrPrintUrl(url, Boolean(args["no-browser"]), consola);
         return;
       }
 

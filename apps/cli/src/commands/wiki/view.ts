@@ -1,4 +1,4 @@
-import { getClient, openUrl, wikiUrl } from "@repo/backlog-utils";
+import { getClient, openOrPrintUrl, wikiUrl } from "@repo/backlog-utils";
 import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
@@ -39,14 +39,14 @@ const view = withUsage(
         required: true,
       },
       web: commonArgs.web("wiki page"),
+      "no-browser": commonArgs.noBrowser,
     },
     async run({ args }) {
       const { client, host } = await getClient();
 
-      if (args.web) {
+      if (args.web || args["no-browser"]) {
         const url = wikiUrl(host, Number(args.wiki));
-        await openUrl(url);
-        consola.info(`Opening ${url} in your browser.`);
+        await openOrPrintUrl(url, Boolean(args["no-browser"]), consola);
         return;
       }
 
