@@ -4,41 +4,46 @@ description: bee — Backlog をターミナルから操作するコマンドラ
 template: splash
 hero:
   tagline: "ターミナルから Backlog のプロジェクトを管理しよう"
+  image:
+    html: |
+      <pre style="color:var(--sl-color-accent);font-family:var(--__sl-font-mono);font-size:clamp(0.4rem,0.95vw,0.7rem);line-height:1.0;user-select:none;white-space:pre" aria-hidden="true">⠀⠀⠀⠀⠀⠀⠀⠀⠀⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠄
+      ⠀⠀⠀⠀⠀⠀⠀⠀⠾⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠷
+      ⠀⠀⠀⠀⠀⠀⠀⠼⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠧
+      ⠀⠀⠀⠀⠀⠀⠴⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠦
+      ⠀⠀⠀⠀⠀⠰⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠆
+      ⠀⠀⠀⠀⠠⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠄
+      ⠀⠀⠀⠠⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠛⠛⠛⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠄
+      ⠀⠀⠀⠾⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠀⠀⠀⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠷
+      ⠀⠀⠼⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠀⠀⠀⠛⠛⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠧
+      ⠀⠼⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠀⠀⠀⠀⠀⠀⠈⠙⠻⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠧
+      ⠰⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠦
+      ⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠀⠀⠀⠿⠿⠷⠦⠀⠀⠀⠀⠻⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠆
+      ⠾⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠀⠀⠀⠿⠿⠿⠿⠿⠄⠀⠀⠈⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠟
+      ⠘⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠀⠀⠀⠿⠿⠿⠿⠿⠇⠀⠀⠀⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠃
+      ⠀⠙⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠀⠀⠀⠿⠿⠿⠿⠿⠃⠀⠀⠠⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠃
+      ⠀⠀⠹⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠀⠀⠀⠿⠿⠟⠋⠁⠀⠀⠀⠼⠿⠿⠿⠿⠿⠿⠿⠿⠿⠏
+      ⠀⠀⠀⠻⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⠾⠿⠿⠿⠿⠿⠿⠿⠿⠿⠏
+      ⠀⠀⠀⠀⠻⠿⠿⠿⠿⠿⠿⠿⠿⠿⠀⠀⠀⠀⠀⠀⠀⠠⠴⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠟
+      ⠀⠀⠀⠀⠈⠿⠿⠿⠿⠿⠿⠿⠿⠿⠷⠶⠶⠶⠶⠾⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠁
+      ⠀⠀⠀⠀⠀⠈⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠁
+      ⠀⠀⠀⠀⠀⠀⠘⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠃
+      ⠀⠀⠀⠀⠀⠀⠀⠙⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠋
+      ⠀⠀⠀⠀⠀⠀⠀⠀⠹⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠏
+      ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠟
+      ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉</pre>
   actions:
     - text: はじめに
       link: /guides/getting-started/
       icon: right-arrow
+    - text: GitHub
+      link: https://github.com/nulab/backlog-cli
+      icon: github
+      variant: secondary
+      attrs:
+        target: _blank
 ---
 
-import { Card, CardGrid } from "@astrojs/starlight/components";
+import InstallCommand from "../../components/InstallCommand.astro";
 
-## bee でできること
+<InstallCommand />
 
-<CardGrid>
-  <Card title="課題管理" icon="document">
-    課題の一覧表示、作成、編集、クローズをコマンドラインから実行できます。
-  </Card>
-  <Card title="プルリクエスト" icon="random">
-    PR の作成やレビュー、マージ操作をターミナルから行えます。
-  </Card>
-  <Card title="JSON 出力" icon="seti:json">
-    `--json` フラグですべてのデータを JSON で取得。jq やスクリプトとの連携に最適です。
-  </Card>
-  <Card title="CI/CD・AI 連携" icon="setting">
-    環境変数による認証で、GitHub Actions や AI エージェントからの操作にも対応しています。
-  </Card>
-</CardGrid>
-
-```sh
-# 課題の一覧表示
-bee issue list --project MY_PROJECT
-
-# 課題を対話的に作成
-bee issue create
-
-# プルリクエストの一覧
-bee pr list --project MY_PROJECT --repo my-repo
-
-# JSON でデータを取得して jq で加工
-bee issue list --project MY_PROJECT --json | jq '.[].summary'
-```

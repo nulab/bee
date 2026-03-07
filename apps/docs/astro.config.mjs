@@ -9,6 +9,11 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "Backlog CLI",
+      logo: {
+        src: "./src/assets/title.svg",
+        alt: "Backlog CLI",
+        replacesTitle: true,
+      },
       favicon: "/favicon.svg",
       customCss: ["./src/theme.css"],
       defaultLocale: "ja",
