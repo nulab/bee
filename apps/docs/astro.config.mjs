@@ -28,6 +28,11 @@ export default defineConfig({
           label: "npm",
           href: "https://www.npmjs.com/package/@nulab/bee",
         },
+        {
+          icon: "open-book",
+          label: "Backlog API",
+          href: "https://developer.nulab.com/ja/docs/backlog/",
+        },
       ],
       sidebar: [
         {
