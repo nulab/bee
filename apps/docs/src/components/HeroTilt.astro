@@ -1,0 +1,61 @@
+<!--
+  Persona-menu-style 3D tilt effect for the hero logo.
+  Applies CSS 3D transforms directly to .hero img — no wrapping needed.
+-->
+<style>
+  @media (prefers-reduced-motion: no-preference) and (pointer: fine) {
+    :global(.hero img) {
+      transition: transform 0.3s ease-out, filter 0.3s ease-out;
+      will-change: transform, filter;
+    }
+  }
+</style>
+
+<script>
+  const isDev = import.meta.env.DEV;
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const isTouch = window.matchMedia("(pointer: coarse)").matches;
+
+  if (isDev || (!prefersReduced && !isTouch)) {
+    const img = document.querySelector<HTMLImageElement>(".hero img");
+    if (img) {
+      // Left-bottom is nearest: positive rotateX (top tilts back), negative rotateY (right tilts back)
+      const BASE_RX = 10;
+      const BASE_RY = -14;
+      const MAX_TILT = 20;
+
+      const applyTransform = (rx: number, ry: number) => {
+        const shadowX = ry * -0.6;
+        const shadowY = rx * 0.6;
+        const shadowBlur = 10 + (Math.abs(rx) + Math.abs(ry)) * 0.2;
+        img.style.transform = `perspective(500px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02, 1.02, 1)`;
+        img.style.filter = `drop-shadow(${shadowX}px ${shadowY}px ${shadowBlur}px rgba(0, 0, 0, 0.35))`;
+      };
+
+      applyTransform(BASE_RX, BASE_RY);
+
+      document.addEventListener("mousemove", (e) => {
+        const rect = img.getBoundingClientRect();
+        const imgCx = rect.left + rect.width / 2;
+        const imgCy = rect.top + rect.height / 2;
+
+        const dx = e.clientX - imgCx;
+        const dy = e.clientY - imgCy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Attenuation: closer to icon = stronger effect, farther = weaker
+        // Uses a sigmoid-like falloff so influence fades smoothly with distance
+        const radius = Math.max(rect.width, rect.height);
+        const influence = 1 / (1 + (dist / radius) ** 2);
+
+        const nx = dx / (window.innerWidth / 2);
+        const ny = dy / (window.innerHeight / 2);
+
+        const ry = BASE_RY + nx * MAX_TILT * influence;
+        const rx = BASE_RX - ny * MAX_TILT * influence;
+
+        applyTransform(rx, ry);
+      });
+    }
+  }
+</script>
