@@ -147,6 +147,9 @@ vite.config.ts.timestamp-*
 # Claude Code plans
 .claude/plans/
 
+# Git worktrees
+.worktrees/
+
 # Lefthook local overrides
 lefthook-local.yml
 
