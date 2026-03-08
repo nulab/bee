@@ -69,7 +69,16 @@ will remain unchanged.`,
     let statusId: number | undefined;
     if (opts.status) {
       const projectKey = issue.includes("-") ? issue.split("-")[0] : undefined;
-      statusId = await resolveStatusId(client, opts.status, projectKey);
+      if (projectKey) {
+        statusId = await resolveStatusId(client, opts.status, projectKey);
+      } else {
+        statusId = Number(opts.status);
+        if (Number.isNaN(statusId)) {
+          throw new Error(
+            "Status name requires an issue key (e.g. PROJECT-123), not a numeric ID.",
+          );
+        }
+      }
     }
 
     const issueData = await client.patchIssue(issue, {

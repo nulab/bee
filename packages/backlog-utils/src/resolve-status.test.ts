@@ -8,70 +8,59 @@ const createMockClient = (statuses: { id: number; name: string }[] = []) =>
   }) as unknown as Backlog;
 
 describe("resolveStatusId", () => {
-  it("returns numeric ID as-is", async () => {
+  it("returns numeric ID as-is without calling API", async () => {
     const client = createMockClient();
-    expect(await resolveStatusId(client, "3")).toBe(3);
+    expect(await resolveStatusId(client, "3", "PROJECT")).toBe(3);
     expect(client.getProjectStatuses).not.toHaveBeenCalled();
   });
 
-  it("resolves built-in status name 'open'", async () => {
-    const client = createMockClient();
-    expect(await resolveStatusId(client, "open")).toBe(1);
+  it("resolves status name via project API (English)", async () => {
+    const client = createMockClient([
+      { id: 1, name: "Open" },
+      { id: 2, name: "In Progress" },
+      { id: 3, name: "Resolved" },
+      { id: 4, name: "Closed" },
+    ]);
+    expect(await resolveStatusId(client, "Open", "PROJECT")).toBe(1);
+    expect(await resolveStatusId(client, "Closed", "PROJECT")).toBe(4);
+    expect(client.getProjectStatuses).toHaveBeenCalledWith("PROJECT");
   });
 
-  it("resolves built-in status name 'in-progress'", async () => {
-    const client = createMockClient();
-    expect(await resolveStatusId(client, "in-progress")).toBe(2);
+  it("resolves status name via project API (Japanese)", async () => {
+    const client = createMockClient([
+      { id: 1, name: "未着手" },
+      { id: 2, name: "処理中" },
+      { id: 3, name: "処理済み" },
+      { id: 4, name: "完了" },
+    ]);
+    expect(await resolveStatusId(client, "未着手", "PROJECT")).toBe(1);
+    expect(await resolveStatusId(client, "完了", "PROJECT")).toBe(4);
   });
 
-  it("resolves built-in status name 'inprogress'", async () => {
-    const client = createMockClient();
-    expect(await resolveStatusId(client, "inprogress")).toBe(2);
-  });
-
-  it("resolves built-in status name 'resolved'", async () => {
-    const client = createMockClient();
-    expect(await resolveStatusId(client, "resolved")).toBe(3);
-  });
-
-  it("resolves built-in status name 'closed'", async () => {
-    const client = createMockClient();
-    expect(await resolveStatusId(client, "closed")).toBe(4);
-  });
-
-  it("is case-insensitive for built-in names", async () => {
-    const client = createMockClient();
-    expect(await resolveStatusId(client, "Open")).toBe(1);
-    expect(await resolveStatusId(client, "CLOSED")).toBe(4);
-    expect(await resolveStatusId(client, "In-Progress")).toBe(2);
+  it("is case-insensitive for name matching", async () => {
+    const client = createMockClient([
+      { id: 1, name: "Open" },
+      { id: 4, name: "Closed" },
+    ]);
+    expect(await resolveStatusId(client, "open", "PROJECT")).toBe(1);
+    expect(await resolveStatusId(client, "CLOSED", "PROJECT")).toBe(4);
   });
 
   it("resolves custom project status by name", async () => {
     const client = createMockClient([
       { id: 1, name: "Open" },
-      { id: 2, name: "In Progress" },
       { id: 1000, name: "Reviewing" },
     ]);
     expect(await resolveStatusId(client, "Reviewing", "PROJECT")).toBe(1000);
-    expect(client.getProjectStatuses).toHaveBeenCalledWith("PROJECT");
   });
 
-  it("is case-insensitive for custom status names", async () => {
-    const client = createMockClient([{ id: 1000, name: "Reviewing" }]);
-    expect(await resolveStatusId(client, "reviewing", "PROJECT")).toBe(1000);
-  });
-
-  it("throws for unknown status without project", async () => {
-    const client = createMockClient();
-    await expect(resolveStatusId(client, "unknown")).rejects.toThrow(
-      'Unknown status "unknown". Built-in values: open, in-progress, resolved, closed',
-    );
-  });
-
-  it("throws for unknown status with project", async () => {
-    const client = createMockClient([{ id: 1, name: "Open" }]);
+  it("throws with available statuses when name not found", async () => {
+    const client = createMockClient([
+      { id: 1, name: "Open" },
+      { id: 4, name: "Closed" },
+    ]);
     await expect(resolveStatusId(client, "unknown", "PROJECT")).rejects.toThrow(
-      "No matching custom status found in the project either",
+      'Unknown status "unknown". Available statuses: Open, Closed',
     );
   });
 });

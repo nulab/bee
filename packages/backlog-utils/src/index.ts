@@ -2,9 +2,7 @@ export { formatBacklogError, handleBacklogApiError, isBacklogErrorResponse } fro
 export type { BacklogErrorResponse } from "./api-error";
 export { ACTIVITY_LABELS } from "./activity-labels";
 export {
-  ISSUE_STATUS_NAMES,
   IssueStatusId,
-  IssueStatusName,
   PRIORITY_NAMES,
   PriorityId,
   RESOLUTION_NAMES,

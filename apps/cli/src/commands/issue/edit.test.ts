@@ -109,18 +109,6 @@ describe("issue edit", () => {
     }, "TEST-1");
   });
 
-  it("resolves status by name", async () => {
-    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
-
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["TEST-1", "--status", "closed"], { from: "user" });
-
-    expect(mockClient.patchIssue).toHaveBeenCalledWith(
-      "TEST-1",
-      expect.objectContaining({ statusId: 4 }),
-    );
-  });
-
   it("resolves status by numeric ID", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
@@ -133,17 +121,20 @@ describe("issue edit", () => {
     );
   });
 
-  it("resolves custom project status by name", async () => {
+  it("resolves status by name via project API", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
-    mockClient.getProjectStatuses.mockResolvedValue([{ id: 1000, name: "Reviewing" }]);
+    mockClient.getProjectStatuses.mockResolvedValue([
+      { id: 1, name: "未着手" },
+      { id: 4, name: "完了" },
+    ]);
 
     const { default: edit } = await import("./edit");
-    await edit.parseAsync(["TEST-1", "--status", "Reviewing"], { from: "user" });
+    await edit.parseAsync(["TEST-1", "--status", "完了"], { from: "user" });
 
     expect(mockClient.getProjectStatuses).toHaveBeenCalledWith("TEST");
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
-      expect.objectContaining({ statusId: 1000 }),
+      expect.objectContaining({ statusId: 4 }),
     );
   });
 

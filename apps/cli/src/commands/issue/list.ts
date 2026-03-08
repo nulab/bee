@@ -83,9 +83,18 @@ Multiple project keys can be specified as a comma-separated list.`,
     const assigneeId = await Promise.all(
       (opts.assignee ?? []).map((id: string) => resolveUserId(client, id)),
     );
-    const projectForStatus = opts.project?.split(",")[0]?.trim() || undefined;
+    const projectForStatus = opts.project?.split(",")[0]?.trim();
     const statusId: number[] = await Promise.all(
-      opts.status.map((s: string) => resolveStatusId(client, s, projectForStatus)),
+      opts.status.map((s: string) => {
+        if (projectForStatus) {
+          return resolveStatusId(client, s, projectForStatus);
+        }
+        const n = Number(s);
+        if (Number.isNaN(n)) {
+          throw new Error("Status name requires --project (-p) to be specified.");
+        }
+        return n;
+      }),
     );
     const priorityId = opts.priority.length > 0 ? resolvePriorityIds(opts.priority) : [];
 

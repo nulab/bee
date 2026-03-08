@@ -1,43 +1,33 @@
 import { type Backlog } from "backlog-js";
-import { ISSUE_STATUS_NAMES, IssueStatusName } from "./issue-constants";
 
 /**
  * Resolve a status value (name or numeric ID) to a numeric status ID.
  *
- * Lookup order:
- * 1. Parse as number — return as-is if valid
- * 2. Match against built-in status names (open, in-progress, resolved, closed)
- * 3. Fetch project statuses and match by name (case-insensitive)
+ * - Numeric strings are treated as IDs and returned as-is.
+ * - Non-numeric strings are looked up by name (case-insensitive) against the
+ *   project's status list fetched from the API.  This covers both built-in
+ *   statuses (whose display names depend on the project language, e.g. "Open"
+ *   vs "未着手") and custom statuses.
  */
 export const resolveStatusId = async (
   client: Backlog,
   value: string,
-  projectIdOrKey?: string,
+  projectIdOrKey: string,
 ): Promise<number> => {
-  // 1. Numeric ID
+  // Numeric ID — return as-is
   const asNumber = Number(value);
   if (!Number.isNaN(asNumber) && String(asNumber) === value) {
     return asNumber;
   }
 
-  // 2. Built-in status name
+  // Name lookup via API
+  const statuses = await client.getProjectStatuses(projectIdOrKey);
   const lower = value.toLowerCase();
-  const builtIn = IssueStatusName[lower];
-  if (builtIn !== undefined) {
-    return builtIn;
+  const match = statuses.find((s) => s.name.toLowerCase() === lower);
+  if (match) {
+    return match.id;
   }
 
-  // 3. Project custom status (requires project context)
-  if (projectIdOrKey) {
-    const statuses = await client.getProjectStatuses(projectIdOrKey);
-    const match = statuses.find((s) => s.name.toLowerCase() === lower);
-    if (match) {
-      return match.id;
-    }
-  }
-
-  const suffix = projectIdOrKey ? ". No matching custom status found in the project either." : "";
-  throw new Error(
-    `Unknown status "${value}". Built-in values: ${ISSUE_STATUS_NAMES.join(", ")}${suffix}`,
-  );
+  const known = statuses.map((s) => s.name).join(", ");
+  throw new Error(`Unknown status "${value}". Available statuses: ${known}`);
 };
