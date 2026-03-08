@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   patchWebhook: vi.fn(),
@@ -64,14 +65,11 @@ describe("webhook edit", () => {
   it("outputs JSON when --json flag is set", async () => {
     mockClient.patchWebhook.mockResolvedValue({ id: 1, name: "Hook" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: { webhook: "1", project: "TEST", name: "Hook", json: "" },
-    } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Hook"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { edit } = await import("./edit");
+      await edit.run?.({
+        args: { webhook: "1", project: "TEST", name: "Hook", json: "" },
+      } as never);
+    }, "Hook");
   });
 });

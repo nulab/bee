@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   get: vi.fn(),
@@ -18,14 +19,12 @@ describe("api", () => {
   it("makes GET request by default", async () => {
     mockClient.get.mockResolvedValue({ id: 1, name: "test" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    await expectStdoutContaining(async () => {
+      const { api } = await import("./api");
+      await api.run?.({ args: { endpoint: "/users/myself" } } as never);
 
-    const { api } = await import("./api");
-    await api.run?.({ args: { endpoint: "/users/myself" } } as never);
-
-    expect(mockClient.get).toHaveBeenCalledWith("/users/myself", {});
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining('"name"'));
-    writeSpy.mockRestore();
+      expect(mockClient.get).toHaveBeenCalledWith("/users/myself", {});
+    }, '"name"');
   });
 
   it("normalizes endpoint with /api/v2 prefix", async () => {

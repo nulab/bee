@@ -1,6 +1,7 @@
 import { printTable } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getIssueAttachments: vi.fn(),
@@ -55,10 +56,9 @@ describe("issue attachments", () => {
         created: "2025-01-01T00:00:00Z",
       },
     ]);
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-    const { attachments } = await import("./attachments");
-    await attachments.run?.({ args: { issue: "TEST-1", json: "" } } as never);
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("file.png"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { attachments } = await import("./attachments");
+      await attachments.run?.({ args: { issue: "TEST-1", json: "" } } as never);
+    }, "file.png");
   });
 });

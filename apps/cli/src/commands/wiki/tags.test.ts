@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getWikisTags: vi.fn(),
@@ -40,12 +41,9 @@ describe("wiki tags", () => {
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getWikisTags.mockResolvedValue([{ id: 1, name: "guide" }]);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { tags } = await import("./tags");
-    await tags.run?.({ args: { project: "TEST", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("guide"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { tags } = await import("./tags");
+      await tags.run?.({ args: { project: "TEST", json: "" } } as never);
+    }, "guide");
   });
 });

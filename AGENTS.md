@@ -297,6 +297,7 @@ All list commands use the pattern: `consola.info("No <plural> found.")` (e.g., `
 - **Mock at package boundaries** — mock entire packages (`@repo/backlog-utils`, `@repo/config`, etc.), not internal functions. Each package is independently tested; CLI command tests trust the package interface.
 - **CLI command tests verify side-effect composition** — assert which functions were called, in what order, and with what arguments. Actual network I/O and file I/O belong in package-level or E2E tests.
 - **Cover both happy path and error paths** — each command should have tests for success, auth/config failures, and edge cases (e.g., empty state, already-existing resources).
+- **Error path tests must exercise actual branching logic** — test explicit `throw`, `consola.error()`, or early `return` branches in the implementation. Do not write tests that only verify default error propagation (e.g., testing that an `await` without `try/catch` propagates a rejection is testing JavaScript, not the command).
 - **Extract shared mock setup into helper functions** — when multiple tests in the same `describe` need the same mock state, use a named setup function (e.g., `setupOAuthMocks()`).
 
 ## Code Conventions (enforced by oxlint)

@@ -1,6 +1,7 @@
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   deleteCategories: vi.fn(),
@@ -40,7 +41,10 @@ describe("category delete", () => {
     const { deleteCategory } = await import("./delete");
     await deleteCategory.run?.({ args: { category: "1", project: "TEST", yes: true } } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete category 1? This cannot be undone.",
+      true,
+    );
   });
 
   it("cancels when user declines confirmation", async () => {
@@ -56,14 +60,11 @@ describe("category delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteCategories.mockResolvedValue({ id: 1, name: "Bug" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { deleteCategory } = await import("./delete");
-    await deleteCategory.run?.({
-      args: { category: "1", project: "TEST", yes: true, json: "" },
-    } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Bug"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { deleteCategory } = await import("./delete");
+      await deleteCategory.run?.({
+        args: { category: "1", project: "TEST", yes: true, json: "" },
+      } as never);
+    }, "Bug");
   });
 });

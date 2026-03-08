@@ -1,6 +1,7 @@
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   deleteWebhook: vi.fn(),
@@ -40,7 +41,10 @@ describe("webhook delete", () => {
     const { deleteWebhook } = await import("./delete");
     await deleteWebhook.run?.({ args: { webhook: "1", project: "TEST", yes: true } } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete webhook 1? This cannot be undone.",
+      true,
+    );
   });
 
   it("cancels when user declines confirmation", async () => {
@@ -56,14 +60,11 @@ describe("webhook delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteWebhook.mockResolvedValue({ id: 1, name: "Deploy Hook" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { deleteWebhook } = await import("./delete");
-    await deleteWebhook.run?.({
-      args: { webhook: "1", project: "TEST", yes: true, json: "" },
-    } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Deploy Hook"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { deleteWebhook } = await import("./delete");
+      await deleteWebhook.run?.({
+        args: { webhook: "1", project: "TEST", yes: true, json: "" },
+      } as never);
+    }, "Deploy Hook");
   });
 });

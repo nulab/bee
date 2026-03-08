@@ -3,7 +3,11 @@
   Applies CSS 3D transforms directly to .hero img — no wrapping needed.
 -->
 <style>
-  @media (prefers-reduced-motion: no-preference) and (pointer: fine) {
+  :global(.hero img) {
+    transform: perspective(500px) rotateX(10deg) rotateY(-14deg) scale3d(1.02, 1.02, 1);
+    filter: drop-shadow(4.2px 3px 8.4px rgba(0, 0, 0, 0.15));
+  }
+  @media (pointer: fine) {
     :global(.hero img) {
       transition: transform 0.3s ease-out, filter 0.3s ease-out;
       will-change: transform, filter;
@@ -13,10 +17,9 @@
 
 <script>
   const isDev = import.meta.env.DEV;
-  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const isTouch = window.matchMedia("(pointer: coarse)").matches;
 
-  if (isDev || (!prefersReduced && !isTouch)) {
+  if (isDev || !isTouch) {
     const img = document.querySelector<HTMLImageElement>(".hero img");
     if (img) {
       // Left-bottom is nearest: positive rotateX (top tilts back), negative rotateY (right tilts back)
@@ -31,8 +34,6 @@
         img.style.transform = `perspective(500px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02, 1.02, 1)`;
         img.style.filter = `drop-shadow(${shadowX}px ${shadowY}px ${shadowBlur}px rgba(0, 0, 0, 0.15))`;
       };
-
-      applyTransform(BASE_RX, BASE_RY);
 
       document.addEventListener("mousemove", (e) => {
         const rect = img.getBoundingClientRect();
@@ -55,6 +56,10 @@
         const rx = BASE_RX - ny * MAX_TILT * influence;
 
         applyTransform(rx, ry);
+      });
+
+      document.addEventListener("mouseleave", () => {
+        applyTransform(BASE_RX, BASE_RY);
       });
     }
   }
