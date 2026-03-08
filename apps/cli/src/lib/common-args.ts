@@ -30,19 +30,19 @@ const project = {
 };
 
 const projectPositional = {
-  type: "positional" as const,
+  type: "positional",
   description: "Project ID or project key",
   required: true,
   default: process.env.BACKLOG_PROJECT,
-};
+} as const;
 
 const repo = {
-  type: "string" as const,
+  type: "string",
   alias: "R",
   description: "Repository name or ID",
   default: process.env.BACKLOG_REPO,
   required: true,
-};
+} as const;
 
 // ---------------------------------------------------------------------------
 // Pagination
