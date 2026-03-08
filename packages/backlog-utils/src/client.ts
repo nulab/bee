@@ -160,7 +160,7 @@ const handleRateLimitError = (error: unknown): void => {
   if (error instanceof BacklogErrors.BacklogApiError && error.status === 429) {
     const resetEpoch = error.response.headers.get("X-RateLimit-Reset");
     const resetMessage = resetEpoch
-      ? `Rate limit resets at ${formatResetTime(Number(resetEpoch))}.`
+      ? `Rate limit resets at ${formatResetTime(Number(resetEpoch))} (X-RateLimit-Reset: ${resetEpoch}).`
       : "Please wait and try again later.";
     throw new UserError(`API rate limit exceeded. ${resetMessage}`);
   }
