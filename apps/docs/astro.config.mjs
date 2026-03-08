@@ -23,6 +23,14 @@ export default defineConfig({
       },
       head: [
         {
+          tag: "meta",
+          attrs: { property: "og:image", content: "https://nulab.github.io/bee/og-image.png" },
+        },
+        {
+          tag: "meta",
+          attrs: { name: "twitter:card", content: "summary" },
+        },
+        {
           tag: "link",
           attrs: {
             rel: "alternate",
