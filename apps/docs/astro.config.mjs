@@ -95,7 +95,7 @@ export default defineConfig({
           label: "Recipes",
           items: [
             {
-              label: "GitHub Issues のように PR と課題を連動させる",
+              label: "Pull Request と課題を連動させる",
               slug: "recipes/pr-lifecycle-sync",
             },
             {

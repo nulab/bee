@@ -1,5 +1,11 @@
 import { type CommandEntry, buildFlagParts, buildUsageLine, loadCommands } from "./commands";
 
+const docFiles = import.meta.glob<string>("../content/docs/**/*.mdx", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+});
+
 const HEADER = `# bee
 
 bee is a command-line tool for interacting with [Backlog](https://backlog.com/) project management.
@@ -84,80 +90,58 @@ const renderCommandMarkdown = (entry: CommandEntry): string => {
   return lines.join("\n");
 };
 
-type Category = "core" | "project-management" | "config" | "additional";
-
-const CATEGORY_MAP: Record<string, Category> = {
-  // Core commands — main Backlog features + authentication
-  auth: "core",
-  issue: "core",
-  pr: "core",
-  wiki: "core",
-  document: "core",
-  notification: "core",
-  star: "core",
-  watching: "core",
-  dashboard: "core",
-  browse: "core",
-  // Project management — space, project & team administration
-  project: "project-management",
-  space: "project-management",
-  repo: "project-management",
-  team: "project-management",
-  user: "project-management",
-  // Config — Backlog project settings
-  category: "config",
-  milestone: "config",
-  "issue-type": "config",
-  status: "config",
-  // Additional commands — CLI utilities
-  api: "additional",
-  completion: "additional",
-};
-
-const SECTIONS: { category: Category; heading: string }[] = [
-  { category: "core", heading: "Core commands" },
-  { category: "project-management", heading: "Project management" },
-  { category: "config", heading: "Config" },
-  { category: "additional", heading: "Additional commands" },
-];
-
-const categoryOf = (entry: CommandEntry): Category =>
-  CATEGORY_MAP[entry.parent || entry.name] ?? "additional";
-
 const buildLlmsTxt = async (siteUrl: string): Promise<string> => {
   const commands = await loadCommands();
   const lines: string[] = [HEADER];
 
   lines.push("## Docs");
   lines.push("");
-  lines.push(`- [Getting Started](${siteUrl}/getting-started.md): Installation and basic usage`);
   lines.push(
-    `- [Full documentation](${siteUrl}/llms-full.txt): Complete command reference in a single file`,
+    `- [Full documentation](${siteUrl}/llms-full.txt): Complete reference in a single file`,
   );
+  for (const slug of docSlugs) {
+    const raw = docFiles[`${PREFIX}${slug}.mdx`];
+    const titleMatch = raw.match(/^title:\s*(.+)$/m);
+    const title = titleMatch?.[1] ?? slug;
+    lines.push(`- [${title}](${siteUrl}/${slug}.md)`);
+  }
   lines.push("");
 
   lines.push("## Commands");
   lines.push("");
-
-  for (const { category, heading } of SECTIONS) {
-    const entries = commands.filter((e) => categoryOf(e) === category);
-    if (entries.length === 0) {
-      continue;
-    }
-    lines.push(`### ${heading}`);
-    lines.push("");
-    for (const entry of entries) {
-      lines.push(`- [${entry.title}](${siteUrl}/commands/${entry.id}.md): ${entry.description}`);
-    }
-    lines.push("");
+  for (const entry of commands) {
+    lines.push(`- [${entry.title}](${siteUrl}/commands/${entry.id}.md): ${entry.description}`);
   }
+  lines.push("");
 
   return lines.join("\n");
+};
+
+const PREFIX = "../content/docs/";
+
+const docSlugs = Object.keys(docFiles)
+  .filter((key) => !key.endsWith("/index.mdx"))
+  .map((key) => key.slice(PREFIX.length).replace(/\.mdx$/, ""));
+
+const renderDocPage = (slug: string): string => {
+  const raw = docFiles[`${PREFIX}${slug}.mdx`];
+  const body = raw.replace(/^---[\s\S]*?---\s*/, "");
+  const titleMatch = raw.match(/^title:\s*(.+)$/m);
+  const title = titleMatch?.[1] ?? slug;
+  return `## ${title}\n\n${body.trim()}`;
 };
 
 const buildLlmsFullTxt = async (): Promise<string> => {
   const commands = await loadCommands();
   const lines: string[] = [HEADER];
+
+  for (const slug of docSlugs) {
+    lines.push(renderDocPage(slug));
+    lines.push("");
+  }
+
+  lines.push("# Command reference");
+  lines.push("");
 
   for (const entry of commands) {
     lines.push(renderCommandMarkdown(entry));
