@@ -4,7 +4,7 @@ description: |-
   bee CLI のインストールから Backlog への初回ログイン、課題の一覧・作成まで。Node.js 20 以上が必要です。
 ---
 
-import { Tabs, TabItem, Steps, Aside, LinkCard, CardGrid } from "@astrojs/starlight/components";
+import { Tabs, TabItem, Steps, LinkCard } from "@astrojs/starlight/components";
 
 bee は、[Backlog](https://backlog.com/) をターミナルから操作するためのコマンドラインツールです。課題の管理、プルリクエスト、ドキュメント、通知など、Backlog の主要な機能をコマンドラインから利用できます。
 
@@ -73,10 +73,6 @@ bee --version
    bee issue list --project YOUR_PROJECT
    ```
 
-   :::tip
-   プロジェクトキーは Backlog のプロジェクト URL に含まれています（例: `https://xxx.backlog.com/projects/MY_PROJECT` の `MY_PROJECT` 部分）。
-   :::
-
 3. **課題を作成する**
 
    対話形式で新しい課題を作成します。プロジェクト、課題種別、優先度などを順番に選択できます。
@@ -92,15 +88,6 @@ bee --version
    ```
 
 </Steps>
-
-## 次のステップ
-
-<CardGrid>
-  <LinkCard title="認証" href="../guides/authentication/" description="OAuth や API キーなど、認証方法の詳細を確認する" />
-  <LinkCard title="環境変数" href="../guides/environment-variables/" description="環境変数でデフォルトのプロジェクトなどを設定する" />
-  <LinkCard title="出力フォーマット" href="../guides/output-formatting/" description="JSON 出力やテーブル表示のカスタマイズ方法" />
-  <LinkCard title="シェル補完" href="../guides/shell-completion/" description="タブ補完を設定してコマンド入力を効率化する" />
-</CardGrid>
 
 ## アンインストール
 
@@ -128,3 +115,10 @@ bee --version
     ```
   </TabItem>
 </Tabs>
+
+## 次のステップ
+
+<LinkCard title="🔑 認証" href="../guides/authentication/" description="OAuth や API キーなど、認証方法の詳細を確認する" />
+<LinkCard title="⚙️ 環境変数" href="../guides/environment-variables/" description="環境変数でデフォルトのプロジェクトなどを設定する" />
+<LinkCard title="🔄 CI/CD" href="../integrations/ci-cd/" description="GitHub Actions などの CI/CD パイプラインとの連携" />
+<LinkCard title="🤖 AI エージェント" href="../integrations/ai-agent/" description="Claude Code や GitHub Copilot など AI エージェントとの連携" />
