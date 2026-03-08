@@ -36,8 +36,8 @@ export const resolveStatusId = async (
     }
   }
 
+  const suffix = projectIdOrKey ? ". No matching custom status found in the project either." : "";
   throw new Error(
-    `Unknown status "${value}". Built-in values: ${ISSUE_STATUS_NAMES.join(", ")}` +
-      (projectIdOrKey ? ". No matching custom status found in the project either." : ""),
+    `Unknown status "${value}". Built-in values: ${ISSUE_STATUS_NAMES.join(", ")}${suffix}`,
   );
 };
