@@ -1,17 +1,25 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, resolveStdinArg } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Update an existing Backlog wiki page.
+const edit = new BeeCommand("edit")
+  .summary("Edit a wiki page")
+  .description(
+    `Update an existing Backlog wiki page.
 
 Only the specified fields will be updated. Fields that are not provided
 will remain unchanged. When input is piped, it is used as the body
 automatically.`,
-
-  examples: [
+  )
+  .argument("<wiki>", "Wiki page ID")
+  .option("-n, --name <name>", "New name of the wiki page")
+  .option("-b, --body <text>", "New content of the wiki page")
+  .option("--mail-notify", "Send notification email")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     {
       description: "Update wiki page name",
       command: 'bee wiki edit 12345 -n "New Name"',
@@ -24,59 +32,21 @@ automatically.`,
       description: "Update body from stdin",
       command: 'echo "New content" | bee wiki edit 12345',
     },
-  ],
+  ])
+  .action(async (wiki, opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const content = await resolveStdinArg(opts.body);
 
-const edit = withUsage(
-  defineCommand({
-    meta: {
-      name: "edit",
-      description: "Edit a wiki page",
-    },
-    args: {
-      ...outputArgs,
-      wiki: {
-        type: "positional",
-        description: "Wiki page ID",
-        valueHint: "<number>",
-        required: true,
-      },
-      name: {
-        type: "string",
-        alias: "n",
-        description: "New name of the wiki page",
-      },
-      body: {
-        type: "string",
-        alias: "b",
-        description: "New content of the wiki page",
-      },
-      "mail-notify": {
-        type: "boolean",
-        description: "Send notification email",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const wikiData = await client.patchWiki(Number(wiki), {
+      name: opts.name,
+      content,
+      mailNotify: opts.mailNotify,
+    });
 
-      const content = await resolveStdinArg(args.body);
+    outputResult(wikiData, opts, (data) => {
+      consola.success(`Updated wiki page ${data.id}: ${data.name}`);
+    });
+  });
 
-      const wiki = await client.patchWiki(Number(args.wiki), {
-        name: args.name,
-        content,
-        mailNotify: args["mail-notify"],
-      });
-
-      outputResult(wiki, args, (data) => {
-        consola.success(`Updated wiki page ${data.id}: ${data.name}`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, edit };
+export default edit;

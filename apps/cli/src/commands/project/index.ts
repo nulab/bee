@@ -1,19 +1,17 @@
-import { defineCommand } from "citty";
+import { BeeCommand } from "../../lib/bee-command";
 
-export const project = defineCommand({
-  meta: {
-    name: "project",
-    description: "Manage Backlog projects",
-  },
-  subCommands: {
-    list: () => import("./list").then((m) => m.list),
-    view: () => import("./view").then((m) => m.view),
-    create: () => import("./create").then((m) => m.create),
-    edit: () => import("./edit").then((m) => m.edit),
-    delete: () => import("./delete").then((m) => m.deleteProject),
-    users: () => import("./users").then((m) => m.users),
-    activities: () => import("./activities").then((m) => m.activities),
-    "add-user": () => import("./add-user").then((m) => m.addUser),
-    "remove-user": () => import("./remove-user").then((m) => m.removeUser),
-  },
-});
+const project = new BeeCommand("project").summary("Manage Backlog projects");
+
+await project.addCommands([
+  import("./list.js"),
+  import("./view.js"),
+  import("./create.js"),
+  import("./edit.js"),
+  import("./delete.js"),
+  import("./users.js"),
+  import("./activities.js"),
+  import("./add-user.js"),
+  import("./remove-user.js"),
+]);
+
+export default project;

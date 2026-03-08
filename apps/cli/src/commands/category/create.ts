@@ -1,53 +1,36 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, promptRequired } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `Create a new category in a Backlog project.
+const create = new BeeCommand("create")
+  .summary("Create a category")
+  .description(
+    `Create a new category in a Backlog project.
 
 If \`--name\` is not provided, you will be prompted interactively.`,
-
-  examples: [
+  )
+  .addOption(opt.project())
+  .option("-n, --name <value>", "Category name")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     { description: "Create a category", command: 'bee category create -p PROJECT -n "Bug Report"' },
     { description: "Create interactively", command: "bee category create -p PROJECT" },
-  ],
+  ])
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const name = await promptRequired("Category name:", opts.name);
 
-const create = withUsage(
-  defineCommand({
-    meta: {
-      name: "create",
-      description: "Create a category",
-    },
-    args: {
-      ...outputArgs,
-      project: { ...commonArgs.project, required: true },
-      name: {
-        type: "string",
-        alias: "n",
-        description: "Category name",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const category = await client.postCategories(opts.project, { name });
 
-      const name = await promptRequired("Category name:", args.name);
+    outputResult(category, opts, (data) => {
+      consola.success(`Created category ${data.name} (ID: ${data.id})`);
+    });
+  });
 
-      const category = await client.postCategories(args.project, { name });
-
-      outputResult(category, args, (data) => {
-        consola.success(`Created category ${data.name} (ID: ${data.id})`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, create };
+export default create;

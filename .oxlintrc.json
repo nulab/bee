@@ -195,9 +195,11 @@
     {
       // oxlint's type checker cannot reliably resolve types across workspace
       // packages, causing false positives in command files.
+      // Commander's addCommands() requires default exports from command modules.
       "files": ["apps/cli/src/commands/**"],
       "rules": {
-        "typescript/no-redundant-type-constituents": "off"
+        "typescript/no-redundant-type-constituents": "off",
+        "import/no-default-export": "off"
       }
     }
   ],

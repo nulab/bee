@@ -5,23 +5,39 @@ import {
   resolveProjectIds,
   resolveUserId,
 } from "@repo/backlog-utils";
-import { outputArgs, outputResult, promptRequired, splitArg } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { Option } from "commander";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Create a new Backlog issue.
+const create = new BeeCommand("create")
+  .summary("Create an issue")
+  .description(
+    `Create a new Backlog issue.
 
 Requires a project, title, issue type, and priority. When run
 interactively, omitted required fields will be prompted.
 
 Issue type accepts a numeric ID. Priority accepts a name: \`high\`, \`normal\`,
 or \`low\`.`,
-
-  examples: [
+  )
+  .addOption(new Option("-p, --project <id>", "Project ID or project key").env("BACKLOG_PROJECT"))
+  .option("-t, --title <text>", "Issue title")
+  .option("-T, --type <id>", "Issue type ID")
+  .option("-P, --priority <name>", "Priority")
+  .option("-d, --description <text>", "Issue description")
+  .addOption(opt.assignee())
+  .option("--parent-issue <id>", "Parent issue ID")
+  .option("--start-date <date>", "Start date")
+  .option("--due-date <date>", "Due date")
+  .option("--estimated-hours <n>", "Estimated hours")
+  .option("--actual-hours <n>", "Actual hours")
+  .addOption(opt.notify())
+  .addOption(opt.attachment())
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Create an issue with required fields",
       command: 'bee issue create -p PROJECT --type 1 --priority normal -t "Fix login bug"',
@@ -39,113 +55,45 @@ or \`low\`.`,
       description: "Output as JSON",
       command: 'bee issue create -p PROJECT --type 1 --priority normal -t "Title" --json',
     },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const project = await promptRequired("Project:", opts.project);
+    const title = await promptRequired("Summary:", opts.title);
+    const issueTypeId = await promptRequired("Issue type ID:", opts.type);
+    const priority = await promptRequired("Priority:", opts.priority, {
+      valueHint: `{${PRIORITY_NAMES.join("|")}}`,
+    });
+    const priorityId = PriorityId[priority.toLowerCase()];
+    if (priorityId === undefined) {
+      throw new Error(`Unknown priority "${priority}". Valid values: ${PRIORITY_NAMES.join(", ")}`);
+    }
 
-const create = withUsage(
-  defineCommand({
-    meta: {
-      name: "create",
-      description: "Create an issue",
-    },
-    args: {
-      ...outputArgs,
-      project: commonArgs.project,
-      title: {
-        type: "string",
-        alias: "t",
-        description: "Issue title",
-      },
-      type: {
-        type: "string",
-        alias: "T",
-        description: "Issue type ID",
-        valueHint: "<number>",
-      },
-      priority: {
-        type: "string",
-        alias: "P",
-        description: "Priority",
-        valueHint: `{${PRIORITY_NAMES.join("|")}}`,
-      },
-      description: {
-        type: "string",
-        alias: "d",
-        description: "Issue description",
-      },
-      assignee: commonArgs.assignee,
-      "parent-issue": {
-        type: "string",
-        description: "Parent issue ID",
-      },
-      "start-date": {
-        type: "string",
-        description: "Start date",
-        valueHint: "<yyyy-MM-dd>",
-      },
-      "due-date": {
-        type: "string",
-        description: "Due date",
-        valueHint: "<yyyy-MM-dd>",
-      },
-      "estimated-hours": {
-        type: "string",
-        description: "Estimated hours",
-      },
-      "actual-hours": {
-        type: "string",
-        description: "Actual hours",
-      },
-      notify: commonArgs.notify,
-      attachment: commonArgs.attachment,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const [projectId] = await resolveProjectIds(client, [project]);
+    const assigneeId = opts.assignee ? await resolveUserId(client, opts.assignee) : undefined;
+    const notifiedUserId = opts.notify ?? [];
+    const attachmentId = opts.attachment ?? [];
 
-      const project = await promptRequired("Project:", args.project);
-      const title = await promptRequired("Summary:", args.title);
-      const issueTypeId = await promptRequired("Issue type ID:", args.type);
-      const priority = await promptRequired("Priority:", args.priority, {
-        valueHint: `{${PRIORITY_NAMES.join("|")}}`,
-      });
-      const priorityId = PriorityId[priority.toLowerCase()];
-      if (priorityId === undefined) {
-        throw new Error(
-          `Unknown priority "${priority}". Valid values: ${PRIORITY_NAMES.join(", ")}`,
-        );
-      }
+    const issue = await client.postIssue({
+      projectId,
+      summary: title,
+      issueTypeId: Number(issueTypeId),
+      priorityId,
+      description: opts.description,
+      assigneeId,
+      parentIssueId: opts.parentIssue ? Number(opts.parentIssue) : undefined,
+      startDate: opts.startDate,
+      dueDate: opts.dueDate,
+      estimatedHours: opts.estimatedHours ? Number(opts.estimatedHours) : undefined,
+      actualHours: opts.actualHours ? Number(opts.actualHours) : undefined,
+      notifiedUserId,
+      attachmentId,
+    });
 
-      const [projectId] = await resolveProjectIds(client, [project]);
-      const assigneeId = args.assignee ? await resolveUserId(client, args.assignee) : undefined;
-      const notifiedUserId = splitArg(args.notify, v.number());
-      const attachmentId = splitArg(args.attachment, v.number());
+    outputResult(issue, opts as { json?: string }, (data) => {
+      consola.success(`Created issue ${data.issueKey}: ${data.summary}`);
+    });
+  });
 
-      const issue = await client.postIssue({
-        projectId,
-        summary: title,
-        issueTypeId: Number(issueTypeId),
-        priorityId,
-        description: args.description,
-        assigneeId,
-        parentIssueId: args["parent-issue"] ? Number(args["parent-issue"]) : undefined,
-        startDate: args["start-date"],
-        dueDate: args["due-date"],
-        estimatedHours: args["estimated-hours"] ? Number(args["estimated-hours"]) : undefined,
-        actualHours: args["actual-hours"] ? Number(args["actual-hours"]) : undefined,
-        notifiedUserId,
-        attachmentId,
-      });
-
-      outputResult(issue, args, (data) => {
-        consola.success(`Created issue ${data.issueKey}: ${data.summary}`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, create };
+export default create;

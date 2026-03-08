@@ -1,61 +1,39 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, promptRequired } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `Update an existing category in a Backlog project.
+const edit = new BeeCommand("edit")
+  .summary("Edit a category")
+  .description(
+    `Update an existing category in a Backlog project.
 
 Renames the specified category.`,
-
-  examples: [
+  )
+  .argument("<category>", "Category ID")
+  .addOption(opt.project())
+  .option("-n, --name <value>", "New name of the category")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Rename a category",
       command: 'bee category edit 12345 -p PROJECT -n "New Name"',
     },
-  ],
+  ])
+  .action(async (category, opts, cmd) => {
+    await resolveOptions(cmd);
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const name = await promptRequired("Category name:", opts.name);
 
-const edit = withUsage(
-  defineCommand({
-    meta: {
-      name: "edit",
-      description: "Edit a category",
-    },
-    args: {
-      ...outputArgs,
-      category: {
-        type: "positional",
-        description: "Category ID",
-        required: true,
-        valueHint: "<number>",
-      },
-      project: { ...commonArgs.project, required: true },
-      name: {
-        type: "string",
-        alias: "n",
-        description: "New name of the category",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const result = await client.patchCategories(opts.project, Number(category), { name });
 
-      const name = await promptRequired("Category name:", args.name);
+    outputResult(result, opts, (data) => {
+      consola.success(`Updated category ${data.name} (ID: ${data.id})`);
+    });
+  });
 
-      const category = await client.patchCategories(args.project, Number(args.category), { name });
-
-      outputResult(category, args, (data) => {
-        consola.success(`Updated category ${data.name} (ID: ${data.id})`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, edit };
+export default edit;

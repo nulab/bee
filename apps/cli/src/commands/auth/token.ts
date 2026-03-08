@@ -1,16 +1,19 @@
 import { UserError } from "@repo/cli-utils";
 import { findSpace, loadConfig, resolveSpace } from "@repo/config";
-import { defineCommand } from "citty";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { BeeCommand } from "../../lib/bee-command";
 
-const commandUsage: CommandUsage = {
-  long: `Print the auth token for a Backlog space to standard output.
+const tokenCommand = new BeeCommand("token")
+  .summary("Print the auth token to stdout")
+  .description(
+    `Print the auth token for a Backlog space to standard output.
 
 Without \`--space\`, the default space is used.
 
 The token output can be used with \`BACKLOG_API_KEY\` or piped to other commands.`,
-
-  examples: [
+  )
+  .option("-s, --space <hostname>", "The hostname of the Backlog space")
+  .envVars([["BACKLOG_SPACE", "Default space hostname"]])
+  .examples([
     { description: "Print token for default space", command: "bee auth token" },
     {
       description: "Print token for specific space",
@@ -21,40 +24,17 @@ The token output can be used with \`BACKLOG_API_KEY\` or piped to other commands
       command:
         'TOKEN=$(bee auth token) && curl -H "X-Api-Key: $TOKEN" https://xxx.backlog.com/api/v2/users/myself',
     },
-  ],
+  ])
+  .action((opts) => {
+    const space = opts.space ? findSpace(loadConfig().spaces, opts.space) : resolveSpace();
 
-  annotations: {
-    environment: [["BACKLOG_SPACE", "Default space hostname"]],
-  },
-};
+    if (!space) {
+      throw new UserError("No space configured. Run `bee auth login` to authenticate.");
+    }
 
-const tokenCommand = withUsage(
-  defineCommand({
-    meta: {
-      name: "token",
-      description: "Print the auth token to stdout",
-    },
-    args: {
-      space: {
-        type: "string",
-        alias: "s",
-        description: "The hostname of the Backlog space",
-        valueHint: "<xxx.backlog.com>",
-      },
-    },
-    run({ args }) {
-      const space = args.space ? findSpace(loadConfig().spaces, args.space) : resolveSpace();
+    const token = space.auth.method === "api-key" ? space.auth.apiKey : space.auth.accessToken;
 
-      if (!space) {
-        throw new UserError("No space configured. Run `bee auth login` to authenticate.");
-      }
+    process.stdout.write(token);
+  });
 
-      const token = space.auth.method === "api-key" ? space.auth.apiKey : space.auth.accessToken;
-
-      process.stdout.write(token);
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, tokenCommand as token };
+export default tokenCommand;

@@ -20,8 +20,8 @@ describe("project list", () => {
       { projectKey: "PROJ2", name: "Project Two", archived: true },
     ]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getProjects).toHaveBeenCalled();
@@ -33,8 +33,8 @@ describe("project list", () => {
   it("shows message when no projects found", async () => {
     mockClient.getProjects.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No projects found.");
   });
@@ -42,8 +42,8 @@ describe("project list", () => {
   it("passes archived query parameter", async () => {
     mockClient.getProjects.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { archived: true } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--archived"], { from: "user" });
 
     expect(mockClient.getProjects).toHaveBeenCalledWith(
       expect.objectContaining({ archived: true }),
@@ -53,8 +53,8 @@ describe("project list", () => {
   it("passes all query parameter", async () => {
     mockClient.getProjects.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { all: true } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--all"], { from: "user" });
 
     expect(mockClient.getProjects).toHaveBeenCalledWith(expect.objectContaining({ all: true }));
   });
@@ -65,8 +65,8 @@ describe("project list", () => {
     ]);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["--json"], { from: "user" });
     }, "PROJ1");
   });
 });

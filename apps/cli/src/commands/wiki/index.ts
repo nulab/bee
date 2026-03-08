@@ -1,19 +1,17 @@
-import { defineCommand } from "citty";
+import { BeeCommand } from "../../lib/bee-command";
 
-export const wiki = defineCommand({
-  meta: {
-    name: "wiki",
-    description: "Manage Backlog wiki pages",
-  },
-  subCommands: {
-    list: () => import("./list").then((m) => m.list),
-    view: () => import("./view").then((m) => m.view),
-    count: () => import("./count").then((m) => m.count),
-    tags: () => import("./tags").then((m) => m.tags),
-    history: () => import("./history").then((m) => m.history),
-    attachments: () => import("./attachments").then((m) => m.attachments),
-    create: () => import("./create").then((m) => m.create),
-    edit: () => import("./edit").then((m) => m.edit),
-    delete: () => import("./delete").then((m) => m.deleteWiki),
-  },
-});
+const wiki = new BeeCommand("wiki").summary("Manage Backlog wiki pages");
+
+await wiki.addCommands([
+  import("./list.js"),
+  import("./view.js"),
+  import("./count.js"),
+  import("./tags.js"),
+  import("./history.js"),
+  import("./attachments.js"),
+  import("./create.js"),
+  import("./edit.js"),
+  import("./delete.js"),
+]);
+
+export default wiki;

@@ -29,8 +29,8 @@ describe("issue attachments", () => {
         created: "2025-01-01T00:00:00Z",
       },
     ]);
-    const { attachments } = await import("./attachments");
-    await attachments.run?.({ args: { issue: "TEST-1" } } as never);
+    const { default: attachments } = await import("./attachments");
+    await attachments.parseAsync(["TEST-1"], { from: "user" });
     expect(mockClient.getIssueAttachments).toHaveBeenCalledWith("TEST-1");
     expect(printTable).toHaveBeenCalledWith(
       expect.arrayContaining([
@@ -41,8 +41,8 @@ describe("issue attachments", () => {
 
   it("shows message when no attachments found", async () => {
     mockClient.getIssueAttachments.mockResolvedValue([]);
-    const { attachments } = await import("./attachments");
-    await attachments.run?.({ args: { issue: "TEST-1" } } as never);
+    const { default: attachments } = await import("./attachments");
+    await attachments.parseAsync(["TEST-1"], { from: "user" });
     expect(consola.info).toHaveBeenCalledWith("No attachments found.");
   });
 
@@ -57,8 +57,8 @@ describe("issue attachments", () => {
       },
     ]);
     await expectStdoutContaining(async () => {
-      const { attachments } = await import("./attachments");
-      await attachments.run?.({ args: { issue: "TEST-1", json: "" } } as never);
+      const { default: attachments } = await import("./attachments");
+      await attachments.parseAsync(["TEST-1", "--json"], { from: "user" });
     }, "file.png");
   });
 });

@@ -29,10 +29,10 @@ describe("document create", () => {
       title: "Meeting Notes",
     });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: { project: "100", title: "Meeting Notes", body: "Content here" },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["-p", "100", "-t", "Meeting Notes", "-b", "Content here"], {
+      from: "user",
+    });
 
     expect(mockClient.addDocument).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -51,8 +51,8 @@ describe("document create", () => {
       title: "Title",
     });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: {} } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync([], { from: "user" });
 
     expect(promptRequired).toHaveBeenCalledWith("Project:", undefined);
     expect(promptRequired).toHaveBeenCalledWith("Title:", undefined);
@@ -66,10 +66,8 @@ describe("document create", () => {
       title: "Title",
     });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: { project: "100", title: "Title", body: "" },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["-p", "100", "-t", "Title", "-b", ""], { from: "user" });
 
     expect(resolveStdinArg).toHaveBeenCalledWith("");
     expect(mockClient.addDocument).toHaveBeenCalledWith(
@@ -86,16 +84,11 @@ describe("document create", () => {
       title: "Title",
     });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "100",
-        title: "Title",
-        emoji: "star",
-        "parent-id": "999",
-        "add-last": true,
-      },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      ["-p", "100", "-t", "Title", "--emoji", "star", "--parent-id", "999", "--add-last"],
+      { from: "user" },
+    );
 
     expect(mockClient.addDocument).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -114,10 +107,8 @@ describe("document create", () => {
     });
 
     await expectStdoutContaining(async () => {
-      const { create } = await import("./create");
-      await create.run?.({
-        args: { project: "100", title: "Title", json: "" },
-      } as never);
+      const { default: create } = await import("./create");
+      await create.parseAsync(["-p", "100", "-t", "Title", "--json"], { from: "user" });
     }, "Title");
   });
 });

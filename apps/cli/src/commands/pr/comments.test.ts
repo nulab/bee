@@ -31,8 +31,8 @@ describe("pr comments", () => {
   it("displays pull request comments", async () => {
     mockClient.getPullRequestComments.mockResolvedValue(sampleComments);
 
-    const { comments } = await import("./comments");
-    await comments.run?.({ args: { number: "42", project: "PROJ", repo: "repo" } } as never);
+    const { default: comments } = await import("./comments");
+    await comments.parseAsync(["42", "--project", "PROJ", "--repo", "repo"], { from: "user" });
 
     expect(mockClient.getPullRequestComments).toHaveBeenCalledWith("PROJ", "repo", 42, {
       order: "asc",
@@ -47,8 +47,8 @@ describe("pr comments", () => {
   it("shows message when no comments found", async () => {
     mockClient.getPullRequestComments.mockResolvedValue([]);
 
-    const { comments } = await import("./comments");
-    await comments.run?.({ args: { number: "42", project: "PROJ", repo: "repo" } } as never);
+    const { default: comments } = await import("./comments");
+    await comments.parseAsync(["42", "--project", "PROJ", "--repo", "repo"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No comments found.");
   });
@@ -58,8 +58,8 @@ describe("pr comments", () => {
       { id: 1, content: "", createdUser: { name: "Alice" }, created: "2025-01-01T00:00:00Z" },
     ]);
 
-    const { comments } = await import("./comments");
-    await comments.run?.({ args: { number: "42", project: "PROJ", repo: "repo" } } as never);
+    const { default: comments } = await import("./comments");
+    await comments.parseAsync(["42", "--project", "PROJ", "--repo", "repo"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No comments found.");
   });
@@ -68,10 +68,10 @@ describe("pr comments", () => {
     mockClient.getPullRequestComments.mockResolvedValue(sampleComments);
 
     await expectStdoutContaining(async () => {
-      const { comments } = await import("./comments");
-      await comments.run?.({
-        args: { number: "42", project: "PROJ", repo: "repo", json: "" },
-      } as never);
+      const { default: comments } = await import("./comments");
+      await comments.parseAsync(["42", "--project", "PROJ", "--repo", "repo", "--json"], {
+        from: "user",
+      });
     }, "Looks good!");
   });
 });

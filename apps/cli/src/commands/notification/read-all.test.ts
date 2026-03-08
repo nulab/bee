@@ -16,8 +16,8 @@ describe("notification read-all", () => {
   it("marks all notifications as read", async () => {
     mockClient.resetNotificationsMarkAsRead.mockResolvedValue({ count: 0 });
 
-    const { readAll } = await import("./read-all");
-    await readAll.run?.({ args: {} } as never);
+    const { default: readAll } = await import("./read-all");
+    await readAll.parseAsync([], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.resetNotificationsMarkAsRead).toHaveBeenCalled();

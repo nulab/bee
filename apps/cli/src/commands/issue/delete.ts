@@ -1,16 +1,22 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { confirmOrExit, outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Delete a Backlog issue.
+const deleteIssue = new BeeCommand("delete")
+  .summary("Delete an issue")
+  .description(
+    `Delete a Backlog issue.
 
 This action is irreversible. You will be prompted for confirmation unless
 \`--yes\` is provided.`,
-
-  examples: [
+  )
+  .argument("<issue>", "Issue ID or issue key")
+  .option("-y, --yes", "Skip confirmation prompt")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     {
       description: "Delete an issue (with confirmation)",
       command: "bee issue delete PROJECT-123",
@@ -19,53 +25,24 @@ This action is irreversible. You will be prompted for confirmation unless
       description: "Delete an issue without confirmation",
       command: "bee issue delete PROJECT-123 --yes",
     },
-  ],
+  ])
+  .action(async (issue, opts) => {
+    const confirmed = await confirmOrExit(
+      `Are you sure you want to delete issue ${issue}? This cannot be undone.`,
+      opts.yes,
+    );
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    if (!confirmed) {
+      return;
+    }
 
-const deleteIssue = withUsage(
-  defineCommand({
-    meta: {
-      name: "delete",
-      description: "Delete an issue",
-    },
-    args: {
-      ...outputArgs,
-      issue: {
-        type: "positional",
-        description: "Issue ID or issue key",
-        valueHint: "<PROJECT-123>",
-        required: true,
-      },
-      yes: {
-        type: "boolean",
-        alias: "y",
-        description: "Skip confirmation prompt",
-      },
-    },
-    async run({ args }) {
-      const confirmed = await confirmOrExit(
-        `Are you sure you want to delete issue ${args.issue}? This cannot be undone.`,
-        args.yes,
-      );
+    const { client } = await getClient();
 
-      if (!confirmed) {
-        return;
-      }
+    const issueData = await client.deleteIssue(issue);
 
-      const { client } = await getClient();
+    outputResult(issueData, opts as { json?: string }, (data) => {
+      consola.success(`Deleted issue ${data.issueKey}: ${data.summary}`);
+    });
+  });
 
-      const issue = await client.deleteIssue(args.issue);
-
-      outputResult(issue, args, (data) => {
-        consola.success(`Deleted issue ${data.issueKey}: ${data.summary}`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, deleteIssue };
+export default deleteIssue;

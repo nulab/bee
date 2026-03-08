@@ -1,46 +1,32 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Display the number of wiki pages in a Backlog project.
+const count = new BeeCommand("count")
+  .summary("Count wiki pages")
+  .description(
+    `Display the number of wiki pages in a Backlog project.
 
 The count includes all wiki pages regardless of tag or keyword.`,
+  )
+  .argument("<project>", "Project ID or project key")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
+    { description: "Count wiki pages", command: "bee wiki count PROJECT" },
+    { description: "Output as JSON", command: "bee wiki count PROJECT --json" },
+  ])
+  .action(async (project, opts) => {
+    const { client } = await getClient();
 
-  examples: [
-    { description: "Count wiki pages", command: "bee wiki count -p PROJECT" },
-    { description: "Output as JSON", command: "bee wiki count -p PROJECT --json" },
-  ],
+    const result = await client.getWikisCount(project);
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const json = opts.json === true ? "" : opts.json;
+    outputResult(result, { json }, (data) => {
+      consola.log(String(data.count));
+    });
+  });
 
-const count = withUsage(
-  defineCommand({
-    meta: {
-      name: "count",
-      description: "Count wiki pages",
-    },
-    args: {
-      ...outputArgs,
-      project: commonArgs.projectPositional,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
-
-      const result = await client.getWikisCount(args.project);
-
-      outputResult(result, args, (data) => {
-        consola.log(String(data.count));
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, count };
+export default count;

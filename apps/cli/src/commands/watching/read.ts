@@ -1,44 +1,24 @@
 import { getClient } from "@repo/backlog-utils";
-import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 
-const commandUsage: CommandUsage = {
-  long: `Mark a watching item as read.
+const read = new BeeCommand("read")
+  .summary("Mark a watching item as read")
+  .description(
+    `Mark a watching item as read.
 
 Specify the watching ID to mark as read. Use \`bee watching list\`
 to find watching IDs.`,
+  )
+  .argument("<watching>", "Watching ID")
+  .envVars([...ENV_AUTH])
+  .examples([{ description: "Mark a watching item as read", command: "bee watching read 12345" }])
+  .action(async (watching) => {
+    const { client } = await getClient();
 
-  examples: [{ description: "Mark a watching item as read", command: "bee watching read 12345" }],
+    await client.resetWatchingListItemAsRead(Number(watching));
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    consola.success(`Marked watching ${watching} as read.`);
+  });
 
-const read = withUsage(
-  defineCommand({
-    meta: {
-      name: "read",
-      description: "Mark a watching item as read",
-    },
-    args: {
-      watching: {
-        type: "positional",
-        description: "Watching ID",
-        required: true,
-        valueHint: "<number>",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
-
-      await client.resetWatchingListItemAsRead(Number(args.watching));
-
-      consola.success(`Marked watching ${args.watching} as read.`);
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, read };
+export default read;

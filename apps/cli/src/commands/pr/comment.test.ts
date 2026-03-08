@@ -26,10 +26,10 @@ describe("pr comment", () => {
   it("adds a comment to a pull request", async () => {
     mockClient.postPullRequestComments.mockResolvedValue({ id: 1, content: "LGTM" });
 
-    const { comment } = await import("./comment");
-    await comment.run?.({
-      args: { number: "42", project: "TEST", repo: "my-repo", body: "LGTM" },
-    } as never);
+    const { default: comment } = await import("./comment");
+    await comment.parseAsync(["42", "--project", "TEST", "--repo", "my-repo", "--body", "LGTM"], {
+      from: "user",
+    });
 
     expect(mockClient.postPullRequestComments).toHaveBeenCalledWith("TEST", "my-repo", 42, {
       content: "LGTM",
@@ -42,10 +42,10 @@ describe("pr comment", () => {
     vi.mocked(resolveStdinArg).mockResolvedValueOnce("Stdin content");
     mockClient.postPullRequestComments.mockResolvedValue({ id: 2, content: "Stdin content" });
 
-    const { comment } = await import("./comment");
-    await comment.run?.({
-      args: { number: "42", project: "TEST", repo: "my-repo", body: "" },
-    } as never);
+    const { default: comment } = await import("./comment");
+    await comment.parseAsync(["42", "--project", "TEST", "--repo", "my-repo", "--body", ""], {
+      from: "user",
+    });
 
     expect(resolveStdinArg).toHaveBeenCalledWith("");
     expect(mockClient.postPullRequestComments).toHaveBeenCalledWith("TEST", "my-repo", 42, {
@@ -57,10 +57,23 @@ describe("pr comment", () => {
   it("adds a comment with notified users", async () => {
     mockClient.postPullRequestComments.mockResolvedValue({ id: 3, content: "FYI" });
 
-    const { comment } = await import("./comment");
-    await comment.run?.({
-      args: { number: "42", project: "TEST", repo: "my-repo", body: "FYI", notify: "111,222" },
-    } as never);
+    const { default: comment } = await import("./comment");
+    await comment.parseAsync(
+      [
+        "42",
+        "--project",
+        "TEST",
+        "--repo",
+        "my-repo",
+        "--body",
+        "FYI",
+        "--notify",
+        "111",
+        "--notify",
+        "222",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.postPullRequestComments).toHaveBeenCalledWith("TEST", "my-repo", 42, {
       content: "FYI",
@@ -71,10 +84,11 @@ describe("pr comment", () => {
   it("outputs JSON when --json flag is set", async () => {
     mockClient.postPullRequestComments.mockResolvedValue({ id: 1, content: "LGTM" });
     await expectStdoutContaining(async () => {
-      const { comment } = await import("./comment");
-      await comment.run?.({
-        args: { number: "42", project: "TEST", repo: "my-repo", body: "LGTM", json: "" },
-      } as never);
+      const { default: comment } = await import("./comment");
+      await comment.parseAsync(
+        ["42", "--project", "TEST", "--repo", "my-repo", "--body", "LGTM", "--json"],
+        { from: "user" },
+      );
     }, "LGTM");
   });
 
@@ -83,10 +97,10 @@ describe("pr comment", () => {
       { id: 1, content: "Hello", createdUser: { name: "Alice" }, created: "2025-01-01T00:00:00Z" },
     ]);
 
-    const { comment } = await import("./comment");
-    await comment.run?.({
-      args: { number: "42", project: "TEST", repo: "my-repo", list: true },
-    } as never);
+    const { default: comment } = await import("./comment");
+    await comment.parseAsync(["42", "--project", "TEST", "--repo", "my-repo", "--list"], {
+      from: "user",
+    });
 
     expect(mockClient.getPullRequestComments).toHaveBeenCalledWith("TEST", "my-repo", 42, {
       order: "asc",
@@ -97,10 +111,10 @@ describe("pr comment", () => {
   it("shows message when no comments found with --list", async () => {
     mockClient.getPullRequestComments.mockResolvedValue([]);
 
-    const { comment } = await import("./comment");
-    await comment.run?.({
-      args: { number: "42", project: "TEST", repo: "my-repo", list: true },
-    } as never);
+    const { default: comment } = await import("./comment");
+    await comment.parseAsync(["42", "--project", "TEST", "--repo", "my-repo", "--list"], {
+      from: "user",
+    });
 
     expect(consola.info).toHaveBeenCalledWith("No comments found.");
   });
@@ -112,16 +126,11 @@ describe("pr comment", () => {
     mockClient.getMyself.mockResolvedValue({ id: 1 });
     mockClient.patchPullRequestComments.mockResolvedValue({ id: 20, content: "Updated" });
 
-    const { comment } = await import("./comment");
-    await comment.run?.({
-      args: {
-        number: "42",
-        project: "TEST",
-        repo: "my-repo",
-        "edit-last": true,
-        body: "Updated",
-      },
-    } as never);
+    const { default: comment } = await import("./comment");
+    await comment.parseAsync(
+      ["42", "--project", "TEST", "--repo", "my-repo", "--edit-last", "--body", "Updated"],
+      { from: "user" },
+    );
 
     expect(mockClient.patchPullRequestComments).toHaveBeenCalledWith("TEST", "my-repo", 42, 20, {
       content: "Updated",
@@ -135,15 +144,10 @@ describe("pr comment", () => {
     ]);
     mockClient.getMyself.mockResolvedValue({ id: 1 });
 
-    const { comment } = await import("./comment");
-    await comment.run?.({
-      args: {
-        number: "42",
-        project: "TEST",
-        repo: "my-repo",
-        "edit-last": true,
-      },
-    } as never);
+    const { default: comment } = await import("./comment");
+    await comment.parseAsync(["42", "--project", "TEST", "--repo", "my-repo", "--edit-last"], {
+      from: "user",
+    });
 
     expect(consola.error).toHaveBeenCalledWith(
       "Comment body is required. Use --body or pipe input.",
@@ -151,10 +155,8 @@ describe("pr comment", () => {
   });
 
   it("shows error when body is missing for add comment", async () => {
-    const { comment } = await import("./comment");
-    await comment.run?.({
-      args: { number: "42", project: "TEST", repo: "my-repo" },
-    } as never);
+    const { default: comment } = await import("./comment");
+    await comment.parseAsync(["42", "--project", "TEST", "--repo", "my-repo"], { from: "user" });
 
     expect(consola.error).toHaveBeenCalledWith(
       "Comment body is required. Use --body or pipe input.",
@@ -167,16 +169,11 @@ describe("pr comment", () => {
     ]);
     mockClient.getMyself.mockResolvedValue({ id: 1 });
 
-    const { comment } = await import("./comment");
-    await comment.run?.({
-      args: {
-        number: "42",
-        project: "TEST",
-        repo: "my-repo",
-        "edit-last": true,
-        body: "Updated",
-      },
-    } as never);
+    const { default: comment } = await import("./comment");
+    await comment.parseAsync(
+      ["42", "--project", "TEST", "--repo", "my-repo", "--edit-last", "--body", "Updated"],
+      { from: "user" },
+    );
 
     expect(consola.error).toHaveBeenCalledWith("No comment by you was found on pull request #42.");
   });

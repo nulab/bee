@@ -1,24 +1,39 @@
-import { PR_STATUS_NAMES, PrStatusName, getClient } from "@repo/backlog-utils";
-import { type Row, outputArgs, outputResult, printTable, splitArg } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { PR_STATUS_NAMES, PrStatusName, getClient, resolveUserId } from "@repo/backlog-utils";
+import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
-import {
-  type CommandUsage,
-  ENV_AUTH,
-  ENV_PROJECT,
-  ENV_REPO,
-  withUsage,
-} from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT, ENV_REPO } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { collect, collectNum } from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `List pull requests in a Backlog repository.
+const resolveStatusIds = (statuses: string[]): number[] =>
+  statuses.map((name) => {
+    const id = PrStatusName[name.toLowerCase()];
+    if (id === undefined) {
+      throw new Error(`Unknown status "${name}". Valid values: ${PR_STATUS_NAMES.join(", ")}`);
+    }
+    return id;
+  });
+
+const list = new BeeCommand("list")
+  .summary("List pull requests")
+  .description(
+    `List pull requests in a Backlog repository.
 
 By default, all pull requests are returned. Use \`--status\` to filter by
 status (open, closed, merged).`,
-
-  examples: [
+  )
+  .addOption(opt.project())
+  .addOption(opt.repo())
+  .option("-S, --status <name>", "Status name (repeatable)", collect, [] satisfies string[])
+  .addOption(opt.assigneeList())
+  .option("--issue <id>", "Issue ID (repeatable)", collectNum, [] satisfies number[])
+  .option("--created-user <id>", "Created user ID (repeatable)", collectNum, [] satisfies number[])
+  .addOption(opt.count())
+  .addOption(opt.offset())
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT, ENV_REPO])
+  .examples([
     { description: "List pull requests", command: "bee pr list -p PROJECT -R repo" },
     {
       description: "List open pull requests only",
@@ -29,91 +44,43 @@ status (open, closed, merged).`,
       command: "bee pr list -p PROJECT -R repo --assignee @me",
     },
     { description: "Output as JSON", command: "bee pr list -p PROJECT -R repo --json" },
-  ],
+  ])
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT, ENV_REPO],
-  },
-};
+    const statusId = opts.status.length > 0 ? resolveStatusIds(opts.status) : undefined;
+    const assigneeId = await Promise.all(
+      (opts.assignee ?? []).map((id: string) => resolveUserId(client, id)),
+    );
+    const issueId: number[] = opts.issue;
+    const createdUserId: number[] = opts.createdUser;
 
-const list = withUsage(
-  defineCommand({
-    meta: {
-      name: "list",
-      description: "List pull requests",
-    },
-    args: {
-      ...outputArgs,
-      project: { ...commonArgs.project, required: true },
-      repo: commonArgs.repo,
-      status: {
-        type: "string",
-        alias: "S",
-        description: "Status name (comma-separated for multiple)",
-        valueHint: `{${PR_STATUS_NAMES.join("|")}}`,
-      },
-      assignee: commonArgs.assigneeList,
-      issue: {
-        type: "string",
-        description: "Issue ID (comma-separated for multiple)",
-      },
-      "created-user": {
-        type: "string",
-        description: "Created user ID (comma-separated for multiple)",
-      },
-      count: commonArgs.count,
-      offset: commonArgs.offset,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const pullRequests = await client.getPullRequests(opts.project, opts.repo, {
+      statusId,
+      assigneeId: assigneeId.length > 0 ? assigneeId : undefined,
+      issueId: issueId.length > 0 ? issueId : undefined,
+      createdUserId: createdUserId.length > 0 ? createdUserId : undefined,
+      count: opts.count ? Number(opts.count) : undefined,
+      offset: opts.offset ? Number(opts.offset) : undefined,
+    });
 
-      const statusId = args.status
-        ? args.status
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
-            .map((name) => {
-              const id = PrStatusName[name.toLowerCase()];
-              if (id === undefined) {
-                throw new Error(
-                  `Unknown status "${name}". Valid values: ${PR_STATUS_NAMES.join(", ")}`,
-                );
-              }
-              return id;
-            })
-        : undefined;
+    const json = opts.json === true ? "" : opts.json;
+    outputResult(pullRequests, { json }, (data) => {
+      if (data.length === 0) {
+        consola.info("No pull requests found.");
+        return;
+      }
 
-      const assigneeId = splitArg(args.assignee, v.number());
-      const issueId = splitArg(args.issue, v.number());
-      const createdUserId = splitArg(args["created-user"], v.number());
+      const rows: Row[] = data.map((pr) => [
+        { header: "#", value: String(pr.number) },
+        { header: "STATUS", value: pr.status.name },
+        { header: "ASSIGNEE", value: pr.assignee?.name ?? "Unassigned" },
+        { header: "SUMMARY", value: pr.summary },
+      ]);
 
-      const pullRequests = await client.getPullRequests(args.project, args.repo, {
-        statusId,
-        assigneeId: assigneeId.length > 0 ? assigneeId : undefined,
-        issueId: issueId.length > 0 ? issueId : undefined,
-        createdUserId: createdUserId.length > 0 ? createdUserId : undefined,
-        count: args.count ? Number(args.count) : undefined,
-        offset: args.offset ? Number(args.offset) : undefined,
-      });
+      printTable(rows);
+    });
+  });
 
-      outputResult(pullRequests, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No pull requests found.");
-          return;
-        }
-
-        const rows: Row[] = data.map((pr) => [
-          { header: "#", value: String(pr.number) },
-          { header: "STATUS", value: pr.status.name },
-          { header: "ASSIGNEE", value: pr.assignee?.name ?? "Unassigned" },
-          { header: "SUMMARY", value: pr.summary },
-        ]);
-
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, list };
+export default list;

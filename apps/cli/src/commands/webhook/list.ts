@@ -1,61 +1,49 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `List webhooks in a Backlog project.
+const list = new BeeCommand("list")
+  .summary("List webhooks")
+  .description(
+    `List webhooks in a Backlog project.
 
 Webhooks allow external services to receive notifications when events occur
 in a project.`,
-
-  examples: [
+  )
+  .addOption(opt.project())
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     { description: "List all webhooks in a project", command: "bee webhook list -p PROJECT" },
     { description: "Output as JSON", command: "bee webhook list -p PROJECT --json" },
-  ],
+  ])
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const webhooks = await client.getWebhooks(opts.project);
 
-const list = withUsage(
-  defineCommand({
-    meta: {
-      name: "list",
-      description: "List webhooks",
-    },
-    args: {
-      ...outputArgs,
-      project: { ...commonArgs.project, required: true },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const json = opts.json === true ? "" : opts.json;
+    outputResult(webhooks, { json }, (data) => {
+      if (data.length === 0) {
+        consola.info("No webhooks found.");
+        return;
+      }
 
-      const webhooks = await client.getWebhooks(args.project);
+      const rows: Row[] = data.map(
+        (w: { id: number; name: string; hookUrl: string; allEvent: boolean }) => [
+          { header: "ID", value: String(w.id) },
+          { header: "NAME", value: w.name },
+          { header: "HOOK URL", value: w.hookUrl },
+          { header: "ALL EVENT", value: w.allEvent ? "Yes" : "No" },
+        ],
+      );
 
-      outputResult(webhooks, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No webhooks found.");
-          return;
-        }
+      printTable(rows);
+    });
+  });
 
-        const rows: Row[] = data.map(
-          (w: { id: number; name: string; hookUrl: string; allEvent: boolean }) => [
-            { header: "ID", value: String(w.id) },
-            { header: "NAME", value: w.name },
-            { header: "HOOK URL", value: w.hookUrl },
-            { header: "ALL EVENT", value: w.allEvent ? "Yes" : "No" },
-          ],
-        );
-
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, list };
+export default list;

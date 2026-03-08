@@ -1,55 +1,41 @@
 import { getClient } from "@repo/backlog-utils";
-import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { formatDate, outputResult, printDefinitionList } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Display the space notification.
+const notification = new BeeCommand("notification")
+  .summary("Display the space notification")
+  .description(
+    `Display the space notification.
 
 Shows the notification message that is set for the entire Backlog space,
 along with the date it was last updated.`,
-
-  examples: [
+  )
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "View space notification", command: "bee space notification" },
     { description: "Output as JSON", command: "bee space notification --json" },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const data = await client.getSpaceNotification();
 
-const notification = withUsage(
-  defineCommand({
-    meta: {
-      name: "notification",
-      description: "Display the space notification",
-    },
-    args: {
-      ...outputArgs,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    outputResult(data, opts, (result) => {
+      if (!result.content) {
+        consola.info("No space notification set.");
+        return;
+      }
 
-      const data = await client.getSpaceNotification();
+      consola.log("");
+      printDefinitionList([
+        ["Content", result.content],
+        ["Updated", result.updated ? formatDate(result.updated) : undefined],
+      ]);
+      consola.log("");
+    });
+  });
 
-      outputResult(data, args, (result) => {
-        if (!result.content) {
-          consola.info("No space notification set.");
-          return;
-        }
-
-        consola.log("");
-        printDefinitionList([
-          ["Content", result.content],
-          ["Updated", result.updated ? formatDate(result.updated) : undefined],
-        ]);
-        consola.log("");
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, notification };
+export default notification;

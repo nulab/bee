@@ -20,18 +20,24 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("webhook create", () => {
   it("creates a webhook with provided arguments", async () => {
+    vi.mocked(promptRequired).mockImplementation((_, val) => Promise.resolve(val ?? ""));
+    vi.mocked(promptRequired).mockResolvedValueOnce("TEST");
     vi.mocked(promptRequired).mockResolvedValueOnce("Deploy Hook");
     mockClient.postWebhook.mockResolvedValue({ id: 1, name: "Deploy Hook" });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "TEST",
-        name: "Deploy Hook",
-        "hook-url": "https://example.com/hook",
-        "all-event": true,
-      },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      [
+        "-p",
+        "TEST",
+        "--name",
+        "Deploy Hook",
+        "--hook-url",
+        "https://example.com/hook",
+        "--all-event",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.postWebhook).toHaveBeenCalledWith("TEST", {
       name: "Deploy Hook",
@@ -43,13 +49,15 @@ describe("webhook create", () => {
   });
 
   it("prompts for name when not provided", async () => {
+    vi.mocked(promptRequired).mockImplementation((_, val) => Promise.resolve(val ?? ""));
+    vi.mocked(promptRequired).mockResolvedValueOnce("TEST");
     vi.mocked(promptRequired).mockResolvedValueOnce("Prompted Hook");
     mockClient.postWebhook.mockResolvedValue({ id: 2, name: "Prompted Hook" });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: { project: "TEST", "hook-url": "https://example.com/hook" },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["-p", "TEST", "--hook-url", "https://example.com/hook"], {
+      from: "user",
+    });
 
     expect(promptRequired).toHaveBeenCalledWith("Webhook name:", undefined);
     expect(mockClient.postWebhook).toHaveBeenCalledWith("TEST", {
@@ -60,19 +68,30 @@ describe("webhook create", () => {
     });
   });
 
-  it("parses activity type IDs from comma-separated string", async () => {
+  it("parses activity type IDs from repeatable option", async () => {
+    vi.mocked(promptRequired).mockImplementation((_, val) => Promise.resolve(val ?? ""));
+    vi.mocked(promptRequired).mockResolvedValueOnce("TEST");
     vi.mocked(promptRequired).mockResolvedValueOnce("Hook");
     mockClient.postWebhook.mockResolvedValue({ id: 3, name: "Hook" });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "TEST",
-        name: "Hook",
-        "hook-url": "https://example.com/hook",
-        "activity-type-ids": "1,2,3",
-      },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      [
+        "-p",
+        "TEST",
+        "--name",
+        "Hook",
+        "--hook-url",
+        "https://example.com/hook",
+        "--activity-type-ids",
+        "1",
+        "--activity-type-ids",
+        "2",
+        "--activity-type-ids",
+        "3",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.postWebhook).toHaveBeenCalledWith("TEST", {
       name: "Hook",
@@ -83,19 +102,17 @@ describe("webhook create", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
+    vi.mocked(promptRequired).mockImplementation((_, val) => Promise.resolve(val ?? ""));
+    vi.mocked(promptRequired).mockResolvedValueOnce("TEST");
     vi.mocked(promptRequired).mockResolvedValueOnce("Hook");
     mockClient.postWebhook.mockResolvedValue({ id: 1, name: "Hook" });
 
     await expectStdoutContaining(async () => {
-      const { create } = await import("./create");
-      await create.run?.({
-        args: {
-          project: "TEST",
-          name: "Hook",
-          "hook-url": "https://example.com/hook",
-          json: "",
-        },
-      } as never);
+      const { default: create } = await import("./create");
+      await create.parseAsync(
+        ["-p", "TEST", "--name", "Hook", "--hook-url", "https://example.com/hook", "--json"],
+        { from: "user" },
+      );
     }, "Hook");
   });
 });

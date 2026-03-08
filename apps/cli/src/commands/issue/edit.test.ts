@@ -4,6 +4,7 @@ import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   patchIssue: vi.fn(),
+  getMyself: vi.fn().mockResolvedValue({ id: 99 }),
 };
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
@@ -17,8 +18,8 @@ describe("issue edit", () => {
   it("updates issue summary", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "New title" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({ args: { issue: "TEST-1", title: "New title" } } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["TEST-1", "--title", "New title"], { from: "user" });
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
@@ -30,10 +31,10 @@ describe("issue edit", () => {
   it("updates assignee and priority", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: { issue: "TEST-1", assignee: "12345", priority: "high" },
-    } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["TEST-1", "--assignee", "12345", "--priority", "high"], {
+      from: "user",
+    });
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
@@ -41,13 +42,26 @@ describe("issue edit", () => {
     );
   });
 
+  it("resolves @me to current user ID for assignee", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
+
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["TEST-1", "--assignee", "@me"], { from: "user" });
+
+    expect(mockClient.getMyself).toHaveBeenCalled();
+    expect(mockClient.patchIssue).toHaveBeenCalledWith(
+      "TEST-1",
+      expect.objectContaining({ assigneeId: 99 }),
+    );
+  });
+
   it("passes comment with the update", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: { issue: "TEST-1", title: "New title", comment: "Updated" },
-    } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["TEST-1", "--title", "New title", "--comment", "Updated"], {
+      from: "user",
+    });
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
@@ -58,10 +72,23 @@ describe("issue edit", () => {
   it("passes notifiedUserId and attachmentId to API", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: { issue: "TEST-1", title: "Title", notify: "111,222", attachment: "1,2" },
-    } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(
+      [
+        "TEST-1",
+        "--title",
+        "Title",
+        "--notify",
+        "111",
+        "--notify",
+        "222",
+        "--attachment",
+        "1",
+        "--attachment",
+        "2",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
@@ -76,17 +103,15 @@ describe("issue edit", () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
     await expectStdoutContaining(async () => {
-      const { edit } = await import("./edit");
-      await edit.run?.({ args: { issue: "TEST-1", title: "Title", json: "" } } as never);
+      const { default: edit } = await import("./edit");
+      await edit.parseAsync(["TEST-1", "--title", "Title", "--json"], { from: "user" });
     }, "TEST-1");
   });
 
   it("throws error for unknown priority name", async () => {
-    const { edit } = await import("./edit");
+    const { default: edit } = await import("./edit");
     await expect(
-      edit.run?.({
-        args: { issue: "TEST-1", priority: "invalid" },
-      } as never),
+      edit.parseAsync(["TEST-1", "--priority", "invalid"], { from: "user" }),
     ).rejects.toThrow('Unknown priority "invalid". Valid values: high, normal, low');
   });
 });

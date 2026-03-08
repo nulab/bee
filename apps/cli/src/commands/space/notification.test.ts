@@ -19,8 +19,8 @@ describe("space notification", () => {
       updated: "2024-03-01T09:00:00Z",
     });
 
-    const { notification } = await import("./notification");
-    await notification.run?.({ args: {} } as never);
+    const { default: notification } = await import("./notification");
+    await notification.parseAsync([], { from: "user" });
 
     expect(mockClient.getSpaceNotification).toHaveBeenCalled();
     expect(consola.log).toHaveBeenCalledWith(
@@ -35,8 +35,8 @@ describe("space notification", () => {
       updated: null,
     });
 
-    const { notification } = await import("./notification");
-    await notification.run?.({ args: {} } as never);
+    const { default: notification } = await import("./notification");
+    await notification.parseAsync([], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No space notification set.");
   });
@@ -48,8 +48,8 @@ describe("space notification", () => {
     });
 
     await expectStdoutContaining(async () => {
-      const { notification } = await import("./notification");
-      await notification.run?.({ args: { json: "" } } as never);
+      const { default: notification } = await import("./notification");
+      await notification.parseAsync(["--json"], { from: "user" });
     }, "Important notice");
   });
 });

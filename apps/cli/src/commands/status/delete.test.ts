@@ -23,10 +23,10 @@ describe("status delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteProjectStatus.mockResolvedValue({ id: 1, name: "Open", color: "#e30000" });
 
-    const { deleteStatus } = await import("./delete");
-    await deleteStatus.run?.({
-      args: { status: "1", project: "TEST", "substitute-status-id": "2" },
-    } as never);
+    const { default: deleteStatus } = await import("./delete");
+    await deleteStatus.parseAsync(["1", "-p", "TEST", "--substitute-status-id", "2"], {
+      from: "user",
+    });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete status 1? This cannot be undone.",
@@ -40,10 +40,10 @@ describe("status delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteProjectStatus.mockResolvedValue({ id: 1, name: "Open", color: "#e30000" });
 
-    const { deleteStatus } = await import("./delete");
-    await deleteStatus.run?.({
-      args: { status: "1", project: "TEST", "substitute-status-id": "2", yes: true },
-    } as never);
+    const { default: deleteStatus } = await import("./delete");
+    await deleteStatus.parseAsync(["1", "-p", "TEST", "--substitute-status-id", "2", "--yes"], {
+      from: "user",
+    });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete status 1? This cannot be undone.",
@@ -54,10 +54,10 @@ describe("status delete", () => {
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
 
-    const { deleteStatus } = await import("./delete");
-    await deleteStatus.run?.({
-      args: { status: "1", project: "TEST", "substitute-status-id": "2" },
-    } as never);
+    const { default: deleteStatus } = await import("./delete");
+    await deleteStatus.parseAsync(["1", "-p", "TEST", "--substitute-status-id", "2"], {
+      from: "user",
+    });
 
     expect(mockClient.deleteProjectStatus).not.toHaveBeenCalled();
   });
@@ -67,16 +67,11 @@ describe("status delete", () => {
     mockClient.deleteProjectStatus.mockResolvedValue({ id: 1, name: "Open", color: "#e30000" });
 
     await expectStdoutContaining(async () => {
-      const { deleteStatus } = await import("./delete");
-      await deleteStatus.run?.({
-        args: {
-          status: "1",
-          project: "TEST",
-          "substitute-status-id": "2",
-          yes: true,
-          json: "",
-        },
-      } as never);
+      const { default: deleteStatus } = await import("./delete");
+      await deleteStatus.parseAsync(
+        ["1", "-p", "TEST", "--substitute-status-id", "2", "--yes", "--json"],
+        { from: "user" },
+      );
     }, "Open");
   });
 });

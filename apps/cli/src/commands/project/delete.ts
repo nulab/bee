@@ -1,18 +1,24 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { confirmOrExit, outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Delete a Backlog project.
+const deleteProject = new BeeCommand("delete")
+  .summary("Delete a project")
+  .description(
+    `Delete a Backlog project.
 
 This action is irreversible. You will be prompted for confirmation unless
 \`--yes\` is provided.
 
 Requires Administrator role.`,
-
-  examples: [
+  )
+  .argument("<project>", "Project ID or project key")
+  .option("-y, --yes", "Skip confirmation prompt")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Delete a project (with confirmation)",
       command: "bee project delete PROJECT_KEY",
@@ -21,53 +27,25 @@ Requires Administrator role.`,
       description: "Delete a project without confirmation",
       command: "bee project delete PROJECT_KEY --yes",
     },
-  ],
+  ])
+  .action(async (project, opts) => {
+    const confirmed = await confirmOrExit(
+      `Are you sure you want to delete project ${project}? This cannot be undone.`,
+      opts.yes,
+    );
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    if (!confirmed) {
+      return;
+    }
 
-const deleteProject = withUsage(
-  defineCommand({
-    meta: {
-      name: "delete",
-      description: "Delete a project",
-    },
-    args: {
-      ...outputArgs,
-      project: {
-        type: "positional",
-        description: "Project ID or project key",
-        required: true,
-        default: process.env.BACKLOG_PROJECT,
-      },
-      yes: {
-        type: "boolean",
-        alias: "y",
-        description: "Skip confirmation prompt",
-      },
-    },
-    async run({ args }) {
-      const confirmed = await confirmOrExit(
-        `Are you sure you want to delete project ${args.project}? This cannot be undone.`,
-        args.yes,
-      );
+    const { client } = await getClient();
 
-      if (!confirmed) {
-        return;
-      }
+    const projectData = await client.deleteProject(project);
 
-      const { client } = await getClient();
+    const jsonArg = opts.json === true ? "" : opts.json;
+    outputResult(projectData, { ...opts, json: jsonArg }, (data) => {
+      consola.success(`Deleted project ${data.projectKey}: ${data.name}`);
+    });
+  });
 
-      const project = await client.deleteProject(args.project);
-
-      outputResult(project, args, (data) => {
-        consola.success(`Deleted project ${data.projectKey}: ${data.name}`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, deleteProject };
+export default deleteProject;

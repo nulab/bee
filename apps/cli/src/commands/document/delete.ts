@@ -1,16 +1,22 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { confirmOrExit, outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Delete a Backlog document.
+const deleteDocument = new BeeCommand("delete")
+  .summary("Delete a document")
+  .description(
+    `Delete a Backlog document.
 
 This action is irreversible. You will be prompted for confirmation unless
 \`--yes\` is provided.`,
-
-  examples: [
+  )
+  .argument("<document>", "Document ID")
+  .option("-y, --yes", "Skip confirmation prompt")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     {
       description: "Delete a document (with confirmation)",
       command: "bee document delete 12345",
@@ -19,53 +25,24 @@ This action is irreversible. You will be prompted for confirmation unless
       description: "Delete a document without confirmation",
       command: "bee document delete 12345 --yes",
     },
-  ],
+  ])
+  .action(async (document, opts) => {
+    const confirmed = await confirmOrExit(
+      `Are you sure you want to delete document ${document}? This cannot be undone.`,
+      opts.yes,
+    );
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    if (!confirmed) {
+      return;
+    }
 
-const deleteDocument = withUsage(
-  defineCommand({
-    meta: {
-      name: "delete",
-      description: "Delete a document",
-    },
-    args: {
-      ...outputArgs,
-      document: {
-        type: "positional",
-        description: "Document ID",
-        valueHint: "<number>",
-        required: true,
-      },
-      yes: {
-        type: "boolean",
-        alias: "y",
-        description: "Skip confirmation prompt",
-      },
-    },
-    async run({ args }) {
-      const confirmed = await confirmOrExit(
-        `Are you sure you want to delete document ${args.document}? This cannot be undone.`,
-        args.yes,
-      );
+    const { client } = await getClient();
 
-      if (!confirmed) {
-        return;
-      }
+    const doc = await client.deleteDocument(document);
 
-      const { client } = await getClient();
+    outputResult(doc, opts, (data) => {
+      consola.success(`Deleted document ${data.title} (ID: ${data.id})`);
+    });
+  });
 
-      const doc = await client.deleteDocument(args.document);
-
-      outputResult(doc, args, (data) => {
-        consola.success(`Deleted document ${data.title} (ID: ${data.id})`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, deleteDocument };
+export default deleteDocument;

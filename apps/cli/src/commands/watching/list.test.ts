@@ -32,8 +32,8 @@ describe("watching list", () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getWatchingListItems.mockResolvedValue(sampleWatchings);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getMyself).toHaveBeenCalled();
@@ -45,8 +45,8 @@ describe("watching list", () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getWatchingListItems.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No watching items found.");
   });
@@ -56,8 +56,8 @@ describe("watching list", () => {
     mockClient.getWatchingListItems.mockResolvedValue(sampleWatchings);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["--json"], { from: "user" });
     }, "TEST-1");
   });
 });

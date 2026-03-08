@@ -27,8 +27,8 @@ describe("wiki create", () => {
     mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
     mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: { project: "TEST", name: "My Page", body: "Hello" } } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["-p", "TEST", "-n", "My Page", "-b", "Hello"], { from: "user" });
 
     expect(mockClient.postWiki).toHaveBeenCalledWith({
       projectId: 100,
@@ -45,8 +45,8 @@ describe("wiki create", () => {
     mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
     mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: { project: "TEST", name: "My Page", body: "" } } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["-p", "TEST", "-n", "My Page", "-b", ""], { from: "user" });
 
     expect(resolveStdinArg).toHaveBeenCalledWith("");
     expect(mockClient.postWiki).toHaveBeenCalledWith(
@@ -61,8 +61,8 @@ describe("wiki create", () => {
     mockClient.getProjects.mockResolvedValue([{ id: 200, projectKey: "PROMPTED" }]);
     mockClient.postWiki.mockResolvedValue({ id: 2, name: "Prompted Page" });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: {} } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync([], { from: "user" });
 
     expect(promptRequired).toHaveBeenCalledWith("Project:", undefined);
     expect(promptRequired).toHaveBeenCalledWith("Page name:", undefined);
@@ -73,10 +73,10 @@ describe("wiki create", () => {
     mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
     mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: { project: "TEST", name: "My Page", body: "Hello", "mail-notify": true },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["-p", "TEST", "-n", "My Page", "-b", "Hello", "--mail-notify"], {
+      from: "user",
+    });
 
     expect(mockClient.postWiki).toHaveBeenCalledWith(expect.objectContaining({ mailNotify: true }));
   });
@@ -87,10 +87,10 @@ describe("wiki create", () => {
     mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
 
     await expectStdoutContaining(async () => {
-      const { create } = await import("./create");
-      await create.run?.({
-        args: { project: "TEST", name: "My Page", body: "Hello", json: "" },
-      } as never);
+      const { default: create } = await import("./create");
+      await create.parseAsync(["-p", "TEST", "-n", "My Page", "-b", "Hello", "--json"], {
+        from: "user",
+      });
     }, "My Page");
   });
 });

@@ -48,10 +48,8 @@ describe("auth login", () => {
         updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
       );
 
-      const { login } = await import("./login");
-      await login.run?.({
-        args: { method: "api-key" },
-      } as never);
+      const { default: login } = await import("./login");
+      await login.parseAsync(["--method", "api-key"], { from: "user" });
 
       expect(Backlog).toHaveBeenCalledWith({ host: "example.backlog.com", apiKey: "test-api-key" });
       expect(mockGetMyself).toHaveBeenCalled();
@@ -83,10 +81,8 @@ describe("auth login", () => {
         }),
       );
 
-      const { login } = await import("./login");
-      await login.run?.({
-        args: { method: "api-key" },
-      } as never);
+      const { default: login } = await import("./login");
+      await login.parseAsync(["--method", "api-key"], { from: "user" });
 
       const result = vi.mocked(updateConfig).mock.results[0]?.value;
       expect(result.spaces).toEqual([
@@ -104,12 +100,8 @@ describe("auth login", () => {
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("bad-key");
 
-      const { login } = await import("./login");
-      await expect(
-        login.run?.({
-          args: { method: "api-key" },
-        } as never),
-      ).rejects.toThrow(
+      const { default: login } = await import("./login");
+      await expect(login.parseAsync(["--method", "api-key"], { from: "user" })).rejects.toThrow(
         "Authentication failed. Could not connect to example.backlog.com with the provided API key.",
       );
       expect(updateConfig).not.toHaveBeenCalled();
@@ -118,12 +110,10 @@ describe("auth login", () => {
 
   describe("invalid method", () => {
     it("returns error for invalid method", async () => {
-      const { login } = await import("./login");
-      await expect(
-        login.run?.({
-          args: { method: "invalid" },
-        } as never),
-      ).rejects.toThrow('Invalid auth method. Use "api-key" or "oauth".');
+      const { default: login } = await import("./login");
+      await expect(login.parseAsync(["--method", "invalid"], { from: "user" })).rejects.toThrow(
+        'Invalid auth method. Use "api-key" or "oauth".',
+      );
     });
   });
 
@@ -158,14 +148,11 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { login } = await import("./login");
-      await login.run?.({
-        args: {
-          method: "oauth",
-          "client-id": "my-client-id",
-          "client-secret": "my-client-secret",
-        },
-      } as never);
+      const { default: login } = await import("./login");
+      await login.parseAsync(
+        ["--method", "oauth", "--client-id", "my-client-id", "--client-secret", "my-client-secret"],
+        { from: "user" },
+      );
 
       expect(startCallbackServer).toHaveBeenCalled();
       expect(OAuth2).toHaveBeenCalledWith({
@@ -221,15 +208,19 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { login } = await import("./login");
+      const { default: login } = await import("./login");
       await expect(
-        login.run?.({
-          args: {
-            method: "oauth",
-            "client-id": "my-client-id",
-            "client-secret": "my-client-secret",
-          },
-        } as never),
+        login.parseAsync(
+          [
+            "--method",
+            "oauth",
+            "--client-id",
+            "my-client-id",
+            "--client-secret",
+            "my-client-secret",
+          ],
+          { from: "user" },
+        ),
       ).rejects.toThrow("OAuth authorization failed: OAuth callback timed out after 5 minutes");
       expect(mockStop).toHaveBeenCalled();
     });
@@ -242,15 +233,19 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { login } = await import("./login");
+      const { default: login } = await import("./login");
       await expect(
-        login.run?.({
-          args: {
-            method: "oauth",
-            "client-id": "my-client-id",
-            "client-secret": "my-client-secret",
-          },
-        } as never),
+        login.parseAsync(
+          [
+            "--method",
+            "oauth",
+            "--client-id",
+            "my-client-id",
+            "--client-secret",
+            "my-client-secret",
+          ],
+          { from: "user" },
+        ),
       ).rejects.toThrow("Failed to exchange authorization code for tokens.");
     });
 
@@ -262,15 +257,19 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { login } = await import("./login");
+      const { default: login } = await import("./login");
       await expect(
-        login.run?.({
-          args: {
-            method: "oauth",
-            "client-id": "my-client-id",
-            "client-secret": "my-client-secret",
-          },
-        } as never),
+        login.parseAsync(
+          [
+            "--method",
+            "oauth",
+            "--client-id",
+            "my-client-id",
+            "--client-secret",
+            "my-client-secret",
+          ],
+          { from: "user" },
+        ),
       ).rejects.toThrow("Authentication verification failed.");
     });
 
@@ -299,14 +298,11 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { login } = await import("./login");
-      await login.run?.({
-        args: {
-          method: "oauth",
-          "client-id": "my-client-id",
-          "client-secret": "my-client-secret",
-        },
-      } as never);
+      const { default: login } = await import("./login");
+      await login.parseAsync(
+        ["--method", "oauth", "--client-id", "my-client-id", "--client-secret", "my-client-secret"],
+        { from: "user" },
+      );
 
       const result = vi.mocked(updateConfig).mock.results[0]?.value;
       expect(result.spaces).toEqual([

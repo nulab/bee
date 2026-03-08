@@ -1,14 +1,12 @@
-import { defineCommand } from "citty";
+import { BeeCommand } from "../../lib/bee-command";
 
-export const space = defineCommand({
-  meta: {
-    name: "space",
-    description: "Manage space information",
-  },
-  subCommands: {
-    info: () => import("./info").then((m) => m.info),
-    activities: () => import("./activities").then((m) => m.activities),
-    "disk-usage": () => import("./disk-usage").then((m) => m.diskUsage),
-    notification: () => import("./notification").then((m) => m.notification),
-  },
-});
+const space = new BeeCommand("space").summary("Manage space information");
+
+await space.addCommands([
+  import("./info.js"),
+  import("./activities.js"),
+  import("./disk-usage.js"),
+  import("./notification.js"),
+]);
+
+export default space;

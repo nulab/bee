@@ -1,14 +1,12 @@
-import { defineCommand } from "citty";
+import { BeeCommand } from "../../lib/bee-command";
 
-export const category = defineCommand({
-  meta: {
-    name: "category",
-    description: "Manage project categories",
-  },
-  subCommands: {
-    list: () => import("./list").then((m) => m.list),
-    create: () => import("./create").then((m) => m.create),
-    edit: () => import("./edit").then((m) => m.edit),
-    delete: () => import("./delete").then((m) => m.deleteCategory),
-  },
-});
+const category = new BeeCommand("category").summary("Manage project categories");
+
+await category.addCommands([
+  import("./list.js"),
+  import("./create.js"),
+  import("./edit.js"),
+  import("./delete.js"),
+]);
+
+export default category;

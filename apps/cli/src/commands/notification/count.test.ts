@@ -17,8 +17,8 @@ describe("notification count", () => {
   it("counts all notifications when no flags are set", async () => {
     mockClient.getNotificationsCount.mockResolvedValue({ count: 42 });
 
-    const { count } = await import("./count");
-    await count.run?.({ args: {} } as never);
+    const { default: count } = await import("./count");
+    await count.parseAsync([], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getNotificationsCount).toHaveBeenCalledWith({});
@@ -28,8 +28,8 @@ describe("notification count", () => {
   it("filters read notifications with --already-read read", async () => {
     mockClient.getNotificationsCount.mockResolvedValue({ count: 10 });
 
-    const { count } = await import("./count");
-    await count.run?.({ args: { "already-read": "read" } } as never);
+    const { default: count } = await import("./count");
+    await count.parseAsync(["--already-read", "read"], { from: "user" });
 
     expect(mockClient.getNotificationsCount).toHaveBeenCalledWith(
       expect.objectContaining({ alreadyRead: true }),
@@ -39,8 +39,8 @@ describe("notification count", () => {
   it("filters unread notifications with --already-read unread", async () => {
     mockClient.getNotificationsCount.mockResolvedValue({ count: 3 });
 
-    const { count } = await import("./count");
-    await count.run?.({ args: { "already-read": "unread" } } as never);
+    const { default: count } = await import("./count");
+    await count.parseAsync(["--already-read", "unread"], { from: "user" });
 
     expect(mockClient.getNotificationsCount).toHaveBeenCalledWith(
       expect.objectContaining({ alreadyRead: false }),
@@ -50,8 +50,8 @@ describe("notification count", () => {
   it("counts all with --already-read all", async () => {
     mockClient.getNotificationsCount.mockResolvedValue({ count: 50 });
 
-    const { count } = await import("./count");
-    await count.run?.({ args: { "already-read": "all" } } as never);
+    const { default: count } = await import("./count");
+    await count.parseAsync(["--already-read", "all"], { from: "user" });
 
     expect(mockClient.getNotificationsCount).toHaveBeenCalledWith({});
   });
@@ -59,8 +59,8 @@ describe("notification count", () => {
   it("filters by resource-already-read", async () => {
     mockClient.getNotificationsCount.mockResolvedValue({ count: 5 });
 
-    const { count } = await import("./count");
-    await count.run?.({ args: { "resource-already-read": "read" } } as never);
+    const { default: count } = await import("./count");
+    await count.parseAsync(["--resource-already-read", "read"], { from: "user" });
 
     expect(mockClient.getNotificationsCount).toHaveBeenCalledWith(
       expect.objectContaining({ resourceAlreadyRead: true }),
@@ -71,8 +71,8 @@ describe("notification count", () => {
     mockClient.getNotificationsCount.mockResolvedValue({ count: 42 });
 
     await expectStdoutContaining(async () => {
-      const { count } = await import("./count");
-      await count.run?.({ args: { json: "" } } as never);
+      const { default: count } = await import("./count");
+      await count.parseAsync(["--json"], { from: "user" });
     }, "42");
   });
 });

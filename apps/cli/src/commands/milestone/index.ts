@@ -1,14 +1,12 @@
-import { defineCommand } from "citty";
+import { BeeCommand } from "../../lib/bee-command";
 
-export const milestone = defineCommand({
-  meta: {
-    name: "milestone",
-    description: "Manage project milestones",
-  },
-  subCommands: {
-    list: () => import("./list").then((m) => m.list),
-    create: () => import("./create").then((m) => m.create),
-    edit: () => import("./edit").then((m) => m.edit),
-    delete: () => import("./delete").then((m) => m.deleteMilestone),
-  },
-});
+const milestone = new BeeCommand("milestone").summary("Manage project milestones");
+
+await milestone.addCommands([
+  import("./list.js"),
+  import("./create.js"),
+  import("./edit.js"),
+  import("./delete.js"),
+]);
+
+export default milestone;

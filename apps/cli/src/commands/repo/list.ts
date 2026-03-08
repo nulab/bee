@@ -1,57 +1,42 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `List Git repositories in a Backlog project.
+const list = new BeeCommand("list")
+  .summary("List repositories in a project")
+  .description(
+    `List Git repositories in a Backlog project.
 
 By default, repositories are listed in the configured display order.`,
-
-  examples: [
+  )
+  .argument("<project>", "Project ID or project key")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     { description: "List repositories in a project", command: "bee repo list PROJECT_KEY" },
     { description: "Output as JSON", command: "bee repo list PROJECT_KEY --json" },
-  ],
+  ])
+  .action(async (project, opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const repos = await client.getGitRepositories(project);
 
-const list = withUsage(
-  defineCommand({
-    meta: {
-      name: "list",
-      description: "List repositories in a project",
-    },
-    args: {
-      ...outputArgs,
-      project: commonArgs.projectPositional,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    outputResult(repos, opts, (data) => {
+      if (data.length === 0) {
+        consola.info("No repositories found.");
+        return;
+      }
 
-      const repos = await client.getGitRepositories(args.project);
+      const rows: Row[] = data.map((repo) => [
+        { header: "NAME", value: repo.name },
+        { header: "DESCRIPTION", value: repo.description ?? "" },
+        { header: "LAST PUSHED", value: repo.pushedAt?.slice(0, 10) ?? "" },
+      ]);
 
-      outputResult(repos, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No repositories found.");
-          return;
-        }
+      printTable(rows);
+    });
+  });
 
-        const rows: Row[] = data.map((repo) => [
-          { header: "NAME", value: repo.name },
-          { header: "DESCRIPTION", value: repo.description ?? "" },
-          { header: "LAST PUSHED", value: repo.pushedAt?.slice(0, 10) ?? "" },
-        ]);
-
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, list };
+export default list;

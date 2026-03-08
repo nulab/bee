@@ -1,57 +1,39 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `List wiki tags in a Backlog project.
+const tags = new BeeCommand("tags")
+  .summary("List wiki tags")
+  .description(
+    `List wiki tags in a Backlog project.
 
 Tags are labels attached to wiki pages for organization.`,
+  )
+  .argument("<project>", "Project ID or project key")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
+    { description: "List wiki tags", command: "bee wiki tags PROJECT" },
+    { description: "Output as JSON", command: "bee wiki tags PROJECT --json" },
+  ])
+  .action(async (project, opts) => {
+    const { client } = await getClient();
 
-  examples: [
-    { description: "List wiki tags", command: "bee wiki tags -p PROJECT" },
-    { description: "Output as JSON", command: "bee wiki tags -p PROJECT --json" },
-  ],
+    const result = await client.getWikisTags(project);
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const json = opts.json === true ? "" : opts.json;
+    outputResult(result, { json }, (data) => {
+      if (data.length === 0) {
+        consola.info("No wiki tags found.");
+        return;
+      }
 
-const tags = withUsage(
-  defineCommand({
-    meta: {
-      name: "tags",
-      description: "List wiki tags",
-    },
-    args: {
-      ...outputArgs,
-      project: {
-        type: "positional",
-        description: "Project ID or project key",
-        required: true,
-        default: process.env.BACKLOG_PROJECT,
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+      for (const tag of data) {
+        consola.log(tag.name);
+      }
+    });
+  });
 
-      const result = await client.getWikisTags(args.project);
-
-      outputResult(result, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No wiki tags found.");
-          return;
-        }
-
-        for (const tag of data) {
-          consola.log(tag.name);
-        }
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, tags };
+export default tags;

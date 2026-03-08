@@ -23,10 +23,10 @@ describe("issue-type delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteIssueType.mockResolvedValue({ id: 1, name: "Bug", color: "#e30000" });
 
-    const { deleteIssueType } = await import("./delete");
-    await deleteIssueType.run?.({
-      args: { issueType: "1", project: "TEST", "substitute-issue-type-id": "2" },
-    } as never);
+    const { default: deleteIssueType } = await import("./delete");
+    await deleteIssueType.parseAsync(["1", "-p", "TEST", "--substitute-issue-type-id", "2"], {
+      from: "user",
+    });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete issue type 1? This cannot be undone.",
@@ -42,10 +42,11 @@ describe("issue-type delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteIssueType.mockResolvedValue({ id: 1, name: "Bug", color: "#e30000" });
 
-    const { deleteIssueType } = await import("./delete");
-    await deleteIssueType.run?.({
-      args: { issueType: "1", project: "TEST", "substitute-issue-type-id": "2", yes: true },
-    } as never);
+    const { default: deleteIssueType } = await import("./delete");
+    await deleteIssueType.parseAsync(
+      ["1", "-p", "TEST", "--substitute-issue-type-id", "2", "--yes"],
+      { from: "user" },
+    );
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete issue type 1? This cannot be undone.",
@@ -56,10 +57,10 @@ describe("issue-type delete", () => {
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
 
-    const { deleteIssueType } = await import("./delete");
-    await deleteIssueType.run?.({
-      args: { issueType: "1", project: "TEST", "substitute-issue-type-id": "2" },
-    } as never);
+    const { default: deleteIssueType } = await import("./delete");
+    await deleteIssueType.parseAsync(["1", "-p", "TEST", "--substitute-issue-type-id", "2"], {
+      from: "user",
+    });
 
     expect(mockClient.deleteIssueType).not.toHaveBeenCalled();
   });
@@ -69,16 +70,11 @@ describe("issue-type delete", () => {
     mockClient.deleteIssueType.mockResolvedValue({ id: 1, name: "Bug", color: "#e30000" });
 
     await expectStdoutContaining(async () => {
-      const { deleteIssueType } = await import("./delete");
-      await deleteIssueType.run?.({
-        args: {
-          issueType: "1",
-          project: "TEST",
-          "substitute-issue-type-id": "2",
-          yes: true,
-          json: "",
-        },
-      } as never);
+      const { default: deleteIssueType } = await import("./delete");
+      await deleteIssueType.parseAsync(
+        ["1", "-p", "TEST", "--substitute-issue-type-id", "2", "--yes", "--json"],
+        { from: "user" },
+      );
     }, "Bug");
   });
 });

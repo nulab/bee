@@ -38,8 +38,8 @@ describe("repo view", () => {
   it("displays repository details", async () => {
     mockClient.getGitRepository.mockResolvedValue(sampleRepo);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { project: "PROJ", repository: "api-server" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["api-server", "--project", "PROJ"], { from: "user" });
 
     expect(mockClient.getGitRepository).toHaveBeenCalledWith("PROJ", "api-server");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("api-server"));
@@ -53,10 +53,8 @@ describe("repo view", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    const { view } = await import("./view");
-    await view.run?.({
-      args: { project: "PROJ", repository: "api-server", web: true },
-    } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["api-server", "--project", "PROJ", "--web"], { from: "user" });
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/git/PROJ/api-server",
@@ -70,8 +68,8 @@ describe("repo view", () => {
     mockClient.getGitRepository.mockResolvedValue(sampleRepo);
 
     await expectStdoutContaining(async () => {
-      const { view } = await import("./view");
-      await view.run?.({ args: { project: "PROJ", repository: "api-server", json: "" } } as never);
+      const { default: view } = await import("./view");
+      await view.parseAsync(["api-server", "--project", "PROJ", "--json"], { from: "user" });
     }, "api-server");
   });
 });

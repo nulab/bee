@@ -1,93 +1,66 @@
 import { getClient } from "@repo/backlog-utils";
 import { UserError } from "@repo/cli-utils";
-import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Add a star to an issue, comment, wiki page, or pull request comment.
+const add = new BeeCommand("add")
+  .summary("Add a star")
+  .description(
+    `Add a star to an issue, comment, wiki page, or pull request comment.
 
 Exactly one of \`--issue\`, \`--comment\`, \`--wiki\`, or \`--pr-comment\` must be
 provided. The \`--issue\` flag accepts an issue key (e.g., PROJECT-123) or a
 numeric ID. Other flags require numeric IDs.`,
-
-  examples: [
+  )
+  .addOption(opt.issue())
+  .option("--comment <number>", "Comment ID to star")
+  .option("--wiki <number>", "Wiki page ID to star")
+  .option("--pr-comment <number>", "Pull request comment ID to star")
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "Star an issue by key", command: "bee star add --issue PROJECT-123" },
     { description: "Star an issue by ID", command: "bee star add --issue 12345" },
     { description: "Star a comment", command: "bee star add --comment 67890" },
     { description: "Star a wiki page", command: "bee star add --wiki 111" },
     { description: "Star a pull request comment", command: "bee star add --pr-comment 222" },
-  ],
+  ])
+  .action(async (opts) => {
+    const flags = [opts.issue, opts.comment, opts.wiki, opts.prComment].filter(
+      (v) => v !== undefined,
+    );
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
-
-const add = withUsage(
-  defineCommand({
-    meta: {
-      name: "add",
-      description: "Add a star",
-    },
-    args: {
-      issue: commonArgs.issue,
-      comment: {
-        type: "string",
-        description: "Comment ID to star",
-        valueHint: "<number>",
-      },
-      wiki: {
-        type: "string",
-        description: "Wiki page ID to star",
-        valueHint: "<number>",
-      },
-      "pr-comment": {
-        type: "string",
-        description: "Pull request comment ID to star",
-        valueHint: "<number>",
-      },
-    },
-    async run({ args }) {
-      const flags = [args.issue, args.comment, args.wiki, args["pr-comment"]].filter(
-        (v) => v !== undefined,
+    if (flags.length === 0) {
+      throw new UserError(
+        "Exactly one of --issue, --comment, --wiki, or --pr-comment must be provided.",
       );
+    }
 
-      if (flags.length === 0) {
-        throw new UserError(
-          "Exactly one of --issue, --comment, --wiki, or --pr-comment must be provided.",
-        );
-      }
+    if (flags.length > 1) {
+      throw new UserError(
+        "Only one of --issue, --comment, --wiki, or --pr-comment can be provided at a time.",
+      );
+    }
 
-      if (flags.length > 1) {
-        throw new UserError(
-          "Only one of --issue, --comment, --wiki, or --pr-comment can be provided at a time.",
-        );
-      }
+    const { client } = await getClient();
 
-      const { client } = await getClient();
+    if (opts.issue) {
+      const issue = /^\d+$/.test(opts.issue)
+        ? { id: Number(opts.issue) }
+        : await client.getIssue(opts.issue);
+      const issueId = issue.id;
+      await client.postStar({ issueId });
+      consola.success(`Starred issue ${opts.issue}.`);
+    } else if (opts.comment) {
+      await client.postStar({ commentId: Number(opts.comment) });
+      consola.success(`Starred comment ${opts.comment}.`);
+    } else if (opts.wiki) {
+      await client.postStar({ wikiId: Number(opts.wiki) });
+      consola.success(`Starred wiki ${opts.wiki}.`);
+    } else if (opts.prComment) {
+      await client.postStar({ pullRequestCommentId: Number(opts.prComment) });
+      consola.success(`Starred pull request comment ${opts.prComment}.`);
+    }
+  });
 
-      if (args.issue) {
-        const issue = /^\d+$/.test(args.issue)
-          ? { id: Number(args.issue) }
-          : await client.getIssue(args.issue);
-        const issueId = issue.id;
-        await client.postStar({ issueId });
-        consola.success(`Starred issue ${args.issue}.`);
-      } else if (args.comment) {
-        await client.postStar({ commentId: Number(args.comment) });
-        consola.success(`Starred comment ${args.comment}.`);
-      } else if (args.wiki) {
-        await client.postStar({ wikiId: Number(args.wiki) });
-        consola.success(`Starred wiki ${args.wiki}.`);
-      } else if (args["pr-comment"]) {
-        await client.postStar({ pullRequestCommentId: Number(args["pr-comment"]) });
-        consola.success(`Starred pull request comment ${args["pr-comment"]}.`);
-      }
-    },
-  }),
-  commandUsage,
-);
-
-export { add, commandUsage };
+export default add;

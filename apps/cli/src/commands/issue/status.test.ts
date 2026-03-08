@@ -27,8 +27,8 @@ describe("issue status", () => {
       { issueKey: "PROJ-3", summary: "In progress", status: { name: "In Progress" } },
     ]);
 
-    const { status } = await import("./status");
-    await status.run?.({ args: {} } as never);
+    const { default: status } = await import("./status");
+    await status.parseAsync([], { from: "user" });
 
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.getIssues).toHaveBeenCalledWith(
@@ -48,8 +48,8 @@ describe("issue status", () => {
     mockClient.getMyself.mockResolvedValue(sampleUser);
     mockClient.getIssues.mockResolvedValue([]);
 
-    const { status } = await import("./status");
-    await status.run?.({ args: {} } as never);
+    const { default: status } = await import("./status");
+    await status.parseAsync([], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No issues assigned to you.");
   });
@@ -61,8 +61,8 @@ describe("issue status", () => {
     ]);
 
     await expectStdoutContaining(async () => {
-      const { status } = await import("./status");
-      await status.run?.({ args: { json: "" } } as never);
+      const { default: status } = await import("./status");
+      await status.parseAsync(["--json"], { from: "user" });
     }, "PROJ-1");
   });
 });

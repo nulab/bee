@@ -1,13 +1,7 @@
-import { defineCommand } from "citty";
+import { BeeCommand } from "../../lib/bee-command";
 
-export const repo = defineCommand({
-  meta: {
-    name: "repo",
-    description: "Manage Backlog Git repositories",
-  },
-  subCommands: {
-    list: () => import("./list").then((m) => m.list),
-    view: () => import("./view").then((m) => m.view),
-    clone: () => import("./clone").then((m) => m.clone),
-  },
-});
+const repo = new BeeCommand("repo").summary("Manage Backlog Git repositories");
+
+await repo.addCommands([import("./list.js"), import("./view.js"), import("./clone.js")]);
+
+export default repo;

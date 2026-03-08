@@ -23,8 +23,8 @@ describe("team delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteTeam.mockResolvedValue({ id: 1, name: "Test Team", members: [] });
 
-    const { deleteTeam } = await import("./delete");
-    await deleteTeam.run?.({ args: { team: "1" } } as never);
+    const { default: deleteTeam } = await import("./delete");
+    await deleteTeam.parseAsync(["1"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete team 1? This cannot be undone.",
@@ -38,8 +38,8 @@ describe("team delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteTeam.mockResolvedValue({ id: 1, name: "Test Team", members: [] });
 
-    const { deleteTeam } = await import("./delete");
-    await deleteTeam.run?.({ args: { team: "1", yes: true } } as never);
+    const { default: deleteTeam } = await import("./delete");
+    await deleteTeam.parseAsync(["1", "--yes"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete team 1? This cannot be undone.",
@@ -50,8 +50,8 @@ describe("team delete", () => {
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
 
-    const { deleteTeam } = await import("./delete");
-    await deleteTeam.run?.({ args: { team: "1" } } as never);
+    const { default: deleteTeam } = await import("./delete");
+    await deleteTeam.parseAsync(["1"], { from: "user" });
 
     expect(mockClient.deleteTeam).not.toHaveBeenCalled();
   });
@@ -61,8 +61,8 @@ describe("team delete", () => {
     mockClient.deleteTeam.mockResolvedValue({ id: 1, name: "Test Team", members: [] });
 
     await expectStdoutContaining(async () => {
-      const { deleteTeam } = await import("./delete");
-      await deleteTeam.run?.({ args: { team: "1", yes: true, json: "" } } as never);
+      const { default: deleteTeam } = await import("./delete");
+      await deleteTeam.parseAsync(["1", "--yes", "--json"], { from: "user" });
     }, "Test Team");
   });
 });

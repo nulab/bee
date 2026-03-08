@@ -1,17 +1,9 @@
 import { ACTIVITY_LABELS, getClient } from "@repo/backlog-utils";
-import {
-  type Row,
-  formatDate,
-  outputArgs,
-  outputResult,
-  printTable,
-  splitArg,
-} from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { type Row, formatDate, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { collectNum } from "../../lib/common-options";
 
 const getActivitySummary = (activity: {
   type: number;
@@ -40,21 +32,35 @@ const getActivitySummary = (activity: {
   return "";
 };
 
-const commandUsage: CommandUsage = {
-  long: `List recent activities across the Backlog space.
+const activities = new BeeCommand("activities")
+  .summary("List space activities")
+  .description(
+    `List recent activities across the Backlog space.
 
 Shows the most recent updates across the entire space, including
 issue changes, wiki edits, git pushes, and other activities. Results are
 ordered by most recent first.
 
-Use \`--activity-type\` to filter by specific activity types (comma-separated IDs).
+Use \`--activity-type\` to filter by specific activity types (repeatable).
 Use \`--count\` to control how many activities are returned (default: 20, max: 100).`,
-
-  examples: [
+  )
+  .option(
+    "--activity-type <id>",
+    "Filter by activity type IDs (repeatable)",
+    collectNum,
+    [] satisfies number[],
+  )
+  .addOption(opt.count())
+  .addOption(opt.order())
+  .addOption(opt.minId())
+  .addOption(opt.maxId())
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "List space activities", command: "bee space activities" },
     {
       description: "Show only issue-related activities",
-      command: "bee space activities --activity-type 1,2,3",
+      command: "bee space activities --activity-type 1 --activity-type 2 --activity-type 3",
     },
     {
       description: "Show last 50 activities",
@@ -64,62 +70,35 @@ Use \`--count\` to control how many activities are returned (default: 20, max: 1
       description: "Output as JSON",
       command: "bee space activities --json",
     },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const activityTypeId: number[] = opts.activityType;
 
-const activities = withUsage(
-  defineCommand({
-    meta: {
-      name: "activities",
-      description: "List space activities",
-    },
-    args: {
-      ...outputArgs,
-      "activity-type": {
-        type: "string",
-        description: "Filter by activity type IDs (comma-separated)",
-        valueHint: "<1,2,3>",
-      },
-      count: commonArgs.count,
-      order: commonArgs.order,
-      "min-id": commonArgs.minId,
-      "max-id": commonArgs.maxId,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const activityList = await client.getSpaceActivities({
+      activityTypeId,
+      count: opts.count ? Number(opts.count) : undefined,
+      order: opts.order,
+      minId: opts.minId ? Number(opts.minId) : undefined,
+      maxId: opts.maxId ? Number(opts.maxId) : undefined,
+    });
 
-      const activityTypeId = splitArg(args["activity-type"], v.number());
+    outputResult(activityList, opts, (data) => {
+      if (data.length === 0) {
+        consola.info("No activities found.");
+        return;
+      }
 
-      const activityList = await client.getSpaceActivities({
-        activityTypeId,
-        count: args.count ? Number(args.count) : undefined,
-        order: args.order as "asc" | "desc" | undefined,
-        minId: args["min-id"] ? Number(args["min-id"]) : undefined,
-        maxId: args["max-id"] ? Number(args["max-id"]) : undefined,
-      });
+      const rows: Row[] = data.map((activity) => [
+        { header: "DATE", value: formatDate(activity.created) },
+        { header: "TYPE", value: ACTIVITY_LABELS[activity.type] ?? `Type ${activity.type}` },
+        { header: "PROJECT", value: activity.project?.name ?? "" },
+        { header: "SUMMARY", value: getActivitySummary(activity) },
+      ]);
 
-      outputResult(activityList, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No activities found.");
-          return;
-        }
+      printTable(rows);
+    });
+  });
 
-        const rows: Row[] = data.map((activity) => [
-          { header: "DATE", value: formatDate(activity.created) },
-          { header: "TYPE", value: ACTIVITY_LABELS[activity.type] ?? `Type ${activity.type}` },
-          { header: "PROJECT", value: activity.project?.name ?? "" },
-          { header: "SUMMARY", value: getActivitySummary(activity) },
-        ]);
-
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, activities };
+export default activities;

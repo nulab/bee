@@ -1,60 +1,45 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `List milestones in a Backlog project.
+const list = new BeeCommand("list")
+  .summary("List milestones")
+  .description(
+    `List milestones in a Backlog project.
 
 Milestones (also known as versions) help track release schedules and
 group issues by development cycle.`,
-
-  examples: [
+  )
+  .argument("[project]", "Project ID or project key")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     { description: "List all milestones", command: "bee milestone list PROJECT" },
     { description: "Output as JSON", command: "bee milestone list PROJECT --json" },
-  ],
+  ])
+  .action(async (project, opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const milestones = await client.getVersions(project);
 
-const list = withUsage(
-  defineCommand({
-    meta: {
-      name: "list",
-      description: "List milestones",
-    },
-    args: {
-      ...outputArgs,
-      project: commonArgs.projectPositional,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    outputResult(milestones, opts, (data) => {
+      if (data.length === 0) {
+        consola.info("No milestones found.");
+        return;
+      }
 
-      const milestones = await client.getVersions(args.project);
+      const rows: Row[] = data.map((m) => [
+        { header: "ID", value: String(m.id) },
+        { header: "NAME", value: m.name },
+        { header: "START DATE", value: m.startDate?.slice(0, 10) ?? "" },
+        { header: "RELEASE DUE DATE", value: m.releaseDueDate?.slice(0, 10) ?? "" },
+        { header: "ARCHIVED", value: m.archived ? "Yes" : "No" },
+      ]);
 
-      outputResult(milestones, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No milestones found.");
-          return;
-        }
+      printTable(rows);
+    });
+  });
 
-        const rows: Row[] = data.map((m) => [
-          { header: "ID", value: String(m.id) },
-          { header: "NAME", value: m.name },
-          { header: "START DATE", value: m.startDate?.slice(0, 10) ?? "" },
-          { header: "RELEASE DUE DATE", value: m.releaseDueDate?.slice(0, 10) ?? "" },
-          { header: "ARCHIVED", value: m.archived ? "Yes" : "No" },
-        ]);
-
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, list };
+export default list;

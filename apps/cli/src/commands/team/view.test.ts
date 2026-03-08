@@ -30,8 +30,8 @@ describe("team view", () => {
   it("displays team details", async () => {
     mockClient.getTeam.mockResolvedValue(sampleTeam);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { team: "1" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["1"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getTeam).toHaveBeenCalledWith(1);
@@ -45,8 +45,8 @@ describe("team view", () => {
   it("displays team with no members", async () => {
     mockClient.getTeam.mockResolvedValue({ ...sampleTeam, members: [] });
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { team: "1" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["1"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Design Team"));
     expect(consola.log).not.toHaveBeenCalledWith(expect.stringContaining("Members:"));
@@ -56,8 +56,8 @@ describe("team view", () => {
     mockClient.getTeam.mockResolvedValue(sampleTeam);
 
     await expectStdoutContaining(async () => {
-      const { view } = await import("./view");
-      await view.run?.({ args: { team: "1", json: "" } } as never);
+      const { default: view } = await import("./view");
+      await view.parseAsync(["1", "--json"], { from: "user" });
     }, "Design Team");
   });
 });

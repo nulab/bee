@@ -24,17 +24,24 @@ describe("pr create", () => {
   it("creates a pull request with required fields", async () => {
     mockClient.postPullRequest.mockResolvedValue({ number: 1, summary: "Add feature" });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "PROJ",
-        repo: "repo",
-        base: "main",
-        head: "feature",
-        title: "Add feature",
-        body: "Details here",
-      },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      [
+        "--project",
+        "PROJ",
+        "--repo",
+        "repo",
+        "--base",
+        "main",
+        "--head",
+        "feature",
+        "--title",
+        "Add feature",
+        "--body",
+        "Details here",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.postPullRequest).toHaveBeenCalledWith("PROJ", "repo", {
       summary: "Add feature",
@@ -53,18 +60,26 @@ describe("pr create", () => {
     mockClient.getMyself.mockResolvedValue({ id: 99 });
     mockClient.postPullRequest.mockResolvedValue({ number: 2, summary: "Title" });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "PROJ",
-        repo: "repo",
-        base: "main",
-        head: "feature",
-        title: "Title",
-        body: "Desc",
-        assignee: "@me",
-      },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      [
+        "--project",
+        "PROJ",
+        "--repo",
+        "repo",
+        "--base",
+        "main",
+        "--head",
+        "feature",
+        "--title",
+        "Title",
+        "--body",
+        "Desc",
+        "--assignee",
+        "@me",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.postPullRequest).toHaveBeenCalledWith(
       "PROJ",
@@ -76,18 +91,26 @@ describe("pr create", () => {
   it("creates a pull request with related issue", async () => {
     mockClient.postPullRequest.mockResolvedValue({ number: 3, summary: "Title" });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "PROJ",
-        repo: "repo",
-        base: "main",
-        head: "feature",
-        title: "Title",
-        body: "Desc",
-        issue: "456",
-      },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      [
+        "--project",
+        "PROJ",
+        "--repo",
+        "repo",
+        "--base",
+        "main",
+        "--head",
+        "feature",
+        "--title",
+        "Title",
+        "--body",
+        "Desc",
+        "--issue",
+        "456",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.postPullRequest).toHaveBeenCalledWith(
       "PROJ",
@@ -100,18 +123,26 @@ describe("pr create", () => {
     mockClient.getIssue.mockResolvedValue({ id: 789 });
     mockClient.postPullRequest.mockResolvedValue({ number: 4, summary: "Title" });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "PROJ",
-        repo: "repo",
-        base: "main",
-        head: "feature",
-        title: "Title",
-        body: "Desc",
-        issue: "PROJ-123",
-      },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      [
+        "--project",
+        "PROJ",
+        "--repo",
+        "repo",
+        "--base",
+        "main",
+        "--head",
+        "feature",
+        "--title",
+        "Title",
+        "--body",
+        "Desc",
+        "--issue",
+        "PROJ-123",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.getIssue).toHaveBeenCalledWith("PROJ-123");
     expect(mockClient.postPullRequest).toHaveBeenCalledWith(
@@ -125,18 +156,25 @@ describe("pr create", () => {
     mockClient.postPullRequest.mockResolvedValue({ number: 1, summary: "Add feature" });
 
     await expectStdoutContaining(async () => {
-      const { create } = await import("./create");
-      await create.run?.({
-        args: {
-          project: "PROJ",
-          repo: "repo",
-          base: "main",
-          head: "feature",
-          title: "Add feature",
-          body: "Details",
-          json: "",
-        },
-      } as never);
+      const { default: create } = await import("./create");
+      await create.parseAsync(
+        [
+          "--project",
+          "PROJ",
+          "--repo",
+          "repo",
+          "--base",
+          "main",
+          "--head",
+          "feature",
+          "--title",
+          "Add feature",
+          "--body",
+          "Details",
+          "--json",
+        ],
+        { from: "user" },
+      );
     }, "Add feature");
   });
 });

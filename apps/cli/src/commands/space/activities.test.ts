@@ -34,8 +34,8 @@ describe("space activities", () => {
       },
     ]);
 
-    const { activities } = await import("./activities");
-    await activities.run?.({ args: {} } as never);
+    const { default: activities } = await import("./activities");
+    await activities.parseAsync([], { from: "user" });
 
     expect(mockClient.getSpaceActivities).toHaveBeenCalledWith(expect.any(Object));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("2024-01-15"));
@@ -48,8 +48,8 @@ describe("space activities", () => {
   it("shows message when no activities found", async () => {
     mockClient.getSpaceActivities.mockResolvedValue([]);
 
-    const { activities } = await import("./activities");
-    await activities.run?.({ args: {} } as never);
+    const { default: activities } = await import("./activities");
+    await activities.parseAsync([], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No activities found.");
   });
@@ -57,10 +57,11 @@ describe("space activities", () => {
   it("passes activity type filter as array of numbers", async () => {
     mockClient.getSpaceActivities.mockResolvedValue([]);
 
-    const { activities } = await import("./activities");
-    await activities.run?.({
-      args: { "activity-type": "1,2,3" },
-    } as never);
+    const { default: activities } = await import("./activities");
+    await activities.parseAsync(
+      ["--activity-type", "1", "--activity-type", "2", "--activity-type", "3"],
+      { from: "user" },
+    );
 
     expect(mockClient.getSpaceActivities).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -72,10 +73,8 @@ describe("space activities", () => {
   it("passes count parameter", async () => {
     mockClient.getSpaceActivities.mockResolvedValue([]);
 
-    const { activities } = await import("./activities");
-    await activities.run?.({
-      args: { count: "50" },
-    } as never);
+    const { default: activities } = await import("./activities");
+    await activities.parseAsync(["--count", "50"], { from: "user" });
 
     expect(mockClient.getSpaceActivities).toHaveBeenCalledWith(
       expect.objectContaining({ count: 50 }),
@@ -95,8 +94,8 @@ describe("space activities", () => {
     ]);
 
     await expectStdoutContaining(async () => {
-      const { activities } = await import("./activities");
-      await activities.run?.({ args: { json: "" } } as never);
+      const { default: activities } = await import("./activities");
+      await activities.parseAsync(["--json"], { from: "user" });
     }, "Test");
   });
 });

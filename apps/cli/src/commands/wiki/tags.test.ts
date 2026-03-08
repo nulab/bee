@@ -13,6 +13,11 @@ vi.mock("@repo/backlog-utils", () => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
+}));
+
 describe("wiki tags", () => {
   it("displays wiki tags", async () => {
     mockClient.getWikisTags.mockResolvedValue([
@@ -20,8 +25,8 @@ describe("wiki tags", () => {
       { id: 2, name: "setup" },
     ]);
 
-    const { tags } = await import("./tags");
-    await tags.run?.({ args: { project: "TEST" } } as never);
+    const { default: tags } = await import("./tags");
+    await tags.parseAsync(["TEST"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWikisTags).toHaveBeenCalledWith("TEST");
@@ -32,8 +37,8 @@ describe("wiki tags", () => {
   it("shows message when no tags found", async () => {
     mockClient.getWikisTags.mockResolvedValue([]);
 
-    const { tags } = await import("./tags");
-    await tags.run?.({ args: { project: "TEST" } } as never);
+    const { default: tags } = await import("./tags");
+    await tags.parseAsync(["TEST"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No wiki tags found.");
   });
@@ -42,8 +47,8 @@ describe("wiki tags", () => {
     mockClient.getWikisTags.mockResolvedValue([{ id: 1, name: "guide" }]);
 
     await expectStdoutContaining(async () => {
-      const { tags } = await import("./tags");
-      await tags.run?.({ args: { project: "TEST", json: "" } } as never);
+      const { default: tags } = await import("./tags");
+      await tags.parseAsync(["TEST", "--json"], { from: "user" });
     }, "guide");
   });
 });

@@ -29,8 +29,8 @@ describe("auth status", () => {
 
     mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });
 
-    const { status } = await import("./status");
-    await status.run?.({ args: {} } as never);
+    const { default: status } = await import("./status");
+    await status.parseAsync([], { from: "user" });
 
     expect(Backlog).toHaveBeenCalledWith({ host: "example.backlog.com", apiKey: "key" });
     expect(mockGetMyself).toHaveBeenCalled();
@@ -47,8 +47,8 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    const { status } = await import("./status");
-    await status.run?.({ args: {} } as never);
+    const { default: status } = await import("./status");
+    await status.parseAsync([], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith(
       "No spaces are authenticated. Run `bee auth login` to get started.",
@@ -67,10 +67,8 @@ describe("auth status", () => {
       aliases: {},
     });
 
-    const { status } = await import("./status");
-    await status.run?.({
-      args: { space: "other.backlog.com" },
-    } as never);
+    const { default: status } = await import("./status");
+    await status.parseAsync(["--space", "other.backlog.com"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith(
       "No authentication configured for other.backlog.com.",
@@ -92,10 +90,8 @@ describe("auth status", () => {
 
     mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });
 
-    const { status } = await import("./status");
-    await status.run?.({
-      args: { "show-token": true },
-    } as never);
+    const { default: status } = await import("./status");
+    await status.parseAsync(["--show-token"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith("    Token   my-secret-key");
   });
@@ -114,8 +110,8 @@ describe("auth status", () => {
 
     mockGetMyself.mockRejectedValue(new Error("Unauthorized"));
 
-    const { status } = await import("./status");
-    await status.run?.({ args: {} } as never);
+    const { default: status } = await import("./status");
+    await status.parseAsync([], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith("    Status  Authentication failed");
     expect(consola.debug).toHaveBeenCalledWith("Token verification failed:", expect.any(Error));
@@ -139,8 +135,8 @@ describe("auth status", () => {
 
     mockGetMyself.mockResolvedValue({ name: "OAuth User", userId: "oauthuser" });
 
-    const { status } = await import("./status");
-    await status.run?.({ args: {} } as never);
+    const { default: status } = await import("./status");
+    await status.parseAsync([], { from: "user" });
 
     expect(Backlog).toHaveBeenCalledWith({
       host: "example.backlog.com",
@@ -169,10 +165,8 @@ describe("auth status", () => {
 
     mockGetMyself.mockResolvedValue({ name: "OAuth User", userId: "oauthuser" });
 
-    const { status } = await import("./status");
-    await status.run?.({
-      args: { "show-token": true },
-    } as never);
+    const { default: status } = await import("./status");
+    await status.parseAsync(["--show-token"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith("    Token   oauth-access-token");
   });
@@ -191,8 +185,8 @@ describe("auth status", () => {
 
     mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });
 
-    const { status } = await import("./status");
-    await status.run?.({ args: {} } as never);
+    const { default: status } = await import("./status");
+    await status.parseAsync([], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith("  example.backlog.com");
   });

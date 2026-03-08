@@ -1,16 +1,23 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Count stars received by a user.
+const count = new BeeCommand("count")
+  .summary("Count received stars")
+  .description(
+    `Count stars received by a user.
 
 If no user ID is specified, counts stars for the authenticated user. Use
 \`--since\` and \`--until\` to filter by date range.`,
-
-  examples: [
+  )
+  .argument("[user]", "User ID")
+  .option("--since <yyyy-MM-dd>", "Count stars received on or after this date")
+  .option("--until <yyyy-MM-dd>", "Count stars received on or before this date")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "Count your stars", command: "bee star count" },
     { description: "Count stars for a specific user", command: "bee star count 12345" },
     {
@@ -18,65 +25,31 @@ If no user ID is specified, counts stars for the authenticated user. Use
       command: "bee star count --since 2025-01-01 --until 2025-12-31",
     },
     { description: "Output as JSON", command: "bee star count --json" },
-  ],
+  ])
+  .action(async (user, opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    let userId: number;
+    if (user) {
+      userId = Number(user);
+    } else {
+      const myself = await client.getMyself();
+      userId = myself.id;
+    }
 
-const count = withUsage(
-  defineCommand({
-    meta: {
-      name: "count",
-      description: "Count received stars",
-    },
-    args: {
-      ...outputArgs,
-      user: {
-        type: "positional",
-        description: "User ID",
-        required: false,
-        valueHint: "<number>",
-      },
-      since: {
-        type: "string",
-        description: "Count stars received on or after this date",
-        valueHint: "<yyyy-MM-dd>",
-      },
-      until: {
-        type: "string",
-        description: "Count stars received on or before this date",
-        valueHint: "<yyyy-MM-dd>",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const params: { since?: string; until?: string } = {};
+    if (opts.since) {
+      params.since = opts.since;
+    }
+    if (opts.until) {
+      params.until = opts.until;
+    }
 
-      let userId: number;
-      if (args.user) {
-        userId = Number(args.user);
-      } else {
-        const myself = await client.getMyself();
-        userId = myself.id;
-      }
+    const result = await client.getUserStarsCount(userId, params);
 
-      const params: { since?: string; until?: string } = {};
-      if (args.since) {
-        params.since = args.since;
-      }
-      if (args.until) {
-        params.until = args.until;
-      }
+    outputResult(result, opts, (data) => {
+      consola.log(String(data.count));
+    });
+  });
 
-      const result = await client.getUserStarsCount(userId, params);
-
-      outputResult(result, args, (data) => {
-        consola.log(String(data.count));
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, count };
+export default count;

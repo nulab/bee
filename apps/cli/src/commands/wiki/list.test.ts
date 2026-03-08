@@ -13,6 +13,11 @@ vi.mock("@repo/backlog-utils", () => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
+}));
+
 describe("wiki list", () => {
   it("displays wiki pages in tabular format", async () => {
     mockClient.getWikis.mockResolvedValue([
@@ -20,8 +25,8 @@ describe("wiki list", () => {
       { id: 2, name: "Setup Guide", updated: "2025-01-02T00:00:00Z" },
     ]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["TEST"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWikis).toHaveBeenCalledWith({
@@ -36,8 +41,8 @@ describe("wiki list", () => {
   it("shows message when no wiki pages found", async () => {
     mockClient.getWikis.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["TEST"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No wiki pages found.");
   });
@@ -45,8 +50,8 @@ describe("wiki list", () => {
   it("passes keyword parameter", async () => {
     mockClient.getWikis.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST", keyword: "setup" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["TEST", "--keyword", "setup"], { from: "user" });
 
     expect(mockClient.getWikis).toHaveBeenCalledWith({
       projectIdOrKey: "TEST",
@@ -60,8 +65,8 @@ describe("wiki list", () => {
     ]);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { project: "TEST", json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["TEST", "--json"], { from: "user" });
     }, "Home");
   });
 });

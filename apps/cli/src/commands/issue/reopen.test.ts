@@ -17,8 +17,8 @@ describe("issue reopen", () => {
   it("reopens an issue", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { reopen } = await import("./reopen");
-    await reopen.run?.({ args: { issue: "TEST-1" } } as never);
+    const { default: reopen } = await import("./reopen");
+    await reopen.parseAsync(["TEST-1"], { from: "user" });
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith("TEST-1", {
       statusId: 1,
@@ -31,8 +31,8 @@ describe("issue reopen", () => {
   it("reopens an issue with a comment", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { reopen } = await import("./reopen");
-    await reopen.run?.({ args: { issue: "TEST-1", comment: "Regression found" } } as never);
+    const { default: reopen } = await import("./reopen");
+    await reopen.parseAsync(["TEST-1", "--comment", "Regression found"], { from: "user" });
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
@@ -43,8 +43,8 @@ describe("issue reopen", () => {
   it("reopens an issue with notified users", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { reopen } = await import("./reopen");
-    await reopen.run?.({ args: { issue: "TEST-1", notify: "111,222" } } as never);
+    const { default: reopen } = await import("./reopen");
+    await reopen.parseAsync(["TEST-1", "--notify", "111", "--notify", "222"], { from: "user" });
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
@@ -56,8 +56,8 @@ describe("issue reopen", () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
     await expectStdoutContaining(async () => {
-      const { reopen } = await import("./reopen");
-      await reopen.run?.({ args: { issue: "TEST-1", json: "" } } as never);
+      const { default: reopen } = await import("./reopen");
+      await reopen.parseAsync(["TEST-1", "--json"], { from: "user" });
     }, "TEST-1");
   });
 });

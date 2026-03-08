@@ -22,8 +22,8 @@ describe("category list", () => {
   it("displays category list in tabular format", async () => {
     mockClient.getCategories.mockResolvedValue(sampleCategories);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["TEST"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getCategories).toHaveBeenCalledWith("TEST");
@@ -35,8 +35,8 @@ describe("category list", () => {
   it("shows message when no categories found", async () => {
     mockClient.getCategories.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["TEST"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No categories found.");
   });
@@ -45,8 +45,8 @@ describe("category list", () => {
     mockClient.getCategories.mockResolvedValue(sampleCategories);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { project: "TEST", json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["TEST", "--json"], { from: "user" });
     }, "Bug");
   });
 });

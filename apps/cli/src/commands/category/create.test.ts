@@ -13,41 +13,41 @@ vi.mock("@repo/backlog-utils", () => ({
 
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn(),
+  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("category create", () => {
   it("creates a category with provided name", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("Bug Report");
     mockClient.postCategories.mockResolvedValue({ id: 1, name: "Bug Report" });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: { project: "TEST", name: "Bug Report" } } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["-p", "TEST", "-n", "Bug Report"], { from: "user" });
 
     expect(mockClient.postCategories).toHaveBeenCalledWith("TEST", { name: "Bug Report" });
     expect(consola.success).toHaveBeenCalledWith("Created category Bug Report (ID: 1)");
   });
 
   it("prompts for name when not provided", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("Prompted Category");
+    vi.mocked(promptRequired)
+      .mockResolvedValueOnce("TEST")
+      .mockResolvedValueOnce("Prompted Category");
     mockClient.postCategories.mockResolvedValue({ id: 2, name: "Prompted Category" });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: { project: "TEST" } } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["-p", "TEST"], { from: "user" });
 
     expect(promptRequired).toHaveBeenCalledWith("Category name:", undefined);
     expect(mockClient.postCategories).toHaveBeenCalledWith("TEST", { name: "Prompted Category" });
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("Bug");
     mockClient.postCategories.mockResolvedValue({ id: 1, name: "Bug" });
 
     await expectStdoutContaining(async () => {
-      const { create } = await import("./create");
-      await create.run?.({ args: { project: "TEST", name: "Bug", json: "" } } as never);
+      const { default: create } = await import("./create");
+      await create.parseAsync(["-p", "TEST", "-n", "Bug", "--json"], { from: "user" });
     }, "Bug");
   });
 });

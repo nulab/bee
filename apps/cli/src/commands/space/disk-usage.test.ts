@@ -26,8 +26,8 @@ describe("space disk-usage", () => {
   it("displays disk usage breakdown", async () => {
     mockClient.getSpaceDiskUsage.mockResolvedValue(sampleDiskUsage);
 
-    const { diskUsage } = await import("./disk-usage");
-    await diskUsage.run?.({ args: {} } as never);
+    const { default: diskUsage } = await import("./disk-usage");
+    await diskUsage.parseAsync([], { from: "user" });
 
     expect(mockClient.getSpaceDiskUsage).toHaveBeenCalled();
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Capacity"));
@@ -41,8 +41,8 @@ describe("space disk-usage", () => {
     mockClient.getSpaceDiskUsage.mockResolvedValue(sampleDiskUsage);
 
     await expectStdoutContaining(async () => {
-      const { diskUsage } = await import("./disk-usage");
-      await diskUsage.run?.({ args: { json: "" } } as never);
+      const { default: diskUsage } = await import("./disk-usage");
+      await diskUsage.parseAsync(["--json"], { from: "user" });
     }, "1073741824");
   });
 });

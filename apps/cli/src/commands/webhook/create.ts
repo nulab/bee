@@ -1,21 +1,35 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, promptRequired, splitArg } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { collectNum } from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `Create a new webhook in a Backlog project.
+const create = new BeeCommand("create")
+  .summary("Create a webhook")
+  .description(
+    `Create a new webhook in a Backlog project.
 
 If \`--name\` is not provided, you will be prompted interactively.
 
 Either \`--all-event\` or \`--activity-type-ids\` must be specified. Use
 \`--all-event\` to subscribe to all activity types, or specify individual
 activity type IDs with \`--activity-type-ids\`.`,
-
-  examples: [
+  )
+  .addOption(opt.project())
+  .option("-n, --name <name>", "Webhook name")
+  .requiredOption("--hook-url <url>", "URL to receive webhook notifications")
+  .option("--all-event", "Subscribe to all event types")
+  .option(
+    "--activity-type-ids <id>",
+    "Activity type IDs to subscribe to (repeatable)",
+    collectNum,
+    [] satisfies number[],
+  )
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Create a webhook",
       command: 'bee webhook create -p PROJECT -n "Deploy Hook" --hook-url https://example.com/hook',
@@ -28,63 +42,27 @@ activity type IDs with \`--activity-type-ids\`.`,
     {
       description: "Create a webhook for specific activity types",
       command:
-        "bee webhook create -p PROJECT -n CI --hook-url https://example.com/hook --activity-type-ids 1,2,3",
+        "bee webhook create -p PROJECT -n CI --hook-url https://example.com/hook --activity-type-ids 1 --activity-type-ids 2 --activity-type-ids 3",
     },
-  ],
+  ])
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const name = await promptRequired("Webhook name:", opts.name);
+    const activityTypeIds: number[] = opts.activityTypeIds ?? [];
 
-const create = withUsage(
-  defineCommand({
-    meta: {
-      name: "create",
-      description: "Create a webhook",
-    },
-    args: {
-      ...outputArgs,
-      project: { ...commonArgs.project, required: true },
-      name: {
-        type: "string",
-        alias: "n",
-        description: "Webhook name",
-      },
-      "hook-url": {
-        type: "string",
-        description: "URL to receive webhook notifications",
-        required: true,
-      },
-      "all-event": {
-        type: "boolean",
-        description: "Subscribe to all event types",
-      },
-      "activity-type-ids": {
-        type: "string",
-        description: "Activity type IDs to subscribe to",
-        valueHint: "<1,2,3,...>",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const webhook = await client.postWebhook(opts.project, {
+      name,
+      hookUrl: opts.hookUrl,
+      allEvent: opts.allEvent,
+      activityTypeIds,
+    });
 
-      const name = await promptRequired("Webhook name:", args.name);
-      const activityTypeIds = splitArg(args["activity-type-ids"], v.number());
+    const json = opts.json === true ? "" : opts.json;
+    outputResult(webhook, { json }, (data) => {
+      consola.success(`Created webhook ${data.name} (ID: ${data.id})`);
+    });
+  });
 
-      const webhook = await client.postWebhook(args.project, {
-        name,
-        hookUrl: args["hook-url"],
-        allEvent: args["all-event"],
-        activityTypeIds,
-      });
-
-      outputResult(webhook, args, (data) => {
-        consola.success(`Created webhook ${data.name} (ID: ${data.id})`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, create };
+export default create;

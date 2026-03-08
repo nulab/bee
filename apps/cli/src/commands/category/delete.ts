@@ -1,17 +1,24 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { confirmOrExit, outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `Delete a category from a Backlog project.
+const deleteCategory = new BeeCommand("delete")
+  .summary("Delete a category")
+  .description(
+    `Delete a category from a Backlog project.
 
 This action is irreversible. You will be prompted for confirmation unless
 \`--yes\` is provided.`,
-
-  examples: [
+  )
+  .argument("<category>", "Category ID")
+  .addOption(opt.project())
+  .option("-y, --yes", "Skip confirmation prompt")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Delete a category (with confirmation)",
       command: "bee category delete 12345 -p PROJECT",
@@ -20,54 +27,25 @@ This action is irreversible. You will be prompted for confirmation unless
       description: "Delete without confirmation",
       command: "bee category delete 12345 -p PROJECT --yes",
     },
-  ],
+  ])
+  .action(async (category, opts, cmd) => {
+    await resolveOptions(cmd);
+    const confirmed = await confirmOrExit(
+      `Are you sure you want to delete category ${category}? This cannot be undone.`,
+      opts.yes,
+    );
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    if (!confirmed) {
+      return;
+    }
 
-const deleteCategory = withUsage(
-  defineCommand({
-    meta: {
-      name: "delete",
-      description: "Delete a category",
-    },
-    args: {
-      ...outputArgs,
-      category: {
-        type: "positional",
-        description: "Category ID",
-        required: true,
-        valueHint: "<number>",
-      },
-      project: { ...commonArgs.project, required: true },
-      yes: {
-        type: "boolean",
-        alias: "y",
-        description: "Skip confirmation prompt",
-      },
-    },
-    async run({ args }) {
-      const confirmed = await confirmOrExit(
-        `Are you sure you want to delete category ${args.category}? This cannot be undone.`,
-        args.yes,
-      );
+    const { client } = await getClient();
 
-      if (!confirmed) {
-        return;
-      }
+    const result = await client.deleteCategories(opts.project, Number(category));
 
-      const { client } = await getClient();
+    outputResult(result, opts, (data) => {
+      consola.success(`Deleted category ${data.name} (ID: ${data.id})`);
+    });
+  });
 
-      const category = await client.deleteCategories(args.project, Number(args.category));
-
-      outputResult(category, args, (data) => {
-        consola.success(`Deleted category ${data.name} (ID: ${data.id})`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, deleteCategory };
+export default deleteCategory;

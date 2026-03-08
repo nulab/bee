@@ -42,8 +42,8 @@ describe("document tree", () => {
   it("displays tree structure", async () => {
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 
-    const { tree } = await import("./tree");
-    await tree.run?.({ args: { project: "PROJECT" } } as never);
+    const { default: tree } = await import("./tree");
+    await tree.parseAsync(["PROJECT"], { from: "user" });
 
     expect(mockClient.getDocumentTree).toHaveBeenCalledWith("PROJECT");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Getting Started"));
@@ -54,8 +54,8 @@ describe("document tree", () => {
   it("displays emoji in tree nodes", async () => {
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 
-    const { tree } = await import("./tree");
-    await tree.run?.({ args: { project: "PROJECT" } } as never);
+    const { default: tree } = await import("./tree");
+    await tree.parseAsync(["PROJECT"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("\ud83d\ude80"));
   });
@@ -66,8 +66,8 @@ describe("document tree", () => {
       activeTree: { id: "root", children: [] },
     });
 
-    const { tree } = await import("./tree");
-    await tree.run?.({ args: { project: "PROJECT" } } as never);
+    const { default: tree } = await import("./tree");
+    await tree.parseAsync(["PROJECT"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No documents found.");
   });
@@ -77,8 +77,8 @@ describe("document tree", () => {
       projectId: "100",
     });
 
-    const { tree } = await import("./tree");
-    await tree.run?.({ args: { project: "PROJECT" } } as never);
+    const { default: tree } = await import("./tree");
+    await tree.parseAsync(["PROJECT"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No documents found.");
   });
@@ -87,16 +87,16 @@ describe("document tree", () => {
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 
     await expectStdoutContaining(async () => {
-      const { tree } = await import("./tree");
-      await tree.run?.({ args: { project: "PROJECT", json: "" } } as never);
+      const { default: tree } = await import("./tree");
+      await tree.parseAsync(["PROJECT", "--json"], { from: "user" });
     }, "doc-1");
   });
 
   it("renders tree connectors correctly", async () => {
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 
-    const { tree } = await import("./tree");
-    await tree.run?.({ args: { project: "PROJECT" } } as never);
+    const { default: tree } = await import("./tree");
+    await tree.parseAsync(["PROJECT"], { from: "user" });
 
     // First child uses ├── connector
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("\u251c\u2500\u2500"));

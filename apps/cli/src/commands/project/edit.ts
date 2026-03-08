@@ -1,16 +1,31 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Update an existing Backlog project.
+const edit = new BeeCommand("edit")
+  .summary("Edit a project")
+  .description(
+    `Update an existing Backlog project.
 
 Only the specified fields will be updated. Fields that are not provided
 will remain unchanged.`,
-
-  examples: [
+  )
+  .argument("<project>", "Project ID or project key")
+  .option("-n, --name <name>", "New name of the project")
+  .option("-k, --key <key>", "New key of the project")
+  .option("--chart-enabled", "Change whether the chart is enabled")
+  .option("--subtasking-enabled", "Change whether subtasking is enabled")
+  .option(
+    "--project-leader-can-edit-project-leader",
+    "Change whether project administrators can manage each other",
+  )
+  .option("--text-formatting-rule <rule>", "Change text formatting rule")
+  .option("--archived", "Change whether the project is archived")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Rename a project",
       command: 'bee project edit PROJECT_KEY --name "New Name"',
@@ -23,78 +38,24 @@ will remain unchanged.`,
       description: "Change formatting rule to markdown",
       command: "bee project edit PROJECT_KEY --text-formatting-rule markdown",
     },
-  ],
+  ])
+  .action(async (project, opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const projectData = await client.patchProject(project, {
+      name: opts.name,
+      key: opts.key,
+      chartEnabled: opts.chartEnabled,
+      subtaskingEnabled: opts.subtaskingEnabled,
+      projectLeaderCanEditProjectLeader: opts.projectLeaderCanEditProjectLeader,
+      textFormattingRule: opts.textFormattingRule,
+      archived: opts.archived,
+    });
 
-const edit = withUsage(
-  defineCommand({
-    meta: {
-      name: "edit",
-      description: "Edit a project",
-    },
-    args: {
-      ...outputArgs,
-      project: {
-        type: "positional",
-        description: "Project ID or project key",
-        required: true,
-        default: process.env.BACKLOG_PROJECT,
-      },
-      name: {
-        type: "string",
-        alias: "n",
-        description: "New name of the project",
-      },
-      key: {
-        type: "string",
-        alias: "k",
-        description: "New key of the project",
-      },
-      "chart-enabled": {
-        type: "boolean",
-        description: "Change whether the chart is enabled",
-      },
-      "subtasking-enabled": {
-        type: "boolean",
-        description: "Change whether subtasking is enabled",
-      },
-      "project-leader-can-edit-project-leader": {
-        type: "boolean",
-        description: "Change whether project administrators can manage each other",
-      },
-      "text-formatting-rule": {
-        type: "string",
-        description: "Change text formatting rule",
-        valueHint: "{backlog|markdown}",
-      },
-      archived: {
-        type: "boolean",
-        description: "Change whether the project is archived",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const jsonArg = opts.json === true ? "" : opts.json;
+    outputResult(projectData, { ...opts, json: jsonArg }, (data) => {
+      consola.success(`Updated project ${data.projectKey}: ${data.name}`);
+    });
+  });
 
-      const project = await client.patchProject(args.project, {
-        name: args.name,
-        key: args.key,
-        chartEnabled: args["chart-enabled"],
-        subtaskingEnabled: args["subtasking-enabled"],
-        projectLeaderCanEditProjectLeader: args["project-leader-can-edit-project-leader"],
-        textFormattingRule: args["text-formatting-rule"] as "backlog" | "markdown" | undefined,
-        archived: args.archived,
-      });
-
-      outputResult(project, args, (data) => {
-        consola.success(`Updated project ${data.projectKey}: ${data.name}`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, edit };
+export default edit;

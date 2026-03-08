@@ -19,8 +19,8 @@ describe("star count", () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getUserStarsCount.mockResolvedValue({ count: 42 });
 
-    const { count } = await import("./count");
-    await count.run?.({ args: {} } as never);
+    const { default: count } = await import("./count");
+    await count.parseAsync([], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getMyself).toHaveBeenCalled();
@@ -31,8 +31,8 @@ describe("star count", () => {
   it("counts stars for a specific user", async () => {
     mockClient.getUserStarsCount.mockResolvedValue({ count: 10 });
 
-    const { count } = await import("./count");
-    await count.run?.({ args: { user: "200" } } as never);
+    const { default: count } = await import("./count");
+    await count.parseAsync(["200"], { from: "user" });
 
     expect(mockClient.getUserStarsCount).toHaveBeenCalledWith(200, {});
     expect(mockClient.getMyself).not.toHaveBeenCalled();
@@ -42,10 +42,8 @@ describe("star count", () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getUserStarsCount.mockResolvedValue({ count: 5 });
 
-    const { count } = await import("./count");
-    await count.run?.({
-      args: { since: "2025-01-01", until: "2025-12-31" },
-    } as never);
+    const { default: count } = await import("./count");
+    await count.parseAsync(["--since", "2025-01-01", "--until", "2025-12-31"], { from: "user" });
 
     expect(mockClient.getUserStarsCount).toHaveBeenCalledWith(100, {
       since: "2025-01-01",
@@ -58,8 +56,8 @@ describe("star count", () => {
     mockClient.getUserStarsCount.mockResolvedValue({ count: 42 });
 
     await expectStdoutContaining(async () => {
-      const { count } = await import("./count");
-      await count.run?.({ args: { json: "" } } as never);
+      const { default: count } = await import("./count");
+      await count.parseAsync(["--json"], { from: "user" });
     }, "42");
   });
 });

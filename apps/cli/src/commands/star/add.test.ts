@@ -17,8 +17,8 @@ describe("star add", () => {
   it("stars an issue", async () => {
     mockClient.postStar.mockResolvedValue(undefined);
 
-    const { add } = await import("./add");
-    await add.run?.({ args: { issue: "12345" } } as never);
+    const { default: add } = await import("./add");
+    await add.parseAsync(["--issue", "12345"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.postStar).toHaveBeenCalledWith({ issueId: 12_345 });
@@ -29,8 +29,8 @@ describe("star add", () => {
     mockClient.getIssue.mockResolvedValue({ id: 99_999 });
     mockClient.postStar.mockResolvedValue(undefined);
 
-    const { add } = await import("./add");
-    await add.run?.({ args: { issue: "PROJECT-123" } } as never);
+    const { default: add } = await import("./add");
+    await add.parseAsync(["--issue", "PROJECT-123"], { from: "user" });
 
     expect(mockClient.getIssue).toHaveBeenCalledWith("PROJECT-123");
     expect(mockClient.postStar).toHaveBeenCalledWith({ issueId: 99_999 });
@@ -40,8 +40,8 @@ describe("star add", () => {
   it("stars a comment", async () => {
     mockClient.postStar.mockResolvedValue(undefined);
 
-    const { add } = await import("./add");
-    await add.run?.({ args: { comment: "67890" } } as never);
+    const { default: add } = await import("./add");
+    await add.parseAsync(["--comment", "67890"], { from: "user" });
 
     expect(mockClient.postStar).toHaveBeenCalledWith({ commentId: 67_890 });
     expect(consola.success).toHaveBeenCalledWith("Starred comment 67890.");
@@ -50,8 +50,8 @@ describe("star add", () => {
   it("stars a wiki page", async () => {
     mockClient.postStar.mockResolvedValue(undefined);
 
-    const { add } = await import("./add");
-    await add.run?.({ args: { wiki: "111" } } as never);
+    const { default: add } = await import("./add");
+    await add.parseAsync(["--wiki", "111"], { from: "user" });
 
     expect(mockClient.postStar).toHaveBeenCalledWith({ wikiId: 111 });
     expect(consola.success).toHaveBeenCalledWith("Starred wiki 111.");
@@ -60,25 +60,27 @@ describe("star add", () => {
   it("stars a pull request comment", async () => {
     mockClient.postStar.mockResolvedValue(undefined);
 
-    const { add } = await import("./add");
-    await add.run?.({ args: { "pr-comment": "222" } } as never);
+    const { default: add } = await import("./add");
+    await add.parseAsync(["--pr-comment", "222"], { from: "user" });
 
     expect(mockClient.postStar).toHaveBeenCalledWith({ pullRequestCommentId: 222 });
     expect(consola.success).toHaveBeenCalledWith("Starred pull request comment 222.");
   });
 
   it("throws error when no option is provided", async () => {
-    const { add } = await import("./add");
+    const { default: add } = await import("./add");
 
-    await expect(add.run?.({ args: {} } as never)).rejects.toThrow(
+    await expect(add.parseAsync([], { from: "user" })).rejects.toThrow(
       "Exactly one of --issue, --comment, --wiki, or --pr-comment must be provided.",
     );
   });
 
   it("throws error when multiple options are provided", async () => {
-    const { add } = await import("./add");
+    const { default: add } = await import("./add");
 
-    await expect(add.run?.({ args: { issue: "1", comment: "2" } } as never)).rejects.toThrow(
+    await expect(
+      add.parseAsync(["--issue", "1", "--comment", "2"], { from: "user" }),
+    ).rejects.toThrow(
       "Only one of --issue, --comment, --wiki, or --pr-comment can be provided at a time.",
     );
   });

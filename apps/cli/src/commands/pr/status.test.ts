@@ -25,8 +25,8 @@ describe("pr status", () => {
     mockClient.getMyself.mockResolvedValue({ id: 1, name: "Alice" });
     mockClient.getPullRequests.mockResolvedValue(samplePullRequests);
 
-    const { status } = await import("./status");
-    await status.run?.({ args: { project: "PROJ", repo: "repo" } } as never);
+    const { default: status } = await import("./status");
+    await status.parseAsync(["--project", "PROJ", "--repo", "repo"], { from: "user" });
 
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.getPullRequests).toHaveBeenCalledWith(
@@ -43,8 +43,8 @@ describe("pr status", () => {
     mockClient.getMyself.mockResolvedValue({ id: 1, name: "Alice" });
     mockClient.getPullRequests.mockResolvedValue([]);
 
-    const { status } = await import("./status");
-    await status.run?.({ args: { project: "PROJ", repo: "repo" } } as never);
+    const { default: status } = await import("./status");
+    await status.parseAsync(["--project", "PROJ", "--repo", "repo"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No pull requests assigned to you.");
   });
@@ -54,8 +54,8 @@ describe("pr status", () => {
     mockClient.getPullRequests.mockResolvedValue(samplePullRequests);
 
     await expectStdoutContaining(async () => {
-      const { status } = await import("./status");
-      await status.run?.({ args: { project: "PROJ", repo: "repo", json: "" } } as never);
+      const { default: status } = await import("./status");
+      await status.parseAsync(["--project", "PROJ", "--repo", "repo", "--json"], { from: "user" });
     }, "Alice");
   });
 });

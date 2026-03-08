@@ -26,8 +26,8 @@ describe("space info", () => {
   it("displays space information", async () => {
     mockClient.getSpace.mockResolvedValue(sampleSpace);
 
-    const { info } = await import("./info");
-    await info.run?.({ args: {} } as never);
+    const { default: info } = await import("./info");
+    await info.parseAsync([], { from: "user" });
 
     expect(mockClient.getSpace).toHaveBeenCalled();
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Test Space"));
@@ -40,8 +40,8 @@ describe("space info", () => {
     mockClient.getSpace.mockResolvedValue(sampleSpace);
 
     await expectStdoutContaining(async () => {
-      const { info } = await import("./info");
-      await info.run?.({ args: { json: "" } } as never);
+      const { default: info } = await import("./info");
+      await info.parseAsync(["--json"], { from: "user" });
     }, "TESTSPACE");
   });
 });

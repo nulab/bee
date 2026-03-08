@@ -23,8 +23,8 @@ describe("team create", () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("Dev Team");
     mockClient.postTeam.mockResolvedValue({ id: 1, name: "Dev Team", members: [] });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: { name: "Dev Team" } } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["--name", "Dev Team"], { from: "user" });
 
     expect(mockClient.postTeam).toHaveBeenCalledWith(expect.objectContaining({ name: "Dev Team" }));
     expect(consola.success).toHaveBeenCalledWith("Created team Dev Team (ID: 1)");
@@ -34,8 +34,8 @@ describe("team create", () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("Prompted Team");
     mockClient.postTeam.mockResolvedValue({ id: 2, name: "Prompted Team", members: [] });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: {} } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync([], { from: "user" });
 
     expect(promptRequired).toHaveBeenCalledWith("Team name:", undefined);
     expect(mockClient.postTeam).toHaveBeenCalledWith(
@@ -47,8 +47,10 @@ describe("team create", () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("Team");
     mockClient.postTeam.mockResolvedValue({ id: 3, name: "Team", members: [] });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: { name: "Team", members: "111,222" } } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["--name", "Team", "--members", "111", "--members", "222"], {
+      from: "user",
+    });
 
     expect(mockClient.postTeam).toHaveBeenCalledWith(
       expect.objectContaining({ members: [111, 222] }),
@@ -60,9 +62,9 @@ describe("team create", () => {
     const apiError = Object.assign(new Error("Bad Request"), { _status: 400, _body: undefined });
     mockClient.postTeam.mockRejectedValue(apiError);
 
-    const { create } = await import("./create");
+    const { default: create } = await import("./create");
 
-    await expect(create.run?.({ args: { name: "Team" } } as never)).rejects.toThrow(
+    await expect(create.parseAsync(["--name", "Team"], { from: "user" })).rejects.toThrow(
       "Administrator role",
     );
   });
@@ -72,8 +74,8 @@ describe("team create", () => {
     mockClient.postTeam.mockResolvedValue({ id: 1, name: "Team", members: [] });
 
     await expectStdoutContaining(async () => {
-      const { create } = await import("./create");
-      await create.run?.({ args: { name: "Team", json: "" } } as never);
+      const { default: create } = await import("./create");
+      await create.parseAsync(["--name", "Team", "--json"], { from: "user" });
     }, "Team");
   });
 });

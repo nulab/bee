@@ -1,17 +1,28 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `Update an existing status in a Backlog project.
+const edit = new BeeCommand("edit")
+  .summary("Edit a status")
+  .description(
+    `Update an existing status in a Backlog project.
 
 Only the specified fields will be updated. Fields that are not provided
 will remain unchanged.`,
-
-  examples: [
+  )
+  .argument("<status>", "Status ID")
+  .addOption(opt.project())
+  .option("-n, --name <value>", "New name of the status")
+  .option(
+    "--color <value>",
+    "Change display color {#ea2c00|#e87758|#e07b9a|#868cb7|#3b9dbd|#4caf93|#b0be3c|#eda62a|#f42858|#393939}",
+  )
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Rename a status",
       command: 'bee status edit 12345 -p PROJECT -n "New Name"',
@@ -20,54 +31,19 @@ will remain unchanged.`,
       description: "Change status color",
       command: 'bee status edit 12345 -p PROJECT --color "#e30000"',
     },
-  ],
+  ])
+  .action(async (status, opts, cmd) => {
+    await resolveOptions(cmd);
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const result = await client.patchProjectStatus(opts.project, Number(status), {
+      name: opts.name,
+      color: opts.color as never,
+    });
 
-const edit = withUsage(
-  defineCommand({
-    meta: {
-      name: "edit",
-      description: "Edit a status",
-    },
-    args: {
-      ...outputArgs,
-      status: {
-        type: "positional",
-        description: "Status ID",
-        required: true,
-        valueHint: "<number>",
-      },
-      project: { ...commonArgs.project, required: true },
-      name: {
-        type: "string",
-        alias: "n",
-        description: "New name of the status",
-      },
-      color: {
-        type: "string",
-        description: "Change display color",
-        valueHint:
-          "{#ea2c00|#e87758|#e07b9a|#868cb7|#3b9dbd|#4caf93|#b0be3c|#eda62a|#f42858|#393939}",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    outputResult(result, opts, (data) => {
+      consola.success(`Updated status ${data.name} (ID: ${data.id})`);
+    });
+  });
 
-      const status = await client.patchProjectStatus(args.project, Number(args.status), {
-        name: args.name,
-        color: args.color as never,
-      });
-
-      outputResult(status, args, (data) => {
-        consola.success(`Updated status ${data.name} (ID: ${data.id})`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, edit };
+export default edit;

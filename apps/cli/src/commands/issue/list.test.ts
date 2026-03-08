@@ -5,6 +5,7 @@ import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getIssues: vi.fn(),
+  getMyself: vi.fn().mockResolvedValue({ id: 99 }),
   getProjects: vi.fn().mockResolvedValue([{ id: 123, projectKey: "PROJ" }]),
 };
 
@@ -38,8 +39,8 @@ describe("issue list", () => {
   it("displays issue list in tabular format", async () => {
     mockClient.getIssues.mockResolvedValue(sampleIssues);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getIssues).toHaveBeenCalled();
@@ -51,8 +52,8 @@ describe("issue list", () => {
   it("shows message when no issues found", async () => {
     mockClient.getIssues.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No issues found.");
   });
@@ -60,8 +61,8 @@ describe("issue list", () => {
   it("shows Unassigned for issues without assignee", async () => {
     mockClient.getIssues.mockResolvedValue([sampleIssues[1]]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unassigned"));
   });
@@ -69,8 +70,8 @@ describe("issue list", () => {
   it("passes project query parameter", async () => {
     mockClient.getIssues.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "123" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--project", "123"], { from: "user" });
 
     expect(mockClient.getIssues).toHaveBeenCalledWith(
       expect.objectContaining({ projectId: [123] }),
@@ -80,19 +81,31 @@ describe("issue list", () => {
   it("passes assignee query parameter", async () => {
     mockClient.getIssues.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { assignee: "42" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--assignee", "42"], { from: "user" });
 
     expect(mockClient.getIssues).toHaveBeenCalledWith(
       expect.objectContaining({ assigneeId: [42] }),
     );
   });
 
+  it("resolves @me to current user ID for assignee", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--assignee", "@me"], { from: "user" });
+
+    expect(mockClient.getMyself).toHaveBeenCalled();
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({ assigneeId: [99] }),
+    );
+  });
+
   it("passes keyword query parameter", async () => {
     mockClient.getIssues.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { keyword: "login bug" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--keyword", "login bug"], { from: "user" });
 
     expect(mockClient.getIssues).toHaveBeenCalledWith(
       expect.objectContaining({ keyword: "login bug" }),
@@ -103,8 +116,8 @@ describe("issue list", () => {
     mockClient.getIssues.mockResolvedValue(sampleIssues);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["--json"], { from: "user" });
     }, "PROJ-1");
   });
 });

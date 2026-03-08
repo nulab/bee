@@ -16,8 +16,8 @@ describe("issue-type edit", () => {
   it("updates issue type name", async () => {
     mockClient.patchIssueType.mockResolvedValue({ id: 1, name: "New Name", color: "#e30000" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({ args: { issueType: "1", project: "TEST", name: "New Name" } } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["1", "-p", "TEST", "-n", "New Name"], { from: "user" });
 
     expect(mockClient.patchIssueType).toHaveBeenCalledWith(
       "TEST",
@@ -30,8 +30,8 @@ describe("issue-type edit", () => {
   it("updates issue type color", async () => {
     mockClient.patchIssueType.mockResolvedValue({ id: 1, name: "Bug", color: "#e30000" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({ args: { issueType: "1", project: "TEST", color: "#e30000" } } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["1", "-p", "TEST", "--color", "#e30000"], { from: "user" });
 
     expect(mockClient.patchIssueType).toHaveBeenCalledWith(
       "TEST",
@@ -44,10 +44,8 @@ describe("issue-type edit", () => {
     mockClient.patchIssueType.mockResolvedValue({ id: 1, name: "Bug", color: "#e30000" });
 
     await expectStdoutContaining(async () => {
-      const { edit } = await import("./edit");
-      await edit.run?.({
-        args: { issueType: "1", project: "TEST", name: "Bug", json: "" },
-      } as never);
+      const { default: edit } = await import("./edit");
+      await edit.parseAsync(["1", "-p", "TEST", "-n", "Bug", "--json"], { from: "user" });
     }, "Bug");
   });
 });

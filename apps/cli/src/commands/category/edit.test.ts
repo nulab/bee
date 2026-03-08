@@ -13,42 +13,38 @@ vi.mock("@repo/backlog-utils", () => ({
 
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn(),
+  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("category edit", () => {
   it("updates category name", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("New Name");
     mockClient.patchCategories.mockResolvedValue({ id: 1, name: "New Name" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({ args: { category: "1", project: "TEST", name: "New Name" } } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["1", "-p", "TEST", "-n", "New Name"], { from: "user" });
 
     expect(mockClient.patchCategories).toHaveBeenCalledWith("TEST", 1, { name: "New Name" });
     expect(consola.success).toHaveBeenCalledWith("Updated category New Name (ID: 1)");
   });
 
   it("prompts for name when not provided", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("Prompted Name");
+    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Prompted Name");
     mockClient.patchCategories.mockResolvedValue({ id: 1, name: "Prompted Name" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({ args: { category: "1", project: "TEST" } } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["1", "-p", "TEST"], { from: "user" });
 
     expect(promptRequired).toHaveBeenCalledWith("Category name:", undefined);
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("Name");
     mockClient.patchCategories.mockResolvedValue({ id: 1, name: "Name" });
 
     await expectStdoutContaining(async () => {
-      const { edit } = await import("./edit");
-      await edit.run?.({
-        args: { category: "1", project: "TEST", name: "Name", json: "" },
-      } as never);
+      const { default: edit } = await import("./edit");
+      await edit.parseAsync(["1", "-p", "TEST", "-n", "Name", "--json"], { from: "user" });
     }, "Name");
   });
 });

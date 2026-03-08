@@ -1,13 +1,14 @@
 import { UserError } from "@repo/cli-utils";
 import { loadConfig, writeConfig } from "@repo/config";
-import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { BeeCommand } from "../../lib/bee-command";
 
 const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
 
-const commandUsage: CommandUsage = {
-  long: `Switch the active (default) Backlog space.
+const switchSpace = new BeeCommand("switch")
+  .summary("Switch active space")
+  .description(
+    `Switch the active (default) Backlog space.
 
 Changes which space is used by default when running commands without
 \`--space\`.
@@ -16,78 +17,57 @@ If multiple spaces are configured, you will be prompted to select one
 interactively. Use \`--space\` to switch directly without a prompt.
 
 For a list of configured spaces, see \`bee auth status\`.`,
-
-  examples: [
+  )
+  .option("-s, --space <hostname>", "The hostname of the Backlog space")
+  .envVars([
+    ["BACKLOG_SPACE", "Space hostname to switch to"],
+    ["BACKLOG_NO_INPUT", "Set to 1 to disable interactive prompts"],
+  ])
+  .examples([
     { description: "Select space via prompt", command: "bee auth switch" },
     {
       description: "Switch to a specific space",
       command: "bee auth switch -s xxx.backlog.com",
     },
-  ],
+  ])
+  .action(async (opts) => {
+    const config = loadConfig();
 
-  annotations: {
-    environment: [
-      ["BACKLOG_SPACE", "Space hostname to switch to"],
-      ["BACKLOG_NO_INPUT", "Set to 1 to disable interactive prompts"],
-    ],
-  },
-};
+    let hostname = opts.space || process.env.BACKLOG_SPACE;
 
-const switchSpace = withUsage(
-  defineCommand({
-    meta: {
-      name: "switch",
-      description: "Switch active space",
-    },
-    args: {
-      space: {
-        type: "string",
-        alias: "s",
-        description: "The hostname of the Backlog space",
-        valueHint: "<xxx.backlog.com>",
-      },
-    },
-    async run({ args }) {
-      const config = loadConfig();
-
-      let hostname = args.space || process.env.BACKLOG_SPACE;
-
-      if (!hostname) {
-        if (config.spaces.length === 0) {
-          throw new UserError("No spaces configured. Run `bee auth login` to add a space.");
-        }
-
-        if (isNoInput()) {
-          throw new UserError(
-            "Hostname is required. Use --space to provide it in BACKLOG_NO_INPUT mode.",
-          );
-        }
-
-        const hosts = config.spaces.map((s) => s.host);
-        hostname = await consola.prompt("Select space:", {
-          type: "select",
-          options: hosts,
-        });
-
-        if (typeof hostname !== "string" || !hostname) {
-          throw new UserError("No space selected.");
-        }
+    if (!hostname) {
+      if (config.spaces.length === 0) {
+        throw new UserError("No spaces configured. Run `bee auth login` to add a space.");
       }
 
-      const space = config.spaces.find((s) => s.host === hostname);
-
-      if (!space) {
+      if (isNoInput()) {
         throw new UserError(
-          `Space "${hostname}" not found. Available spaces: ${config.spaces.map((s) => s.host).join(", ")}`,
+          "Hostname is required. Use --space to provide it in BACKLOG_NO_INPUT mode.",
         );
       }
 
-      writeConfig({ ...config, defaultSpace: hostname });
+      const hosts = config.spaces.map((s) => s.host);
+      hostname = await consola.prompt("Select space:", {
+        type: "select",
+        options: hosts,
+      });
 
-      consola.success(`Switched active space to ${hostname}.`);
-    },
-  }),
-  commandUsage,
-);
+      if (typeof hostname !== "string" || !hostname) {
+        throw new UserError("No space selected.");
+      }
+    }
 
-export { commandUsage, switchSpace };
+    const space = config.spaces.find((s) => s.host === hostname);
+
+    if (!space) {
+      throw new UserError(
+        `Space "${hostname}" not found. Available spaces: ${config.spaces.map((s) => s.host).join(", ")}`,
+      );
+    }
+
+    writeConfig({ ...config, defaultSpace: hostname });
+
+    consola.success(`Switched active space to ${hostname}.`);
+  });
+
+export default switchSpace;

@@ -30,8 +30,8 @@ describe("wiki attachments", () => {
       },
     ]);
 
-    const { attachments } = await import("./attachments");
-    await attachments.run?.({ args: { wiki: "123" } } as never);
+    const { default: attachments } = await import("./attachments");
+    await attachments.parseAsync(["123"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWikisAttachments).toHaveBeenCalledWith(123);
@@ -43,8 +43,8 @@ describe("wiki attachments", () => {
   it("shows message when no attachments found", async () => {
     mockClient.getWikisAttachments.mockResolvedValue([]);
 
-    const { attachments } = await import("./attachments");
-    await attachments.run?.({ args: { wiki: "123" } } as never);
+    const { default: attachments } = await import("./attachments");
+    await attachments.parseAsync(["123"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No attachments found.");
   });
@@ -60,8 +60,8 @@ describe("wiki attachments", () => {
     ]);
 
     await expectStdoutContaining(async () => {
-      const { attachments } = await import("./attachments");
-      await attachments.run?.({ args: { wiki: "123", json: "" } } as never);
+      const { default: attachments } = await import("./attachments");
+      await attachments.parseAsync(["123", "--json"], { from: "user" });
     }, "doc.pdf");
   });
 });

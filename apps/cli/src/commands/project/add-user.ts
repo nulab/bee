@@ -1,67 +1,46 @@
 import { getClient } from "@repo/backlog-utils";
-import { UserError, outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { UserError, outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { RequiredOption, resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `Add a user to a Backlog project.
+const addUser = new BeeCommand("add-user")
+  .summary("Add a user to a project")
+  .description(
+    `Add a user to a Backlog project.
 
 The user is specified by their numeric user ID. Use \`bee project users\`
 to look up user IDs.
 
 Requires Administrator or Project Administrator role.`,
-
-  examples: [
+  )
+  .addOption(opt.project())
+  .addOption(new RequiredOption("--user-id <id>", "User ID"))
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Add a user to a project",
       command: "bee project add-user -p PROJECT_KEY --user-id 12345",
     },
-  ],
+  ])
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const userId = Number(opts.userId);
+    if (Number.isNaN(userId)) {
+      throw new UserError("User ID must be a number.");
+    }
 
-const addUser = withUsage(
-  defineCommand({
-    meta: {
-      name: "add-user",
-      description: "Add a user to a project",
-    },
-    args: {
-      ...outputArgs,
-      project: {
-        type: "string",
-        alias: "p",
-        description: "Project ID or project key",
-        required: true,
-        default: process.env.BACKLOG_PROJECT,
-      },
-      "user-id": {
-        type: "string",
-        description: "User ID",
-        valueHint: "<number>",
-        required: true,
-      },
-    },
-    async run({ args }) {
-      const userId = Number(args["user-id"]);
-      if (Number.isNaN(userId)) {
-        throw new UserError("User ID must be a number.");
-      }
+    const { client } = await getClient();
 
-      const { client } = await getClient();
+    const user = await client.postProjectUser(opts.project, String(userId));
 
-      const user = await client.postProjectUser(args.project, String(userId));
+    const jsonArg = opts.json === true ? "" : opts.json;
+    outputResult(user, { ...opts, json: jsonArg }, (data) => {
+      consola.success(`Added user ${data.name} to project ${opts.project}.`);
+    });
+  });
 
-      outputResult(user, args, (data) => {
-        consola.success(`Added user ${data.name} to project ${args.project}.`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, addUser };
+export default addUser;

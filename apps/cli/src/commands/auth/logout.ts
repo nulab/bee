@@ -1,87 +1,67 @@
 import { UserError } from "@repo/cli-utils";
 import { loadConfig, removeSpace } from "@repo/config";
-import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, withUsage } from "../../lib/command-usage";
+import { BeeCommand } from "../../lib/bee-command";
 
 const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
 
-const commandUsage: CommandUsage = {
-  long: `Remove authentication for a Backlog space.
+const logout = new BeeCommand("logout")
+  .summary("Remove authentication for a Backlog space")
+  .description(
+    `Remove authentication for a Backlog space.
 
 The stored credentials are removed locally. This does not revoke API keys or OAuth tokens on the Backlog server.
 
 If only one space is configured, it will be selected automatically. If multiple spaces are configured, you will be prompted to select one.`,
-
-  examples: [
+  )
+  .option("-s, --space <hostname>", "The hostname of the Backlog space")
+  .envVars([
+    ["BACKLOG_SPACE", "Space hostname to log out from"],
+    ["BACKLOG_NO_INPUT", "Set to 1 to disable interactive prompts"],
+  ])
+  .examples([
     { description: "Select space via prompt", command: "bee auth logout" },
     {
       description: "Log out of a specific space",
       command: "bee auth logout -s xxx.backlog.com",
     },
-  ],
+  ])
+  .action(async (opts) => {
+    const config = loadConfig();
 
-  annotations: {
-    environment: [
-      ["BACKLOG_SPACE", "Space hostname to log out from"],
-      ["BACKLOG_NO_INPUT", "Set to 1 to disable interactive prompts"],
-    ],
-  },
-};
-
-const logout = withUsage(
-  defineCommand({
-    meta: {
-      name: "logout",
-      description: "Remove authentication for a Backlog space",
-    },
-    args: {
-      space: {
-        type: "string",
-        alias: "s",
-        description: "The hostname of the Backlog space",
-        valueHint: "<xxx.backlog.com>",
-      },
-    },
-    async run({ args }) {
-      const config = loadConfig();
-
-      let hostname = args.space || process.env.BACKLOG_SPACE;
-      if (!hostname) {
-        if (config.spaces.length === 0) {
-          consola.info("No spaces are currently authenticated.");
-          return;
-        }
-
-        const [firstSpace] = config.spaces;
-        if (config.spaces.length === 1) {
-          hostname = firstSpace.host;
-        } else if (isNoInput()) {
-          throw new UserError(
-            "Hostname is required. Use --space to provide it in BACKLOG_NO_INPUT mode.",
-          );
-        } else {
-          hostname = await consola.prompt("Select a space to log out from:", {
-            type: "select",
-            options: config.spaces.map((s) => s.host),
-          });
-
-          if (typeof hostname !== "string" || !hostname) {
-            throw new UserError("No space selected.");
-          }
-        }
+    let hostname = opts.space || process.env.BACKLOG_SPACE;
+    if (!hostname) {
+      if (config.spaces.length === 0) {
+        consola.info("No spaces are currently authenticated.");
+        return;
       }
 
-      try {
-        removeSpace(hostname);
-      } catch {
-        throw new UserError(`Space "${hostname}" is not configured.`);
+      const [firstSpace] = config.spaces;
+      if (config.spaces.length === 1) {
+        hostname = firstSpace.host;
+      } else if (isNoInput()) {
+        throw new UserError(
+          "Hostname is required. Use --space to provide it in BACKLOG_NO_INPUT mode.",
+        );
+      } else {
+        hostname = await consola.prompt("Select a space to log out from:", {
+          type: "select",
+          options: config.spaces.map((s) => s.host),
+        });
+
+        if (typeof hostname !== "string" || !hostname) {
+          throw new UserError("No space selected.");
+        }
       }
+    }
 
-      consola.success(`Logged out of ${hostname}.`);
-    },
-  }),
-  commandUsage,
-);
+    try {
+      removeSpace(hostname);
+    } catch {
+      throw new UserError(`Space "${hostname}" is not configured.`);
+    }
 
-export { commandUsage, logout };
+    consola.success(`Logged out of ${hostname}.`);
+  });
+
+export default logout;

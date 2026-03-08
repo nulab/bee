@@ -22,8 +22,8 @@ describe("status list", () => {
   it("displays status list in tabular format", async () => {
     mockClient.getProjectStatuses.mockResolvedValue(sampleStatuses);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["TEST"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getProjectStatuses).toHaveBeenCalledWith("TEST");
@@ -35,8 +35,8 @@ describe("status list", () => {
   it("shows message when no statuses found", async () => {
     mockClient.getProjectStatuses.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["TEST"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No statuses found.");
   });
@@ -44,8 +44,8 @@ describe("status list", () => {
   it("displays color column", async () => {
     mockClient.getProjectStatuses.mockResolvedValue(sampleStatuses);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["TEST"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("#e30000"));
   });
@@ -54,8 +54,8 @@ describe("status list", () => {
     mockClient.getProjectStatuses.mockResolvedValue(sampleStatuses);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { project: "TEST", json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["TEST", "--json"], { from: "user" });
     }, "Open");
   });
 });

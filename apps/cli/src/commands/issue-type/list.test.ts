@@ -22,8 +22,8 @@ describe("issue-type list", () => {
   it("displays issue type list in tabular format", async () => {
     mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["TEST"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getIssueTypes).toHaveBeenCalledWith("TEST");
@@ -35,8 +35,8 @@ describe("issue-type list", () => {
   it("shows message when no issue types found", async () => {
     mockClient.getIssueTypes.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["TEST"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No issue types found.");
   });
@@ -44,8 +44,8 @@ describe("issue-type list", () => {
   it("displays color column", async () => {
     mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["TEST"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("#e30000"));
   });
@@ -54,8 +54,8 @@ describe("issue-type list", () => {
     mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { project: "TEST", json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["TEST", "--json"], { from: "user" });
     }, "Bug");
   });
 });

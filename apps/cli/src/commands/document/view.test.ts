@@ -39,8 +39,8 @@ describe("document view", () => {
   it("displays document details", async () => {
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { document: "doc-1" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["doc-1"], { from: "user" });
 
     expect(mockClient.getDocument).toHaveBeenCalledWith("doc-1");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Meeting Notes"));
@@ -52,8 +52,8 @@ describe("document view", () => {
   it("displays emoji when present", async () => {
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { document: "doc-1" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["doc-1"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("\ud83d\udcdd"));
   });
@@ -61,16 +61,16 @@ describe("document view", () => {
   it("displays body content", async () => {
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { document: "doc-1" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["doc-1"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Body"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Some document content"));
   });
 
   it("opens browser with --web flag", async () => {
-    const { view } = await import("./view");
-    await view.run?.({ args: { document: "doc-1", project: "PROJECT", web: true } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["doc-1", "--web", "-p", "PROJECT"], { from: "user" });
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/document/PROJECT/doc-1",
@@ -84,16 +84,16 @@ describe("document view", () => {
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
     await expectStdoutContaining(async () => {
-      const { view } = await import("./view");
-      await view.run?.({ args: { document: "doc-1", json: "" } } as never);
+      const { default: view } = await import("./view");
+      await view.parseAsync(["doc-1", "--json"], { from: "user" });
     }, "doc-1");
   });
 
   it("hides tags when none exist", async () => {
     mockClient.getDocument.mockResolvedValue({ ...sampleDocument, tags: [] });
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { document: "doc-1" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["doc-1"], { from: "user" });
 
     expect(mockClient.getDocument).toHaveBeenCalledWith("doc-1");
     const allCalls = vi.mocked(consola.log).mock.calls.map((c) => c[0]);
@@ -101,11 +101,9 @@ describe("document view", () => {
   });
 
   it("throws error when --web used without --project", async () => {
-    const { view } = await import("./view");
-    await expect(
-      view.run?.({
-        args: { document: "123", web: true },
-      } as never),
-    ).rejects.toThrow("The --project flag is required when using --web.");
+    const { default: view } = await import("./view");
+    await expect(view.parseAsync(["123", "--web"], { from: "user" })).rejects.toThrow(
+      "The --project flag is required when using --web.",
+    );
   });
 });

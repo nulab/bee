@@ -1,16 +1,14 @@
-import { defineCommand } from "citty";
+import { BeeCommand } from "../../lib/bee-command";
 
-export const document = defineCommand({
-  meta: {
-    name: "document",
-    description: "Manage Backlog documents",
-  },
-  subCommands: {
-    list: () => import("./list").then((m) => m.list),
-    view: () => import("./view").then((m) => m.view),
-    tree: () => import("./tree").then((m) => m.tree),
-    attachments: () => import("./attachments").then((m) => m.attachments),
-    create: () => import("./create").then((m) => m.create),
-    delete: () => import("./delete").then((m) => m.deleteDocument),
-  },
-});
+const document = new BeeCommand("document").summary("Manage Backlog documents");
+
+await document.addCommands([
+  import("./list.js"),
+  import("./view.js"),
+  import("./tree.js"),
+  import("./attachments.js"),
+  import("./create.js"),
+  import("./delete.js"),
+]);
+
+export default document;

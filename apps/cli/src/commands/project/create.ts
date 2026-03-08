@@ -1,17 +1,30 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, promptRequired } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Create a new Backlog project.
+const create = new BeeCommand("create")
+  .summary("Create a project")
+  .description(
+    `Create a new Backlog project.
 
 Project key must consist of uppercase letters (A\u2013Z), numbers (0\u20139), and
 underscores (\`_\`). If \`--name\` or \`--key\` is not provided, you will be
 prompted interactively.`,
-
-  examples: [
+  )
+  .option("-k, --key <key>", "Project key")
+  .option("-n, --name <name>", "Project name")
+  .option("--chart-enabled", "Enable chart")
+  .option("--subtasking-enabled", "Enable subtasking")
+  .option(
+    "--project-leader-can-edit-project-leader",
+    "Allow project administrators to manage each other",
+  )
+  .option("--text-formatting-rule <rule>", "Formatting rules")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     {
       description: "Create a project with key and name",
       command: 'bee project create --key TEST --name "Test Project"',
@@ -25,70 +38,26 @@ prompted interactively.`,
       description: "Create a project interactively",
       command: "bee project create",
     },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const key = await promptRequired("Project key:", opts.key);
+    const name = await promptRequired("Project name:", opts.name);
 
-const create = withUsage(
-  defineCommand({
-    meta: {
-      name: "create",
-      description: "Create a project",
-    },
-    args: {
-      ...outputArgs,
-      key: {
-        type: "string",
-        alias: "k",
-        description: "Project key",
-      },
-      name: {
-        type: "string",
-        alias: "n",
-        description: "Project name",
-      },
-      "chart-enabled": {
-        type: "boolean",
-        description: "Enable chart",
-      },
-      "subtasking-enabled": {
-        type: "boolean",
-        description: "Enable subtasking",
-      },
-      "project-leader-can-edit-project-leader": {
-        type: "boolean",
-        description: "Allow project administrators to manage each other",
-      },
-      "text-formatting-rule": {
-        type: "string",
-        description: "Formatting rules",
-        valueHint: "{backlog|markdown}",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const project = await client.postProject({
+      key,
+      name,
+      chartEnabled: opts.chartEnabled ?? false,
+      subtaskingEnabled: opts.subtaskingEnabled ?? false,
+      projectLeaderCanEditProjectLeader: opts.projectLeaderCanEditProjectLeader,
+      textFormattingRule: (opts.textFormattingRule ?? "markdown") as "backlog" | "markdown",
+    });
 
-      const key = await promptRequired("Project key:", args.key);
-      const name = await promptRequired("Project name:", args.name);
+    const jsonArg = opts.json === true ? "" : opts.json;
+    outputResult(project, { ...opts, json: jsonArg }, (data) => {
+      consola.success(`Created project ${data.projectKey}: ${data.name}`);
+    });
+  });
 
-      const project = await client.postProject({
-        key,
-        name,
-        chartEnabled: args["chart-enabled"] ?? false,
-        subtaskingEnabled: args["subtasking-enabled"] ?? false,
-        projectLeaderCanEditProjectLeader: args["project-leader-can-edit-project-leader"],
-        textFormattingRule: (args["text-formatting-rule"] ?? "markdown") as "backlog" | "markdown",
-      });
-
-      outputResult(project, args, (data) => {
-        consola.success(`Created project ${data.projectKey}: ${data.name}`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, create };
+export default create;

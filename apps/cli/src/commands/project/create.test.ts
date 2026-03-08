@@ -27,8 +27,8 @@ describe("project create", () => {
       textFormattingRule: "markdown",
     });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: { key: "TEST", name: "Test Project" } } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["--key", "TEST", "--name", "Test Project"], { from: "user" });
 
     expect(mockClient.postProject).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -49,8 +49,8 @@ describe("project create", () => {
       textFormattingRule: "backlog",
     });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: {} } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync([], { from: "user" });
 
     expect(promptRequired).toHaveBeenCalledWith("Project key:", undefined);
     expect(promptRequired).toHaveBeenCalledWith("Project name:", undefined);
@@ -70,15 +70,11 @@ describe("project create", () => {
       textFormattingRule: "markdown",
     });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        key: "TEST",
-        name: "Test",
-        "chart-enabled": true,
-        "text-formatting-rule": "markdown",
-      },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      ["--key", "TEST", "--name", "Test", "--chart-enabled", "--text-formatting-rule", "markdown"],
+      { from: "user" },
+    );
 
     expect(mockClient.postProject).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -97,8 +93,8 @@ describe("project create", () => {
     });
 
     await expectStdoutContaining(async () => {
-      const { create } = await import("./create");
-      await create.run?.({ args: { key: "TEST", name: "Test", json: "" } } as never);
+      const { default: create } = await import("./create");
+      await create.parseAsync(["--key", "TEST", "--name", "Test", "--json"], { from: "user" });
     }, "TEST");
   });
 });

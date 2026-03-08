@@ -34,8 +34,8 @@ describe("star list", () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getUserStars.mockResolvedValue(sampleStars);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getMyself).toHaveBeenCalled();
@@ -46,8 +46,8 @@ describe("star list", () => {
   it("lists stars for a specific user", async () => {
     mockClient.getUserStars.mockResolvedValue(sampleStars);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { user: "200" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["200"], { from: "user" });
 
     expect(mockClient.getUserStars).toHaveBeenCalledWith(200, {});
     expect(mockClient.getMyself).not.toHaveBeenCalled();
@@ -57,8 +57,8 @@ describe("star list", () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getUserStars.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No stars found.");
   });
@@ -68,8 +68,8 @@ describe("star list", () => {
     mockClient.getUserStars.mockResolvedValue(sampleStars);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["--json"], { from: "user" });
     }, "Sample issue");
   });
 });

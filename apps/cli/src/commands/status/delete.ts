@@ -1,12 +1,14 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { confirmOrExit, outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `Delete a status from a Backlog project.
+const deleteStatus = new BeeCommand("delete")
+  .summary("Delete a status")
+  .description(
+    `Delete a status from a Backlog project.
 
 When deleting a status, all issues with that status must be reassigned
 to another status. Use \`--substitute-status-id\` to specify
@@ -14,8 +16,14 @@ the replacement.
 
 This action is irreversible. You will be prompted for confirmation unless
 \`--yes\` is provided.`,
-
-  examples: [
+  )
+  .argument("<status>", "Status ID")
+  .addOption(opt.project())
+  .requiredOption("--substitute-status-id <value>", "Replacement status ID for affected issues")
+  .option("-y, --yes", "Skip confirmation prompt")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Delete a status",
       command: "bee status delete 12345 -p PROJECT --substitute-status-id 67890",
@@ -24,64 +32,29 @@ This action is irreversible. You will be prompted for confirmation unless
       description: "Delete without confirmation",
       command: "bee status delete 12345 -p PROJECT --substitute-status-id 67890 --yes",
     },
-  ],
+  ])
+  .action(async (status, opts, cmd) => {
+    await resolveOptions(cmd);
+    const confirmed = await confirmOrExit(
+      `Are you sure you want to delete status ${status}? This cannot be undone.`,
+      opts.yes,
+    );
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    if (!confirmed) {
+      return;
+    }
 
-const deleteStatus = withUsage(
-  defineCommand({
-    meta: {
-      name: "delete",
-      description: "Delete a status",
-    },
-    args: {
-      ...outputArgs,
-      status: {
-        type: "positional",
-        description: "Status ID",
-        required: true,
-        valueHint: "<number>",
-      },
-      project: { ...commonArgs.project, required: true },
-      "substitute-status-id": {
-        type: "string",
-        description: "Replacement status ID for affected issues",
-        valueHint: "<number>",
-        required: true,
-      },
-      yes: {
-        type: "boolean",
-        alias: "y",
-        description: "Skip confirmation prompt",
-      },
-    },
-    async run({ args }) {
-      const confirmed = await confirmOrExit(
-        `Are you sure you want to delete status ${args.status}? This cannot be undone.`,
-        args.yes,
-      );
+    const { client } = await getClient();
 
-      if (!confirmed) {
-        return;
-      }
+    const result = await client.deleteProjectStatus(
+      opts.project,
+      Number(status),
+      Number(opts.substituteStatusId),
+    );
 
-      const { client } = await getClient();
+    outputResult(result, opts, (data) => {
+      consola.success(`Deleted status ${data.name} (ID: ${data.id})`);
+    });
+  });
 
-      const status = await client.deleteProjectStatus(
-        args.project,
-        Number(args.status),
-        Number(args["substitute-status-id"]),
-      );
-
-      outputResult(status, args, (data) => {
-        consola.success(`Deleted status ${data.name} (ID: ${data.id})`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, deleteStatus };
+export default deleteStatus;

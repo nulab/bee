@@ -1,75 +1,58 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, promptRequired, splitArg } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import { collectNum } from "../../lib/common-options";
+import * as opt from "../../lib/common-options";
 import { handleTeamWriteError } from "./warn-team-write-restriction";
 
-const commandUsage: CommandUsage = {
-  long: `Create a new Backlog team.
+const create = new BeeCommand("create")
+  .summary("Create a team")
+  .description(
+    `Create a new Backlog team.
 
 If \`--name\` is not provided, you will be prompted interactively.
 
-Optionally specify \`--members\` with a comma-separated list of user IDs to
-add members when creating the team.`,
-
-  examples: [
+Optionally specify \`--members\` with user IDs (repeatable) to add members
+when creating the team.`,
+  )
+  .option("-n, --name <name>", "Team name")
+  .option(
+    "--members <id>",
+    "User IDs to add as members (repeatable)",
+    collectNum,
+    [] satisfies number[],
+  )
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "Create a team interactively", command: "bee team create" },
     { description: "Create a team with a name", command: 'bee team create --name "Design Team"' },
     {
       description: "Create a team with members",
-      command: 'bee team create --name "Dev Team" --members 111,222,333',
+      command: 'bee team create --name "Dev Team" --members 111 --members 222 --members 333',
     },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const name = await promptRequired("Team name:", opts.name);
+    const { members } = opts;
 
-const create = withUsage(
-  defineCommand({
-    meta: {
-      name: "create",
-      description: "Create a team",
-    },
-    args: {
-      ...outputArgs,
-      name: {
-        type: "string",
-        alias: "n",
-        description: "Team name",
-      },
-      members: {
-        type: "string",
-        description: "Comma-separated list of user IDs to add as members",
-        valueHint: "<userId,...>",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
-
-      const name = await promptRequired("Team name:", args.name);
-      const members = splitArg(args.members, v.number());
-
-      let t;
-      try {
-        t = await client.postTeam({
-          name,
-          members: members.length > 0 ? members : undefined,
-        });
-      } catch (error) {
-        handleTeamWriteError(error);
-        throw error;
-      }
-
-      outputResult(t, args, (data) => {
-        consola.success(`Created team ${data.name} (ID: ${data.id})`);
+    let t;
+    try {
+      t = await client.postTeam({
+        name,
+        members: members.length > 0 ? members : undefined,
       });
-    },
-  }),
-  commandUsage,
-);
+    } catch (error) {
+      handleTeamWriteError(error);
+      throw error;
+    }
 
-export { commandUsage, create };
+    outputResult(t, opts, (data) => {
+      consola.success(`Created team ${data.name} (ID: ${data.id})`);
+    });
+  });
+
+export default create;

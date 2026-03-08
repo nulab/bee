@@ -1,19 +1,28 @@
 import { getClient, resolveProjectIds } from "@repo/backlog-utils";
-import { outputArgs, outputResult, promptRequired, resolveStdinArg } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult, promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Create a new Backlog document.
+const create = new BeeCommand("create")
+  .summary("Create a document")
+  .description(
+    `Create a new Backlog document.
 
 Requires a project and title. When run interactively, omitted required
 fields will be prompted.
 
 When input is piped, it is used as the body automatically.`,
-
-  examples: [
+  )
+  .option("-p, --project <id>", "Project ID or project key")
+  .option("-t, --title <text>", "Document title")
+  .option("-b, --body <text>", "Document body content")
+  .option("--emoji <emoji>", "Emoji for the document")
+  .option("--parent-id <id>", "Parent document ID for creating as a child document")
+  .option("--add-last", "Add document to the end of the list")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Create a document with title and body",
       command: 'bee document create -p PROJECT -t "Meeting Notes" -b "Content here"',
@@ -30,70 +39,29 @@ When input is piped, it is used as the body automatically.`,
       description: "Output as JSON",
       command: 'bee document create -p PROJECT -t "Title" --json',
     },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const project = await promptRequired("Project:", opts.project);
+    const title = await promptRequired("Title:", opts.title);
 
-const create = withUsage(
-  defineCommand({
-    meta: {
-      name: "create",
-      description: "Create a document",
-    },
-    args: {
-      ...outputArgs,
-      project: commonArgs.project,
-      title: {
-        type: "string",
-        alias: "t",
-        description: "Document title",
-      },
-      body: {
-        type: "string",
-        alias: "b",
-        description: "Document body content",
-      },
-      emoji: {
-        type: "string",
-        description: "Emoji for the document",
-      },
-      "parent-id": {
-        type: "string",
-        description: "Parent document ID for creating as a child document",
-      },
-      "add-last": {
-        type: "boolean",
-        description: "Add document to the end of the list",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const [projectId] = await resolveProjectIds(client, [project]);
 
-      const project = await promptRequired("Project:", args.project);
-      const title = await promptRequired("Title:", args.title);
+    const body = await resolveStdinArg(opts.body);
 
-      const [projectId] = await resolveProjectIds(client, [project]);
+    const doc = await client.addDocument({
+      projectId,
+      title,
+      content: body,
+      emoji: opts.emoji,
+      parentId: opts.parentId,
+      addLast: opts.addLast,
+    });
 
-      const body = await resolveStdinArg(args.body);
+    outputResult(doc, opts, (data) => {
+      consola.success(`Created document ${data.title} (ID: ${data.id})`);
+    });
+  });
 
-      const doc = await client.addDocument({
-        projectId,
-        title,
-        content: body,
-        emoji: args.emoji,
-        parentId: args["parent-id"],
-        addLast: args["add-last"],
-      });
-
-      outputResult(doc, args, (data) => {
-        consola.success(`Created document ${data.title} (ID: ${data.id})`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, create };
+export default create;

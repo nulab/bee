@@ -1,18 +1,36 @@
-import { PRIORITY_NAMES, PriorityId, getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, splitArg } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { PRIORITY_NAMES, PriorityId, getClient, resolveUserId } from "@repo/backlog-utils";
+import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Update an existing Backlog issue.
+const edit = new BeeCommand("edit")
+  .summary("Edit an issue")
+  .description(
+    `Update an existing Backlog issue.
 
 Only the specified fields will be updated. Fields that are not provided
 will remain unchanged.`,
-
-  examples: [
+  )
+  .argument("<issue>", "Issue ID or issue key")
+  .option("-t, --title <text>", "New title of the issue")
+  .option("-d, --description <text>", "New description of the issue")
+  .option("-S, --status <id>", "New status ID")
+  .option("-P, --priority <name>", `Change priority`)
+  .option("-T, --type <id>", "New issue type ID")
+  .option("--assignee <id>", "New assignee user ID. Use @me for yourself.")
+  .option("--resolution <id>", "Resolution ID")
+  .option("--parent-issue <id>", "New parent issue ID")
+  .option("--start-date <date>", "New start date")
+  .option("--due-date <date>", "New due date")
+  .option("--estimated-hours <n>", "New estimated hours")
+  .option("--actual-hours <n>", "New actual hours")
+  .addOption(opt.comment())
+  .addOption(opt.notify())
+  .addOption(opt.attachment())
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     {
       description: "Update issue title",
       command: 'bee issue edit PROJECT-123 -t "New title"',
@@ -25,129 +43,44 @@ will remain unchanged.`,
       description: "Add a comment with the update",
       command: 'bee issue edit PROJECT-123 -t "New title" --comment "Updated title"',
     },
-  ],
+  ])
+  .action(async (issue, opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const notifiedUserId = opts.notify ?? [];
+    const attachmentId = opts.attachment ?? [];
 
-const edit = withUsage(
-  defineCommand({
-    meta: {
-      name: "edit",
-      description: "Edit an issue",
-    },
-    args: {
-      ...outputArgs,
-      issue: {
-        type: "positional",
-        description: "Issue ID or issue key",
-        valueHint: "<PROJECT-123>",
-        required: true,
-      },
-      title: {
-        type: "string",
-        alias: "t",
-        description: "New title of the issue",
-      },
-      description: {
-        type: "string",
-        alias: "d",
-        description: "New description of the issue",
-      },
-      status: {
-        type: "string",
-        alias: "S",
-        description: "New status ID",
-      },
-      priority: {
-        type: "string",
-        alias: "P",
-        description: "Change priority",
-        valueHint: `{${PRIORITY_NAMES.join("|")}}`,
-      },
-      type: {
-        type: "string",
-        alias: "T",
-        description: "New issue type ID",
-        valueHint: "<number>",
-      },
-      assignee: {
-        ...commonArgs.assignee,
-        alias: undefined,
-        description: "New assignee user ID. Use @me for yourself.",
-      },
-      resolution: {
-        type: "string",
-        description: "Resolution ID",
-      },
-      "parent-issue": {
-        type: "string",
-        description: "New parent issue ID",
-      },
-      "start-date": {
-        type: "string",
-        description: "New start date",
-        valueHint: "<yyyy-MM-dd>",
-      },
-      "due-date": {
-        type: "string",
-        description: "New due date",
-        valueHint: "<yyyy-MM-dd>",
-      },
-      "estimated-hours": {
-        type: "string",
-        description: "New estimated hours",
-      },
-      "actual-hours": {
-        type: "string",
-        description: "New actual hours",
-      },
-      comment: commonArgs.comment,
-      notify: commonArgs.notify,
-      attachment: commonArgs.attachment,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
-
-      const notifiedUserId = splitArg(args.notify, v.number());
-      const attachmentId = splitArg(args.attachment, v.number());
-
-      let priorityId: number | undefined;
-      if (args.priority) {
-        priorityId = PriorityId[args.priority.toLowerCase()];
-        if (priorityId === undefined) {
-          throw new Error(
-            `Unknown priority "${args.priority}". Valid values: ${PRIORITY_NAMES.join(", ")}`,
-          );
-        }
+    let priorityId: number | undefined;
+    if (opts.priority) {
+      priorityId = PriorityId[opts.priority.toLowerCase()];
+      if (priorityId === undefined) {
+        throw new Error(
+          `Unknown priority "${opts.priority}". Valid values: ${PRIORITY_NAMES.join(", ")}`,
+        );
       }
+    }
 
-      const issue = await client.patchIssue(args.issue, {
-        summary: args.title,
-        description: args.description,
-        statusId: args.status ? Number(args.status) : undefined,
-        priorityId,
-        issueTypeId: args.type ? Number(args.type) : undefined,
-        assigneeId: args.assignee ? Number(args.assignee) : undefined,
-        resolutionId: args.resolution ? Number(args.resolution) : undefined,
-        parentIssueId: args["parent-issue"] ? Number(args["parent-issue"]) : undefined,
-        startDate: args["start-date"],
-        dueDate: args["due-date"],
-        estimatedHours: args["estimated-hours"] ? Number(args["estimated-hours"]) : undefined,
-        actualHours: args["actual-hours"] ? Number(args["actual-hours"]) : undefined,
-        comment: args.comment,
-        notifiedUserId,
-        attachmentId,
-      });
+    const issueData = await client.patchIssue(issue, {
+      summary: opts.title,
+      description: opts.description,
+      statusId: opts.status ? Number(opts.status) : undefined,
+      priorityId,
+      issueTypeId: opts.type ? Number(opts.type) : undefined,
+      assigneeId: opts.assignee ? await resolveUserId(client, opts.assignee) : undefined,
+      resolutionId: opts.resolution ? Number(opts.resolution) : undefined,
+      parentIssueId: opts.parentIssue ? Number(opts.parentIssue) : undefined,
+      startDate: opts.startDate,
+      dueDate: opts.dueDate,
+      estimatedHours: opts.estimatedHours ? Number(opts.estimatedHours) : undefined,
+      actualHours: opts.actualHours ? Number(opts.actualHours) : undefined,
+      comment: opts.comment,
+      notifiedUserId,
+      attachmentId,
+    });
 
-      outputResult(issue, args, (data) => {
-        consola.success(`Updated issue ${data.issueKey}: ${data.summary}`);
-      });
-    },
-  }),
-  commandUsage,
-);
+    outputResult(issueData, opts as { json?: string }, (data) => {
+      consola.success(`Updated issue ${data.issueKey}: ${data.summary}`);
+    });
+  });
 
-export { commandUsage, edit };
+export default edit;

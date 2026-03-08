@@ -1,83 +1,63 @@
 import { getClient, openOrPrintUrl, wikiUrl } from "@repo/backlog-utils";
-import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { formatDate, outputResult, printDefinitionList } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Display details of a Backlog wiki page.
+const view = new BeeCommand("view")
+  .summary("View a wiki page")
+  .description(
+    `Display details of a Backlog wiki page.
 
 Shows the page name, ID, tags, created/updated info, and the full body
 content.
 
 Use \`--web\` to open the wiki page in your default browser instead.`,
-
-  examples: [
+  )
+  .argument("<wiki>", "Wiki page ID")
+  .addOption(opt.web("wiki page"))
+  .addOption(opt.noBrowser())
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "View a wiki page", command: "bee wiki view 12345" },
     { description: "Open wiki page in browser", command: "bee wiki view 12345 --web" },
     { description: "Output as JSON", command: "bee wiki view 12345 --json" },
-  ],
+  ])
+  .action(async (wiki, opts) => {
+    const { client, host } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    if (opts.web || opts.browser === false) {
+      const url = wikiUrl(host, Number(wiki));
+      await openOrPrintUrl(url, opts.browser === false, consola);
+      return;
+    }
 
-const view = withUsage(
-  defineCommand({
-    meta: {
-      name: "view",
-      description: "View a wiki page",
-    },
-    args: {
-      ...outputArgs,
-      wiki: {
-        type: "positional",
-        description: "Wiki page ID",
-        valueHint: "<number>",
-        required: true,
-      },
-      web: commonArgs.web("wiki page"),
-      "no-browser": commonArgs.noBrowser,
-    },
-    async run({ args }) {
-      const { client, host } = await getClient();
+    const wikiData = await client.getWiki(Number(wiki));
 
-      if (args.web || args["no-browser"]) {
-        const url = wikiUrl(host, Number(args.wiki));
-        await openOrPrintUrl(url, Boolean(args["no-browser"]), consola);
-        return;
+    outputResult(wikiData, opts, (data) => {
+      consola.log("");
+      consola.log(`  ${data.name}`);
+      consola.log("");
+      printDefinitionList([
+        ["ID", String(data.id)],
+        [
+          "Tags",
+          data.tags.length > 0
+            ? data.tags.map((t: { name: string }) => t.name).join(", ")
+            : undefined,
+        ],
+        ["Created by", data.createdUser?.name],
+        ["Created", formatDate(data.created)],
+        ["Updated by", data.updatedUser?.name],
+        ["Updated", formatDate(data.updated)],
+      ]);
+      if (data.content) {
+        consola.log("");
+        consola.log(`  ${data.content}`);
       }
+      consola.log("");
+    });
+  });
 
-      const wiki = await client.getWiki(Number(args.wiki));
-
-      outputResult(wiki, args, (data) => {
-        consola.log("");
-        consola.log(`  ${data.name}`);
-        consola.log("");
-        printDefinitionList([
-          ["ID", String(data.id)],
-          [
-            "Tags",
-            data.tags.length > 0
-              ? data.tags.map((t: { name: string }) => t.name).join(", ")
-              : undefined,
-          ],
-          ["Created by", data.createdUser?.name],
-          ["Created", formatDate(data.created)],
-          ["Updated by", data.updatedUser?.name],
-          ["Updated", formatDate(data.updated)],
-        ]);
-        if (data.content) {
-          consola.log("");
-          consola.log(`  ${data.content}`);
-        }
-        consola.log("");
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, view };
+export default view;

@@ -37,8 +37,8 @@ describe("notification list", () => {
       },
     ]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getNotifications).toHaveBeenCalled();
@@ -59,8 +59,8 @@ describe("notification list", () => {
       },
     ]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("*"));
   });
@@ -68,8 +68,8 @@ describe("notification list", () => {
   it("shows message when no notifications found", async () => {
     mockClient.getNotifications.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No notifications found.");
   });
@@ -77,10 +77,10 @@ describe("notification list", () => {
   it("passes limit, min-id, max-id, and order parameters", async () => {
     mockClient.getNotifications.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({
-      args: { count: "5", "min-id": "10", "max-id": "100", order: "asc" },
-    } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--count", "5", "--min-id", "10", "--max-id", "100", "--order", "asc"], {
+      from: "user",
+    });
 
     expect(mockClient.getNotifications).toHaveBeenCalledWith({
       count: 5,
@@ -104,8 +104,8 @@ describe("notification list", () => {
     ]);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["--json"], { from: "user" });
     }, "PROJ-1");
   });
 });

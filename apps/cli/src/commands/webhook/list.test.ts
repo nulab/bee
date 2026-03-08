@@ -13,6 +13,11 @@ vi.mock("@repo/backlog-utils", () => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
+}));
+
 const sampleWebhooks = [
   { id: 1, name: "Deploy Hook", hookUrl: "https://example.com/deploy", allEvent: true },
   { id: 2, name: "CI Hook", hookUrl: "https://example.com/ci", allEvent: false },
@@ -22,8 +27,8 @@ describe("webhook list", () => {
   it("displays webhook list in tabular format", async () => {
     mockClient.getWebhooks.mockResolvedValue(sampleWebhooks);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["-p", "TEST"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWebhooks).toHaveBeenCalledWith("TEST");
@@ -35,8 +40,8 @@ describe("webhook list", () => {
   it("shows message when no webhooks found", async () => {
     mockClient.getWebhooks.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "TEST" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["-p", "TEST"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No webhooks found.");
   });
@@ -45,8 +50,8 @@ describe("webhook list", () => {
     mockClient.getWebhooks.mockResolvedValue(sampleWebhooks);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { project: "TEST", json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["-p", "TEST", "--json"], { from: "user" });
     }, "Deploy Hook");
   });
 });
