@@ -18,13 +18,14 @@ on:
 # リポジトリへの書き込みは不要なので全権限を無効化
 permissions: {}
 
+env:
+  BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+  BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+
 jobs:
   notify:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
-      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
     steps:
       - uses: actions/checkout@v4
         with:
