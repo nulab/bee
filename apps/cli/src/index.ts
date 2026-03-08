@@ -1,9 +1,9 @@
 import { handleBacklogApiError } from "@repo/backlog-utils";
 import { UserError, handleValidationError } from "@repo/cli-utils";
 import { defineCommand, runCommand, runMain } from "citty";
+import consola, { LogLevels } from "consola";
 import { showCommandUsage } from "./lib/command-usage";
 import pkg from "../package.json" with { type: "json" };
-import consola from "consola";
 
 const main = defineCommand({
   meta: {
@@ -49,9 +49,12 @@ if (rawArgs.includes("--help") || rawArgs.includes("-h") || rawArgs.includes("--
   try {
     await runCommand(main, { rawArgs });
   } catch (error) {
+    // At debug level or above, always show the full error with stack trace
+    const showStack = consola.level >= LogLevels.debug;
+
     // UserError = expected failure (bad input, missing config, …) → message only
     if (error instanceof UserError) {
-      consola.error(error.message);
+      consola.error(showStack ? error : error.message);
     } else if (!handleBacklogApiError(error, { json: useJson }) && !handleValidationError(error)) {
       // Unrecognised error = unexpected bug → full object (includes stack trace)
       consola.error(error);
