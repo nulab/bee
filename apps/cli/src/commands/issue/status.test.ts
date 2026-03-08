@@ -1,6 +1,6 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getMyself: vi.fn(),
@@ -13,13 +13,6 @@ vi.mock("@repo/backlog-utils", () => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
-
 const sampleUser = {
   id: 100,
   name: "Alice",
@@ -27,7 +20,6 @@ const sampleUser = {
 
 describe("issue status", () => {
   it("displays issues grouped by status", async () => {
-    setupMocks();
     mockClient.getMyself.mockResolvedValue(sampleUser);
     mockClient.getIssues.mockResolvedValue([
       { issueKey: "PROJ-1", summary: "Open issue", status: { name: "Open" } },
@@ -53,7 +45,6 @@ describe("issue status", () => {
   });
 
   it("shows message when no issues assigned", async () => {
-    setupMocks();
     mockClient.getMyself.mockResolvedValue(sampleUser);
     mockClient.getIssues.mockResolvedValue([]);
 
@@ -64,18 +55,14 @@ describe("issue status", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.getMyself.mockResolvedValue(sampleUser);
     mockClient.getIssues.mockResolvedValue([
       { issueKey: "PROJ-1", summary: "Test", status: { name: "Open" } },
     ]);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { status } = await import("./status");
-    await status.run?.({ args: { json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { status } = await import("./status");
+      await status.run?.({ args: { json: "" } } as never);
+    }, "PROJ-1");
   });
 });

@@ -1,6 +1,7 @@
 import { confirmOrExit, printTable, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   postIssueComments: vi.fn(),
@@ -66,13 +67,10 @@ describe("issue comment", () => {
   it("outputs JSON when --json flag is set", async () => {
     mockClient.postIssueComments.mockResolvedValue({ id: 1, content: "Hello" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { comment } = await import("./comment");
-    await comment.run?.({ args: { issue: "TEST-1", body: "Hello", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Hello"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { comment } = await import("./comment");
+      await comment.run?.({ args: { issue: "TEST-1", body: "Hello", json: "" } } as never);
+    }, "Hello");
   });
 
   it("lists comments with --list flag", async () => {
@@ -156,7 +154,10 @@ describe("issue comment", () => {
     const { comment } = await import("./comment");
     await comment.run?.({ args: { issue: "TEST-1", "delete-last": true, yes: true } } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete your comment on TEST-1?",
+      true,
+    );
   });
 
   it("cancels delete when user declines", async () => {
@@ -169,6 +170,49 @@ describe("issue comment", () => {
     const { comment } = await import("./comment");
     await comment.run?.({ args: { issue: "TEST-1", "delete-last": true } } as never);
 
+    expect(mockClient.deleteIssueComment).not.toHaveBeenCalled();
+  });
+
+  it("shows error when body is missing for add comment", async () => {
+    vi.mocked(resolveStdinArg).mockResolvedValueOnce(undefined);
+
+    const { comment } = await import("./comment");
+    await comment.run?.({ args: { issue: "TEST-1" } } as never);
+
+    expect(consola.error).toHaveBeenCalledWith(
+      "Comment body is required. Use --body or pipe input.",
+    );
+    expect(mockClient.postIssueComments).not.toHaveBeenCalled();
+  });
+
+  it("shows error when body is missing with --edit-last", async () => {
+    mockClient.getMyself.mockResolvedValue({ id: 1 });
+    mockClient.getIssueComments.mockResolvedValue([
+      { id: 20, content: "My comment", createdUser: { id: 1 } },
+    ]);
+    vi.mocked(resolveStdinArg).mockResolvedValueOnce(undefined);
+
+    const { comment } = await import("./comment");
+    await comment.run?.({
+      args: { issue: "TEST-1", "edit-last": true },
+    } as never);
+
+    expect(consola.error).toHaveBeenCalledWith(
+      "Comment body is required. Use --body or pipe input.",
+    );
+    expect(mockClient.patchIssueComment).not.toHaveBeenCalled();
+  });
+
+  it("shows error when no own comment found with --delete-last", async () => {
+    mockClient.getMyself.mockResolvedValue({ id: 1 });
+    mockClient.getIssueComments.mockResolvedValue([
+      { id: 10, content: "Other", createdUser: { id: 999 } },
+    ]);
+
+    const { comment } = await import("./comment");
+    await comment.run?.({ args: { issue: "TEST-1", "delete-last": true } } as never);
+
+    expect(consola.error).toHaveBeenCalledWith("No comment by you was found on TEST-1.");
     expect(mockClient.deleteIssueComment).not.toHaveBeenCalled();
   });
 });

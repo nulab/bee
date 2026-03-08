@@ -1,6 +1,7 @@
 import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getMyself: vi.fn(),
@@ -97,13 +98,10 @@ describe("dashboard", () => {
     mockClient.getIssues.mockResolvedValue(sampleIssues);
     mockClient.getProjects.mockResolvedValue(sampleProjects);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { dashboard } = await import("./dashboard");
-    await dashboard.run?.({ args: { json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Test User"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { dashboard } = await import("./dashboard");
+      await dashboard.run?.({ args: { json: "" } } as never);
+    }, "Test User");
   });
 
   it("shows empty message when no assigned issues", async () => {

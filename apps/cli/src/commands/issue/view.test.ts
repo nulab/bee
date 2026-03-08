@@ -1,6 +1,7 @@
-import { getClient, openOrPrintUrl } from "@repo/backlog-utils";
+import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getIssue: vi.fn(),
@@ -15,13 +16,6 @@ vi.mock("@repo/backlog-utils", () => ({
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
 
 const sampleIssue = {
   id: 1,
@@ -46,7 +40,6 @@ const sampleIssue = {
 
 describe("issue view", () => {
   it("displays issue details", async () => {
-    setupMocks();
     mockClient.getIssue.mockResolvedValue(sampleIssue);
 
     const { view } = await import("./view");
@@ -62,7 +55,6 @@ describe("issue view", () => {
   });
 
   it("shows Unassigned for issues without assignee", async () => {
-    setupMocks();
     mockClient.getIssue.mockResolvedValue({ ...sampleIssue, assignee: null });
 
     const { view } = await import("./view");
@@ -72,7 +64,6 @@ describe("issue view", () => {
   });
 
   it("displays description when present", async () => {
-    setupMocks();
     mockClient.getIssue.mockResolvedValue(sampleIssue);
 
     const { view } = await import("./view");
@@ -83,7 +74,6 @@ describe("issue view", () => {
   });
 
   it("fetches and displays comments with --comments flag", async () => {
-    setupMocks();
     mockClient.getIssue.mockResolvedValue(sampleIssue);
     mockClient.getIssueComments.mockResolvedValue([
       {
@@ -103,8 +93,6 @@ describe("issue view", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    setupMocks();
-
     const { view } = await import("./view");
     await view.run?.({ args: { issue: "PROJ-1", web: true } } as never);
 
@@ -117,15 +105,11 @@ describe("issue view", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.getIssue.mockResolvedValue(sampleIssue);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { view } = await import("./view");
-    await view.run?.({ args: { issue: "PROJ-1", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { view } = await import("./view");
+      await view.run?.({ args: { issue: "PROJ-1", json: "" } } as never);
+    }, "PROJ-1");
   });
 });

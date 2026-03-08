@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getIssues: vi.fn(),
@@ -13,13 +14,6 @@ vi.mock("@repo/backlog-utils", async (importOriginal) => ({
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
 
 const sampleIssues = [
   {
@@ -42,7 +36,6 @@ const sampleIssues = [
 
 describe("issue list", () => {
   it("displays issue list in tabular format", async () => {
-    setupMocks();
     mockClient.getIssues.mockResolvedValue(sampleIssues);
 
     const { list } = await import("./list");
@@ -56,7 +49,6 @@ describe("issue list", () => {
   });
 
   it("shows message when no issues found", async () => {
-    setupMocks();
     mockClient.getIssues.mockResolvedValue([]);
 
     const { list } = await import("./list");
@@ -66,7 +58,6 @@ describe("issue list", () => {
   });
 
   it("shows Unassigned for issues without assignee", async () => {
-    setupMocks();
     mockClient.getIssues.mockResolvedValue([sampleIssues[1]]);
 
     const { list } = await import("./list");
@@ -76,7 +67,6 @@ describe("issue list", () => {
   });
 
   it("passes project query parameter", async () => {
-    setupMocks();
     mockClient.getIssues.mockResolvedValue([]);
 
     const { list } = await import("./list");
@@ -88,7 +78,6 @@ describe("issue list", () => {
   });
 
   it("passes assignee query parameter", async () => {
-    setupMocks();
     mockClient.getIssues.mockResolvedValue([]);
 
     const { list } = await import("./list");
@@ -100,7 +89,6 @@ describe("issue list", () => {
   });
 
   it("passes keyword query parameter", async () => {
-    setupMocks();
     mockClient.getIssues.mockResolvedValue([]);
 
     const { list } = await import("./list");
@@ -112,15 +100,11 @@ describe("issue list", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.getIssues.mockResolvedValue(sampleIssues);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { list } = await import("./list");
-    await list.run?.({ args: { json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { list } = await import("./list");
+      await list.run?.({ args: { json: "" } } as never);
+    }, "PROJ-1");
   });
 });

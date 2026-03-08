@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   patchTeam: vi.fn(),
@@ -51,12 +52,9 @@ describe("team edit", () => {
   it("outputs JSON when --json flag is set", async () => {
     mockClient.patchTeam.mockResolvedValue({ id: 1, name: "Team", members: [] });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { edit } = await import("./edit");
-    await edit.run?.({ args: { team: "1", name: "Team", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Team"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { edit } = await import("./edit");
+      await edit.run?.({ args: { team: "1", name: "Team", json: "" } } as never);
+    }, "Team");
   });
 });
