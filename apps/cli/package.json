@@ -1,7 +1,7 @@
 {
   "name": "@nulab/bee",
   "version": "0.0.0",
-  "description": "bee — a CLI for Backlog",
+  "description": "Bring Backlog to your command line",
   "keywords": [
     "backlog",
     "cli",

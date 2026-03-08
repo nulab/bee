@@ -1,6 +1,6 @@
 # bee
 
-A CLI for [Backlog](https://backlog.com/) project management service, inspired by GitHub CLI.
+Bring [Backlog](https://backlog.com/) to your command line.
 
 **Note:** This is not an officially supported Nulab product. It is maintained by volunteers.
 

@@ -7,7 +7,7 @@
 [![last commit](https://img.shields.io/github/last-commit/nulab/bee?logo=github)](https://github.com/nulab/bee/commits/main)
 [![license](https://img.shields.io/github/license/nulab/bee?logo=opensourceinitiative)](LICENSE)
 
-Command-line tool to view and manage [Backlog](https://backlog.com/), inspired by GitHub CLI.
+Bring [Backlog](https://backlog.com/) to your command line.
 
 > [!NOTE]
 > This is not an officially supported Nulab product. It is maintained by volunteers.
