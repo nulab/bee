@@ -100,6 +100,9 @@ importers:
         specifier: ^0.34.5
         version: 0.34.5
     devDependencies:
+      commander:
+        specifier: ^14.0.3
+        version: 14.0.3
       jiti:
         specifier: ^2.6.1
         version: 2.6.1
