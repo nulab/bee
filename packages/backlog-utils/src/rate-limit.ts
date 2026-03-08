@@ -3,7 +3,7 @@ const RATE_LIMIT_BUFFER_MS = 1000;
 
 const formatResetTime = (epochSeconds: number): string => {
   const date = new Date(epochSeconds * 1000);
-  return date.toLocaleString();
+  return date.toString();
 };
 
 class BacklogRateLimitError extends Error {

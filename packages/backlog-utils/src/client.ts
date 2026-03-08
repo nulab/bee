@@ -167,16 +167,16 @@ const isBacklogAuthError = (error: unknown): boolean =>
   (error as Record<string, unknown>)._name === "BacklogAuthError" &&
   (error as Record<string, unknown>)._status === 401;
 
-const isBacklogRateLimitError = (error: unknown): error is Error & { response: Response } =>
+const isBacklogRateLimitError = (error: unknown): error is Error & { _response: Response } =>
   error instanceof Error &&
   (error as Record<string, unknown>)._name === "BacklogApiError" &&
   (error as Record<string, unknown>)._status === 429;
 
 const handleRateLimitError = (error: unknown): void => {
   if (isBacklogRateLimitError(error)) {
-    const resetEpoch = error.response.headers.get("X-RateLimit-Reset");
+    const resetEpoch = error._response.headers.get("X-RateLimit-Reset");
     const resetMessage = resetEpoch
-      ? `Rate limit resets at ${formatResetTime(Number(resetEpoch))} (X-RateLimit-Reset: ${resetEpoch}).`
+      ? `Rate limit resets at ${formatResetTime(Number(resetEpoch))}.`
       : "Please wait and try again later.";
     throw new UserError(`API rate limit exceeded. ${resetMessage}`);
   }

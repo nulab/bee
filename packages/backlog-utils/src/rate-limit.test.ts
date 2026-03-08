@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { BacklogRateLimitError, formatResetTime } from "./rate-limit";
 
 describe("formatResetTime", () => {
-  it("converts epoch seconds to a localized date-time string", () => {
+  it("converts epoch seconds to a Date.toString() format with timezone", () => {
     const epoch = 1_700_000_000;
     const result = formatResetTime(epoch);
 
-    expect(result).toBe(new Date(epoch * 1000).toLocaleString());
+    expect(result).toBe(new Date(epoch * 1000).toString());
   });
 });
 
