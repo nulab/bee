@@ -23,4 +23,11 @@ describe("notification read-all", () => {
     expect(mockClient.resetNotificationsMarkAsRead).toHaveBeenCalled();
     expect(consola.success).toHaveBeenCalledWith("Marked all notifications as read.");
   });
+
+  it("propagates API errors", async () => {
+    mockClient.resetNotificationsMarkAsRead.mockRejectedValue(new Error("Unauthorized"));
+
+    const { readAll } = await import("./read-all");
+    await expect(readAll.run?.({ args: {} } as never)).rejects.toThrow("Unauthorized");
+  });
 });
