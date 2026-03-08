@@ -164,13 +164,13 @@ const createOAuthClient = (
  */
 const isBacklogAuthError = (error: unknown): boolean =>
   error instanceof Error &&
-  (error as Record<string, unknown>)._name === "BacklogAuthError" &&
-  (error as Record<string, unknown>)._status === 401;
+  (error as unknown as Record<string, unknown>)._name === "BacklogAuthError" &&
+  (error as unknown as Record<string, unknown>)._status === 401;
 
 const isBacklogRateLimitError = (error: unknown): error is Error & { _response: Response } =>
   error instanceof Error &&
-  (error as Record<string, unknown>)._name === "BacklogApiError" &&
-  (error as Record<string, unknown>)._status === 429;
+  (error as unknown as Record<string, unknown>)._name === "BacklogApiError" &&
+  (error as unknown as Record<string, unknown>)._status === 429;
 
 const handleRateLimitError = (error: unknown): void => {
   if (isBacklogRateLimitError(error)) {
