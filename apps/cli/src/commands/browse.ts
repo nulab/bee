@@ -120,7 +120,7 @@ const browse = withUsage(
         getRepoRelativePath(),
       ]);
 
-      const result = resolveUrl(host, args, {
+      const result = resolveUrl(context?.host ?? host, args, {
         context,
         currentBranch,
         latestCommit,

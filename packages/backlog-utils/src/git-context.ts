@@ -9,20 +9,33 @@ type GitContext = {
 /**
  * Parses a Backlog git remote URL into its components.
  *
- * Supports both SSH and HTTPS formats:
- * - SSH:   `<user>@<space>.git.backlog.com:/<PROJECT>/<repo>.git`
+ * Supports SSH (SCP-like and URL), and HTTPS formats:
+ * - SCP:   `<user>@<space>.git.backlog.com:/<PROJECT>/<repo>.git`
+ * - SSH:   `ssh://<user>@<space>.git.backlog.com/<PROJECT>/<repo>.git`
  * - HTTPS: `https://<space>.backlog.com/git/<PROJECT>/<repo>.git`
  *
  * Works with both `.backlog.com` and `.backlog.jp` domains.
  */
 const parseBacklogRemoteUrl = (url: string): GitContext | undefined => {
-  // SSH format: <user>@<space>.git.backlog.com:/<PROJECT>/<repo>.git
-  // or:         <user>@<space>.git.backlog.jp:/<PROJECT>/<repo>.git
-  const sshMatch = url.match(
+  // SSH URL format: ssh://<user>@<space>.git.backlog.com/<PROJECT>/<repo>.git
+  const sshUrlMatch = url.match(
+    /^ssh:\/\/.+@(.+)\.git\.(backlog\.(?:com|jp))\/([^/]+)\/([^/]+?)(?:\.git)?$/,
+  );
+  if (sshUrlMatch) {
+    const [, space, domain, projectKey, repoName] = sshUrlMatch;
+    return {
+      host: `${space}.${domain}`,
+      projectKey,
+      repoName,
+    };
+  }
+
+  // SCP-like format: <user>@<space>.git.backlog.com:/<PROJECT>/<repo>.git
+  const scpMatch = url.match(
     /^.+@(.+)\.git\.(backlog\.(?:com|jp)):\/?([^/]+)\/([^/]+?)(?:\.git)?$/,
   );
-  if (sshMatch) {
-    const [, space, domain, projectKey, repoName] = sshMatch;
+  if (scpMatch) {
+    const [, space, domain, projectKey, repoName] = scpMatch;
     return {
       host: `${space}.${domain}`,
       projectKey,
@@ -31,7 +44,6 @@ const parseBacklogRemoteUrl = (url: string): GitContext | undefined => {
   }
 
   // HTTPS format: https://<space>.backlog.com/git/<PROJECT>/<repo>.git
-  // or:           https://<space>.backlog.jp/git/<PROJECT>/<repo>.git
   const httpsMatch = url.match(
     /^https?:\/\/(.+\.backlog\.(?:com|jp))\/git\/([^/]+)\/([^/]+?)(?:\.git)?$/,
   );
