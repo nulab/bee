@@ -1,6 +1,6 @@
 # Contributing to bee
 
-Thank you for your interest in contributing to bee! This guide covers environment setup, development workflow, and release process. For coding conventions, architecture, and command patterns, see [CLAUDE.md](CLAUDE.md).
+Thank you for your interest in contributing to bee! This guide covers environment setup, development workflow, and release process. For coding conventions, architecture, and command patterns, see [AGENTS.md](AGENTS.md).
 
 ## Prerequisites
 
