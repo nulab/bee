@@ -17,7 +17,33 @@ export default defineConfig({
       },
       favicon: "/favicon.svg",
       customCss: ["./src/theme.css"],
-      defaultLocale: "ja",
+      defaultLocale: "root",
+      locales: {
+        root: { label: "日本語", lang: "ja" },
+      },
+      head: [
+        {
+          tag: "link",
+          attrs: {
+            rel: "alternate",
+            type: "text/markdown",
+            href: "/bee/llms.txt",
+            title: "LLM-friendly summary",
+          },
+        },
+        {
+          tag: "link",
+          attrs: {
+            rel: "alternate",
+            type: "text/markdown",
+            href: "/bee/llms-full.txt",
+            title: "Full LLM command reference",
+          },
+        },
+      ],
+      components: {
+        Head: "./src/components/Head.astro",
+      },
       social: [
         {
           icon: "github",

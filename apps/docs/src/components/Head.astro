@@ -1,0 +1,14 @@
+---
+import Default from "@astrojs/starlight/components/Head.astro";
+import path from "node:path";
+
+const { pathname } = Astro.url;
+const base = import.meta.env.BASE_URL;
+
+// e.g. "/bee/guides/authentication/" → "/bee/guides/authentication.md"
+const slug = pathname.replace(new RegExp(`^${base}`), "").replace(/\/$/, "") || "index";
+const mdHref = path.join(base, `${slug}.md`);
+---
+
+<Default {...Astro.props}><slot /></Default>
+<link rel="alternate" type="text/markdown" href={mdHref} />

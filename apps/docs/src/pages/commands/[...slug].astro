@@ -44,7 +44,11 @@ if (entry.environment && entry.environment.length > 0) {
   frontmatter={{
     title: entry.title,
     description: entry.description,
+    head: [
+      { tag: "meta", attrs: { property: "og:locale", content: "en" } },
+    ],
   }}
+  lang="en"
   headings={headings}
 >
   {entry.long && <div set:html={renderMarkdown(entry.long)} />}
