@@ -1,4 +1,4 @@
-# Backlog CLI
+# bee
 
 [![CI](https://img.shields.io/github/actions/workflow/status/nulab/bee/ci.yml?logo=github&label=CI)](https://github.com/nulab/bee/actions/workflows/ci.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/nulab/bee/codeql.yml?logo=github&label=CodeQL)](https://github.com/nulab/bee/actions/workflows/codeql.yml)

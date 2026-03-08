@@ -1,6 +1,6 @@
 # @repo/docs
 
-Documentation site for Backlog CLI, built with [Astro Starlight](https://starlight.astro.build/).
+Documentation site for bee, built with [Astro Starlight](https://starlight.astro.build/).
 
 Command reference pages are auto-generated from CLI source code. See the [repository root README](../../README.md) for development setup.
 
