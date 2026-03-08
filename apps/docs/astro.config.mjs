@@ -101,14 +101,6 @@ export default defineConfig({
               label: "リリース時に関連課題へ通知",
               slug: "recipes/release-notify-issues",
             },
-            {
-              label: "期限切れ課題を定期リマインド",
-              slug: "recipes/scheduled-housekeeping",
-            },
-            {
-              label: "Backlog Webhook で Actions を起動",
-              slug: "recipes/webhook-to-actions",
-            },
           ],
         },
         ...commandSidebar,

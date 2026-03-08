@@ -1,15 +1,15 @@
 ---
 title: PR 作成時に課題へリンクを貼る
-description: ブランチ名から Backlog 課題キーを抽出し、PR の URL を課題にコメントする
+description: ブランチ名や PR 本文から Backlog 課題キーを抽出し、PR の URL を課題にコメントする
 ---
 
-ブランチ名に `PROJECT-123` のような課題キーを含める運用をしていれば、PR 作成時に Backlog 課題へ自動でリンクを追加できます。
+ブランチ名に `PROJECT-123` のような課題キーを含める運用をしていれば、PR 作成時に Backlog 課題へ自動でリンクを追加できます。PR 本文の編集で課題キーが追加・削除された場合にも対応します。
 
 ```yaml
 name: Link PR to Backlog Issue
 on:
   pull_request:
-    types: [opened]
+    types: [opened, edited]
 
 jobs:
   link:
@@ -18,20 +18,54 @@ jobs:
       BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
       BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
     steps:
-      - name: Extract issue key from branch name
-        id: extract
+      - name: Collect issue keys
+        id: collect
         run: |
-          ISSUE_KEY=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' | head -1)
-          echo "issue_key=$ISSUE_KEY" >> "$GITHUB_OUTPUT"
+          # ブランチ名と PR 本文の両方から課題キーを収集
+          BRANCH_KEYS=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' || true)
+          BODY_KEYS=$(echo "$PR_BODY" | grep -oE '[A-Z_]+-[0-9]+' || true)
+          CURRENT_KEYS=$(echo -e "${BRANCH_KEYS}\n${BODY_KEYS}" | sort -u | grep -v '^$' | tr '\n' ' ')
+          echo "current_keys=$CURRENT_KEYS" >> "$GITHUB_OUTPUT"
 
-      - name: Comment PR link on Backlog issue
-        if: steps.extract.outputs.issue_key != ''
+          # edited イベントの場合、変更前の本文からもキーを取得して差分を計算
+          if [ "${{ github.event.action }}" = "edited" ] && [ -n "$PREV_BODY" ]; then
+            PREV_KEYS=$(echo "$PREV_BODY" | grep -oE '[A-Z_]+-[0-9]+' | sort -u | tr '\n' ' ')
+          else
+            PREV_KEYS=""
+          fi
+          echo "prev_keys=$PREV_KEYS" >> "$GITHUB_OUTPUT"
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PREV_BODY: ${{ github.event.changes.body.from }}
+
+      - name: Comment on newly added issues
+        if: steps.collect.outputs.current_keys != ''
         run: |
-          npx @nulab/bee issue comment ${{ steps.extract.outputs.issue_key }} \
-            --body "PR が作成されました: ${{ github.event.pull_request.html_url }}"
+          CURRENT="${{ steps.collect.outputs.current_keys }}"
+          PREV="${{ steps.collect.outputs.prev_keys }}"
+
+          for KEY in $CURRENT; do
+            # edited イベントでは新しく追加されたキーにだけコメント
+            if [ "${{ github.event.action }}" = "edited" ]; then
+              echo "$PREV" | grep -qw "$KEY" && continue
+            fi
+            npx @nulab/bee issue comment "$KEY" \
+              --body "PR が作成されました: ${{ github.event.pull_request.html_url }}" \
+              || echo "Warning: Failed to comment on $KEY"
+          done
 ```
+
+:::tip[npx の実行速度について]
+各レシピでは `setup-node` を省略して `npx @nulab/bee` で直接実行しています。`npx` は毎回パッケージを解決するため、複数コマンドを実行するレシピでは `npm install -g @nulab/bee` でグローバルインストールしてから `bee` を直接呼ぶ方が高速です。
+
+```yaml
+- run: npm install -g @nulab/bee
+- run: bee issue comment "$KEY" --body "..."
+```
+:::
 
 ## ポイント
 
 - ブランチ名の規約は `feature/PROJECT-123-description` や `PROJECT-123/description` など自由に決められます。正規表現 `[A-Z_]+-[0-9]+` で最初にマッチした課題キーを使います。
-- PR タイトルから抽出したい場合は `github.head_ref` を `github.event.pull_request.title` に変更してください。
+- `edited` イベントでは `github.event.changes.body.from` で変更前の本文を取得できるため、新たに追加されたキーにだけコメントを送ります。すでにリンク済みの課題に重複コメントが飛ぶことはありません。
+- PR 本文から課題キーが削除された場合、Backlog 側のコメントは残ります。コメントの自動削除が必要な場合は Backlog API で該当コメントを検索・削除するステップを追加してください。
