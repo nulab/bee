@@ -16,8 +16,8 @@ describe("auth token", () => {
     const stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     try {
-      const { token } = await import("./token");
-      token.run?.({ args: {} } as never);
+      const { default: token } = await import("./token");
+      await token.parseAsync([], { from: "user" });
 
       expect(stdoutSpy).toHaveBeenCalledWith("my-api-key");
     } finally {
@@ -33,8 +33,8 @@ describe("auth token", () => {
     const stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     try {
-      const { token } = await import("./token");
-      token.run?.({ args: {} } as never);
+      const { default: token } = await import("./token");
+      await token.parseAsync([], { from: "user" });
 
       expect(stdoutSpy).toHaveBeenCalledWith("my-access-token");
     } finally {
@@ -45,8 +45,8 @@ describe("auth token", () => {
   it("throws error when no space is configured", async () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
 
-    const { token } = await import("./token");
-    expect(() => token.run?.({ args: {} } as never)).toThrow(
+    const { default: token } = await import("./token");
+    await expect(token.parseAsync([], { from: "user" })).rejects.toThrow(
       "No space configured. Run `bee auth login` to authenticate.",
     );
   });

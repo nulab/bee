@@ -22,10 +22,8 @@ describe("auth switch", () => {
       aliases: {},
     });
 
-    const { switchSpace } = await import("./switch");
-    await switchSpace.run?.({
-      args: { space: "example.backlog.com" },
-    } as never);
+    const { default: switchSpace } = await import("./switch");
+    await switchSpace.parseAsync(["--space", "example.backlog.com"], { from: "user" });
 
     expect(writeConfig).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -42,11 +40,9 @@ describe("auth switch", () => {
       aliases: {},
     });
 
-    const { switchSpace } = await import("./switch");
+    const { default: switchSpace } = await import("./switch");
     await expect(
-      switchSpace.run?.({
-        args: { space: "missing.backlog.com" },
-      } as never),
+      switchSpace.parseAsync(["--space", "missing.backlog.com"], { from: "user" }),
     ).rejects.toThrow();
   });
 
@@ -62,10 +58,8 @@ describe("auth switch", () => {
       aliases: {},
     });
 
-    const { switchSpace } = await import("./switch");
-    await switchSpace.run?.({
-      args: { space: "target.backlog.com" },
-    } as never);
+    const { default: switchSpace } = await import("./switch");
+    await switchSpace.parseAsync(["--space", "target.backlog.com"], { from: "user" });
 
     expect(writeConfig).toHaveBeenCalledWith(
       expect.objectContaining({

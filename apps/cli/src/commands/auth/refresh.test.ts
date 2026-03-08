@@ -29,8 +29,8 @@ describe("auth refresh", () => {
   it("throws error when no space is configured", async () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
 
-    const { refresh } = await import("./refresh");
-    await expect(refresh.run?.({ args: {} } as never)).rejects.toThrow(
+    const { default: refresh } = await import("./refresh");
+    await expect(refresh.parseAsync([], { from: "user" })).rejects.toThrow(
       "No space configured. Run `bee auth login` to authenticate.",
     );
   });
@@ -41,8 +41,8 @@ describe("auth refresh", () => {
       auth: { method: "api-key" as const, apiKey: "key" },
     });
 
-    const { refresh } = await import("./refresh");
-    await expect(refresh.run?.({ args: {} } as never)).rejects.toThrow(
+    const { default: refresh } = await import("./refresh");
+    await expect(refresh.parseAsync([], { from: "user" })).rejects.toThrow(
       "Token refresh is only available for OAuth authentication. Current space uses API key.",
     );
   });
@@ -57,8 +57,8 @@ describe("auth refresh", () => {
       },
     });
 
-    const { refresh } = await import("./refresh");
-    await expect(refresh.run?.({ args: {} } as never)).rejects.toThrow(
+    const { default: refresh } = await import("./refresh");
+    await expect(refresh.parseAsync([], { from: "user" })).rejects.toThrow(
       "Client ID and Client Secret are missing from the stored OAuth configuration. Please re-authenticate with `bee auth login -m oauth`.",
     );
   });
@@ -82,8 +82,8 @@ describe("auth refresh", () => {
     });
     mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });
 
-    const { refresh } = await import("./refresh");
-    await refresh.run?.({ args: {} } as never);
+    const { default: refresh } = await import("./refresh");
+    await refresh.parseAsync([], { from: "user" });
 
     expect(refreshAccessToken).toHaveBeenCalledWith("example.backlog.com", {
       refreshToken: "old-refresh",
@@ -120,8 +120,8 @@ describe("auth refresh", () => {
     });
     vi.mocked(refreshAccessToken).mockRejectedValue(new Error("invalid_grant"));
 
-    const { refresh } = await import("./refresh");
-    await expect(refresh.run?.({ args: {} } as never)).rejects.toThrow(
+    const { default: refresh } = await import("./refresh");
+    await expect(refresh.parseAsync([], { from: "user" })).rejects.toThrow(
       "Failed to refresh OAuth token. Please re-authenticate with `bee auth login -m oauth`.",
     );
   });
@@ -145,8 +145,8 @@ describe("auth refresh", () => {
     });
     mockGetMyself.mockRejectedValue(new Error("Unauthorized"));
 
-    const { refresh } = await import("./refresh");
-    await expect(refresh.run?.({ args: {} } as never)).rejects.toThrow(
+    const { default: refresh } = await import("./refresh");
+    await expect(refresh.parseAsync([], { from: "user" })).rejects.toThrow(
       "Token verification failed after refresh.",
     );
   });
