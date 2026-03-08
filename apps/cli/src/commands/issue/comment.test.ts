@@ -172,4 +172,47 @@ describe("issue comment", () => {
 
     expect(mockClient.deleteIssueComment).not.toHaveBeenCalled();
   });
+
+  it("shows error when body is missing for add comment", async () => {
+    vi.mocked(resolveStdinArg).mockResolvedValueOnce(undefined);
+
+    const { comment } = await import("./comment");
+    await comment.run?.({ args: { issue: "TEST-1" } } as never);
+
+    expect(consola.error).toHaveBeenCalledWith(
+      "Comment body is required. Use --body or pipe input.",
+    );
+    expect(mockClient.postIssueComments).not.toHaveBeenCalled();
+  });
+
+  it("shows error when body is missing with --edit-last", async () => {
+    mockClient.getMyself.mockResolvedValue({ id: 1 });
+    mockClient.getIssueComments.mockResolvedValue([
+      { id: 20, content: "My comment", createdUser: { id: 1 } },
+    ]);
+    vi.mocked(resolveStdinArg).mockResolvedValueOnce(undefined);
+
+    const { comment } = await import("./comment");
+    await comment.run?.({
+      args: { issue: "TEST-1", "edit-last": true },
+    } as never);
+
+    expect(consola.error).toHaveBeenCalledWith(
+      "Comment body is required. Use --body or pipe input.",
+    );
+    expect(mockClient.patchIssueComment).not.toHaveBeenCalled();
+  });
+
+  it("shows error when no own comment found with --delete-last", async () => {
+    mockClient.getMyself.mockResolvedValue({ id: 1 });
+    mockClient.getIssueComments.mockResolvedValue([
+      { id: 10, content: "Other", createdUser: { id: 999 } },
+    ]);
+
+    const { comment } = await import("./comment");
+    await comment.run?.({ args: { issue: "TEST-1", "delete-last": true } } as never);
+
+    expect(consola.error).toHaveBeenCalledWith("No comment by you was found on TEST-1.");
+    expect(mockClient.deleteIssueComment).not.toHaveBeenCalled();
+  });
 });
