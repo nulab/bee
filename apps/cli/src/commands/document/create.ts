@@ -89,7 +89,7 @@ const create = withUsage(
       });
 
       outputResult(doc, args, (data) => {
-        consola.success(`Created document: ${data.title}`);
+        consola.success(`Created document ${data.title} (ID: ${data.id})`);
       });
     },
   }),

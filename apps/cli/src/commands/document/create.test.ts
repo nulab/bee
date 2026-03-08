@@ -40,7 +40,7 @@ describe("document create", () => {
         content: "Content here",
       }),
     );
-    expect(consola.success).toHaveBeenCalledWith("Created document: Meeting Notes");
+    expect(consola.success).toHaveBeenCalledWith("Created document Meeting Notes (ID: 1)");
   });
 
   it("prompts for required fields when not provided", async () => {
