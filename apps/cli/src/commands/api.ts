@@ -30,8 +30,18 @@ PATCH, and DELETE requests, fields are sent as the request body.`,
   )
   .argument("<endpoint>", "API endpoint path")
   .option("-X, --method <method>", "HTTP method", "GET")
-  .option("-f, --field <key=value>", "Add a parameter with type inference (key=value, repeatable)", collect, [])
-  .option("-F, --raw-field <key=value>", "Add a string parameter (key=value, repeatable)", collect, [])
+  .option(
+    "-f, --field <key=value>",
+    "Add a parameter with type inference (key=value, repeatable)",
+    collect,
+    [],
+  )
+  .option(
+    "-F, --raw-field <key=value>",
+    "Add a string parameter (key=value, repeatable)",
+    collect,
+    [],
+  )
   .option("--json [fields]", "Output as JSON (optionally filter by field names, comma-separated)")
   .option("--silent", "Do not print the response body")
   .envVars([...ENV_AUTH])
@@ -71,8 +81,7 @@ PATCH, and DELETE requests, fields are sent as the request body.`,
 
     // Default to JSON output (api always returns JSON).
     // --json with field names filters the output via outputResult.
-    // commander gives `true` for bare --json, a string for --json fields
-    const jsonVal = opts.json === undefined ? "" : (opts.json === true ? "" : opts.json);
+    const jsonVal = typeof opts.json === "string" ? opts.json : "";
     outputResult(data, { json: jsonVal }, () => {});
   });
 

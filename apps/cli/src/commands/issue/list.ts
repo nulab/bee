@@ -1,6 +1,5 @@
 import { PRIORITY_NAMES, PriorityId, getClient, resolveProjectIds } from "@repo/backlog-utils";
 import { type Row, outputResult, printTable } from "@repo/cli-utils";
-import { type Option as BacklogOption } from "backlog-js";
 import consola from "consola";
 import { Option } from "commander";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
