@@ -32,7 +32,7 @@ when creating the team.`,
     const { client } = await getClient();
 
     const name = await promptRequired("Team name:", opts.name);
-    const {members} = opts;
+    const { members } = opts;
 
     let t;
     try {

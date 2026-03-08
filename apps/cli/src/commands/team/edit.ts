@@ -40,7 +40,7 @@ the given user IDs.`,
   .action(async (team, opts) => {
     const { client } = await getClient();
 
-    const {members} = opts;
+    const { members } = opts;
 
     let t;
     try {

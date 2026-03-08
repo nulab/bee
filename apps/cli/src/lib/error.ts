@@ -5,7 +5,9 @@ import consola, { LogLevels } from "consola";
 
 const handleError = (error: unknown): never | void => {
   if (error instanceof CommanderError) {
-    if (error.exitCode === 0) {return;}
+    if (error.exitCode === 0) {
+      return;
+    }
     process.exit(error.exitCode);
   }
 

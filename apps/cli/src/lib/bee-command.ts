@@ -34,7 +34,9 @@ class BeeCommand extends Command {
   }
 
   private _renderExamples(): string {
-    if (this._examples.length === 0) {return "";}
+    if (this._examples.length === 0) {
+      return "";
+    }
     const lines = this._examples.flatMap((ex) => [
       `  # ${ex.description}`,
       `  $ ${ex.command}`,
@@ -48,7 +50,9 @@ class BeeCommand extends Command {
       .filter((opt) => opt.envVar)
       .map((opt) => [opt.envVar!, opt.description ?? ""]);
     const vars = [...fromOptions, ...this._extraEnvVars];
-    if (vars.length === 0) {return "";}
+    if (vars.length === 0) {
+      return "";
+    }
     const maxLen = Math.max(...vars.map(([k]) => k.length));
     const lines = vars.map(([k, d]) => `  ${k.padEnd(maxLen + 3)}${d}`);
     return `\n${colorize("bold", "ENVIRONMENT VARIABLES")}\n${lines.join("\n")}`;
