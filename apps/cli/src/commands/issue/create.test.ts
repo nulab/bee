@@ -33,10 +33,11 @@ describe("issue create", () => {
       summary: "Fix bug",
     });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: { project: "100", title: "Fix bug", type: "1", priority: "normal" },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      ["--project", "100", "--title", "Fix bug", "--type", "1", "--priority", "normal"],
+      { from: "user" },
+    );
 
     expect(mockClient.postIssue).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -60,8 +61,8 @@ describe("issue create", () => {
       summary: "Title",
     });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: {} } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync([], { from: "user" });
 
     expect(promptRequired).toHaveBeenCalledWith("Project:", undefined);
     expect(promptRequired).toHaveBeenCalledWith("Summary:", undefined);
@@ -82,18 +83,26 @@ describe("issue create", () => {
       summary: "Title",
     });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "100",
-        title: "Title",
-        type: "1",
-        priority: "normal",
-        description: "Details",
-        assignee: "12345",
-        "due-date": "2025-12-31",
-      },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      [
+        "--project",
+        "100",
+        "--title",
+        "Title",
+        "--type",
+        "1",
+        "--priority",
+        "normal",
+        "--description",
+        "Details",
+        "--assignee",
+        "12345",
+        "--due-date",
+        "2025-12-31",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.postIssue).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -116,16 +125,22 @@ describe("issue create", () => {
       summary: "Title",
     });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "100",
-        title: "Title",
-        type: "1",
-        priority: "normal",
-        assignee: "@me",
-      },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      [
+        "--project",
+        "100",
+        "--title",
+        "Title",
+        "--type",
+        "1",
+        "--priority",
+        "normal",
+        "--assignee",
+        "@me",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.postIssue).toHaveBeenCalledWith(
@@ -144,17 +159,28 @@ describe("issue create", () => {
       summary: "Title",
     });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "100",
-        title: "Title",
-        type: "1",
-        priority: "normal",
-        notify: "111,222",
-        attachment: "1,2",
-      },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      [
+        "--project",
+        "100",
+        "--title",
+        "Title",
+        "--type",
+        "1",
+        "--priority",
+        "normal",
+        "--notify",
+        "111",
+        "--notify",
+        "222",
+        "--attachment",
+        "1",
+        "--attachment",
+        "2",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.postIssue).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -176,10 +202,11 @@ describe("issue create", () => {
     });
 
     await expectStdoutContaining(async () => {
-      const { create } = await import("./create");
-      await create.run?.({
-        args: { project: "100", title: "Title", type: "1", priority: "normal", json: "" },
-      } as never);
+      const { default: create } = await import("./create");
+      await create.parseAsync(
+        ["--project", "100", "--title", "Title", "--type", "1", "--priority", "normal", "--json"],
+        { from: "user" },
+      );
     }, "TEST-4");
   });
 
@@ -190,11 +217,11 @@ describe("issue create", () => {
       .mockResolvedValueOnce("1")
       .mockResolvedValueOnce("invalid");
 
-    const { create } = await import("./create");
+    const { default: create } = await import("./create");
     await expect(
-      create.run?.({
-        args: { project: "TEST", summary: "test", priority: "invalid" },
-      } as never),
+      create.parseAsync(["--project", "TEST", "--title", "test", "--priority", "invalid"], {
+        from: "user",
+      }),
     ).rejects.toThrow('Unknown priority "invalid". Valid values: high, normal, low');
   });
 });

@@ -23,8 +23,8 @@ describe("issue count", () => {
   it("outputs issue count", async () => {
     mockClient.getIssuesCount.mockResolvedValue({ count: 42 });
 
-    const { count } = await import("./count");
-    await count.run?.({ args: { project: "TEST" } } as never);
+    const { default: count } = await import("./count");
+    await count.parseAsync(["--project", "TEST"], { from: "user" });
 
     expect(mockClient.getIssuesCount).toHaveBeenCalled();
     expect(consola.log).toHaveBeenCalledWith(42);
@@ -33,8 +33,8 @@ describe("issue count", () => {
   it("passes filter parameters", async () => {
     mockClient.getIssuesCount.mockResolvedValue({ count: 5 });
 
-    const { count } = await import("./count");
-    await count.run?.({ args: { project: "TEST", keyword: "bug" } } as never);
+    const { default: count } = await import("./count");
+    await count.parseAsync(["--project", "TEST", "--keyword", "bug"], { from: "user" });
 
     expect(mockClient.getIssuesCount).toHaveBeenCalledWith(
       expect.objectContaining({ keyword: "bug" }),
@@ -45,17 +45,15 @@ describe("issue count", () => {
     mockClient.getIssuesCount.mockResolvedValue({ count: 42 });
 
     await expectStdoutContaining(async () => {
-      const { count } = await import("./count");
-      await count.run?.({ args: { project: "TEST", json: "" } } as never);
+      const { default: count } = await import("./count");
+      await count.parseAsync(["--project", "TEST", "--json"], { from: "user" });
     }, "42");
   });
 
   it("throws error for unknown priority name", async () => {
-    const { count } = await import("./count");
+    const { default: count } = await import("./count");
     await expect(
-      count.run?.({
-        args: { project: "TEST", priority: "invalid" },
-      } as never),
+      count.parseAsync(["--project", "TEST", "--priority", "invalid"], { from: "user" }),
     ).rejects.toThrow('Unknown priority "invalid". Valid values: high, normal, low');
   });
 });

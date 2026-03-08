@@ -42,8 +42,8 @@ describe("issue view", () => {
   it("displays issue details", async () => {
     mockClient.getIssue.mockResolvedValue(sampleIssue);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { issue: "PROJ-1" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["PROJ-1"], { from: "user" });
 
     expect(mockClient.getIssue).toHaveBeenCalledWith("PROJ-1");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
@@ -57,8 +57,8 @@ describe("issue view", () => {
   it("shows Unassigned for issues without assignee", async () => {
     mockClient.getIssue.mockResolvedValue({ ...sampleIssue, assignee: null });
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { issue: "PROJ-1" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["PROJ-1"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unassigned"));
   });
@@ -66,8 +66,8 @@ describe("issue view", () => {
   it("displays description when present", async () => {
     mockClient.getIssue.mockResolvedValue(sampleIssue);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { issue: "PROJ-1" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["PROJ-1"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Description"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("A test description"));
@@ -83,8 +83,8 @@ describe("issue view", () => {
       },
     ]);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { issue: "PROJ-1", comments: true } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["PROJ-1", "--comments"], { from: "user" });
 
     expect(mockClient.getIssueComments).toHaveBeenCalledWith("PROJ-1", { order: "asc" });
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Comments"));
@@ -93,8 +93,8 @@ describe("issue view", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    const { view } = await import("./view");
-    await view.run?.({ args: { issue: "PROJ-1", web: true } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["PROJ-1", "--web"], { from: "user" });
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/view/PROJ-1",
@@ -108,8 +108,8 @@ describe("issue view", () => {
     mockClient.getIssue.mockResolvedValue(sampleIssue);
 
     await expectStdoutContaining(async () => {
-      const { view } = await import("./view");
-      await view.run?.({ args: { issue: "PROJ-1", json: "" } } as never);
+      const { default: view } = await import("./view");
+      await view.parseAsync(["PROJ-1", "--json"], { from: "user" });
     }, "PROJ-1");
   });
 });

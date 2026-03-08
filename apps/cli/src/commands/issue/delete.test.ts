@@ -23,8 +23,8 @@ describe("issue delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { deleteIssue } = await import("./delete");
-    await deleteIssue.run?.({ args: { issue: "TEST-1" } } as never);
+    const { default: deleteIssue } = await import("./delete");
+    await deleteIssue.parseAsync(["TEST-1"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete issue TEST-1? This cannot be undone.",
@@ -38,8 +38,8 @@ describe("issue delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { deleteIssue } = await import("./delete");
-    await deleteIssue.run?.({ args: { issue: "TEST-1", yes: true } } as never);
+    const { default: deleteIssue } = await import("./delete");
+    await deleteIssue.parseAsync(["TEST-1", "--yes"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete issue TEST-1? This cannot be undone.",
@@ -50,8 +50,8 @@ describe("issue delete", () => {
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
 
-    const { deleteIssue } = await import("./delete");
-    await deleteIssue.run?.({ args: { issue: "TEST-1" } } as never);
+    const { default: deleteIssue } = await import("./delete");
+    await deleteIssue.parseAsync(["TEST-1"], { from: "user" });
 
     expect(mockClient.deleteIssue).not.toHaveBeenCalled();
   });
@@ -61,8 +61,8 @@ describe("issue delete", () => {
     mockClient.deleteIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
     await expectStdoutContaining(async () => {
-      const { deleteIssue } = await import("./delete");
-      await deleteIssue.run?.({ args: { issue: "TEST-1", yes: true, json: "" } } as never);
+      const { default: deleteIssue } = await import("./delete");
+      await deleteIssue.parseAsync(["TEST-1", "--yes", "--json"], { from: "user" });
     }, "TEST-1");
   });
 });

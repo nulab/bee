@@ -17,8 +17,8 @@ describe("issue close", () => {
   it("closes an issue with default resolution", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { close } = await import("./close");
-    await close.run?.({ args: { issue: "TEST-1" } } as never);
+    const { default: close } = await import("./close");
+    await close.parseAsync(["TEST-1"], { from: "user" });
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith("TEST-1", {
       statusId: 4,
@@ -32,8 +32,8 @@ describe("issue close", () => {
   it("closes an issue with a comment", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { close } = await import("./close");
-    await close.run?.({ args: { issue: "TEST-1", comment: "Done" } } as never);
+    const { default: close } = await import("./close");
+    await close.parseAsync(["TEST-1", "--comment", "Done"], { from: "user" });
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
@@ -44,8 +44,8 @@ describe("issue close", () => {
   it("closes an issue with a named resolution", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { close } = await import("./close");
-    await close.run?.({ args: { issue: "TEST-1", resolution: "duplicate" } } as never);
+    const { default: close } = await import("./close");
+    await close.parseAsync(["TEST-1", "--resolution", "duplicate"], { from: "user" });
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
@@ -56,8 +56,8 @@ describe("issue close", () => {
   it("closes an issue with notified users", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { close } = await import("./close");
-    await close.run?.({ args: { issue: "TEST-1", notify: "111,222" } } as never);
+    const { default: close } = await import("./close");
+    await close.parseAsync(["TEST-1", "--notify", "111", "--notify", "222"], { from: "user" });
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
@@ -69,8 +69,8 @@ describe("issue close", () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
     await expectStdoutContaining(async () => {
-      const { close } = await import("./close");
-      await close.run?.({ args: { issue: "TEST-1", json: "" } } as never);
+      const { default: close } = await import("./close");
+      await close.parseAsync(["TEST-1", "--json"], { from: "user" });
     }, "TEST-1");
   });
 });

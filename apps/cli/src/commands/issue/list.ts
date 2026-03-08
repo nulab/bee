@@ -1,21 +1,44 @@
 import { PRIORITY_NAMES, PriorityId, getClient, resolveProjectIds } from "@repo/backlog-utils";
-import { type Row, outputArgs, outputResult, printTable, splitArg } from "@repo/cli-utils";
+import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import { type Option } from "backlog-js";
-import { defineCommand } from "citty";
 import consola from "consola";
-import * as v from "valibot";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import { Option } from "commander";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `List issues from one or more Backlog projects.
+const list = new BeeCommand("list")
+  .summary("List issues")
+  .description(
+    `List issues from one or more Backlog projects.
 
 By default, issues are sorted by last updated date in descending order.
 Use filtering flags to narrow results by assignee, status, priority, and more.
 
 Multiple project keys can be specified as a comma-separated list.`,
-
-  examples: [
+  )
+  .addOption(
+    new Option(
+      "-p, --project <id>",
+      "Project ID or project key (comma-separated for multiple)",
+    ).env("BACKLOG_PROJECT"),
+  )
+  .addOption(opt.assigneeList())
+  .option("-S, --status <id>", "Status ID (comma-separated for multiple)")
+  .option("-P, --priority <name>", `Priority name (comma-separated for multiple)`)
+  .addOption(opt.keyword())
+  .option("--created-since <date>", "Show issues created on or after this date")
+  .option("--created-until <date>", "Show issues created on or before this date")
+  .option("--updated-since <date>", "Show issues updated on or after this date")
+  .option("--updated-until <date>", "Show issues updated on or before this date")
+  .option("--due-since <date>", "Show issues due on or after this date")
+  .option("--due-until <date>", "Show issues due on or before this date")
+  .option("--sort <field>", "Sort field")
+  .addOption(opt.order())
+  .addOption(opt.count())
+  .addOption(opt.offset())
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     { description: "List issues in a project", command: "bee issue list -p PROJECT" },
     { description: "List your assigned issues", command: "bee issue list -p PROJECT -a @me" },
     {
@@ -23,138 +46,78 @@ Multiple project keys can be specified as a comma-separated list.`,
       command: 'bee issue list -p PROJECT -k "login bug" --priority high',
     },
     { description: "Output as JSON", command: "bee issue list -p PROJECT --json" },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
-
-const list = withUsage(
-  defineCommand({
-    meta: {
-      name: "list",
-      description: "List issues",
-    },
-    args: {
-      ...outputArgs,
-      project: {
-        ...commonArgs.project,
-        description: "Project ID or project key (comma-separated for multiple)",
-      },
-      assignee: commonArgs.assigneeList,
-      status: {
-        type: "string",
-        alias: "S",
-        description: "Status ID (comma-separated for multiple)",
-      },
-      priority: {
-        type: "string",
-        alias: "P",
-        description: "Priority name (comma-separated for multiple)",
-        valueHint: `{${PRIORITY_NAMES.join("|")}}`,
-      },
-      keyword: commonArgs.keyword,
-      "created-since": {
-        type: "string",
-        description: "Show issues created on or after this date",
-        valueHint: "<yyyy-MM-dd>",
-      },
-      "created-until": {
-        type: "string",
-        description: "Show issues created on or before this date",
-        valueHint: "<yyyy-MM-dd>",
-      },
-      "updated-since": {
-        type: "string",
-        description: "Show issues updated on or after this date",
-        valueHint: "<yyyy-MM-dd>",
-      },
-      "updated-until": {
-        type: "string",
-        description: "Show issues updated on or before this date",
-        valueHint: "<yyyy-MM-dd>",
-      },
-      "due-since": {
-        type: "string",
-        description: "Show issues due on or after this date",
-        valueHint: "<yyyy-MM-dd>",
-      },
-      "due-until": {
-        type: "string",
-        description: "Show issues due on or before this date",
-        valueHint: "<yyyy-MM-dd>",
-      },
-      sort: {
-        type: "string",
-        description: "Sort field",
-        valueHint:
-          "{issueType|category|version|milestone|summary|status|priority|attachment|sharedFile|created|createdUser|updated|updatedUser|assignee|startDate|dueDate|estimatedHours|actualHours|childIssue}",
-      },
-      order: commonArgs.order,
-      count: commonArgs.count,
-      offset: commonArgs.offset,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
-
-      const projectId = await resolveProjectIds(client, splitArg(args.project, v.string()));
-      const assigneeId = splitArg(args.assignee, v.number());
-      const statusId = splitArg(args.status, v.number());
-      const priorityId = args.priority
-        ? args.priority
+    const projectId = opts.project
+      ? await resolveProjectIds(
+          client,
+          (opts.project as string)
             .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
-            .map((name) => {
-              const id = PriorityId[name.toLowerCase()];
-              if (id === undefined) {
-                throw new Error(
-                  `Unknown priority "${name}". Valid values: ${PRIORITY_NAMES.join(", ")}`,
-                );
-              }
-              return id;
-            })
-        : [];
+            .map((s: string) => s.trim())
+            .filter(Boolean),
+        )
+      : [];
+    const assigneeId = ((opts.assignee as string[]) ?? []).map(Number);
+    const statusId = opts.status
+      ? (opts.status as string)
+          .split(",")
+          .map((s: string) => s.trim())
+          .filter(Boolean)
+          .map(Number)
+      : [];
+    const priorityId = opts.priority
+      ? (opts.priority as string)
+          .split(",")
+          .map((s: string) => s.trim())
+          .filter(Boolean)
+          .map((name: string) => {
+            const id = PriorityId[name.toLowerCase()];
+            if (id === undefined) {
+              throw new Error(
+                `Unknown priority "${name}". Valid values: ${PRIORITY_NAMES.join(", ")}`,
+              );
+            }
+            return id;
+          })
+      : [];
 
-      const issues = await client.getIssues({
-        projectId,
-        assigneeId,
-        statusId,
-        priorityId,
-        keyword: args.keyword,
-        sort: args.sort as Option.Issue.GetIssuesParams["sort"],
-        order: args.order as "asc" | "desc" | undefined,
-        count: args.count ? Number(args.count) : undefined,
-        offset: args.offset ? Number(args.offset) : undefined,
-        createdSince: args["created-since"],
-        createdUntil: args["created-until"],
-        updatedSince: args["updated-since"],
-        updatedUntil: args["updated-until"],
-        dueDateSince: args["due-since"],
-        dueDateUntil: args["due-until"],
-      });
+    const issues = await client.getIssues({
+      projectId,
+      assigneeId,
+      statusId,
+      priorityId,
+      keyword: opts.keyword as string | undefined,
+      sort: opts.sort as Option.Issue.GetIssuesParams["sort"],
+      order: opts.order as "asc" | "desc" | undefined,
+      count: opts.count ? Number(opts.count) : undefined,
+      offset: opts.offset ? Number(opts.offset) : undefined,
+      createdSince: opts.createdSince as string | undefined,
+      createdUntil: opts.createdUntil as string | undefined,
+      updatedSince: opts.updatedSince as string | undefined,
+      updatedUntil: opts.updatedUntil as string | undefined,
+      dueDateSince: opts.dueSince as string | undefined,
+      dueDateUntil: opts.dueUntil as string | undefined,
+    });
 
-      outputResult(issues, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No issues found.");
-          return;
-        }
+    outputResult(issues, opts as { json?: string }, (data) => {
+      if (data.length === 0) {
+        consola.info("No issues found.");
+        return;
+      }
 
-        const rows: Row[] = data.map((issue) => [
-          { header: "KEY", value: issue.issueKey },
-          { header: "STATUS", value: issue.status.name },
-          { header: "TYPE", value: issue.issueType.name },
-          { header: "PRIORITY", value: issue.priority.name },
-          { header: "ASSIGNEE", value: issue.assignee?.name ?? "Unassigned" },
-          { header: "SUMMARY", value: issue.summary },
-        ]);
+      const rows: Row[] = data.map((issue) => [
+        { header: "KEY", value: issue.issueKey },
+        { header: "STATUS", value: issue.status.name },
+        { header: "TYPE", value: issue.issueType.name },
+        { header: "PRIORITY", value: issue.priority.name },
+        { header: "ASSIGNEE", value: issue.assignee?.name ?? "Unassigned" },
+        { header: "SUMMARY", value: issue.summary },
+      ]);
 
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
+      printTable(rows);
+    });
+  });
 
-export { commandUsage, list };
+export default list;
