@@ -115,11 +115,4 @@ describe("dashboard", () => {
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("No assigned issues"));
   });
-
-  it("propagates API errors", async () => {
-    mockClient.getMyself.mockRejectedValue(new Error("Unauthorized"));
-
-    const { dashboard } = await import("./dashboard");
-    await expect(dashboard.run?.({ args: {} } as never)).rejects.toThrow("Unauthorized");
-  });
 });

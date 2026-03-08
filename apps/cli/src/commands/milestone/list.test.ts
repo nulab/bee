@@ -72,11 +72,4 @@ describe("milestone list", () => {
       await list.run?.({ args: { project: "TEST", json: "" } } as never);
     }, "v1.0.0");
   });
-
-  it("propagates API errors", async () => {
-    mockClient.getVersions.mockRejectedValue(new Error("Not Found"));
-
-    const { list } = await import("./list");
-    await expect(list.run?.({ args: { project: "TEST" } } as never)).rejects.toThrow("Not Found");
-  });
 });

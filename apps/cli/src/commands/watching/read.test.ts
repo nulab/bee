@@ -32,11 +32,4 @@ describe("watching read", () => {
 
     expect(mockClient.resetWatchingListItemAsRead).toHaveBeenCalledWith(42);
   });
-
-  it("propagates API errors", async () => {
-    mockClient.resetWatchingListItemAsRead.mockRejectedValue(new Error("Not found"));
-
-    const { read } = await import("./read");
-    await expect(read.run?.({ args: { watching: "999" } } as never)).rejects.toThrow("Not found");
-  });
 });

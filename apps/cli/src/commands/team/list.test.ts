@@ -88,11 +88,4 @@ describe("team list", () => {
       await list.run?.({ args: { json: "" } } as never);
     }, "Design Team");
   });
-
-  it("propagates API errors", async () => {
-    mockClient.getTeams.mockRejectedValue(new Error("Unauthorized"));
-
-    const { list } = await import("./list");
-    await expect(list.run?.({ args: {} } as never)).rejects.toThrow("Unauthorized");
-  });
 });

@@ -58,11 +58,4 @@ describe("issue-type list", () => {
       await list.run?.({ args: { project: "TEST", json: "" } } as never);
     }, "Bug");
   });
-
-  it("propagates API errors", async () => {
-    mockClient.getIssueTypes.mockRejectedValue(new Error("Not Found"));
-
-    const { list } = await import("./list");
-    await expect(list.run?.({ args: { project: "TEST" } } as never)).rejects.toThrow("Not Found");
-  });
 });

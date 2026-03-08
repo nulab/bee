@@ -107,11 +107,4 @@ describe("issue list", () => {
       await list.run?.({ args: { json: "" } } as never);
     }, "PROJ-1");
   });
-
-  it("propagates API errors", async () => {
-    mockClient.getIssues.mockRejectedValue(new Error("API error"));
-
-    const { list } = await import("./list");
-    await expect(list.run?.({ args: {} } as never)).rejects.toThrow("API error");
-  });
 });

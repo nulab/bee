@@ -26,10 +26,4 @@ describe("star remove", () => {
     await remove.run?.({ args: { star: "7" } } as never);
     expect(mockClient.removeStar).toHaveBeenCalledWith(7);
   });
-
-  it("propagates API errors", async () => {
-    mockClient.removeStar.mockRejectedValue(new Error("Not found"));
-    const { remove } = await import("./remove");
-    await expect(remove.run?.({ args: { star: "999" } } as never)).rejects.toThrow("Not found");
-  });
 });

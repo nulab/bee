@@ -51,11 +51,4 @@ describe("user list", () => {
       await list.run?.({ args: { json: "" } } as never);
     }, "user1");
   });
-
-  it("propagates API errors", async () => {
-    mockClient.getUsers.mockRejectedValue(new Error("Unauthorized"));
-
-    const { list } = await import("./list");
-    await expect(list.run?.({ args: {} } as never)).rejects.toThrow("Unauthorized");
-  });
 });

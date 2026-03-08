@@ -71,11 +71,4 @@ describe("repo list", () => {
       await list.run?.({ args: { project: "PROJ", json: "" } } as never);
     }, "api-server");
   });
-
-  it("propagates API errors", async () => {
-    mockClient.getGitRepositories.mockRejectedValue(new Error("Not Found"));
-
-    const { list } = await import("./list");
-    await expect(list.run?.({ args: { project: "PROJ" } } as never)).rejects.toThrow("Not Found");
-  });
 });

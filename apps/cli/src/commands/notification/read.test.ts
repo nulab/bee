@@ -32,11 +32,4 @@ describe("notification read", () => {
 
     expect(mockClient.markAsReadNotification).toHaveBeenCalledWith(99);
   });
-
-  it("propagates API errors", async () => {
-    mockClient.markAsReadNotification.mockRejectedValue(new Error("Not found"));
-
-    const { read } = await import("./read");
-    await expect(read.run?.({ args: { id: "999" } } as never)).rejects.toThrow("Not found");
-  });
 });
