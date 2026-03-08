@@ -49,7 +49,7 @@ const getClient = async (): Promise<{
     return { client, host: envHost };
   }
 
-  consola.error("No space configured. Run `bl auth login` to authenticate.");
+  consola.error("No space configured. Run `bee auth login` to authenticate.");
   return process.exit(1);
 };
 
@@ -80,7 +80,7 @@ const createOAuthClient = (
 
     if (!clientId || !clientSecret || !refreshToken) {
       consola.error(
-        "OAuth credentials are incomplete. Run `bl auth login -m oauth` to re-authenticate.",
+        "OAuth credentials are incomplete. Run `bee auth login -m oauth` to re-authenticate.",
       );
       return false;
     }
@@ -111,7 +111,7 @@ const createOAuthClient = (
         return true;
       } catch {
         consola.error(
-          "OAuth session has expired. Run `bl auth login -m oauth` to re-authenticate.",
+          "OAuth session has expired. Run `bee auth login -m oauth` to re-authenticate.",
         );
         return false;
       }

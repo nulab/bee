@@ -30,7 +30,7 @@ describe("document delete", () => {
       undefined,
     );
     expect(mockClient.deleteDocument).toHaveBeenCalledWith("12345");
-    expect(consola.success).toHaveBeenCalledWith("Deleted document: My Doc");
+    expect(consola.success).toHaveBeenCalledWith("Deleted document My Doc (ID: 1)");
   });
 
   it("skips confirmation with --yes flag", async () => {

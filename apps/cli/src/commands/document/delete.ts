@@ -61,7 +61,7 @@ const deleteDocument = withUsage(
       const doc = await client.deleteDocument(args.document);
 
       outputResult(doc, args, (data) => {
-        consola.success(`Deleted document: ${data.title}`);
+        consola.success(`Deleted document ${data.title} (ID: ${data.id})`);
       });
     },
   }),

@@ -254,6 +254,43 @@ View commands support `--web` to open the resource in a browser. Build the URL (
 
 Use `resolveStdinArg(value)` for flags that accept piped input (e.g., `--body`). Returns stdin content when the flag is empty and stdin is piped, otherwise returns the original value.
 
+## User-Facing Message Conventions
+
+### consola method usage
+
+- **`consola.success()`** — action completion (create, update, delete, login, etc.)
+- **`consola.info()`** — informational (e.g., "No results found.", "Opening ... in browser.")
+- **`consola.error()`** — errors and validation failures
+- **`consola.start()`** — progress indicator for async operations (e.g., "Access token expired. Refreshing...")
+- **`consola.log()`** — raw output (tables, spacing)
+
+### Success message format
+
+CRUD and action messages follow two patterns depending on the resource type:
+
+| Resource type                                                               | Pattern                               | Example                         |
+| --------------------------------------------------------------------------- | ------------------------------------- | ------------------------------- |
+| ID-based (category, status, milestone, webhook, issue-type, team, document) | `<Verb> <resource> <name> (ID: <id>)` | `Created category Bug (ID: 5)`  |
+| Key-based (issue, project, PR, wiki)                                        | `<Verb> <resource> <key>: <name>`     | `Created issue PROJ-1: Fix bug` |
+
+- Use past tense verbs: Created, Updated, Deleted, Added, Removed, Starred, Closed, Reopened, etc.
+- Do not quote or backtick resource names/IDs in success messages.
+
+### "No results" messages
+
+All list commands use the pattern: `consola.info("No <plural> found.")` (e.g., `"No issues found."`, `"No statuses found."`).
+
+### Error messages
+
+- Quote invalid user input with double quotes: `` `Invalid field format: "${pair}". Expected key=value.` ``
+- Reference CLI commands with backticks: ``Run `bee auth login` to authenticate.``
+- Always use `bee` as the CLI command name (never `bl` or other aliases).
+
+### String formatting
+
+- Always use template literals (backticks) for messages containing variables — never string concatenation with `+`.
+- Use `consola` methods — never `console.log` / `console.error`.
+
 ## Test Conventions
 
 - **Test titles**: Always in English. Use `verb + condition` pattern (e.g., `"shows error when X"`, `"calls Y when Z"`).
