@@ -1,0 +1,19 @@
+---
+import Default from "@astrojs/starlight/components/Footer.astro";
+---
+
+<Default><slot /></Default>
+
+<footer class="site-footer">
+  <p>This is not an officially supported Nulab product. It is maintained by volunteers.</p>
+</footer>
+
+<style>
+  .site-footer {
+    text-align: center;
+    padding-block: 1.5rem;
+    border-top: 1px solid var(--sl-color-hairline-light);
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+  }
+</style>
