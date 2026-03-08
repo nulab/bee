@@ -22,18 +22,18 @@ jobs:
       BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
       BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
     steps:
-      - name: Collect issue keys
+      - name: ブランチ名と PR 本文から課題キーを収集する
         id: collect
         run: |
-          # ブランチ名と PR 本文の両方から課題キーを収集
           BRANCH_KEYS=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' || true)
           BODY_KEYS=$(echo "$PR_BODY" | grep -oE '[A-Z_]+-[0-9]+' || true)
           CURRENT_KEYS=$(echo -e "${BRANCH_KEYS}\n${BODY_KEYS}" | sort -u | grep -v '^$' | tr '\n' ' ')
+          echo "検出した課題キー: ${CURRENT_KEYS:-(なし)}"
           echo "current_keys=$CURRENT_KEYS" >> "$GITHUB_OUTPUT"
 
-          # edited イベントの場合、変更前の本文からもキーを取得して差分を計算
           if [ "${{ github.event.action }}" = "edited" ] && [ -n "$PREV_BODY" ]; then
             PREV_KEYS=$(echo "$PREV_BODY" | grep -oE '[A-Z_]+-[0-9]+' | sort -u | tr '\n' ' ')
+            echo "変更前の課題キー: ${PREV_KEYS:-(なし)}"
           else
             PREV_KEYS=""
           fi
@@ -42,20 +42,23 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
           PREV_BODY: ${{ github.event.changes.body.from }}
 
-      - name: Comment on newly added issues
+      - name: 新しく追加された課題に PR リンクをコメントする
         if: steps.collect.outputs.current_keys != ''
         run: |
           CURRENT="${{ steps.collect.outputs.current_keys }}"
           PREV="${{ steps.collect.outputs.prev_keys }}"
 
           for KEY in $CURRENT; do
-            # edited イベントでは新しく追加されたキーにだけコメント
             if [ "${{ github.event.action }}" = "edited" ]; then
-              echo "$PREV" | grep -qw "$KEY" && continue
+              if echo "$PREV" | grep -qw "$KEY"; then
+                echo "スキップ: $KEY (変更前から存在)"
+                continue
+              fi
             fi
+            echo "コメント追加: $KEY に PR リンクを送信します"
             npx @nulab/bee issue comment "$KEY" \
               --body "PR が作成されました: ${{ github.event.pull_request.html_url }}" \
-              || echo "Warning: Failed to comment on $KEY"
+              || echo "⚠ 失敗: $KEY へのコメントに失敗しました"
           done
 ```
 

@@ -24,19 +24,26 @@ jobs:
       BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
       BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
     steps:
-      - name: Extract issue key
+      - name: PR タイトルまたはブランチ名から課題キーを取得する
         id: extract
         run: |
-          # PR タイトルを優先し、なければブランチ名から取得
           ISSUE_KEY=$(echo "${{ github.event.pull_request.title }}" | grep -oE '^[A-Z_]+-[0-9]+')
-          if [ -z "$ISSUE_KEY" ]; then
+          if [ -n "$ISSUE_KEY" ]; then
+            echo "PR タイトルから課題キーを検出: $ISSUE_KEY"
+          else
             ISSUE_KEY=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' | head -1)
+            if [ -n "$ISSUE_KEY" ]; then
+              echo "ブランチ名から課題キーを検出: $ISSUE_KEY"
+            else
+              echo "課題キーが見つかりませんでした。スキップします。"
+            fi
           fi
           echo "issue_key=$ISSUE_KEY" >> "$GITHUB_OUTPUT"
 
-      - name: Close issue
+      - name: Backlog 課題をクローズする
         if: steps.extract.outputs.issue_key != ''
         run: |
+          echo "クローズ: ${{ steps.extract.outputs.issue_key }}"
           npx @nulab/bee issue close ${{ steps.extract.outputs.issue_key }} \
             --comment "PR #${{ github.event.pull_request.number }} のマージにより自動クローズ"
 ```

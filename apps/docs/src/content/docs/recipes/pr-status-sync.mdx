@@ -25,17 +25,24 @@ jobs:
       BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
       BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
     steps:
-      - name: Extract issue key
+      - name: ブランチ名から課題キーを取得する
         id: extract
         run: |
           ISSUE_KEY=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' | head -1)
+          echo "検出した課題キー: ${ISSUE_KEY:-(なし)}"
           echo "issue_key=$ISSUE_KEY" >> "$GITHUB_OUTPUT"
 
-      - name: Set status to processing
+      - name: 課題のステータスを「処理中」に変更する
         if: steps.extract.outputs.issue_key != ''
         run: |
+          echo "ステータス変更: ${{ steps.extract.outputs.issue_key }} → 処理中"
           npx @nulab/bee issue edit ${{ steps.extract.outputs.issue_key }} \
             --status processing
+
+      - name: 課題にレビュー中の PR リンクをコメントする
+        if: steps.extract.outputs.issue_key != ''
+        run: |
+          echo "コメント追加: ${{ steps.extract.outputs.issue_key }}"
           npx @nulab/bee issue comment ${{ steps.extract.outputs.issue_key }} \
             --body "レビュー中: ${{ github.event.pull_request.html_url }}"
 
@@ -47,15 +54,17 @@ jobs:
       BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
       BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
     steps:
-      - name: Extract issue key
+      - name: ブランチ名から課題キーを取得する
         id: extract
         run: |
           ISSUE_KEY=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' | head -1)
+          echo "検出した課題キー: ${ISSUE_KEY:-(なし)}"
           echo "issue_key=$ISSUE_KEY" >> "$GITHUB_OUTPUT"
 
-      - name: Close issue
+      - name: Backlog 課題をクローズする
         if: steps.extract.outputs.issue_key != ''
         run: |
+          echo "クローズ: ${{ steps.extract.outputs.issue_key }}"
           npx @nulab/bee issue close ${{ steps.extract.outputs.issue_key }} \
             --comment "PR #${{ github.event.pull_request.number }} マージ完了"
 ```
