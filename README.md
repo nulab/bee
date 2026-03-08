@@ -1,11 +1,11 @@
 # Backlog CLI
 
-[![CI](https://img.shields.io/github/actions/workflow/status/nulab/bee/ci.yml?style=for-the-badge&logo=github&label=CI)](https://github.com/nulab/bee/actions/workflows/ci.yml)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/nulab/bee/codeql.yml?style=for-the-badge&logo=github&label=CodeQL)](https://github.com/nulab/bee/actions/workflows/codeql.yml)
-[![npm version](https://img.shields.io/npm/v/@nulab/bee?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@nulab/bee)
-[![node](https://img.shields.io/node/v/@nulab/bee?style=for-the-badge&logo=nodedotjs)](https://nodejs.org/)
-[![last commit](https://img.shields.io/github/last-commit/nulab/bee?style=for-the-badge&logo=github)](https://github.com/nulab/bee/commits/main)
-[![license](https://img.shields.io/github/license/nulab/bee?style=for-the-badge&logo=opensourceinitiative)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/nulab/bee/ci.yml?logo=github&label=CI)](https://github.com/nulab/bee/actions/workflows/ci.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/nulab/bee/codeql.yml?logo=github&label=CodeQL)](https://github.com/nulab/bee/actions/workflows/codeql.yml)
+[![npm version](https://img.shields.io/npm/v/@nulab/bee?logo=npm)](https://www.npmjs.com/package/@nulab/bee)
+[![node](https://img.shields.io/node/v/@nulab/bee?logo=nodedotjs)](https://nodejs.org/)
+[![last commit](https://img.shields.io/github/last-commit/nulab/bee?logo=github)](https://github.com/nulab/bee/commits/main)
+[![license](https://img.shields.io/github/license/nulab/bee?logo=opensourceinitiative)](LICENSE)
 
 Command-line tool to view and manage [Backlog](https://backlog.com/), inspired by GitHub CLI.
 
