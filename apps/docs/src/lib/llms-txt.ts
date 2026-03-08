@@ -131,9 +131,7 @@ const buildLlmsTxt = async (siteUrl: string): Promise<string> => {
 
   lines.push("## Docs");
   lines.push("");
-  lines.push(
-    `- [Getting Started](${siteUrl}/guides/getting-started.md): Installation and basic usage`,
-  );
+  lines.push(`- [Getting Started](${siteUrl}/getting-started.md): Installation and basic usage`);
   lines.push(
     `- [Full documentation](${siteUrl}/llms-full.txt): Complete command reference in a single file`,
   );

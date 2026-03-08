@@ -38,7 +38,7 @@ export default defineConfig({
       sidebar: [
         {
           label: "Getting Started",
-          items: [{ label: "はじめに", slug: "guides/getting-started" }],
+          items: [{ label: "はじめに", slug: "getting-started" }],
         },
         {
           label: "Guides",
@@ -52,8 +52,8 @@ export default defineConfig({
         {
           label: "Integrations",
           items: [
-            { label: "CI/CD での利用", slug: "guides/ci-cd" },
-            { label: "AI エージェントとの連携", slug: "guides/ai-agent" },
+            { label: "CI/CD での利用", slug: "integrations/ci-cd" },
+            { label: "AI エージェントとの連携", slug: "integrations/ai-agent" },
           ],
         },
         ...commandSidebar,
