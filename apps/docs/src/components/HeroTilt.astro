@@ -1,11 +1,12 @@
 <!--
   Persona-menu-style 3D tilt effect for the hero logo.
   Applies CSS 3D transforms directly to .hero img — no wrapping needed.
+  Brightness varies with tilt angle to simulate directional lighting.
 -->
 <style>
   :global(.hero img) {
     transform: perspective(500px) rotateX(10deg) rotateY(-14deg) scale3d(1.02, 1.02, 1);
-    filter: drop-shadow(4.2px 3px 8.4px rgba(0, 0, 0, 0.15));
+    filter: drop-shadow(4.2px 3px 8.4px rgba(0, 0, 0, 0.15)) brightness(1);
     transition: transform 0.3s ease-out, filter 0.3s ease-out;
     will-change: transform, filter;
   }
@@ -23,8 +24,18 @@
       const shadowX = ry * -0.3;
       const shadowY = rx * 0.3;
       const shadowBlur = 6 + (Math.abs(rx) + Math.abs(ry)) * 0.1;
+
+      // Brightness: tilting "toward the light" (top-left) = brighter, away = darker
+      // Base angles are rx=10, ry=-14. Deviations from base drive brightness.
+      // Positive rx deviation (tilting back more) = catching more overhead light
+      // Negative ry deviation (tilting right back more) = catching more left-side light
+      const dRx = rx - BASE_RX;
+      const dRy = ry - BASE_RY;
+      const brightness = 1 + (dRx * 0.008 - dRy * 0.006);
+      const clampedBrightness = Math.max(0.85, Math.min(1.2, brightness));
+
       img.style.transform = `perspective(500px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02, 1.02, 1)`;
-      img.style.filter = `drop-shadow(${shadowX}px ${shadowY}px ${shadowBlur}px rgba(0, 0, 0, 0.15))`;
+      img.style.filter = `drop-shadow(${shadowX}px ${shadowY}px ${shadowBlur}px rgba(0, 0, 0, 0.15)) brightness(${clampedBrightness})`;
     };
 
     const isTouch = window.matchMedia("(pointer: coarse)").matches;
