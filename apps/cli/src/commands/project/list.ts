@@ -1,72 +1,53 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `List projects accessible to the authenticated user.
+const list = new BeeCommand("list")
+  .summary("List projects")
+  .description(
+    `List projects accessible to the authenticated user.
 
 By default, only active (non-archived) projects are shown. Use \`--archived\`
 to include archived projects.
 
 Administrators can use \`--all\` to list every project in the space, not just
 the ones they have joined.`,
-
-  examples: [
+  )
+  .option("--archived", "Include archived projects")
+  .option("--all", "Include all projects (admin only)")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "List your active projects", command: "bee project list" },
     { description: "Include archived projects", command: "bee project list --archived" },
     { description: "List all projects (admin only)", command: "bee project list --all" },
     { description: "Output as JSON", command: "bee project list --json" },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const projects = await client.getProjects({
+      archived: opts.archived,
+      all: opts.all,
+    });
 
-const list = withUsage(
-  defineCommand({
-    meta: {
-      name: "list",
-      description: "List projects",
-    },
-    args: {
-      ...outputArgs,
-      archived: {
-        type: "boolean",
-        description: "Include archived projects",
-      },
-      all: {
-        type: "boolean",
-        description: "Include all projects (admin only)",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const jsonArg = opts.json === true ? "" : opts.json;
+    outputResult(projects, { ...opts, json: jsonArg }, (data) => {
+      if (data.length === 0) {
+        consola.info("No projects found.");
+        return;
+      }
 
-      const projects = await client.getProjects({
-        archived: args.archived,
-        all: args.all,
-      });
+      const rows: Row[] = data.map((project) => [
+        { header: "KEY", value: project.projectKey },
+        { header: "NAME", value: project.name },
+        { header: "STATUS", value: project.archived ? "Archived" : "Active" },
+      ]);
 
-      outputResult(projects, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No projects found.");
-          return;
-        }
+      printTable(rows);
+    });
+  });
 
-        const rows: Row[] = data.map((project) => [
-          { header: "KEY", value: project.projectKey },
-          { header: "NAME", value: project.name },
-          { header: "STATUS", value: project.archived ? "Archived" : "Active" },
-        ]);
-
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, list };
+export default list;

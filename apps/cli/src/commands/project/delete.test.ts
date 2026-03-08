@@ -14,6 +14,7 @@ vi.mock("@repo/backlog-utils", () => ({
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
   confirmOrExit: vi.fn(),
+  promptRequired: vi.fn((label: string, value: unknown) => Promise.resolve(value)),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -23,8 +24,8 @@ describe("project delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteProject.mockResolvedValue({ projectKey: "TEST", name: "Test Project" });
 
-    const { deleteProject } = await import("./delete");
-    await deleteProject.run?.({ args: { project: "TEST" } } as never);
+    const { default: deleteProject } = await import("./delete");
+    await deleteProject.parseAsync(["--project", "TEST"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete project TEST? This cannot be undone.",
@@ -38,8 +39,8 @@ describe("project delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteProject.mockResolvedValue({ projectKey: "TEST", name: "Test Project" });
 
-    const { deleteProject } = await import("./delete");
-    await deleteProject.run?.({ args: { project: "TEST", yes: true } } as never);
+    const { default: deleteProject } = await import("./delete");
+    await deleteProject.parseAsync(["--project", "TEST", "--yes"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete project TEST? This cannot be undone.",
@@ -50,8 +51,8 @@ describe("project delete", () => {
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
 
-    const { deleteProject } = await import("./delete");
-    await deleteProject.run?.({ args: { project: "TEST" } } as never);
+    const { default: deleteProject } = await import("./delete");
+    await deleteProject.parseAsync(["--project", "TEST"], { from: "user" });
 
     expect(mockClient.deleteProject).not.toHaveBeenCalled();
   });
@@ -61,8 +62,8 @@ describe("project delete", () => {
     mockClient.deleteProject.mockResolvedValue({ projectKey: "TEST", name: "Test Project" });
 
     await expectStdoutContaining(async () => {
-      const { deleteProject } = await import("./delete");
-      await deleteProject.run?.({ args: { project: "TEST", yes: true, json: "" } } as never);
+      const { default: deleteProject } = await import("./delete");
+      await deleteProject.parseAsync(["--project", "TEST", "--yes", "--json"], { from: "user" });
     }, "TEST");
   });
 });

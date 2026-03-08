@@ -1,62 +1,47 @@
 import { ROLE_LABELS, getClient } from "@repo/backlog-utils";
-import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `List members of a Backlog project.
+const users = new BeeCommand("users")
+  .summary("List project users")
+  .description(
+    `List members of a Backlog project.
 
 Displays each user's ID, user ID, name, and role within the project.`,
+  )
+  .addOption(opt.project())
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
+    { description: "List project members", command: "bee project users -p PROJECT_KEY" },
+    { description: "Output as JSON", command: "bee project users -p PROJECT_KEY --json" },
+  ])
+  .action(async (_opts, cmd) => {
+    const opts = await resolveOptions(cmd);
 
-  examples: [
-    { description: "List project members", command: "bee project users PROJECT_KEY" },
-    { description: "Output as JSON", command: "bee project users PROJECT_KEY --json" },
-  ],
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const members = await client.getProjectUsers(opts.project as string);
 
-const users = withUsage(
-  defineCommand({
-    meta: {
-      name: "users",
-      description: "List project users",
-    },
-    args: {
-      ...outputArgs,
-      project: {
-        type: "positional",
-        description: "Project ID or project key",
-        required: true,
-        default: process.env.BACKLOG_PROJECT,
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const jsonArg = opts.json === true ? "" : (opts.json as string | undefined);
+    outputResult(members, { ...opts, json: jsonArg }, (data) => {
+      if (data.length === 0) {
+        consola.info("No users found.");
+        return;
+      }
 
-      const members = await client.getProjectUsers(args.project);
+      const rows: Row[] = data.map((user) => [
+        { header: "ID", value: String(user.id) },
+        { header: "USER ID", value: user.userId ?? "" },
+        { header: "NAME", value: user.name },
+        { header: "ROLE", value: ROLE_LABELS[user.roleType] ?? `Unknown (${user.roleType})` },
+      ]);
 
-      outputResult(members, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No users found.");
-          return;
-        }
+      printTable(rows);
+    });
+  });
 
-        const rows: Row[] = data.map((user) => [
-          { header: "ID", value: String(user.id) },
-          { header: "USER ID", value: user.userId ?? "" },
-          { header: "NAME", value: user.name },
-          { header: "ROLE", value: ROLE_LABELS[user.roleType] ?? `Unknown (${user.roleType})` },
-        ]);
-
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, users };
+export default users;

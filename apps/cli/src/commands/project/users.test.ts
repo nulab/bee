@@ -11,6 +11,11 @@ vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
 }));
 
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  promptRequired: vi.fn((label: string, value: unknown) => Promise.resolve(value)),
+}));
+
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("project users", () => {
@@ -20,8 +25,8 @@ describe("project users", () => {
       { id: 2, userId: "user2", name: "User Two", roleType: 2 },
     ]);
 
-    const { users } = await import("./users");
-    await users.run?.({ args: { project: "PROJ1" } } as never);
+    const { default: users } = await import("./users");
+    await users.parseAsync(["--project", "PROJ1"], { from: "user" });
 
     expect(mockClient.getProjectUsers).toHaveBeenCalledWith("PROJ1");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
@@ -33,8 +38,8 @@ describe("project users", () => {
   it("shows message when no users found", async () => {
     mockClient.getProjectUsers.mockResolvedValue([]);
 
-    const { users } = await import("./users");
-    await users.run?.({ args: { project: "PROJ1" } } as never);
+    const { default: users } = await import("./users");
+    await users.parseAsync(["--project", "PROJ1"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No users found.");
   });
@@ -45,8 +50,8 @@ describe("project users", () => {
     ]);
 
     await expectStdoutContaining(async () => {
-      const { users } = await import("./users");
-      await users.run?.({ args: { project: "PROJ1", json: "" } } as never);
+      const { default: users } = await import("./users");
+      await users.parseAsync(["--project", "PROJ1", "--json"], { from: "user" });
     }, "user1");
   });
 });

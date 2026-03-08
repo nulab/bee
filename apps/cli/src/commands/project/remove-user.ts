@@ -1,67 +1,47 @@
 import { getClient } from "@repo/backlog-utils";
-import { UserError, outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { UserError, outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
+import { RequiredOption } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `Remove a user from a Backlog project.
+const removeUser = new BeeCommand("remove-user")
+  .summary("Remove a user from a project")
+  .description(
+    `Remove a user from a Backlog project.
 
 The user is specified by their numeric user ID. Use \`bee project users\`
 to look up user IDs.
 
 Requires Administrator or Project Administrator role.`,
-
-  examples: [
+  )
+  .addOption(opt.project())
+  .addOption(new RequiredOption("--user-id <id>", "User ID"))
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Remove a user from a project",
       command: "bee project remove-user -p PROJECT_KEY --user-id 12345",
     },
-  ],
+  ])
+  .action(async (_opts, cmd) => {
+    const opts = await resolveOptions(cmd);
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const userId = Number(opts.userId);
+    if (Number.isNaN(userId)) {
+      throw new UserError("User ID must be a number.");
+    }
 
-const removeUser = withUsage(
-  defineCommand({
-    meta: {
-      name: "remove-user",
-      description: "Remove a user from a project",
-    },
-    args: {
-      ...outputArgs,
-      project: {
-        type: "string",
-        alias: "p",
-        description: "Project ID or project key",
-        required: true,
-        default: process.env.BACKLOG_PROJECT,
-      },
-      "user-id": {
-        type: "string",
-        description: "User ID",
-        valueHint: "<number>",
-        required: true,
-      },
-    },
-    async run({ args }) {
-      const userId = Number(args["user-id"]);
-      if (Number.isNaN(userId)) {
-        throw new UserError("User ID must be a number.");
-      }
+    const { client } = await getClient();
 
-      const { client } = await getClient();
+    const user = await client.deleteProjectUsers(opts.project as string, { userId });
 
-      const user = await client.deleteProjectUsers(args.project, { userId });
+    const jsonArg = opts.json === true ? "" : (opts.json as string | undefined);
+    outputResult(user, { ...opts, json: jsonArg }, (data) => {
+      consola.success(`Removed user ${data.name} from project ${opts.project}.`);
+    });
+  });
 
-      outputResult(user, args, (data) => {
-        consola.success(`Removed user ${data.name} from project ${args.project}.`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, removeUser };
+export default removeUser;

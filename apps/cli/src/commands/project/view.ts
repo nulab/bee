@@ -1,72 +1,61 @@
 import { getClient, openOrPrintUrl, projectUrl } from "@repo/backlog-utils";
-import { outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult, printDefinitionList } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `Display details of a Backlog project.
+const view = new BeeCommand("view")
+  .summary("View a project")
+  .description(
+    `Display details of a Backlog project.
 
 Shows project settings including chart, subtasking, wiki, file sharing,
 and git/subversion integration status.
 
 Use \`--web\` to open the project in your default browser instead.`,
+  )
+  .addOption(opt.project())
+  .addOption(opt.web("project"))
+  .addOption(opt.noBrowser())
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
+    { description: "View project details", command: "bee project view -p PROJECT_KEY" },
+    { description: "Open project in browser", command: "bee project view -p PROJECT_KEY --web" },
+    { description: "Output as JSON", command: "bee project view -p PROJECT_KEY --json" },
+  ])
+  .action(async (_opts, cmd) => {
+    const opts = await resolveOptions(cmd);
 
-  examples: [
-    { description: "View project details", command: "bee project view PROJECT_KEY" },
-    { description: "Open project in browser", command: "bee project view PROJECT_KEY --web" },
-    { description: "Output as JSON", command: "bee project view PROJECT_KEY --json" },
-  ],
+    const { client, host } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    if (opts.web || opts.browser === false) {
+      const url = projectUrl(host, opts.project as string);
+      await openOrPrintUrl(url, opts.browser === false, consola);
+      return;
+    }
 
-const view = withUsage(
-  defineCommand({
-    meta: {
-      name: "view",
-      description: "View a project",
-    },
-    args: {
-      ...outputArgs,
-      project: commonArgs.projectPositional,
-      web: commonArgs.web("project"),
-      "no-browser": commonArgs.noBrowser,
-    },
-    async run({ args }) {
-      const { client, host } = await getClient();
+    const project = await client.getProject(opts.project as string);
 
-      if (args.web || args["no-browser"]) {
-        const url = projectUrl(host, args.project);
-        await openOrPrintUrl(url, Boolean(args["no-browser"]), consola);
-        return;
-      }
+    const jsonArg = opts.json === true ? "" : opts.json;
+    outputResult(project, { ...opts, json: jsonArg }, (data) => {
+      consola.log("");
+      consola.log(`  ${data.name} (${data.projectKey})`);
+      consola.log("");
+      printDefinitionList([
+        ["Status", data.archived ? "Archived" : "Active"],
+        ["Text Formatting", data.textFormattingRule],
+        ["Chart", data.chartEnabled ? "Yes" : "No"],
+        ["Subtasking", data.subtaskingEnabled ? "Yes" : "No"],
+        ["Wiki", data.useWiki ? "Yes" : "No"],
+        ["File Sharing", data.useFileSharing ? "Yes" : "No"],
+        ["Git", data.useGit ? "Yes" : "No"],
+        ["Subversion", data.useSubversion ? "Yes" : "No"],
+        ["Dev Attributes", data.useDevAttributes ? "Yes" : "No"],
+      ]);
+      consola.log("");
+    });
+  });
 
-      const project = await client.getProject(args.project);
-
-      outputResult(project, args, (data) => {
-        consola.log("");
-        consola.log(`  ${data.name} (${data.projectKey})`);
-        consola.log("");
-        printDefinitionList([
-          ["Status", data.archived ? "Archived" : "Active"],
-          ["Text Formatting", data.textFormattingRule],
-          ["Chart", data.chartEnabled ? "Yes" : "No"],
-          ["Subtasking", data.subtaskingEnabled ? "Yes" : "No"],
-          ["Wiki", data.useWiki ? "Yes" : "No"],
-          ["File Sharing", data.useFileSharing ? "Yes" : "No"],
-          ["Git", data.useGit ? "Yes" : "No"],
-          ["Subversion", data.useSubversion ? "Yes" : "No"],
-          ["Dev Attributes", data.useDevAttributes ? "Yes" : "No"],
-        ]);
-        consola.log("");
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, view };
+export default view;

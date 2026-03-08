@@ -1,50 +1,10 @@
 import { ACTIVITY_LABELS, getClient } from "@repo/backlog-utils";
-import {
-  type Row,
-  formatDate,
-  outputArgs,
-  outputResult,
-  printTable,
-  splitArg,
-} from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { type Row, formatDate, outputResult, printTable } from "@repo/cli-utils";
+import { Option } from "commander";
 import consola from "consola";
-import * as v from "valibot";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
-
-const commandUsage: CommandUsage = {
-  long: `List recent activities of a Backlog project.
-
-Shows the most recent updates including issue changes, wiki edits, git pushes,
-and other project activities. Results are ordered by most recent first.
-
-Use \`--activity-type\` to filter by specific activity types (comma-separated IDs).
-Use \`--count\` to control how many activities are returned (default: 20, max: 100).
-
-For a list of activity type IDs, see:
-https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#activity-type`,
-
-  examples: [
-    { description: "List recent activities", command: "bee project activities PROJECT_KEY" },
-    {
-      description: "Show only issue-related activities",
-      command: "bee project activities PROJECT_KEY --activity-type 1,2,3",
-    },
-    {
-      description: "Show last 50 activities",
-      command: "bee project activities PROJECT_KEY --count 50",
-    },
-    {
-      description: "Output as JSON",
-      command: "bee project activities PROJECT_KEY --json",
-    },
-  ],
-
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
 const getActivitySummary = (activity: {
   type: number;
@@ -73,52 +33,72 @@ const getActivitySummary = (activity: {
   return "";
 };
 
-const activities = withUsage(
-  defineCommand({
-    meta: {
-      name: "activities",
-      description: "List project activities",
+const activities = new BeeCommand("activities")
+  .summary("List project activities")
+  .description(
+    `List recent activities of a Backlog project.
+
+Shows the most recent updates including issue changes, wiki edits, git pushes,
+and other project activities. Results are ordered by most recent first.
+
+Use \`--activity-type\` to filter by specific activity types (comma-separated IDs).
+Use \`--count\` to control how many activities are returned (default: 20, max: 100).
+
+For a list of activity type IDs, see:
+https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#activity-type`,
+  )
+  .addOption(opt.project())
+  .addOption(new Option("--activity-type <ids>", "Filter by activity type IDs (comma-separated)"))
+  .addOption(opt.count())
+  .addOption(opt.order())
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
+    { description: "List recent activities", command: "bee project activities -p PROJECT_KEY" },
+    {
+      description: "Show only issue-related activities",
+      command: "bee project activities -p PROJECT_KEY --activity-type 1,2,3",
     },
-    args: {
-      ...outputArgs,
-      project: commonArgs.projectPositional,
-      "activity-type": {
-        type: "string",
-        description: "Filter by activity type IDs (comma-separated)",
-        valueHint: "<1,2,3>",
-      },
-      count: commonArgs.count,
-      order: commonArgs.order,
+    {
+      description: "Show last 50 activities",
+      command: "bee project activities -p PROJECT_KEY --count 50",
     },
-    async run({ args }) {
-      const { client } = await getClient();
-
-      const activityTypeId = splitArg(args["activity-type"], v.number());
-
-      const activityList = await client.getProjectActivities(args.project, {
-        activityTypeId,
-        count: args.count ? Number(args.count) : undefined,
-        order: args.order as "asc" | "desc" | undefined,
-      });
-
-      outputResult(activityList, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No activities found.");
-          return;
-        }
-
-        const rows: Row[] = data.map((activity) => [
-          { header: "DATE", value: formatDate(activity.created) },
-          { header: "TYPE", value: ACTIVITY_LABELS[activity.type] ?? `Type ${activity.type}` },
-          { header: "USER", value: activity.createdUser?.name ?? "Unknown" },
-          { header: "SUMMARY", value: getActivitySummary(activity) },
-        ]);
-
-        printTable(rows);
-      });
+    {
+      description: "Output as JSON",
+      command: "bee project activities -p PROJECT_KEY --json",
     },
-  }),
-  commandUsage,
-);
+  ])
+  .action(async (_opts, cmd) => {
+    const opts = await resolveOptions(cmd);
 
-export { commandUsage, activities };
+    const { client } = await getClient();
+
+    const activityTypeId = opts.activityType
+      ? String(opts.activityType).split(",").map(Number)
+      : undefined;
+
+    const activityList = await client.getProjectActivities(opts.project as string, {
+      activityTypeId,
+      count: opts.count ? Number(opts.count) : undefined,
+      order: opts.order as "asc" | "desc" | undefined,
+    });
+
+    const jsonArg = opts.json === true ? "" : (opts.json as string | undefined);
+    outputResult(activityList, { ...opts, json: jsonArg }, (data) => {
+      if (data.length === 0) {
+        consola.info("No activities found.");
+        return;
+      }
+
+      const rows: Row[] = data.map((activity) => [
+        { header: "DATE", value: formatDate(activity.created) },
+        { header: "TYPE", value: ACTIVITY_LABELS[activity.type] ?? `Type ${activity.type}` },
+        { header: "USER", value: activity.createdUser?.name ?? "Unknown" },
+        { header: "SUMMARY", value: getActivitySummary(activity) },
+      ]);
+
+      printTable(rows);
+    });
+  });
+
+export default activities;

@@ -14,6 +14,11 @@ vi.mock("@repo/backlog-utils", () => ({
   projectUrl: vi.fn((host: string, key: string) => `https://${host}/projects/${key}`),
 }));
 
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  promptRequired: vi.fn((label: string, value: unknown) => Promise.resolve(value)),
+}));
+
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleProject = {
@@ -35,8 +40,8 @@ describe("project view", () => {
   it("displays project details", async () => {
     mockClient.getProject.mockResolvedValue(sampleProject);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { project: "PROJ1" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["--project", "PROJ1"], { from: "user" });
 
     expect(mockClient.getProject).toHaveBeenCalledWith("PROJ1");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Test Project"));
@@ -48,15 +53,15 @@ describe("project view", () => {
   it("shows Archived status for archived project", async () => {
     mockClient.getProject.mockResolvedValue({ ...sampleProject, archived: true });
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { project: "PROJ1" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["--project", "PROJ1"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Archived"));
   });
 
   it("opens browser with --web flag", async () => {
-    const { view } = await import("./view");
-    await view.run?.({ args: { project: "PROJ1", web: true } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["--project", "PROJ1", "--web"], { from: "user" });
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/projects/PROJ1",
@@ -70,8 +75,8 @@ describe("project view", () => {
     mockClient.getProject.mockResolvedValue(sampleProject);
 
     await expectStdoutContaining(async () => {
-      const { view } = await import("./view");
-      await view.run?.({ args: { project: "PROJ1", json: "" } } as never);
+      const { default: view } = await import("./view");
+      await view.parseAsync(["--project", "PROJ1", "--json"], { from: "user" });
     }, "PROJ1");
   });
 });
