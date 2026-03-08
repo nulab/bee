@@ -99,4 +99,13 @@ describe("document view", () => {
     const allCalls = vi.mocked(consola.log).mock.calls.map((c) => c[0]);
     expect(allCalls.every((c) => !String(c).includes("Tags"))).toBe(true);
   });
+
+  it("throws error when --web used without --project", async () => {
+    const { view } = await import("./view");
+    await expect(
+      view.run?.({
+        args: { document: "123", web: true },
+      } as never),
+    ).rejects.toThrow("The --project flag is required when using --web.");
+  });
 });
