@@ -5,7 +5,6 @@ description: |-
 ---
 
 import { Tabs, TabItem, Steps, Aside, LinkCard, CardGrid } from "@astrojs/starlight/components";
-import InstallCommand from "../../components/InstallCommand.astro";
 
 bee は、[Backlog](https://backlog.com/) をターミナルから操作するためのコマンドラインツールです。課題の管理、プルリクエスト、ドキュメント、通知など、Backlog の主要な機能をコマンドラインから利用できます。
 
@@ -21,7 +20,28 @@ node --version
 
 ## インストール
 
-<InstallCommand />
+<Tabs>
+  <TabItem label="npm">
+    ```sh
+    npm install -g @nulab/bee
+    ```
+  </TabItem>
+  <TabItem label="pnpm">
+    ```sh
+    pnpm add -g @nulab/bee
+    ```
+  </TabItem>
+  <TabItem label="bun">
+    ```sh
+    bun add -g @nulab/bee
+    ```
+  </TabItem>
+  <TabItem label="nypm">
+    ```sh
+    npx nypm install -g @nulab/bee
+    ```
+  </TabItem>
+</Tabs>
 
 バージョンを確認してインストールが成功したことを確認します。
 
@@ -100,6 +120,11 @@ bee --version
   <TabItem label="bun">
     ```sh
     bun remove -g @nulab/bee
+    ```
+  </TabItem>
+  <TabItem label="nypm">
+    ```sh
+    npx nypm uninstall -g @nulab/bee
     ```
   </TabItem>
 </Tabs>
