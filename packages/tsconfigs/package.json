@@ -6,7 +6,7 @@
     "./base.json": "./base.json"
   },
   "dependencies": {
-    "@types/node": "^25.2.1"
+    "@types/node": "^25.3.3"
   },
   "devDependencies": {
     "@tsconfig/node-lts": "^24.0.0",
