@@ -129,6 +129,38 @@ describe("pr comment", () => {
     expect(consola.success).toHaveBeenCalledWith("Updated comment on pull request #42");
   });
 
+  it("shows error when body is missing with --edit-last", async () => {
+    mockClient.getPullRequestComments.mockResolvedValue([
+      { id: 20, content: "My comment", createdUser: { id: 1 } },
+    ]);
+    mockClient.getMyself.mockResolvedValue({ id: 1 });
+
+    const { comment } = await import("./comment");
+    await comment.run?.({
+      args: {
+        number: "42",
+        project: "TEST",
+        repo: "my-repo",
+        "edit-last": true,
+      },
+    } as never);
+
+    expect(consola.error).toHaveBeenCalledWith(
+      "Comment body is required. Use --body or pipe input.",
+    );
+  });
+
+  it("shows error when body is missing for add comment", async () => {
+    const { comment } = await import("./comment");
+    await comment.run?.({
+      args: { number: "42", project: "TEST", repo: "my-repo" },
+    } as never);
+
+    expect(consola.error).toHaveBeenCalledWith(
+      "Comment body is required. Use --body or pipe input.",
+    );
+  });
+
   it("shows error when no own comment found with --edit-last", async () => {
     mockClient.getPullRequestComments.mockResolvedValue([
       { id: 10, content: "Other", createdUser: { id: 999 } },
