@@ -49,7 +49,7 @@ Use \`--web\` to open the Backlog dashboard in your browser instead.`,
 
     // commander gives `true` for bare --json, a string for --json fields
     const jsonVal = opts.json === true ? "" : opts.json;
-    outputResult(result, { json: jsonVal } as { json?: string }, (data) => {
+    outputResult(result, { json: jsonVal }, (data) => {
       consola.log("");
       consola.log(`  ${data.myself.name} (${host})`);
 
