@@ -5,6 +5,10 @@ description: ブランチ名や PR 本文から Backlog 課題キーを抽出し
 
 ブランチ名に `PROJECT-123` のような課題キーを含める運用をしていれば、PR 作成時に Backlog 課題へ自動でリンクを追加できます。PR 本文の編集で課題キーが追加・削除された場合にも対応します。
 
+:::note[前提]
+リポジトリの **Settings → Secrets and variables → Actions** に `BACKLOG_API_KEY` と `BACKLOG_SPACE` を登録してください。設定方法は [CI/CD での利用](../integrations/ci-cd/) を参照してください。
+:::
+
 ```yaml
 name: Link PR to Backlog Issue
 on:

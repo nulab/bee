@@ -5,6 +5,10 @@ description: GitHub の「Closes #123」に相当する、PR マージ時に Bac
 
 GitHub の `Closes #123` に相当するパターンです。PR マージをトリガーに、ブランチ名または PR タイトルから課題キーを抽出してクローズします。
 
+:::note[前提]
+リポジトリの **Settings → Secrets and variables → Actions** に `BACKLOG_API_KEY` と `BACKLOG_SPACE` を登録してください。設定方法は [CI/CD での利用](../integrations/ci-cd/) を参照してください。
+:::
+
 ```yaml
 name: Close Backlog Issue on Merge
 on:
