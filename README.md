@@ -12,7 +12,7 @@ Command-line tool to view and manage [Backlog](https://backlog.com/), inspired b
 > [!NOTE]
 > This is not an officially supported Nulab product. It is maintained by volunteers.
 
-**Looking to install and use bee?** See the [CLI package README](apps/cli/README.md) or the [documentation site](https://nulab.github.io).
+**Looking to install and use bee?** See the [CLI package README](apps/cli/README.md) or the [documentation site](https://nulab.github.io/bee).
 
 ## Development
 

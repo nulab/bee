@@ -1,7 +1,7 @@
 {
   "private": true,
   "license": "MIT",
-  "repository": "nulab/backlog-cli",
+  "repository": "nulab/bee",
   "scripts": {
     "postinstall": "lefthook install",
     "lint": "oxlint",

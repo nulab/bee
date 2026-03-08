@@ -6,6 +6,7 @@ const commandSidebar = await loadCommandSidebar();
 
 export default defineConfig({
   site: "https://nulab.github.io",
+  base: "/bee",
   integrations: [
     starlight({
       title: "Backlog CLI",
@@ -21,7 +22,7 @@ export default defineConfig({
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/nulab/backlog-cli",
+          href: "https://github.com/nulab/bee",
         },
         {
           icon: "npm",

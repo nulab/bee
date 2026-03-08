@@ -28,11 +28,11 @@ bee project list
 
 ## Documentation
 
-See the [documentation site](https://nulab.github.io) for the full command reference and guides.
+See the [documentation site](https://nulab.github.io/bee) for the full command reference and guides.
 
 ## Development
 
-See the [repository root README](https://github.com/nulab/backlog-cli) for development setup and contributing instructions.
+See the [repository root README](https://github.com/nulab/bee) for development setup and contributing instructions.
 
 ## License
 
