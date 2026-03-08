@@ -5,6 +5,7 @@ import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getPullRequests: vi.fn(),
+  getMyself: vi.fn().mockResolvedValue({ id: 99 }),
 };
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
@@ -97,6 +98,22 @@ describe("pr list", () => {
       "PROJ",
       "repo",
       expect.objectContaining({ assigneeId: [42] }),
+    );
+  });
+
+  it("resolves @me to current user ID for assignee", async () => {
+    mockClient.getPullRequests.mockResolvedValue([]);
+
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--project", "PROJ", "--repo", "repo", "--assignee", "@me"], {
+      from: "user",
+    });
+
+    expect(mockClient.getMyself).toHaveBeenCalled();
+    expect(mockClient.getPullRequests).toHaveBeenCalledWith(
+      "PROJ",
+      "repo",
+      expect.objectContaining({ assigneeId: [99] }),
     );
   });
 

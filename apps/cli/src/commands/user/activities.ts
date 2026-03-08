@@ -1,9 +1,9 @@
 import { ACTIVITY_LABELS, getClient } from "@repo/backlog-utils";
-import { type Row, formatDate, outputResult, printTable } from "@repo/cli-utils";
+import { type Row, formatDate, outputResult, printTable, splitArg } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
-import { collectNum } from "../../lib/common-options";
 
 const getActivitySummary = (activity: {
   type: number;
@@ -41,19 +41,14 @@ Shows the most recent updates performed by the specified user, including
 issue changes, wiki edits, git pushes, and other activities. Results are
 ordered by most recent first.
 
-Use \`--activity-type\` to filter by specific activity types (repeatable IDs).
+Use \`--activity-type\` to filter by specific activity types (comma-separated IDs).
 Use \`--count\` to control how many activities are returned (default: 20, max: 100).
 
 For a list of activity type IDs, see:
 https://developer.nulab.com/docs/backlog/api/2/get-user-recent-updates/#activity-type`,
   )
   .argument("<user>", "User ID")
-  .option(
-    "--activity-type <id>",
-    "Filter by activity type IDs (repeatable)",
-    collectNum,
-    [] as number[],
-  )
+  .option("--activity-type <ids>", "Filter by activity type IDs (comma-separated)")
   .addOption(opt.count())
   .addOption(opt.order())
   .addOption(opt.minId())
@@ -64,7 +59,7 @@ https://developer.nulab.com/docs/backlog/api/2/get-user-recent-updates/#activity
     { description: "List user activities", command: "bee user activities 12345" },
     {
       description: "Show only issue-related activities",
-      command: "bee user activities 12345 --activity-type 1 --activity-type 2 --activity-type 3",
+      command: "bee user activities 12345 --activity-type 1,2,3",
     },
     {
       description: "Show last 50 activities",
@@ -78,7 +73,7 @@ https://developer.nulab.com/docs/backlog/api/2/get-user-recent-updates/#activity
   .action(async (user, opts) => {
     const { client } = await getClient();
 
-    const activityTypeId: number[] = opts.activityType;
+    const activityTypeId = splitArg(opts.activityType, v.number());
 
     const activityList = await client.getUserActivities(Number(user), {
       activityTypeId,

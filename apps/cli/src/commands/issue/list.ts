@@ -1,4 +1,10 @@
-import { PRIORITY_NAMES, PriorityId, getClient, resolveProjectIds } from "@repo/backlog-utils";
+import {
+  PRIORITY_NAMES,
+  PriorityId,
+  getClient,
+  resolveProjectIds,
+  resolveUserId,
+} from "@repo/backlog-utils";
 import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
 import { Option } from "commander";
@@ -58,7 +64,9 @@ Multiple project keys can be specified as a comma-separated list.`,
             .filter(Boolean),
         )
       : [];
-    const assigneeId = (opts.assignee ?? []).map(Number);
+    const assigneeId = await Promise.all(
+      (opts.assignee ?? []).map((id: string) => resolveUserId(client, id)),
+    );
     const statusId = opts.status
       ? opts.status
           .split(",")

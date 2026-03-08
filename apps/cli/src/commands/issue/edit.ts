@@ -1,4 +1,4 @@
-import { PRIORITY_NAMES, PriorityId, getClient } from "@repo/backlog-utils";
+import { PRIORITY_NAMES, PriorityId, getClient, resolveUserId } from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
@@ -66,7 +66,7 @@ will remain unchanged.`,
       statusId: opts.status ? Number(opts.status) : undefined,
       priorityId,
       issueTypeId: opts.type ? Number(opts.type) : undefined,
-      assigneeId: opts.assignee ? Number(opts.assignee) : undefined,
+      assigneeId: opts.assignee ? await resolveUserId(client, opts.assignee) : undefined,
       resolutionId: opts.resolution ? Number(opts.resolution) : undefined,
       parentIssueId: opts.parentIssue ? Number(opts.parentIssue) : undefined,
       startDate: opts.startDate,

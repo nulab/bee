@@ -1,4 +1,4 @@
-import { PR_STATUS_NAMES, PrStatusName, getClient } from "@repo/backlog-utils";
+import { PR_STATUS_NAMES, PrStatusName, getClient, resolveUserId } from "@repo/backlog-utils";
 import { type Row, outputResult, printTable, splitArg } from "@repo/cli-utils";
 import consola from "consola";
 import * as v from "valibot";
@@ -56,7 +56,9 @@ status (open, closed, merged).`,
           })
       : undefined;
 
-    const assigneeId = (opts.assignee ?? []).map(Number).filter((n: number) => !Number.isNaN(n));
+    const assigneeId = await Promise.all(
+      (opts.assignee ?? []).map((id: string) => resolveUserId(client, id)),
+    );
     const issueId = splitArg(opts.issue, v.number());
     const createdUserId = splitArg(opts.createdUser, v.number());
 

@@ -4,6 +4,7 @@ import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   patchIssue: vi.fn(),
+  getMyself: vi.fn().mockResolvedValue({ id: 99 }),
 };
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
@@ -38,6 +39,19 @@ describe("issue edit", () => {
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
       expect.objectContaining({ assigneeId: 12_345, priorityId: 2 }),
+    );
+  });
+
+  it("resolves @me to current user ID for assignee", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
+
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["TEST-1", "--assignee", "@me"], { from: "user" });
+
+    expect(mockClient.getMyself).toHaveBeenCalled();
+    expect(mockClient.patchIssue).toHaveBeenCalledWith(
+      "TEST-1",
+      expect.objectContaining({ assigneeId: 99 }),
     );
   });
 

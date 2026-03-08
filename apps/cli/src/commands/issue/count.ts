@@ -1,4 +1,10 @@
-import { PRIORITY_NAMES, PriorityId, getClient, resolveProjectIds } from "@repo/backlog-utils";
+import {
+  PRIORITY_NAMES,
+  PriorityId,
+  getClient,
+  resolveProjectIds,
+  resolveUserId,
+} from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
@@ -51,7 +57,9 @@ by default, or a JSON object with \`--json\`.`,
             .filter(Boolean),
         )
       : [];
-    const assigneeId = (opts.assignee ?? []).map(Number);
+    const assigneeId = await Promise.all(
+      (opts.assignee ?? []).map((id: string) => resolveUserId(client, id)),
+    );
     const statusId = opts.status
       ? opts.status
           .split(",")
