@@ -3,8 +3,7 @@ import { UserError, outputResult } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
-import { resolveOptions } from "../../lib/required-option";
-import { RequiredOption } from "../../lib/required-option";
+import { RequiredOption, resolveOptions } from "../../lib/required-option";
 
 const addUser = new BeeCommand("add-user")
   .summary("Add a user to a project")
@@ -26,8 +25,8 @@ Requires Administrator or Project Administrator role.`,
       command: "bee project add-user -p PROJECT_KEY --user-id 12345",
     },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
 
     const userId = Number(opts.userId);
     if (Number.isNaN(userId)) {
@@ -36,9 +35,9 @@ Requires Administrator or Project Administrator role.`,
 
     const { client } = await getClient();
 
-    const user = await client.postProjectUser(opts.project as string, String(userId));
+    const user = await client.postProjectUser(opts.project, String(userId));
 
-    const jsonArg = opts.json === true ? "" : (opts.json as string | undefined);
+    const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(user, { ...opts, json: jsonArg }, (data) => {
       consola.success(`Added user ${data.name} to project ${opts.project}.`);
     });

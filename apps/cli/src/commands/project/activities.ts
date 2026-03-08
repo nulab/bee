@@ -68,8 +68,8 @@ https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#activ
       command: "bee project activities -p PROJECT_KEY --json",
     },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
 
     const { client } = await getClient();
 
@@ -77,13 +77,13 @@ https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#activ
       ? String(opts.activityType).split(",").map(Number)
       : undefined;
 
-    const activityList = await client.getProjectActivities(opts.project as string, {
+    const activityList = await client.getProjectActivities(opts.project, {
       activityTypeId,
       count: opts.count ? Number(opts.count) : undefined,
-      order: opts.order as "asc" | "desc" | undefined,
+      order: opts.order,
     });
 
-    const jsonArg = opts.json === true ? "" : (opts.json as string | undefined);
+    const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(activityList, { ...opts, json: jsonArg }, (data) => {
       if (data.length === 0) {
         consola.info("No activities found.");

@@ -47,8 +47,8 @@ will remain unchanged.`,
   .action(async (issue, opts) => {
     const { client } = await getClient();
 
-    const notifiedUserId = (opts.notify as number[]) ?? [];
-    const attachmentId = (opts.attachment as number[]) ?? [];
+    const notifiedUserId = opts.notify ?? [];
+    const attachmentId = opts.attachment ?? [];
 
     let priorityId: number | undefined;
     if (opts.priority) {

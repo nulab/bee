@@ -1,57 +1,42 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `List issue types in a Backlog project.
+const list = new BeeCommand("list")
+  .summary("List issue types")
+  .description(
+    `List issue types in a Backlog project.
 
 Issue types categorize issues and are displayed with their associated color.`,
-
-  examples: [
+  )
+  .argument("[project]", "Project ID or project key")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     { description: "List all issue types", command: "bee issue-type list PROJECT" },
     { description: "Output as JSON", command: "bee issue-type list PROJECT --json" },
-  ],
+  ])
+  .action(async (project, opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const issueTypes = await client.getIssueTypes(project);
 
-const list = withUsage(
-  defineCommand({
-    meta: {
-      name: "list",
-      description: "List issue types",
-    },
-    args: {
-      ...outputArgs,
-      project: commonArgs.projectPositional,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    outputResult(issueTypes, opts, (data) => {
+      if (data.length === 0) {
+        consola.info("No issue types found.");
+        return;
+      }
 
-      const issueTypes = await client.getIssueTypes(args.project);
+      const rows: Row[] = data.map((t) => [
+        { header: "ID", value: String(t.id) },
+        { header: "NAME", value: t.name },
+        { header: "COLOR", value: t.color },
+      ]);
 
-      outputResult(issueTypes, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No issue types found.");
-          return;
-        }
+      printTable(rows);
+    });
+  });
 
-        const rows: Row[] = data.map((t) => [
-          { header: "ID", value: String(t.id) },
-          { header: "NAME", value: t.name },
-          { header: "COLOR", value: t.color },
-        ]);
-
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, list };
+export default list;

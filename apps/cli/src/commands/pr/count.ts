@@ -30,16 +30,16 @@ by default, or a JSON object with \`--json\`.`,
     },
     { description: "Output as JSON", command: "bee pr count -p PROJECT -R repo --json" },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
 
     const statusId = opts.status
-      ? (opts.status as string)
+      ? opts.status
           .split(",")
-          .map((s) => s.trim())
+          .map((s: string) => s.trim())
           .filter(Boolean)
-          .map((name) => {
+          .map((name: string) => {
             const id = PrStatusName[name.toLowerCase()];
             if (id === undefined) {
               throw new Error(
@@ -50,20 +50,18 @@ by default, or a JSON object with \`--json\`.`,
           })
       : undefined;
 
-    const assigneeId = ((opts.assignee as string[]) ?? [])
-      .map(Number)
-      .filter((n) => !Number.isNaN(n));
-    const issueId = splitArg(opts.issue as string | undefined, v.number());
-    const createdUserId = splitArg(opts.createdUser as string | undefined, v.number());
+    const assigneeId = (opts.assignee ?? []).map(Number).filter((n: number) => !Number.isNaN(n));
+    const issueId = splitArg(opts.issue, v.number());
+    const createdUserId = splitArg(opts.createdUser, v.number());
 
-    const result = await client.getPullRequestsCount(opts.project as string, opts.repo as string, {
+    const result = await client.getPullRequestsCount(opts.project, opts.repo, {
       statusId,
       assigneeId: assigneeId.length > 0 ? assigneeId : undefined,
       issueId: issueId.length > 0 ? issueId : undefined,
       createdUserId: createdUserId.length > 0 ? createdUserId : undefined,
     });
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(result, { json }, (data) => {
       consola.log(data.count);
     });

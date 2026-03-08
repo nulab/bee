@@ -36,16 +36,16 @@ status (open, closed, merged).`,
     },
     { description: "Output as JSON", command: "bee pr list -p PROJECT -R repo --json" },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
 
     const statusId = opts.status
-      ? (opts.status as string)
+      ? opts.status
           .split(",")
-          .map((s) => s.trim())
+          .map((s: string) => s.trim())
           .filter(Boolean)
-          .map((name) => {
+          .map((name: string) => {
             const id = PrStatusName[name.toLowerCase()];
             if (id === undefined) {
               throw new Error(
@@ -56,13 +56,11 @@ status (open, closed, merged).`,
           })
       : undefined;
 
-    const assigneeId = ((opts.assignee as string[]) ?? [])
-      .map(Number)
-      .filter((n) => !Number.isNaN(n));
-    const issueId = splitArg(opts.issue as string | undefined, v.number());
-    const createdUserId = splitArg(opts.createdUser as string | undefined, v.number());
+    const assigneeId = (opts.assignee ?? []).map(Number).filter((n: number) => !Number.isNaN(n));
+    const issueId = splitArg(opts.issue, v.number());
+    const createdUserId = splitArg(opts.createdUser, v.number());
 
-    const pullRequests = await client.getPullRequests(opts.project as string, opts.repo as string, {
+    const pullRequests = await client.getPullRequests(opts.project, opts.repo, {
       statusId,
       assigneeId: assigneeId.length > 0 ? assigneeId : undefined,
       issueId: issueId.length > 0 ? issueId : undefined,
@@ -71,7 +69,7 @@ status (open, closed, merged).`,
       offset: opts.offset ? Number(opts.offset) : undefined,
     });
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(pullRequests, { json }, (data) => {
       if (data.length === 0) {
         consola.info("No pull requests found.");

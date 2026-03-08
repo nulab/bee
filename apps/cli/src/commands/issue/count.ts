@@ -45,22 +45,22 @@ by default, or a JSON object with \`--json\`.`,
     const projectId = opts.project
       ? await resolveProjectIds(
           client,
-          (opts.project as string)
+          opts.project
             .split(",")
             .map((s: string) => s.trim())
             .filter(Boolean),
         )
       : [];
-    const assigneeId = ((opts.assignee as string[]) ?? []).map(Number);
+    const assigneeId = (opts.assignee ?? []).map(Number);
     const statusId = opts.status
-      ? (opts.status as string)
+      ? opts.status
           .split(",")
           .map((s: string) => s.trim())
           .filter(Boolean)
           .map(Number)
       : [];
     const priorityId = opts.priority
-      ? (opts.priority as string)
+      ? opts.priority
           .split(",")
           .map((s: string) => s.trim())
           .filter(Boolean)
@@ -80,13 +80,13 @@ by default, or a JSON object with \`--json\`.`,
       assigneeId,
       statusId,
       priorityId,
-      keyword: opts.keyword as string | undefined,
-      createdSince: opts.createdSince as string | undefined,
-      createdUntil: opts.createdUntil as string | undefined,
-      updatedSince: opts.updatedSince as string | undefined,
-      updatedUntil: opts.updatedUntil as string | undefined,
-      dueDateSince: opts.dueSince as string | undefined,
-      dueDateUntil: opts.dueUntil as string | undefined,
+      keyword: opts.keyword,
+      createdSince: opts.createdSince,
+      createdUntil: opts.createdUntil,
+      updatedSince: opts.updatedSince,
+      updatedUntil: opts.updatedUntil,
+      dueDateSince: opts.dueSince,
+      dueDateUntil: opts.dueUntil,
     });
 
     outputResult(result, opts as { json?: string }, (data) => {

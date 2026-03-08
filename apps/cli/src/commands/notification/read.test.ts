@@ -16,8 +16,8 @@ describe("notification read", () => {
   it("marks a notification as read", async () => {
     mockClient.markAsReadNotification.mockResolvedValue(undefined);
 
-    const { read } = await import("./read");
-    await read.run?.({ args: { id: "12345" } } as never);
+    const { default: read } = await import("./read");
+    await read.parseAsync(["12345"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.markAsReadNotification).toHaveBeenCalledWith(12_345);
@@ -27,8 +27,8 @@ describe("notification read", () => {
   it("converts string ID to number", async () => {
     mockClient.markAsReadNotification.mockResolvedValue(undefined);
 
-    const { read } = await import("./read");
-    await read.run?.({ args: { id: "99" } } as never);
+    const { default: read } = await import("./read");
+    await read.parseAsync(["99"], { from: "user" });
 
     expect(mockClient.markAsReadNotification).toHaveBeenCalledWith(99);
   });

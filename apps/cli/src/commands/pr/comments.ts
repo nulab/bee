@@ -28,25 +28,20 @@ Displays all comments in chronological order with the author and date.`,
     },
     { description: "Output as JSON", command: "bee pr comments 42 -p PROJECT -R repo --json" },
   ])
-  .action(async (number, _opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (number, opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
 
     const prNumber = Number(number);
 
-    const prComments = await client.getPullRequestComments(
-      opts.project as string,
-      opts.repo as string,
-      prNumber,
-      {
-        minId: opts.minId ? Number(opts.minId) : undefined,
-        maxId: opts.maxId ? Number(opts.maxId) : undefined,
-        order: (opts.order as "asc" | "desc") ?? "asc",
-        count: opts.count ? Number(opts.count) : undefined,
-      },
-    );
+    const prComments = await client.getPullRequestComments(opts.project, opts.repo, prNumber, {
+      minId: opts.minId ? Number(opts.minId) : undefined,
+      maxId: opts.maxId ? Number(opts.maxId) : undefined,
+      order: opts.order ?? "asc",
+      count: opts.count ? Number(opts.count) : undefined,
+    });
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(prComments, { json }, (data) => {
       const contentComments = data.filter((c) => c.content);
 

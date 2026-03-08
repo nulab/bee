@@ -1,18 +1,25 @@
 import { NOTIFICATION_REASON_LABELS, getClient } from "@repo/backlog-utils";
-import { type Row, formatDate, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { type Row, formatDate, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `List notifications for the authenticated user.
+const list = new BeeCommand("list")
+  .summary("List notifications")
+  .description(
+    `List notifications for the authenticated user.
 
 Unread notifications are marked with an asterisk (\`*\`). Use \`--count\` to
 control the number of notifications returned, and \`--min-id\` / \`--max-id\`
 for cursor-based pagination.`,
-
-  examples: [
+  )
+  .addOption(opt.count())
+  .addOption(opt.minId())
+  .addOption(opt.maxId())
+  .addOption(opt.order())
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "List recent notifications", command: "bee notification list" },
     { description: "List the last 5 notifications", command: "bee notification list --count 5" },
     {
@@ -20,57 +27,35 @@ for cursor-based pagination.`,
       command: "bee notification list --order asc",
     },
     { description: "Output as JSON", command: "bee notification list --json" },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const notifications = await client.getNotifications({
+      count: opts.count ? Number(opts.count) : undefined,
+      minId: opts.minId ? Number(opts.minId) : undefined,
+      maxId: opts.maxId ? Number(opts.maxId) : undefined,
+      order: opts.order,
+    });
 
-const list = withUsage(
-  defineCommand({
-    meta: {
-      name: "list",
-      description: "List notifications",
-    },
-    args: {
-      ...outputArgs,
-      count: commonArgs.count,
-      "min-id": commonArgs.minId,
-      "max-id": commonArgs.maxId,
-      order: commonArgs.order,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    outputResult(notifications, opts, (data) => {
+      if (data.length === 0) {
+        consola.info("No notifications found.");
+        return;
+      }
 
-      const notifications = await client.getNotifications({
-        count: args.count ? Number(args.count) : undefined,
-        minId: args["min-id"] ? Number(args["min-id"]) : undefined,
-        maxId: args["max-id"] ? Number(args["max-id"]) : undefined,
-        order: args.order as "asc" | "desc" | undefined,
-      });
+      const rows: Row[] = data.map((n) => [
+        { header: "", value: n.alreadyRead ? " " : "*" },
+        { header: "ID", value: String(n.id) },
+        { header: "REASON", value: NOTIFICATION_REASON_LABELS[n.reason] ?? String(n.reason) },
+        { header: "ISSUE", value: n.issue?.issueKey ?? "-" },
+        { header: "SUMMARY", value: n.issue?.summary ?? "-" },
+        { header: "SENDER", value: n.sender.name },
+        { header: "DATE", value: formatDate(n.created) },
+      ]);
 
-      outputResult(notifications, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No notifications found.");
-          return;
-        }
+      printTable(rows);
+    });
+  });
 
-        const rows: Row[] = data.map((n) => [
-          { header: "", value: n.alreadyRead ? " " : "*" },
-          { header: "ID", value: String(n.id) },
-          { header: "REASON", value: NOTIFICATION_REASON_LABELS[n.reason] ?? String(n.reason) },
-          { header: "ISSUE", value: n.issue?.issueKey ?? "-" },
-          { header: "SUMMARY", value: n.issue?.summary ?? "-" },
-          { header: "SENDER", value: n.sender.name },
-          { header: "DATE", value: formatDate(n.created) },
-        ]);
-
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, list };
+export default list;

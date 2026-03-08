@@ -23,8 +23,8 @@ describe("category delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteCategories.mockResolvedValue({ id: 1, name: "Bug" });
 
-    const { deleteCategory } = await import("./delete");
-    await deleteCategory.run?.({ args: { category: "1", project: "TEST" } } as never);
+    const { default: deleteCategory } = await import("./delete");
+    await deleteCategory.parseAsync(["1", "-p", "TEST"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete category 1? This cannot be undone.",
@@ -38,8 +38,8 @@ describe("category delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteCategories.mockResolvedValue({ id: 1, name: "Bug" });
 
-    const { deleteCategory } = await import("./delete");
-    await deleteCategory.run?.({ args: { category: "1", project: "TEST", yes: true } } as never);
+    const { default: deleteCategory } = await import("./delete");
+    await deleteCategory.parseAsync(["1", "-p", "TEST", "--yes"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete category 1? This cannot be undone.",
@@ -50,8 +50,8 @@ describe("category delete", () => {
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
 
-    const { deleteCategory } = await import("./delete");
-    await deleteCategory.run?.({ args: { category: "1", project: "TEST" } } as never);
+    const { default: deleteCategory } = await import("./delete");
+    await deleteCategory.parseAsync(["1", "-p", "TEST"], { from: "user" });
 
     expect(mockClient.deleteCategories).not.toHaveBeenCalled();
   });
@@ -61,10 +61,8 @@ describe("category delete", () => {
     mockClient.deleteCategories.mockResolvedValue({ id: 1, name: "Bug" });
 
     await expectStdoutContaining(async () => {
-      const { deleteCategory } = await import("./delete");
-      await deleteCategory.run?.({
-        args: { category: "1", project: "TEST", yes: true, json: "" },
-      } as never);
+      const { default: deleteCategory } = await import("./delete");
+      await deleteCategory.parseAsync(["1", "-p", "TEST", "--yes", "--json"], { from: "user" });
     }, "Bug");
   });
 });

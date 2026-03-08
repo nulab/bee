@@ -40,24 +40,22 @@ will remain unchanged.`,
       command: "bee project edit -p PROJECT_KEY --text-formatting-rule markdown",
     },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
 
     const { client } = await getClient();
 
-    const project = await client.patchProject(opts.project as string, {
-      name: opts.name as string | undefined,
-      key: opts.key as string | undefined,
-      chartEnabled: opts.chartEnabled as boolean | undefined,
-      subtaskingEnabled: opts.subtaskingEnabled as boolean | undefined,
-      projectLeaderCanEditProjectLeader: opts.projectLeaderCanEditProjectLeader as
-        | boolean
-        | undefined,
-      textFormattingRule: opts.textFormattingRule as "backlog" | "markdown" | undefined,
-      archived: opts.archived as boolean | undefined,
+    const project = await client.patchProject(opts.project, {
+      name: opts.name,
+      key: opts.key,
+      chartEnabled: opts.chartEnabled,
+      subtaskingEnabled: opts.subtaskingEnabled,
+      projectLeaderCanEditProjectLeader: opts.projectLeaderCanEditProjectLeader,
+      textFormattingRule: opts.textFormattingRule,
+      archived: opts.archived,
     });
 
-    const jsonArg = opts.json === true ? "" : (opts.json as string | undefined);
+    const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(project, { ...opts, json: jsonArg }, (data) => {
       consola.success(`Updated project ${data.projectKey}: ${data.name}`);
     });

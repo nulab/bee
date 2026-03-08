@@ -41,8 +41,8 @@ describe("repo clone", () => {
     mockClient.getGitRepository.mockResolvedValue(sampleRepo);
     mockSpawn.mockReturnValue(createMockChildProcess());
 
-    const { clone } = await import("./clone");
-    await clone.run?.({ args: { project: "PROJ", repository: "api-server" } } as never);
+    const { default: clone } = await import("./clone");
+    await clone.parseAsync(["api-server", "--project", "PROJ"], { from: "user" });
 
     expect(mockClient.getGitRepository).toHaveBeenCalledWith("PROJ", "api-server");
     expect(mockSpawn).toHaveBeenCalledWith(
@@ -56,10 +56,10 @@ describe("repo clone", () => {
     mockClient.getGitRepository.mockResolvedValue(sampleRepo);
     mockSpawn.mockReturnValue(createMockChildProcess());
 
-    const { clone } = await import("./clone");
-    await clone.run?.({
-      args: { project: "PROJ", repository: "api-server", directory: "./dest" },
-    } as never);
+    const { default: clone } = await import("./clone");
+    await clone.parseAsync(["api-server", "--project", "PROJ", "--directory", "./dest"], {
+      from: "user",
+    });
 
     expect(mockSpawn).toHaveBeenCalledWith(
       "git",
@@ -72,10 +72,8 @@ describe("repo clone", () => {
     mockClient.getGitRepository.mockResolvedValue(sampleRepo);
     mockSpawn.mockReturnValue(createMockChildProcess());
 
-    const { clone } = await import("./clone");
-    await clone.run?.({
-      args: { project: "PROJ", repository: "api-server", http: true },
-    } as never);
+    const { default: clone } = await import("./clone");
+    await clone.parseAsync(["api-server", "--project", "PROJ", "--http"], { from: "user" });
 
     expect(mockSpawn).toHaveBeenCalledWith(
       "git",
@@ -88,10 +86,10 @@ describe("repo clone", () => {
     mockClient.getGitRepository.mockResolvedValue(sampleRepo);
     mockSpawn.mockReturnValue(createMockChildProcess(128));
 
-    const { clone } = await import("./clone");
+    const { default: clone } = await import("./clone");
 
     await expect(
-      clone.run?.({ args: { project: "PROJ", repository: "api-server" } } as never),
+      clone.parseAsync(["api-server", "--project", "PROJ"], { from: "user" }),
     ).rejects.toThrow("git clone exited with code 128");
   });
 
@@ -100,10 +98,8 @@ describe("repo clone", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { clone } = await import("./clone");
-    await clone.run?.({
-      args: { project: "PROJ", repository: "api-server", json: "" },
-    } as never);
+    const { default: clone } = await import("./clone");
+    await clone.parseAsync(["api-server", "--project", "PROJ", "--json"], { from: "user" });
 
     expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("api-server"));
     expect(mockSpawn).not.toHaveBeenCalled();

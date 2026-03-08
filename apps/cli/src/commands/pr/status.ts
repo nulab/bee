@@ -24,19 +24,19 @@ organized by their current status (Open, Closed, Merged).`,
     },
     { description: "Output as JSON", command: "bee pr status -p PROJECT -R repo --json" },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
 
     const me = await client.getMyself();
 
-    const pullRequests = await client.getPullRequests(opts.project as string, opts.repo as string, {
+    const pullRequests = await client.getPullRequests(opts.project, opts.repo, {
       assigneeId: [me.id],
       statusId: [PrStatusId.Open, PrStatusId.Closed, PrStatusId.Merged],
       count: 100,
     });
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
 
     if (pullRequests.length === 0) {
       outputResult({ user: me, pullRequests: [] }, { json }, () => {

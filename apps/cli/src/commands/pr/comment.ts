@@ -40,22 +40,17 @@ Use \`--edit-last\` to edit your most recent comment.`,
       command: 'bee pr comment 42 -p PROJECT -R repo --edit-last -b "Updated"',
     },
   ])
-  .action(async (number, _opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (number, opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
     const prNumber = Number(number);
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
 
     if (opts.list) {
-      const comments = await client.getPullRequestComments(
-        opts.project as string,
-        opts.repo as string,
-        prNumber,
-        {
-          order: "asc",
-        },
-      );
+      const comments = await client.getPullRequestComments(opts.project, opts.repo, prNumber, {
+        order: "asc",
+      });
 
       outputResult(comments, { json }, (data) => {
         const filtered = data.filter((c) => c.content);
@@ -78,14 +73,9 @@ Use \`--edit-last\` to edit your most recent comment.`,
 
     if (opts.editLast) {
       const myself = await client.getMyself();
-      const comments = await client.getPullRequestComments(
-        opts.project as string,
-        opts.repo as string,
-        prNumber,
-        {
-          order: "desc",
-        },
-      );
+      const comments = await client.getPullRequestComments(opts.project, opts.repo, prNumber, {
+        order: "desc",
+      });
       const myComment = comments.find((c) => c.createdUser.id === myself.id);
 
       if (!myComment) {
@@ -93,18 +83,18 @@ Use \`--edit-last\` to edit your most recent comment.`,
         return;
       }
 
-      const content = (await resolveStdinArg(opts.body as string | undefined)) ?? opts.body;
+      const content = (await resolveStdinArg(opts.body)) ?? opts.body;
       if (!content) {
         consola.error("Comment body is required. Use --body or pipe input.");
         return;
       }
 
       const result = await client.patchPullRequestComments(
-        opts.project as string,
-        opts.repo as string,
+        opts.project,
+        opts.repo,
         prNumber,
         myComment.id,
-        { content: content as string },
+        { content },
       );
 
       outputResult(result, { json }, () => {
@@ -114,22 +104,17 @@ Use \`--edit-last\` to edit your most recent comment.`,
     }
 
     // Default: add comment
-    const content = (await resolveStdinArg(opts.body as string | undefined)) ?? opts.body;
+    const content = (await resolveStdinArg(opts.body)) ?? opts.body;
     if (!content) {
       consola.error("Comment body is required. Use --body or pipe input.");
       return;
     }
-    const notifiedUserId = (opts.notify as number[]) ?? [];
+    const notifiedUserId = opts.notify ?? [];
 
-    const result = await client.postPullRequestComments(
-      opts.project as string,
-      opts.repo as string,
-      prNumber,
-      {
-        content: content as string,
-        notifiedUserId,
-      },
-    );
+    const result = await client.postPullRequestComments(opts.project, opts.repo, prNumber, {
+      content,
+      notifiedUserId,
+    });
 
     outputResult(result, { json }, () => {
       consola.success(`Added comment to pull request #${number}`);

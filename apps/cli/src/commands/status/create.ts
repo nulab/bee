@@ -1,17 +1,27 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, promptRequired } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `Create a new status in a Backlog project.
+const create = new BeeCommand("create")
+  .summary("Create a status")
+  .description(
+    `Create a new status in a Backlog project.
 
 If \`--name\` is not provided, you will be prompted interactively.
 The \`--color\` flag must be one of the predefined Backlog colors.`,
-
-  examples: [
+  )
+  .addOption(opt.project())
+  .option("-n, --name <value>", "Status name")
+  .requiredOption(
+    "--color <value>",
+    "Display color {#ea2c00|#e87758|#e07b9a|#868cb7|#3b9dbd|#4caf93|#b0be3c|#eda62a|#f42858|#393939}",
+  )
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Create a status",
       command: 'bee status create -p PROJECT -n "In Review" --color "#3b9dbd"',
@@ -20,51 +30,21 @@ The \`--color\` flag must be one of the predefined Backlog colors.`,
       description: "Create interactively",
       command: 'bee status create -p PROJECT --color "#3b9dbd"',
     },
-  ],
+  ])
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const name = await promptRequired("Status name:", opts.name);
 
-const create = withUsage(
-  defineCommand({
-    meta: {
-      name: "create",
-      description: "Create a status",
-    },
-    args: {
-      ...outputArgs,
-      project: { ...commonArgs.project, required: true },
-      name: {
-        type: "string",
-        alias: "n",
-        description: "Status name",
-      },
-      color: {
-        type: "string",
-        description: "Display color",
-        valueHint:
-          "{#ea2c00|#e87758|#e07b9a|#868cb7|#3b9dbd|#4caf93|#b0be3c|#eda62a|#f42858|#393939}",
-        required: true,
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const status = await client.postProjectStatus(opts.project, {
+      name,
+      color: opts.color as never,
+    });
 
-      const name = await promptRequired("Status name:", args.name);
+    outputResult(status, opts, (data) => {
+      consola.success(`Created status ${data.name} (ID: ${data.id})`);
+    });
+  });
 
-      const status = await client.postProjectStatus(args.project, {
-        name,
-        color: args.color as never,
-      });
-
-      outputResult(status, args, (data) => {
-        consola.success(`Created status ${data.name} (ID: ${data.id})`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, create };
+export default create;

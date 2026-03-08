@@ -45,21 +45,21 @@ activity type IDs with \`--activity-type-ids\`.`,
         "bee webhook create -p PROJECT -n CI --hook-url https://example.com/hook --activity-type-ids 1 --activity-type-ids 2 --activity-type-ids 3",
     },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
 
-    const name = await promptRequired("Webhook name:", opts.name as string | undefined);
-    const activityTypeIds: number[] = (opts.activityTypeIds as number[]) ?? [];
+    const name = await promptRequired("Webhook name:", opts.name);
+    const activityTypeIds: number[] = opts.activityTypeIds ?? [];
 
-    const webhook = await client.postWebhook(opts.project as string, {
+    const webhook = await client.postWebhook(opts.project, {
       name,
-      hookUrl: opts.hookUrl as string,
-      allEvent: opts.allEvent as boolean | undefined,
+      hookUrl: opts.hookUrl,
+      allEvent: opts.allEvent,
       activityTypeIds,
     });
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(webhook, { json }, (data) => {
       consola.success(`Created webhook ${data.name} (ID: ${data.id})`);
     });

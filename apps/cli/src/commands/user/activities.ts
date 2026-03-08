@@ -83,7 +83,7 @@ https://developer.nulab.com/docs/backlog/api/2/get-user-recent-updates/#activity
     const activityList = await client.getUserActivities(Number(user), {
       activityTypeId,
       count: opts.count ? Number(opts.count) : undefined,
-      order: opts.order as "asc" | "desc" | undefined,
+      order: opts.order,
       minId: opts.minId ? Number(opts.minId) : undefined,
       maxId: opts.maxId ? Number(opts.maxId) : undefined,
     });

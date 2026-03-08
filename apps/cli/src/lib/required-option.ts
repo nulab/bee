@@ -10,7 +10,7 @@ class RequiredOption extends Option {
   }
 }
 
-const resolveOptions = async (cmd: Command): Promise<Record<string, unknown>> => {
+const resolveOptions = async (cmd: Command): Promise<void> => {
   const opts = cmd.opts();
   for (const opt of cmd.options) {
     if (opt instanceof RequiredOption) {
@@ -18,7 +18,6 @@ const resolveOptions = async (cmd: Command): Promise<Record<string, unknown>> =>
       opts[key] = await promptRequired(`${opt.promptLabel}:`, opts[key]);
     }
   }
-  return opts;
 };
 
 export { RequiredOption, resolveOptions };

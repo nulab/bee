@@ -15,6 +15,11 @@ vi.mock("@repo/backlog-utils", async (importOriginal) => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
+}));
+
 const sampleDocuments = [
   {
     id: "doc-1",
@@ -52,8 +57,8 @@ describe("document list", () => {
   it("displays document list in tabular format", async () => {
     mockClient.getDocuments.mockResolvedValue(sampleDocuments);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "PROJECT" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["-p", "PROJECT"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getDocuments).toHaveBeenCalled();
@@ -66,8 +71,8 @@ describe("document list", () => {
   it("shows message when no documents found", async () => {
     mockClient.getDocuments.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "PROJECT" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["-p", "PROJECT"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No documents found.");
   });
@@ -75,8 +80,8 @@ describe("document list", () => {
   it("passes keyword query parameter", async () => {
     mockClient.getDocuments.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "PROJECT", keyword: "meeting" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["-p", "PROJECT", "-k", "meeting"], { from: "user" });
 
     expect(mockClient.getDocuments).toHaveBeenCalledWith(
       expect.objectContaining({ keyword: "meeting" }),
@@ -86,8 +91,10 @@ describe("document list", () => {
   it("passes sort and order parameters", async () => {
     mockClient.getDocuments.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "PROJECT", sort: "created", order: "asc" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["-p", "PROJECT", "--sort", "created", "--order", "asc"], {
+      from: "user",
+    });
 
     expect(mockClient.getDocuments).toHaveBeenCalledWith(
       expect.objectContaining({ sort: "created", order: "asc" }),
@@ -97,8 +104,8 @@ describe("document list", () => {
   it("passes count and offset parameters", async () => {
     mockClient.getDocuments.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "PROJECT", count: "10", offset: "5" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["-p", "PROJECT", "-L", "10", "--offset", "5"], { from: "user" });
 
     expect(mockClient.getDocuments).toHaveBeenCalledWith(
       expect.objectContaining({ count: 10, offset: 5 }),
@@ -109,8 +116,8 @@ describe("document list", () => {
     mockClient.getDocuments.mockResolvedValue(sampleDocuments);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { project: "PROJECT", json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["-p", "PROJECT", "--json"], { from: "user" });
     }, "doc-1");
   });
 });

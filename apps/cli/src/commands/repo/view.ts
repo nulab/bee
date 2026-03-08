@@ -1,19 +1,27 @@
 import { getClient, openOrPrintUrl, repositoryUrl } from "@repo/backlog-utils";
-import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { formatDate, outputResult, printDefinitionList } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `Display details of a Git repository in a Backlog project.
+const view = new BeeCommand("view")
+  .summary("View a repository")
+  .description(
+    `Display details of a Git repository in a Backlog project.
 
 Shows repository name, description, HTTP and SSH clone URLs, size,
 creation and update timestamps.
 
 Use \`--web\` to open the repository in your default browser instead.`,
-
-  examples: [
+  )
+  .argument("<repository>", "Repository name or ID")
+  .addOption(opt.project())
+  .addOption(opt.web("repository"))
+  .addOption(opt.noBrowser())
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "View repository details",
       command: "bee repo view api-server -p PROJECT_KEY",
@@ -23,58 +31,33 @@ Use \`--web\` to open the repository in your default browser instead.`,
       command: "bee repo view api-server -p PROJECT_KEY --web",
     },
     { description: "Output as JSON", command: "bee repo view api-server -p PROJECT_KEY --json" },
-  ],
+  ])
+  .action(async (repository, opts, cmd) => {
+    await resolveOptions(cmd);
+    const { client, host } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    if (opts.web || opts.browser === false) {
+      const url = repositoryUrl(host, opts.project, repository);
+      await openOrPrintUrl(url, opts.browser === false, consola);
+      return;
+    }
 
-const view = withUsage(
-  defineCommand({
-    meta: {
-      name: "view",
-      description: "View a repository",
-    },
-    args: {
-      ...outputArgs,
-      repository: {
-        type: "positional",
-        description: "Repository name or ID",
-        required: true,
-      },
-      project: { ...commonArgs.project, required: true },
-      web: commonArgs.web("repository"),
-      "no-browser": commonArgs.noBrowser,
-    },
-    async run({ args }) {
-      const { client, host } = await getClient();
+    const repo = await client.getGitRepository(opts.project, repository);
 
-      if (args.web || args["no-browser"]) {
-        const url = repositoryUrl(host, args.project, args.repository);
-        await openOrPrintUrl(url, Boolean(args["no-browser"]), consola);
-        return;
-      }
+    outputResult(repo, opts, (data) => {
+      consola.log("");
+      consola.log(`  ${data.name}`);
+      consola.log("");
+      printDefinitionList([
+        ["Description", data.description ?? ""],
+        ["HTTP URL", data.httpUrl],
+        ["SSH URL", data.sshUrl],
+        ["Created", formatDate(data.created)],
+        ["Updated", formatDate(data.updated)],
+        ["Last Pushed", data.pushedAt ? formatDate(data.pushedAt) : ""],
+      ]);
+      consola.log("");
+    });
+  });
 
-      const repo = await client.getGitRepository(args.project, args.repository);
-
-      outputResult(repo, args, (data) => {
-        consola.log("");
-        consola.log(`  ${data.name}`);
-        consola.log("");
-        printDefinitionList([
-          ["Description", data.description ?? ""],
-          ["HTTP URL", data.httpUrl],
-          ["SSH URL", data.sshUrl],
-          ["Created", formatDate(data.created)],
-          ["Updated", formatDate(data.updated)],
-          ["Last Pushed", data.pushedAt ? formatDate(data.pushedAt) : ""],
-        ]);
-        consola.log("");
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, view };
+export default view;

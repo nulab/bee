@@ -59,10 +59,10 @@ or \`low\`.`,
   .action(async (opts) => {
     const { client } = await getClient();
 
-    const project = await promptRequired("Project:", opts.project as string | undefined);
-    const title = await promptRequired("Summary:", opts.title as string | undefined);
-    const issueTypeId = await promptRequired("Issue type ID:", opts.type as string | undefined);
-    const priority = await promptRequired("Priority:", opts.priority as string | undefined, {
+    const project = await promptRequired("Project:", opts.project);
+    const title = await promptRequired("Summary:", opts.title);
+    const issueTypeId = await promptRequired("Issue type ID:", opts.type);
+    const priority = await promptRequired("Priority:", opts.priority, {
       valueHint: `{${PRIORITY_NAMES.join("|")}}`,
     });
     const priorityId = PriorityId[priority.toLowerCase()];
@@ -71,22 +71,20 @@ or \`low\`.`,
     }
 
     const [projectId] = await resolveProjectIds(client, [project]);
-    const assigneeId = opts.assignee
-      ? await resolveUserId(client, opts.assignee as string)
-      : undefined;
-    const notifiedUserId = (opts.notify as number[]) ?? [];
-    const attachmentId = (opts.attachment as number[]) ?? [];
+    const assigneeId = opts.assignee ? await resolveUserId(client, opts.assignee) : undefined;
+    const notifiedUserId = opts.notify ?? [];
+    const attachmentId = opts.attachment ?? [];
 
     const issue = await client.postIssue({
       projectId,
       summary: title,
       issueTypeId: Number(issueTypeId),
       priorityId,
-      description: opts.description as string | undefined,
+      description: opts.description,
       assigneeId,
       parentIssueId: opts.parentIssue ? Number(opts.parentIssue) : undefined,
-      startDate: opts.startDate as string | undefined,
-      dueDate: opts.dueDate as string | undefined,
+      startDate: opts.startDate,
+      dueDate: opts.dueDate,
       estimatedHours: opts.estimatedHours ? Number(opts.estimatedHours) : undefined,
       actualHours: opts.actualHours ? Number(opts.actualHours) : undefined,
       notifiedUserId,

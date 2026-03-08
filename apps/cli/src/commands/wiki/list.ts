@@ -24,16 +24,16 @@ Use \`--keyword\` to filter pages by name or content.`,
     },
     { description: "Output as JSON", command: "bee wiki list -p PROJECT --json" },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
 
     const wikis = await client.getWikis({
-      projectIdOrKey: opts.project as string,
-      keyword: opts.keyword as string | undefined,
+      projectIdOrKey: opts.project,
+      keyword: opts.keyword,
     });
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(wikis, { json }, (data) => {
       if (data.length === 0) {
         consola.info("No wiki pages found.");

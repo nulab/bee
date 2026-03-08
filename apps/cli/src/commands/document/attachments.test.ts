@@ -36,8 +36,8 @@ describe("document attachments", () => {
       attachments: sampleAttachments,
     });
 
-    const { attachments } = await import("./attachments");
-    await attachments.run?.({ args: { document: "doc-1" } } as never);
+    const { default: attachments } = await import("./attachments");
+    await attachments.parseAsync(["doc-1"], { from: "user" });
 
     expect(mockClient.getDocument).toHaveBeenCalledWith("doc-1");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("NAME"));
@@ -52,8 +52,8 @@ describe("document attachments", () => {
       attachments: [],
     });
 
-    const { attachments } = await import("./attachments");
-    await attachments.run?.({ args: { document: "doc-1" } } as never);
+    const { default: attachments } = await import("./attachments");
+    await attachments.parseAsync(["doc-1"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No attachments found.");
   });
@@ -86,8 +86,8 @@ describe("document attachments", () => {
       ],
     });
 
-    const { attachments } = await import("./attachments");
-    await attachments.run?.({ args: { document: "doc-1" } } as never);
+    const { default: attachments } = await import("./attachments");
+    await attachments.parseAsync(["doc-1"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("500 B"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("5.0 KB"));
@@ -101,8 +101,8 @@ describe("document attachments", () => {
     });
 
     await expectStdoutContaining(async () => {
-      const { attachments } = await import("./attachments");
-      await attachments.run?.({ args: { document: "doc-1", json: "" } } as never);
+      const { default: attachments } = await import("./attachments");
+      await attachments.parseAsync(["doc-1", "--json"], { from: "user" });
     }, "report.pdf");
   });
 });

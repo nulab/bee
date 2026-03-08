@@ -1,46 +1,26 @@
 import { getClient } from "@repo/backlog-utils";
-import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 
-const commandUsage: CommandUsage = {
-  long: `Mark a notification as read.
+const read = new BeeCommand("read")
+  .summary("Mark a notification as read")
+  .description(
+    `Mark a notification as read.
 
 Specify the notification ID to mark as read. Use \`bee notification list\`
 to find notification IDs.`,
-
-  examples: [
+  )
+  .argument("<id>", "Notification ID")
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "Mark a notification as read", command: "bee notification read 12345" },
-  ],
+  ])
+  .action(async (id) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    await client.markAsReadNotification(Number(id));
 
-const read = withUsage(
-  defineCommand({
-    meta: {
-      name: "read",
-      description: "Mark a notification as read",
-    },
-    args: {
-      id: {
-        type: "positional",
-        description: "Notification ID",
-        required: true,
-        valueHint: "<number>",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    consola.success(`Marked notification ${id} as read.`);
+  });
 
-      await client.markAsReadNotification(Number(args.id));
-
-      consola.success(`Marked notification ${args.id} as read.`);
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, read };
+export default read;

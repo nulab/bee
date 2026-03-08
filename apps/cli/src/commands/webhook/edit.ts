@@ -40,20 +40,20 @@ All fields are optional. Only the specified fields will be updated.`,
       command: "bee webhook edit 12345 -p PROJECT --all-event",
     },
   ])
-  .action(async (webhook, _opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (webhook, opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
 
-    const activityTypeIds: number[] = (opts.activityTypeIds as number[]) ?? [];
+    const activityTypeIds: number[] = opts.activityTypeIds ?? [];
 
-    const webhookData = await client.patchWebhook(opts.project as string, webhook, {
-      name: opts.name as string | undefined,
-      hookUrl: opts.hookUrl as string | undefined,
-      allEvent: opts.allEvent as boolean | undefined,
+    const webhookData = await client.patchWebhook(opts.project, webhook, {
+      name: opts.name,
+      hookUrl: opts.hookUrl,
+      allEvent: opts.allEvent,
       activityTypeIds,
     });
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(webhookData, { json }, (data) => {
       consola.success(`Updated webhook ${data.name} (ID: ${data.id})`);
     });

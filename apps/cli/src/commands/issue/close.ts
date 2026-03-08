@@ -1,4 +1,4 @@
-import { IssueStatusId, RESOLUTION_NAMES, ResolutionId, getClient } from "@repo/backlog-utils";
+import { IssueStatusId, ResolutionId, getClient } from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
@@ -38,7 +38,7 @@ Optionally add a comment with \`--comment\`.`,
       ? (ResolutionId[opts.resolution] ?? Number(opts.resolution))
       : ResolutionId.fixed;
 
-    const notifiedUserId = (opts.notify as number[]) ?? [];
+    const notifiedUserId = opts.notify ?? [];
 
     const issueData = await client.patchIssue(issue, {
       statusId: IssueStatusId.Closed,

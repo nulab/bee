@@ -23,8 +23,8 @@ describe("milestone delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
-    const { deleteMilestone } = await import("./delete");
-    await deleteMilestone.run?.({ args: { milestone: "1", project: "TEST" } } as never);
+    const { default: deleteMilestone } = await import("./delete");
+    await deleteMilestone.parseAsync(["1", "-p", "TEST"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete milestone 1? This cannot be undone.",
@@ -38,8 +38,8 @@ describe("milestone delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
-    const { deleteMilestone } = await import("./delete");
-    await deleteMilestone.run?.({ args: { milestone: "1", project: "TEST", yes: true } } as never);
+    const { default: deleteMilestone } = await import("./delete");
+    await deleteMilestone.parseAsync(["1", "-p", "TEST", "--yes"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete milestone 1? This cannot be undone.",
@@ -50,8 +50,8 @@ describe("milestone delete", () => {
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
 
-    const { deleteMilestone } = await import("./delete");
-    await deleteMilestone.run?.({ args: { milestone: "1", project: "TEST" } } as never);
+    const { default: deleteMilestone } = await import("./delete");
+    await deleteMilestone.parseAsync(["1", "-p", "TEST"], { from: "user" });
 
     expect(mockClient.deleteVersions).not.toHaveBeenCalled();
   });
@@ -61,10 +61,8 @@ describe("milestone delete", () => {
     mockClient.deleteVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
     await expectStdoutContaining(async () => {
-      const { deleteMilestone } = await import("./delete");
-      await deleteMilestone.run?.({
-        args: { milestone: "1", project: "TEST", yes: true, json: "" },
-      } as never);
+      const { default: deleteMilestone } = await import("./delete");
+      await deleteMilestone.parseAsync(["1", "-p", "TEST", "--yes", "--json"], { from: "user" });
     }, "v1.0.0");
   });
 });

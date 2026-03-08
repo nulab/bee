@@ -23,8 +23,8 @@ describe("document delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteDocument.mockResolvedValue({ id: "1", title: "My Doc" });
 
-    const { deleteDocument } = await import("./delete");
-    await deleteDocument.run?.({ args: { document: "12345" } } as never);
+    const { default: deleteDocument } = await import("./delete");
+    await deleteDocument.parseAsync(["12345"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete document 12345? This cannot be undone.",
@@ -38,8 +38,8 @@ describe("document delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteDocument.mockResolvedValue({ id: "1", title: "My Doc" });
 
-    const { deleteDocument } = await import("./delete");
-    await deleteDocument.run?.({ args: { document: "12345", yes: true } } as never);
+    const { default: deleteDocument } = await import("./delete");
+    await deleteDocument.parseAsync(["12345", "--yes"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete document 12345? This cannot be undone.",
@@ -50,8 +50,8 @@ describe("document delete", () => {
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
 
-    const { deleteDocument } = await import("./delete");
-    await deleteDocument.run?.({ args: { document: "12345" } } as never);
+    const { default: deleteDocument } = await import("./delete");
+    await deleteDocument.parseAsync(["12345"], { from: "user" });
 
     expect(mockClient.deleteDocument).not.toHaveBeenCalled();
   });
@@ -61,8 +61,8 @@ describe("document delete", () => {
     mockClient.deleteDocument.mockResolvedValue({ id: "1", title: "My Doc" });
 
     await expectStdoutContaining(async () => {
-      const { deleteDocument } = await import("./delete");
-      await deleteDocument.run?.({ args: { document: "12345", yes: true, json: "" } } as never);
+      const { default: deleteDocument } = await import("./delete");
+      await deleteDocument.parseAsync(["12345", "--yes", "--json"], { from: "user" });
     }, "My Doc");
   });
 });

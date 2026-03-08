@@ -19,14 +19,14 @@ Displays each user's ID, user ID, name, and role within the project.`,
     { description: "List project members", command: "bee project users -p PROJECT_KEY" },
     { description: "Output as JSON", command: "bee project users -p PROJECT_KEY --json" },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
 
     const { client } = await getClient();
 
-    const members = await client.getProjectUsers(opts.project as string);
+    const members = await client.getProjectUsers(opts.project);
 
-    const jsonArg = opts.json === true ? "" : (opts.json as string | undefined);
+    const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(members, { ...opts, json: jsonArg }, (data) => {
       if (data.length === 0) {
         consola.info("No users found.");

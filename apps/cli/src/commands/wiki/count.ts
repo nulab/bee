@@ -19,13 +19,13 @@ The count includes all wiki pages regardless of tag or keyword.`,
     { description: "Count wiki pages", command: "bee wiki count -p PROJECT" },
     { description: "Output as JSON", command: "bee wiki count -p PROJECT --json" },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
 
-    const result = await client.getWikisCount(opts.project as string);
+    const result = await client.getWikisCount(opts.project);
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(result, { json }, (data) => {
       consola.log(String(data.count));
     });

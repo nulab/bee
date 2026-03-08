@@ -28,12 +28,12 @@ This action is irreversible. You will be prompted for confirmation unless
       command: "bee webhook delete 12345 -p PROJECT --yes",
     },
   ])
-  .action(async (webhook, _opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (webhook, opts, cmd) => {
+    await resolveOptions(cmd);
 
     const confirmed = await confirmOrExit(
       `Are you sure you want to delete webhook ${webhook}? This cannot be undone.`,
-      opts.yes as boolean | undefined,
+      opts.yes,
     );
 
     if (!confirmed) {
@@ -42,9 +42,9 @@ This action is irreversible. You will be prompted for confirmation unless
 
     const { client } = await getClient();
 
-    const webhookData = await client.deleteWebhook(opts.project as string, webhook);
+    const webhookData = await client.deleteWebhook(opts.project, webhook);
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(webhookData, { json }, (data) => {
       consola.success(`Deleted webhook ${data.name} (ID: ${data.id})`);
     });

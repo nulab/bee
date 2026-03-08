@@ -1,58 +1,43 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `List statuses in a Backlog project.
+const list = new BeeCommand("list")
+  .summary("List statuses")
+  .description(
+    `List statuses in a Backlog project.
 
 Statuses define the workflow states that issues can move through.
 Each status is displayed with its associated color.`,
-
-  examples: [
+  )
+  .argument("[project]", "Project ID or project key")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     { description: "List all statuses", command: "bee status list PROJECT" },
     { description: "Output as JSON", command: "bee status list PROJECT --json" },
-  ],
+  ])
+  .action(async (project, opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const statuses = await client.getProjectStatuses(project);
 
-const list = withUsage(
-  defineCommand({
-    meta: {
-      name: "list",
-      description: "List statuses",
-    },
-    args: {
-      ...outputArgs,
-      project: commonArgs.projectPositional,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    outputResult(statuses, opts, (data) => {
+      if (data.length === 0) {
+        consola.info("No statuses found.");
+        return;
+      }
 
-      const statuses = await client.getProjectStatuses(args.project);
+      const rows: Row[] = data.map((s) => [
+        { header: "ID", value: String(s.id) },
+        { header: "NAME", value: s.name },
+        { header: "COLOR", value: s.color },
+      ]);
 
-      outputResult(statuses, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No statuses found.");
-          return;
-        }
+      printTable(rows);
+    });
+  });
 
-        const rows: Row[] = data.map((s) => [
-          { header: "ID", value: String(s.id) },
-          { header: "NAME", value: s.name },
-          { header: "COLOR", value: s.color },
-        ]);
-
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, list };
+export default list;

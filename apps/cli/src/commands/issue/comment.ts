@@ -132,7 +132,7 @@ Use \`--delete-last\` to delete your most recent comment.`,
       consola.error("Comment body is required. Use --body or pipe input.");
       return;
     }
-    const notifiedUserId = (opts.notify as number[]) ?? [];
+    const notifiedUserId = opts.notify ?? [];
 
     const result = await client.postIssueComments(issue, {
       content,

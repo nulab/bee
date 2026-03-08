@@ -42,32 +42,30 @@ interactively, omitted required fields will be prompted.`,
         'bee pr create -p PROJECT -R repo --base main --head feature -t "Title" -b "Desc" --issue 123',
     },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
 
-    const base = await promptRequired("Base branch:", opts.base as string | undefined);
-    const head = await promptRequired("Head branch:", opts.head as string | undefined);
-    const summary = await promptRequired("Summary:", opts.title as string | undefined);
-    const description = await promptRequired("Body:", opts.body as string | undefined);
+    const base = await promptRequired("Base branch:", opts.base);
+    const head = await promptRequired("Head branch:", opts.head);
+    const summary = await promptRequired("Summary:", opts.title);
+    const description = await promptRequired("Body:", opts.body);
 
-    const assigneeId = opts.assignee
-      ? await resolveUserId(client, opts.assignee as string)
-      : undefined;
-    const notifiedUserId = (opts.notify as number[]) ?? [];
-    const attachmentId = (opts.attachment as number[]) ?? [];
+    const assigneeId = opts.assignee ? await resolveUserId(client, opts.assignee) : undefined;
+    const notifiedUserId = opts.notify ?? [];
+    const attachmentId = opts.attachment ?? [];
 
     let issueId: number | undefined;
     if (opts.issue) {
       if (Number.isNaN(Number(opts.issue))) {
-        const issue = await client.getIssue(opts.issue as string);
+        const issue = await client.getIssue(opts.issue);
         issueId = issue.id;
       } else {
         issueId = Number(opts.issue);
       }
     }
 
-    const pullRequest = await client.postPullRequest(opts.project as string, opts.repo as string, {
+    const pullRequest = await client.postPullRequest(opts.project, opts.repo, {
       summary,
       description,
       base,
@@ -78,7 +76,7 @@ interactively, omitted required fields will be prompted.`,
       attachmentId,
     });
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(pullRequest, { json }, (data) => {
       consola.success(`Created pull request #${data.number}: ${data.summary}`);
     });

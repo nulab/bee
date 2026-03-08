@@ -33,7 +33,7 @@ Shows version number, updater, and update date for each revision.`,
       minId: opts.minId ? Number(opts.minId) : undefined,
       maxId: opts.maxId ? Number(opts.maxId) : undefined,
       count: opts.count ? Number(opts.count) : undefined,
-      order: opts.order as "asc" | "desc" | undefined,
+      order: opts.order,
     });
 
     outputResult(histories, opts, (data) => {

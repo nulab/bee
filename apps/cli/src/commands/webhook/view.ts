@@ -20,13 +20,13 @@ Shows the webhook name, ID, hook URL, description, and activity type IDs.`,
     { description: "View a webhook", command: "bee webhook view 12345 -p PROJECT" },
     { description: "Output as JSON", command: "bee webhook view 12345 -p PROJECT --json" },
   ])
-  .action(async (webhook, _opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (webhook, opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
 
-    const webhookData = await client.getWebhook(opts.project as string, webhook);
+    const webhookData = await client.getWebhook(opts.project, webhook);
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(webhookData, { json }, (data) => {
       consola.log("");
       consola.log(`  ${data.name}`);

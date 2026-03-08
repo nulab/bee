@@ -1,8 +1,8 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
 const parseReadFilter = (value: string | undefined): boolean | undefined => {
   if (value === undefined || value === "all") {
@@ -11,16 +11,28 @@ const parseReadFilter = (value: string | undefined): boolean | undefined => {
   return value === "read";
 };
 
-const commandUsage: CommandUsage = {
-  long: `Display the count of notifications for the authenticated user.
+const count = new BeeCommand("count")
+  .summary("Count notifications")
+  .description(
+    `Display the count of notifications for the authenticated user.
 
 By default, returns the count of all notifications regardless of read status.
 Use \`--already-read\` and \`--resource-already-read\` to filter by read status.
 
 For details, see:
 https://developer.nulab.com/docs/backlog/api/2/count-notifications/`,
-
-  examples: [
+  )
+  .option(
+    "--already-read <value>",
+    "Filter by read status. If omitted, count all. {read|unread|all}",
+  )
+  .option(
+    "--resource-already-read <value>",
+    "Filter by resource read status. If omitted, count all. {read|unread|all}",
+  )
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "Count all notifications", command: "bee notification count" },
     {
       description: "Count only unread notifications",
@@ -31,57 +43,29 @@ https://developer.nulab.com/docs/backlog/api/2/count-notifications/`,
       command: "bee notification count --already-read read",
     },
     { description: "Output as JSON", command: "bee notification count --json" },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const alreadyRead = parseReadFilter(opts.alreadyRead);
+    const resourceAlreadyRead = parseReadFilter(opts.resourceAlreadyRead);
 
-const count = withUsage(
-  defineCommand({
-    meta: {
-      name: "count",
-      description: "Count notifications",
-    },
-    args: {
-      ...outputArgs,
-      "already-read": {
-        type: "string",
-        description: "Filter by read status. If omitted, count all.",
-        valueHint: "{read|unread|all}",
-      },
-      "resource-already-read": {
-        type: "string",
-        description: "Filter by resource read status. If omitted, count all.",
-        valueHint: "{read|unread|all}",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const params: Record<string, boolean> = {};
+    if (alreadyRead !== undefined) {
+      params.alreadyRead = alreadyRead;
+    }
+    if (resourceAlreadyRead !== undefined) {
+      params.resourceAlreadyRead = resourceAlreadyRead;
+    }
 
-      const alreadyRead = parseReadFilter(args["already-read"]);
-      const resourceAlreadyRead = parseReadFilter(args["resource-already-read"]);
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- backlog-js types require both fields but API accepts partial params
+    const result = await client.getNotificationsCount(
+      params as unknown as Parameters<typeof client.getNotificationsCount>[0],
+    );
 
-      const params: Record<string, boolean> = {};
-      if (alreadyRead !== undefined) {
-        params.alreadyRead = alreadyRead;
-      }
-      if (resourceAlreadyRead !== undefined) {
-        params.resourceAlreadyRead = resourceAlreadyRead;
-      }
+    outputResult(result, opts, (data) => {
+      consola.log(String(data.count));
+    });
+  });
 
-      // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- backlog-js types require both fields but API accepts partial params
-      const result = await client.getNotificationsCount(
-        params as unknown as Parameters<typeof client.getNotificationsCount>[0],
-      );
-
-      outputResult(result, args, (data) => {
-        consola.log(String(data.count));
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, count };
+export default count;

@@ -25,18 +25,18 @@ Use \`--web\` to open the project in your default browser instead.`,
     { description: "Open project in browser", command: "bee project view -p PROJECT_KEY --web" },
     { description: "Output as JSON", command: "bee project view -p PROJECT_KEY --json" },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
 
     const { client, host } = await getClient();
 
     if (opts.web || opts.browser === false) {
-      const url = projectUrl(host, opts.project as string);
+      const url = projectUrl(host, opts.project);
       await openOrPrintUrl(url, opts.browser === false, consola);
       return;
     }
 
-    const project = await client.getProject(opts.project as string);
+    const project = await client.getProject(opts.project);
 
     const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(project, { ...opts, json: jsonArg }, (data) => {

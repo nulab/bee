@@ -30,25 +30,21 @@ Use \`--web\` to open the pull request in your default browser instead.`,
     },
     { description: "Output as JSON", command: "bee pr view 42 -p PROJECT -R repo --json" },
   ])
-  .action(async (number, _opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (number, opts, cmd) => {
+    await resolveOptions(cmd);
     const { client, host } = await getClient();
 
     const prNumber = Number(number);
 
     if (opts.web || opts.browser === false) {
-      const url = pullRequestUrl(host, opts.project as string, opts.repo as string, prNumber);
+      const url = pullRequestUrl(host, opts.project, opts.repo, prNumber);
       await openOrPrintUrl(url, opts.browser === false, consola);
       return;
     }
 
-    const pullRequest = await client.getPullRequest(
-      opts.project as string,
-      opts.repo as string,
-      prNumber,
-    );
+    const pullRequest = await client.getPullRequest(opts.project, opts.repo, prNumber);
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(pullRequest, { json }, (data) => {
       consola.log("");
       consola.log(`  #${data.number}: ${data.summary}`);

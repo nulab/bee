@@ -29,12 +29,12 @@ Requires Administrator role.`,
       command: "bee project delete -p PROJECT_KEY --yes",
     },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
 
     const confirmed = await confirmOrExit(
       `Are you sure you want to delete project ${opts.project}? This cannot be undone.`,
-      opts.yes as boolean | undefined,
+      opts.yes,
     );
 
     if (!confirmed) {
@@ -43,9 +43,9 @@ Requires Administrator role.`,
 
     const { client } = await getClient();
 
-    const project = await client.deleteProject(opts.project as string);
+    const project = await client.deleteProject(opts.project);
 
-    const jsonArg = opts.json === true ? "" : (opts.json as string | undefined);
+    const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(project, { ...opts, json: jsonArg }, (data) => {
       consola.success(`Deleted project ${data.projectKey}: ${data.name}`);
     });

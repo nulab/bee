@@ -20,13 +20,13 @@ in a project.`,
     { description: "List all webhooks in a project", command: "bee webhook list -p PROJECT" },
     { description: "Output as JSON", command: "bee webhook list -p PROJECT --json" },
   ])
-  .action(async (_opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
 
-    const webhooks = await client.getWebhooks(opts.project as string);
+    const webhooks = await client.getWebhooks(opts.project);
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(webhooks, { json }, (data) => {
       if (data.length === 0) {
         consola.info("No webhooks found.");

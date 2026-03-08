@@ -1,9 +1,9 @@
 import { PRIORITY_NAMES, PriorityId, getClient, resolveProjectIds } from "@repo/backlog-utils";
 import { type Row, outputResult, printTable } from "@repo/cli-utils";
-import { type Option } from "backlog-js";
+import { type Option as BacklogOption } from "backlog-js";
 import consola from "consola";
-import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import { Option } from "commander";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
 const list = new BeeCommand("list")
@@ -53,22 +53,22 @@ Multiple project keys can be specified as a comma-separated list.`,
     const projectId = opts.project
       ? await resolveProjectIds(
           client,
-          (opts.project as string)
+          opts.project
             .split(",")
             .map((s: string) => s.trim())
             .filter(Boolean),
         )
       : [];
-    const assigneeId = ((opts.assignee as string[]) ?? []).map(Number);
+    const assigneeId = (opts.assignee ?? []).map(Number);
     const statusId = opts.status
-      ? (opts.status as string)
+      ? opts.status
           .split(",")
           .map((s: string) => s.trim())
           .filter(Boolean)
           .map(Number)
       : [];
     const priorityId = opts.priority
-      ? (opts.priority as string)
+      ? opts.priority
           .split(",")
           .map((s: string) => s.trim())
           .filter(Boolean)
@@ -88,17 +88,17 @@ Multiple project keys can be specified as a comma-separated list.`,
       assigneeId,
       statusId,
       priorityId,
-      keyword: opts.keyword as string | undefined,
-      sort: opts.sort as Option.Issue.GetIssuesParams["sort"],
-      order: opts.order as "asc" | "desc" | undefined,
+      keyword: opts.keyword,
+      sort: opts.sort,
+      order: opts.order,
       count: opts.count ? Number(opts.count) : undefined,
       offset: opts.offset ? Number(opts.offset) : undefined,
-      createdSince: opts.createdSince as string | undefined,
-      createdUntil: opts.createdUntil as string | undefined,
-      updatedSince: opts.updatedSince as string | undefined,
-      updatedUntil: opts.updatedUntil as string | undefined,
-      dueDateSince: opts.dueSince as string | undefined,
-      dueDateUntil: opts.dueUntil as string | undefined,
+      createdSince: opts.createdSince,
+      createdUntil: opts.createdUntil,
+      updatedSince: opts.updatedSince,
+      updatedUntil: opts.updatedUntil,
+      dueDateSince: opts.dueSince,
+      dueDateUntil: opts.dueUntil,
     });
 
     outputResult(issues, opts as { json?: string }, (data) => {

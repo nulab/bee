@@ -16,8 +16,8 @@ describe("milestone edit", () => {
   it("updates milestone name", async () => {
     mockClient.patchVersions.mockResolvedValue({ id: 1, name: "v2.0.0" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({ args: { milestone: "1", project: "TEST", name: "v2.0.0" } } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["1", "-p", "TEST", "-n", "v2.0.0"], { from: "user" });
 
     expect(mockClient.patchVersions).toHaveBeenCalledWith(
       "TEST",
@@ -30,8 +30,8 @@ describe("milestone edit", () => {
   it("archives a milestone", async () => {
     mockClient.patchVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({ args: { milestone: "1", project: "TEST", archived: true } } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["1", "-p", "TEST", "-n", "v1.0.0", "--archived"], { from: "user" });
 
     expect(mockClient.patchVersions).toHaveBeenCalledWith(
       "TEST",
@@ -43,15 +43,21 @@ describe("milestone edit", () => {
   it("updates date fields", async () => {
     mockClient.patchVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: {
-        milestone: "1",
-        project: "TEST",
-        "start-date": "2026-07-01",
-        "release-due-date": "2026-12-31",
-      },
-    } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(
+      [
+        "1",
+        "-p",
+        "TEST",
+        "-n",
+        "v1.0.0",
+        "--start-date",
+        "2026-07-01",
+        "--release-due-date",
+        "2026-12-31",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.patchVersions).toHaveBeenCalledWith(
       "TEST",
@@ -67,10 +73,8 @@ describe("milestone edit", () => {
     mockClient.patchVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
     await expectStdoutContaining(async () => {
-      const { edit } = await import("./edit");
-      await edit.run?.({
-        args: { milestone: "1", project: "TEST", name: "v1.0.0", json: "" },
-      } as never);
+      const { default: edit } = await import("./edit");
+      await edit.parseAsync(["1", "-p", "TEST", "-n", "v1.0.0", "--json"], { from: "user" });
     }, "v1.0.0");
   });
 });

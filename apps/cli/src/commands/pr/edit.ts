@@ -38,41 +38,33 @@ will remain unchanged.`,
       command: 'bee pr edit 42 -p PROJECT -R repo -t "New title" --comment "Updated title"',
     },
   ])
-  .action(async (number, _opts, cmd) => {
-    const opts = await resolveOptions(cmd);
+  .action(async (number, opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient();
 
     const prNumber = Number(number);
-    const notifiedUserId = (opts.notify as number[]) ?? [];
+    const notifiedUserId = opts.notify ?? [];
 
     let issueId: number | undefined;
     if (opts.issue) {
       if (Number.isNaN(Number(opts.issue))) {
-        const issue = await client.getIssue(opts.issue as string);
+        const issue = await client.getIssue(opts.issue);
         issueId = issue.id;
       } else {
         issueId = Number(opts.issue);
       }
     }
 
-    const pullRequest = await client.patchPullRequest(
-      opts.project as string,
-      opts.repo as string,
-      prNumber,
-      {
-        summary: opts.title as string | undefined,
-        description: opts.body as string | undefined,
-        issueId,
-        assigneeId: opts.assignee
-          ? await resolveUserId(client, opts.assignee as string)
-          : undefined,
-        // @ts-expect-error backlog-js types say string[] but Backlog API accepts a single string
-        comment: opts.comment ?? undefined,
-        notifiedUserId,
-      },
-    );
+    const pullRequest = await client.patchPullRequest(opts.project, opts.repo, prNumber, {
+      summary: opts.title,
+      description: opts.body,
+      issueId,
+      assigneeId: opts.assignee ? await resolveUserId(client, opts.assignee) : undefined,
+      comment: opts.comment ?? undefined,
+      notifiedUserId,
+    });
 
-    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    const json = opts.json === true ? "" : opts.json;
     outputResult(pullRequest, { json }, (data) => {
       consola.success(`Updated pull request #${data.number}: ${data.summary}`);
     });

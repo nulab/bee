@@ -26,7 +26,7 @@ Optionally add a comment with \`--comment\`.`,
   .action(async (issue, opts) => {
     const { client } = await getClient();
 
-    const notifiedUserId = (opts.notify as number[]) ?? [];
+    const notifiedUserId = opts.notify ?? [];
 
     const issueData = await client.patchIssue(issue, {
       statusId: IssueStatusId.Open,

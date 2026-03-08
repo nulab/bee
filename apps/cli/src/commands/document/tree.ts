@@ -1,24 +1,9 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
+import { outputResult } from "@repo/cli-utils";
 import { type Entity } from "backlog-js";
-import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-
-const commandUsage: CommandUsage = {
-  long: `Display the document tree structure of a Backlog project.
-
-Shows the hierarchical structure of documents with tree-style indentation.`,
-
-  examples: [
-    { description: "Show document tree", command: "bee document tree PROJECT" },
-    { description: "Output as JSON", command: "bee document tree PROJECT --json" },
-  ],
-
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
 const renderNode = (
   node: Entity.Document.DocumentTreeNode,
@@ -48,40 +33,36 @@ const renderTree = (children: Entity.Document.DocumentTreeNode[]): string[] => {
   return lines;
 };
 
-const tree = withUsage(
-  defineCommand({
-    meta: {
-      name: "tree",
-      description: "Display document tree",
-    },
-    args: {
-      ...outputArgs,
-      project: {
-        type: "positional",
-        description: "Project ID or project key",
-        required: true,
-        default: process.env.BACKLOG_PROJECT,
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+const tree = new BeeCommand("tree")
+  .summary("Display document tree")
+  .description(
+    `Display the document tree structure of a Backlog project.
 
-      const docTree = await client.getDocumentTree(args.project);
+Shows the hierarchical structure of documents with tree-style indentation.`,
+  )
+  .argument("[project]", "Project ID or project key", process.env.BACKLOG_PROJECT)
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
+    { description: "Show document tree", command: "bee document tree PROJECT" },
+    { description: "Output as JSON", command: "bee document tree PROJECT --json" },
+  ])
+  .action(async (project, opts) => {
+    const { client } = await getClient();
 
-      outputResult(docTree, args, (data) => {
-        if (!data.activeTree || data.activeTree.children.length === 0) {
-          consola.info("No documents found.");
-          return;
-        }
+    const docTree = await client.getDocumentTree(project);
 
-        const lines = renderTree(data.activeTree.children);
-        for (const line of lines) {
-          consola.log(line);
-        }
-      });
-    },
-  }),
-  commandUsage,
-);
+    outputResult(docTree, opts, (data) => {
+      if (!data.activeTree || data.activeTree.children.length === 0) {
+        consola.info("No documents found.");
+        return;
+      }
 
-export { commandUsage, tree };
+      const lines = renderTree(data.activeTree.children);
+      for (const line of lines) {
+        consola.log(line);
+      }
+    });
+  });
+
+export default tree;

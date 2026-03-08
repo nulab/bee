@@ -35,10 +35,10 @@ describe("resolveOptions", () => {
 
     // parse with no args — title is undefined
     cmd.parse([], { from: "user" });
-    const opts = await resolveOptions(cmd);
+    await resolveOptions(cmd);
 
     expect(promptRequired).toHaveBeenCalledWith("Issue title:", undefined);
-    expect(opts.title).toBe("prompted-value");
+    expect(cmd.opts().title).toBe("prompted-value");
   });
 
   it("passes existing value to promptRequired", async () => {
@@ -50,10 +50,10 @@ describe("resolveOptions", () => {
       .action(() => {});
 
     cmd.parse(["--title", "existing"], { from: "user" });
-    const opts = await resolveOptions(cmd);
+    await resolveOptions(cmd);
 
     expect(promptRequired).toHaveBeenCalledWith("Issue title:", "existing");
-    expect(opts.title).toBe("existing");
+    expect(cmd.opts().title).toBe("existing");
   });
 
   it("ignores non-RequiredOption options", async () => {

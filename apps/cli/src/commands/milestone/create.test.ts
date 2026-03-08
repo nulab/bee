@@ -13,18 +13,17 @@ vi.mock("@repo/backlog-utils", () => ({
 
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn(),
+  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("milestone create", () => {
   it("creates a milestone with provided name", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("v1.0.0");
     mockClient.postVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: { project: "TEST", name: "v1.0.0" } } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["-p", "TEST", "-n", "v1.0.0"], { from: "user" });
 
     expect(mockClient.postVersions).toHaveBeenCalledWith(
       "TEST",
@@ -34,28 +33,34 @@ describe("milestone create", () => {
   });
 
   it("prompts for name when not provided", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("Prompted Milestone");
+    vi.mocked(promptRequired)
+      .mockResolvedValueOnce("TEST")
+      .mockResolvedValueOnce("Prompted Milestone");
     mockClient.postVersions.mockResolvedValue({ id: 2, name: "Prompted Milestone" });
 
-    const { create } = await import("./create");
-    await create.run?.({ args: { project: "TEST" } } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(["-p", "TEST"], { from: "user" });
 
     expect(promptRequired).toHaveBeenCalledWith("Milestone name:", undefined);
   });
 
   it("passes date parameters", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("v1.0.0");
     mockClient.postVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "TEST",
-        name: "v1.0.0",
-        "start-date": "2026-04-01",
-        "release-due-date": "2026-06-30",
-      },
-    } as never);
+    const { default: create } = await import("./create");
+    await create.parseAsync(
+      [
+        "-p",
+        "TEST",
+        "-n",
+        "v1.0.0",
+        "--start-date",
+        "2026-04-01",
+        "--release-due-date",
+        "2026-06-30",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.postVersions).toHaveBeenCalledWith(
       "TEST",
@@ -67,12 +72,11 @@ describe("milestone create", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("v1.0.0");
     mockClient.postVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
     await expectStdoutContaining(async () => {
-      const { create } = await import("./create");
-      await create.run?.({ args: { project: "TEST", name: "v1.0.0", json: "" } } as never);
+      const { default: create } = await import("./create");
+      await create.parseAsync(["-p", "TEST", "-n", "v1.0.0", "--json"], { from: "user" });
     }, "v1.0.0");
   });
 });
