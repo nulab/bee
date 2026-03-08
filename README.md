@@ -1,6 +1,8 @@
 # Backlog CLI
 
 [![CI](https://img.shields.io/github/actions/workflow/status/nulab/bee/ci.yml?style=for-the-badge&logo=github&label=CI)](https://github.com/nulab/bee/actions/workflows/ci.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/nulab/bee/codeql.yml?style=for-the-badge&logo=github&label=CodeQL)](https://github.com/nulab/bee/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://img.shields.io/github/actions/workflow/status/nulab/bee/scorecard.yml?style=for-the-badge&logo=openssfscorecard&label=Scorecard)](https://github.com/nulab/bee/actions/workflows/scorecard.yml)
 [![npm version](https://img.shields.io/npm/v/@nulab/bee?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@nulab/bee)
 [![node](https://img.shields.io/node/v/@nulab/bee?style=for-the-badge&logo=nodedotjs)](https://nodejs.org/)
 [![last commit](https://img.shields.io/github/last-commit/nulab/bee?style=for-the-badge&logo=github)](https://github.com/nulab/bee/commits/main)
