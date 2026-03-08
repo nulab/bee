@@ -31,17 +31,18 @@ jobs:
       BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
       BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
     steps:
-      - name: PR 本文から課題キーを収集する
+      # PR 本文から課題キーを抽出する
+      # edited イベントでは変更前の本文からもキーを取得して差分を計算する
+      - name: Collect issue keys from PR body
         id: collect
         run: |
           KEYS=$(echo "$PR_BODY" | grep -oE '[A-Z_]+-[0-9]+' | sort -u | tr '\n' ' ')
-          echo "検出した課題キー: ${KEYS:-(なし)}"
+          echo "Detected issue keys: ${KEYS:-(none)}"
           echo "keys=$KEYS" >> "$GITHUB_OUTPUT"
 
-          # edited イベント用: 変更前の本文からもキーを取得
           if [ "${{ github.event.action }}" = "edited" ]; then
             PREV=$(echo "$PREV_BODY" | grep -oE '[A-Z_]+-[0-9]+' | sort -u | tr '\n' ' ')
-            echo "変更前の課題キー: ${PREV:-(なし)}"
+            echo "Previous issue keys: ${PREV:-(none)}"
             echo "prev=$PREV" >> "$GITHUB_OUTPUT"
           fi
         env:
@@ -49,49 +50,45 @@ jobs:
           PREV_BODY: ${{ github.event.changes.body.from }}
 
       # PR 作成 → 課題にリンク＋ステータスを「処理中」に
-      - name: 各課題のステータスを「処理中」に変更して PR リンクをコメントする
+      - name: Update status to "processing" and comment PR link
         if: github.event.action == 'opened' && steps.collect.outputs.keys != ''
         run: |
           for KEY in ${{ steps.collect.outputs.keys }}; do
-            echo "処理中に変更: $KEY"
-            npx @nulab/bee issue edit "$KEY" --status processing \
-              || echo "⚠ 失敗: $KEY のステータス変更に失敗しました"
-            echo "コメント追加: $KEY に PR リンクを送信します"
+            echo "Updating status: $KEY -> processing"
+            npx @nulab/bee issue edit "$KEY" --status processing || true
+            echo "Commenting on: $KEY"
             npx @nulab/bee issue comment "$KEY" \
-              --body "レビュー中: ${{ github.event.pull_request.html_url }}" \
-              || echo "⚠ 失敗: $KEY へのコメントに失敗しました"
+              --body "レビュー中: ${{ github.event.pull_request.html_url }}" || true
           done
 
       # PR 本文の編集 → 新しく追加された課題キーにだけコメント
-      - name: 新しく追加された課題に PR リンクをコメントする
+      - name: Comment PR link on newly added issues
         if: github.event.action == 'edited' && steps.collect.outputs.keys != ''
         run: |
           for KEY in ${{ steps.collect.outputs.keys }}; do
             if echo "${{ steps.collect.outputs.prev }}" | grep -qw "$KEY"; then
-              echo "スキップ: $KEY (変更前から存在)"
+              echo "Skipping: $KEY (already linked)"
               continue
             fi
-            echo "コメント追加: $KEY に PR リンクを送信します"
+            echo "Commenting on: $KEY"
             npx @nulab/bee issue comment "$KEY" \
-              --body "レビュー中: ${{ github.event.pull_request.html_url }}" \
-              || echo "⚠ 失敗: $KEY へのコメントに失敗しました"
+              --body "レビュー中: ${{ github.event.pull_request.html_url }}" || true
           done
 
       # PR マージ → 課題をクローズ
-      - name: 各課題をクローズする
+      - name: Close linked issues
         if: github.event.action == 'closed' && github.event.pull_request.merged == true && steps.collect.outputs.keys != ''
         run: |
           for KEY in ${{ steps.collect.outputs.keys }}; do
-            echo "クローズ: $KEY"
+            echo "Closing: $KEY"
             npx @nulab/bee issue close "$KEY" \
-              --comment "PR #${{ github.event.pull_request.number }} のマージにより自動クローズ" \
-              || echo "⚠ 失敗: $KEY のクローズに失敗しました"
+              --comment "PR #${{ github.event.pull_request.number }} のマージにより自動クローズ" || true
           done
 ```
 
 ## カスタマイズ
 
 - **ステータス変更が不要な場合** — `bee issue edit` の行を削除すれば、リンクのコメントだけになります。
-- **自動クローズが不要な場合** — 「各課題をクローズする」ステップを削除してください。
+- **自動クローズが不要な場合** — 「Close linked issues」ステップを削除してください。
 - **クローズではなく別のステータスにしたい場合** — `bee issue close` を `bee issue edit --status processed` に変更してください。
-- **`edited` イベントが不要な場合** — トリガーの `types` から `edited` を削除し、「新しく追加された課題に PR リンクをコメントする」ステップを削除してください。
+- **`edited` イベントが不要な場合** — トリガーの `types` から `edited` を削除し、「Comment PR link on newly added issues」ステップを削除してください。

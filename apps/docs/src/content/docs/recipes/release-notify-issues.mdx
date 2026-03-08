@@ -26,29 +26,30 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 前回タグからのコミットに含まれる課題キーを収集する
+      # 前回タグから現在のタグまでのコミットに含まれる課題キーを収集する
+      - name: Collect issue keys from commits since last tag
         id: collect
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           if [ -n "$PREV_TAG" ]; then
             RANGE="${PREV_TAG}..HEAD"
-            echo "対象範囲: ${PREV_TAG} から HEAD まで"
+            echo "Range: ${PREV_TAG}..HEAD"
           else
             RANGE="HEAD"
-            echo "対象範囲: 全コミット (前回タグなし)"
+            echo "Range: all commits (no previous tag)"
           fi
           KEYS=$(git log "$RANGE" --oneline | grep -oE '[A-Z_]+-[0-9]+' | sort -u | tr '\n' ' ')
-          echo "検出した課題キー: ${KEYS:-(なし)}"
+          echo "Detected issue keys: ${KEYS:-(none)}"
           echo "issue_keys=$KEYS" >> "$GITHUB_OUTPUT"
 
-      - name: 各課題にリリースバージョンをコメントする
+      # 各課題にリリースバージョンをコメントする
+      - name: Comment release info on each issue
         if: steps.collect.outputs.issue_keys != ''
         run: |
           for KEY in ${{ steps.collect.outputs.issue_keys }}; do
-            echo "コメント追加: $KEY にリリース ${{ github.event.release.tag_name }} を通知します"
+            echo "Commenting on: $KEY (release ${{ github.event.release.tag_name }})"
             npx @nulab/bee issue comment "$KEY" \
-              --body "リリース ${{ github.event.release.tag_name }} に含まれています: ${{ github.event.release.html_url }}" \
-              || echo "⚠ 失敗: $KEY へのコメントに失敗しました"
+              --body "リリース ${{ github.event.release.tag_name }} に含まれています: ${{ github.event.release.html_url }}" || true
           done
 ```
 
