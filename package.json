@@ -22,7 +22,7 @@
     "oxlint": "^1.51.0",
     "oxlint-tsgolint": "^0.16.0",
     "turbo": "^2.8.13",
-    "typescript": "6.0.0-dev.20260205",
+    "typescript": "6.0.0-dev.20260301",
     "vitest": "^4.0.18"
   },
   "packageManager": "pnpm@10.30.3",
