@@ -64,6 +64,8 @@ packages/tsconfigs   — Shared TypeScript base config
 
 Command reference pages are **auto-generated** from CLI source code — do NOT create `.md` files under `apps/docs/src/content/docs/commands/`. The dynamic route `apps/docs/src/pages/commands/[...slug].astro` uses `loadCommands()` (in `apps/docs/src/lib/commands.ts`) to import each command's `commandUsage` and `defineCommand` metadata at build time and render documentation pages automatically.
 
+**When adding or removing CLI commands**, also update the command table in `skills/using-bee/SKILL.md` to keep the Skill in sync with the CLI.
+
 **To add docs for a new command group**, only add sidebar entries to `apps/docs/astro.config.mjs`:
 
 ```js

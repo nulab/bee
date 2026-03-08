@@ -21,32 +21,32 @@ Set these environment variables to avoid repeating common flags:
 
 ## Commands
 
-| Command            | Subcommands                                                                                  |
-| ------------------ | -------------------------------------------------------------------------------------------- |
-| `bee issue`        | `list`, `view`, `create`, `edit`, `close`, `reopen`, `comment`, `delete`, `status`           |
-| `bee pr`           | `list`, `view`, `create`, `edit`, `comment`, `comments`, `status`                            |
-| `bee project`      | `list`, `view`, `create`, `edit`, `delete`, `users`, `activities`, `add-user`, `remove-user` |
-| `bee wiki`         | `list`, `view`, `create`, `edit`, `delete`, `count`, `tags`, `history`, `attachments`        |
-| `bee document`     | `list`, `view`, `create`, `delete`, `tree`, `attachments`                                    |
-| `bee notification` | `list`, `count`, `read`, `read-all`                                                          |
-| `bee repo`         | `list`, `view`, `clone`                                                                      |
-| `bee auth`         | `login`, `logout`, `status`, `token`, `refresh`, `switch`                                    |
-| `bee user`         | `list`, `view`, `me`, `activities`                                                           |
-| `bee team`         | `list`, `view`, `create`, `edit`, `delete`                                                   |
-| `bee category`     | `list`, `create`, `edit`, `delete`                                                           |
-| `bee milestone`    | `list`, `create`, `edit`, `delete`                                                           |
-| `bee issue-type`   | `list`, `create`, `edit`, `delete`                                                           |
-| `bee status`       | `list`, `create`, `edit`, `delete`                                                           |
-| `bee webhook`      | `list`, `view`, `create`, `edit`, `delete`                                                   |
-| `bee star`         | `list`, `add`, `count`                                                                       |
-| `bee watching`     | `list`, `add`, `view`, `delete`, `read`                                                      |
-| `bee space`        | `info`, `activities`, `disk-usage`, `notification`                                           |
-| `bee browse`       | Open Backlog pages in browser                                                                |
-| `bee api`          | Make raw API requests                                                                        |
-| `bee dashboard`    | Show dashboard                                                                               |
-| `bee completion`   | Shell completion                                                                             |
+| Command            | Subcommands                                                                                                |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `bee issue`        | `list`, `view`, `create`, `edit`, `close`, `reopen`, `comment`, `delete`, `status`, `count`, `attachments` |
+| `bee pr`           | `list`, `view`, `create`, `edit`, `comment`, `comments`, `status`, `count`                                 |
+| `bee project`      | `list`, `view`, `create`, `edit`, `delete`, `users`, `activities`, `add-user`, `remove-user`               |
+| `bee wiki`         | `list`, `view`, `create`, `edit`, `delete`, `count`, `tags`, `history`, `attachments`                      |
+| `bee document`     | `list`, `view`, `create`, `delete`, `tree`, `attachments`                                                  |
+| `bee notification` | `list`, `count`, `read`, `read-all`                                                                        |
+| `bee repo`         | `list`, `view`, `clone`                                                                                    |
+| `bee auth`         | `login`, `logout`, `status`, `token`, `refresh`, `switch`                                                  |
+| `bee user`         | `list`, `view`, `me`, `activities`                                                                         |
+| `bee team`         | `list`, `view`, `create`, `edit`, `delete`                                                                 |
+| `bee category`     | `list`, `create`, `edit`, `delete`                                                                         |
+| `bee milestone`    | `list`, `create`, `edit`, `delete`                                                                         |
+| `bee issue-type`   | `list`, `create`, `edit`, `delete`                                                                         |
+| `bee status`       | `list`, `create`, `edit`, `delete`                                                                         |
+| `bee webhook`      | `list`, `view`, `create`, `edit`, `delete`                                                                 |
+| `bee star`         | `list`, `add`, `remove`, `count`                                                                           |
+| `bee watching`     | `list`, `add`, `view`, `delete`, `read`                                                                    |
+| `bee space`        | `info`, `activities`, `disk-usage`, `notification`                                                         |
+| `bee browse`       | Open Backlog pages in browser                                                                              |
+| `bee api`          | Make raw API requests                                                                                      |
+| `bee dashboard`    | Show dashboard                                                                                             |
+| `bee completion`   | Shell completion                                                                                           |
 
-Run `bee <command> <subcommand> --help` for flags and usage details.
+This table may not reflect the latest version. Run `bee --help` and `bee <command> --help` to discover new commands and flags.
 
 For the full command reference (all flags, arguments, examples, and environment variables), fetch:
 https://nulab.github.io/bee/llms-full.txt
