@@ -79,6 +79,10 @@ export default defineConfig({
           label: "Integrations",
           items: [
             { label: "CI/CD での利用", slug: "integrations/ci-cd" },
+            {
+              label: "Backlog 課題ワークフロー",
+              slug: "integrations/backlog-issue-workflow",
+            },
             { label: "AI エージェントとの連携", slug: "integrations/ai-agent" },
           ],
         },

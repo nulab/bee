@@ -1,0 +1,356 @@
+---
+title: Backlog 課題ワークフロー
+description: GitHub Actions と bee を組み合わせて、Backlog の課題管理を自動化するワークフローパターン集
+---
+
+import { Steps, Tabs, TabItem, Card } from "@astrojs/starlight/components";
+
+GitHub では Issue と Actions が密に連携し、Issue の作成・更新・クローズを自動化できます。bee を使えば、Backlog の課題でも同様のワークフローを GitHub Actions 上で実現できます。
+
+このページでは、GitHub Issue ワークフローに相当する Backlog 課題ワークフローのパターンをまとめています。
+
+## 前提: GitHub Actions で bee を使う
+
+すべてのワークフローで共通のセットアップが必要です。詳細は [CI/CD での利用](../ci-cd/) を参照してください。
+
+```yaml
+env:
+  BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+  BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+```
+
+## パターン 1: ブランチ名から課題を自動検出する
+
+GitHub Flow では `feature/PROJECT-123-add-login` のようにブランチ名に課題キーを含めることが一般的です。これを利用して、PR 作成時に Backlog 課題と自動連携できます。
+
+```yaml
+name: Backlog Issue Link
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  link-issue:
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - name: Extract issue key from branch name
+        id: extract
+        run: |
+          ISSUE_KEY=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' | head -1)
+          echo "issue_key=$ISSUE_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Comment PR link on Backlog issue
+        if: steps.extract.outputs.issue_key != ''
+        run: |
+          npx @nulab/bee issue comment ${{ steps.extract.outputs.issue_key }} \
+            --body "GitHub PR が作成されました: ${{ github.event.pull_request.html_url }}"
+```
+
+## パターン 2: PR マージで課題のステータスを進める
+
+GitHub Issues では PR マージ時に `Closes #123` で自動クローズできます。Backlog でも同様に、PR マージをトリガーにして課題のステータスを変更できます。
+
+```yaml
+name: Backlog Issue Status Update
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  update-status:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - name: Extract issue key
+        id: extract
+        run: |
+          # PR タイトルまたはブランチ名から課題キーを抽出
+          ISSUE_KEY=$(echo "${{ github.event.pull_request.title }}" | grep -oE '^[A-Z_]+-[0-9]+')
+          if [ -z "$ISSUE_KEY" ]; then
+            ISSUE_KEY=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' | head -1)
+          fi
+          echo "issue_key=$ISSUE_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Close issue
+        if: steps.extract.outputs.issue_key != ''
+        run: |
+          npx @nulab/bee issue close ${{ steps.extract.outputs.issue_key }} \
+            --comment "GitHub PR #${{ github.event.pull_request.number }} のマージにより自動クローズしました"
+```
+
+## パターン 3: リリース時に関連課題をまとめて更新する
+
+GitHub のリリースノート自動生成に相当するパターンです。リリースタグの作成をトリガーに、関連する Backlog 課題にリリースバージョンをコメントします。
+
+```yaml
+name: Backlog Release Notification
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify-issues:
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect issue keys from commits since last tag
+        id: collect
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            RANGE="${PREV_TAG}..HEAD"
+          else
+            RANGE="HEAD"
+          fi
+          KEYS=$(git log "$RANGE" --oneline | grep -oE '[A-Z_]+-[0-9]+' | sort -u | tr '\n' ' ')
+          echo "issue_keys=$KEYS" >> "$GITHUB_OUTPUT"
+
+      - name: Comment release version on each issue
+        if: steps.collect.outputs.issue_keys != ''
+        run: |
+          for KEY in ${{ steps.collect.outputs.issue_keys }}; do
+            npx @nulab/bee issue comment "$KEY" \
+              --body "リリース ${{ github.event.release.tag_name }} に含まれています: ${{ github.event.release.html_url }}" \
+              || echo "Warning: Failed to comment on $KEY"
+          done
+```
+
+## パターン 4: Backlog Webhook → GitHub Actions の連携
+
+GitHub Issues ではイベント（作成・更新・ラベル追加など）が直接 Actions をトリガーします。Backlog でも Webhook を使って同様のイベント駆動ワークフローを実現できます。
+
+### 仕組み
+
+```
+Backlog Webhook → 中継サーバー → GitHub repository_dispatch → GitHub Actions
+```
+
+Backlog の Webhook は GitHub Actions を直接トリガーできないため、中継が必要です。以下の方法があります。
+
+<Tabs>
+<TabItem label="Cloudflare Workers">
+
+Cloudflare Workers を使った軽量な中継サーバーの例です。
+
+```js
+// Backlog Webhook → GitHub repository_dispatch に変換
+export default {
+  async fetch(request, env) {
+    if (request.method !== "POST") {
+      return new Response("Method not allowed", { status: 405 });
+    }
+
+    const payload = await request.json();
+
+    // Backlog の課題追加イベント (type: 1) をフィルタ
+    if (payload.type !== 1) {
+      return new Response("Ignored", { status: 200 });
+    }
+
+    const issue = payload.content;
+    await fetch(
+      `https://api.github.com/repos/${env.GITHUB_REPO}/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `token ${env.GITHUB_TOKEN}`,
+          Accept: "application/vnd.github+json",
+        },
+        body: JSON.stringify({
+          event_type: "backlog_issue_created",
+          client_payload: {
+            issue_key: `${payload.project.projectKey}-${issue.key_id}`,
+            summary: issue.summary,
+            priority: issue.priority?.name,
+            assignee: issue.assignee?.name,
+          },
+        }),
+      }
+    );
+
+    return new Response("OK", { status: 200 });
+  },
+};
+```
+
+</TabItem>
+<TabItem label="GitHub Actions (受信側)">
+
+`repository_dispatch` イベントで受信するワークフローです。
+
+```yaml
+name: Backlog Issue Event Handler
+on:
+  repository_dispatch:
+    types: [backlog_issue_created, backlog_issue_updated]
+
+jobs:
+  handle-event:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log event
+        run: |
+          echo "Event: ${{ github.event.action }}"
+          echo "Issue: ${{ github.event.client_payload.issue_key }}"
+          echo "Summary: ${{ github.event.client_payload.summary }}"
+
+      - name: Create GitHub Issue for tracking
+        if: github.event.action == 'backlog_issue_created'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "[${{ github.event.client_payload.issue_key }}] ${{ github.event.client_payload.summary }}" \
+            --body "Backlog 課題から自動作成されました。担当: ${{ github.event.client_payload.assignee }}"
+```
+
+</TabItem>
+</Tabs>
+
+:::tip
+Backlog の Webhook は `bee webhook create` コマンドで設定できます。
+
+```sh
+bee webhook create -p PROJECT -n "GitHub連携" \
+  --hook-url "https://your-worker.workers.dev/webhook" \
+  --activity-type-ids 1,2,3,4
+```
+
+主なアクティビティタイプ ID: `1` = 課題の追加、`2` = 課題の更新、`3` = 課題にコメント、`4` = 課題の削除
+:::
+
+## パターン 5: 定期実行で課題の棚卸しをする
+
+GitHub Actions の `schedule` トリガーは Issue の棚卸しに使えます（stale bot など）。Backlog 課題でも同様のパターンを実現できます。
+
+```yaml
+name: Backlog Issue Housekeeping
+on:
+  schedule:
+    # 毎週月曜 9:00 JST (= 日曜 24:00 UTC)
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+
+jobs:
+  housekeeping:
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - name: Remind overdue issues
+        run: |
+          # 期限切れの課題を取得して担当者にリマインドコメントを追加
+          OVERDUE=$(npx @nulab/bee issue list --project MY_PROJECT --json key,dueDate,status \
+            | jq -r '.[] | select(.dueDate != null and .dueDate < now | todate | .[:10] and .status.name != "完了") | .key')
+          for KEY in $OVERDUE; do
+            npx @nulab/bee issue comment "$KEY" \
+              --body "この課題は期限を過ぎています。ステータスを確認してください。"
+          done
+
+      - name: Weekly summary
+        run: |
+          echo "## 週次課題サマリー" > summary.md
+          echo "" >> summary.md
+          echo "### 未完了課題" >> summary.md
+          npx @nulab/bee issue list --project MY_PROJECT --status open >> summary.md
+          echo "" >> summary.md
+          echo "### 今週完了した課題" >> summary.md
+          npx @nulab/bee issue list --project MY_PROJECT --status closed >> summary.md
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+```
+
+## パターン 6: 複合ワークフロー — 開発ライフサイクル全体の自動化
+
+上記のパターンを組み合わせて、Backlog 課題を中心とした開発ライフサイクル全体を自動化する例です。
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│ Backlog で   │     │ ブランチ作成  │     │ PR 作成       │     │ PR マージ    │
+│ 課題を作成   │────▶│ PROJECT-123- │────▶│ 課題に PR     │────▶│ 課題を       │
+│              │     │ feature-name │     │ リンクを追加  │     │ 自動クローズ │
+└──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
+                                                                       │
+                                                                       ▼
+                                                               ┌──────────────┐
+                                                               │ リリース時   │
+                                                               │ 課題に通知   │
+                                                               └──────────────┘
+```
+
+このフローを 1 つのリポジトリで実現するワークフローの全体像です。
+
+```yaml
+name: Backlog Issue Lifecycle
+on:
+  pull_request:
+    types: [opened, closed]
+    branches: [main]
+
+jobs:
+  # PR 作成時: 課題にリンクを追加
+  on-pr-opened:
+    if: github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - name: Extract issue key
+        id: extract
+        run: |
+          ISSUE_KEY=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' | head -1)
+          echo "issue_key=$ISSUE_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Update issue status to processing
+        if: steps.extract.outputs.issue_key != ''
+        run: |
+          npx @nulab/bee issue edit ${{ steps.extract.outputs.issue_key }} \
+            --status processing
+          npx @nulab/bee issue comment ${{ steps.extract.outputs.issue_key }} \
+            --body "レビュー中: ${{ github.event.pull_request.html_url }}"
+
+  # PR マージ時: 課題をクローズ
+  on-pr-merged:
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - name: Extract issue key
+        id: extract
+        run: |
+          ISSUE_KEY=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' | head -1)
+          echo "issue_key=$ISSUE_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Close issue
+        if: steps.extract.outputs.issue_key != ''
+        run: |
+          npx @nulab/bee issue close ${{ steps.extract.outputs.issue_key }} \
+            --comment "マージ完了: PR #${{ github.event.pull_request.number }}"
+```
+
+## GitHub Issue ワークフローとの対応表
+
+| GitHub Issue のパターン | Backlog での実現方法 |
+| --- | --- |
+| `Closes #123` で自動クローズ | PR マージ時に `bee issue close` ([パターン 2](#パターン-2-pr-マージで課題のステータスを進める)) |
+| Issue イベントで Actions トリガー | Backlog Webhook + `repository_dispatch` ([パターン 4](#パターン-4-backlog-webhook--github-actions-の連携)) |
+| Stale bot で古い Issue を管理 | `schedule` トリガー + `bee issue list` ([パターン 5](#パターン-5-定期実行で課題の棚卸しをする)) |
+| Issue テンプレートでの自動ラベル付け | Backlog の課題テンプレート機能を利用 |
+| PR と Issue のリンク | ブランチ名規約 + `bee issue comment` ([パターン 1](#パターン-1-ブランチ名から課題を自動検出する)) |
+| リリースノートの自動生成 | リリースイベント + コミットから課題キー抽出 ([パターン 3](#パターン-3-リリース時に関連課題をまとめて更新する)) |
