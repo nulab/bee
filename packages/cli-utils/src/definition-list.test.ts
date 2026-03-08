@@ -1,27 +1,19 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import consola from "consola";
 import { printDefinitionList } from "./definition-list";
 
+vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
+
 describe("printDefinitionList", () => {
-  const logSpy = vi.spyOn(consola, "log").mockImplementation(() => {});
-
-  beforeEach(() => {
-    logSpy.mockClear();
-  });
-
-  afterEach(() => {
-    logSpy.mockClear();
-  });
-
   it("prints labels padded to the longest label width", () => {
     printDefinitionList([
       ["Status", "Active"],
       ["Text Formatting", "markdown"],
     ]);
 
-    expect(logSpy).toHaveBeenCalledTimes(2);
-    expect(logSpy).toHaveBeenCalledWith("    Status           Active");
-    expect(logSpy).toHaveBeenCalledWith("    Text Formatting  markdown");
+    expect(consola.log).toHaveBeenCalledTimes(2);
+    expect(consola.log).toHaveBeenCalledWith("    Status           Active");
+    expect(consola.log).toHaveBeenCalledWith("    Text Formatting  markdown");
   });
 
   it("skips items with null or undefined values", () => {
@@ -32,9 +24,9 @@ describe("printDefinitionList", () => {
       ["Type", "Bug"],
     ]);
 
-    expect(logSpy).toHaveBeenCalledTimes(2);
-    expect(logSpy).toHaveBeenCalledWith("    Status  Active");
-    expect(logSpy).toHaveBeenCalledWith("    Type    Bug");
+    expect(consola.log).toHaveBeenCalledTimes(2);
+    expect(consola.log).toHaveBeenCalledWith("    Status  Active");
+    expect(consola.log).toHaveBeenCalledWith("    Type    Bug");
   });
 
   it("skips items with empty string values", () => {
@@ -43,8 +35,8 @@ describe("printDefinitionList", () => {
       ["Note", ""],
     ]);
 
-    expect(logSpy).toHaveBeenCalledTimes(1);
-    expect(logSpy).toHaveBeenCalledWith("    Status  Active");
+    expect(consola.log).toHaveBeenCalledTimes(1);
+    expect(consola.log).toHaveBeenCalledWith("    Status  Active");
   });
 
   it("does nothing when all items are filtered out", () => {
@@ -53,18 +45,18 @@ describe("printDefinitionList", () => {
       ["B", undefined],
     ]);
 
-    expect(logSpy).not.toHaveBeenCalled();
+    expect(consola.log).not.toHaveBeenCalled();
   });
 
   it("does nothing for empty array", () => {
     printDefinitionList([]);
 
-    expect(logSpy).not.toHaveBeenCalled();
+    expect(consola.log).not.toHaveBeenCalled();
   });
 
   it("respects custom indent", () => {
     printDefinitionList([["Name", "Test"]], 2);
 
-    expect(logSpy).toHaveBeenCalledWith("  Name  Test");
+    expect(consola.log).toHaveBeenCalledWith("  Name  Test");
   });
 });

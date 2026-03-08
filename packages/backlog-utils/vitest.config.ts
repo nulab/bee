@@ -3,5 +3,6 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     name: "backlog-utils",
+    setupFiles: ["@repo/test-utils/setup"],
   },
 });
