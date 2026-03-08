@@ -6,35 +6,70 @@
   :global(.hero img) {
     transform: perspective(500px) rotateX(10deg) rotateY(-14deg) scale3d(1.02, 1.02, 1);
     filter: drop-shadow(4.2px 3px 8.4px rgba(0, 0, 0, 0.15));
-  }
-  @media (pointer: fine) {
-    :global(.hero img) {
-      transition: transform 0.3s ease-out, filter 0.3s ease-out;
-      will-change: transform, filter;
-    }
+    transition: transform 0.3s ease-out, filter 0.3s ease-out;
+    will-change: transform, filter;
   }
 </style>
 
 <script>
-  const isDev = import.meta.env.DEV;
-  const isTouch = window.matchMedia("(pointer: coarse)").matches;
+  const img = document.querySelector<HTMLImageElement>(".hero img");
+  if (img) {
+    // Left-bottom is nearest: positive rotateX (top tilts back), negative rotateY (right tilts back)
+    const BASE_RX = 10;
+    const BASE_RY = -14;
+    const MAX_TILT = 20;
 
-  if (isDev || !isTouch) {
-    const img = document.querySelector<HTMLImageElement>(".hero img");
-    if (img) {
-      // Left-bottom is nearest: positive rotateX (top tilts back), negative rotateY (right tilts back)
-      const BASE_RX = 10;
-      const BASE_RY = -14;
-      const MAX_TILT = 20;
+    const applyTransform = (rx: number, ry: number) => {
+      const shadowX = ry * -0.3;
+      const shadowY = rx * 0.3;
+      const shadowBlur = 6 + (Math.abs(rx) + Math.abs(ry)) * 0.1;
+      img.style.transform = `perspective(500px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02, 1.02, 1)`;
+      img.style.filter = `drop-shadow(${shadowX}px ${shadowY}px ${shadowBlur}px rgba(0, 0, 0, 0.15))`;
+    };
 
-      const applyTransform = (rx: number, ry: number) => {
-        const shadowX = ry * -0.3;
-        const shadowY = rx * 0.3;
-        const shadowBlur = 6 + (Math.abs(rx) + Math.abs(ry)) * 0.1;
-        img.style.transform = `perspective(500px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02, 1.02, 1)`;
-        img.style.filter = `drop-shadow(${shadowX}px ${shadowY}px ${shadowBlur}px rgba(0, 0, 0, 0.15))`;
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+
+    if (isTouch) {
+      // Mobile: use device orientation (gyroscope) to drive the tilt
+      const setupOrientation = () => {
+        window.addEventListener("deviceorientation", (e) => {
+          // beta: front-back tilt (-180..180), gamma: left-right tilt (-90..90)
+          const beta = e.beta ?? 0;
+          const gamma = e.gamma ?? 0;
+
+          // Normalize: assume phone held at ~45° (beta≈45), center around that
+          // Map beta deviation and gamma to -1..1 range
+          const ny = Math.max(-1, Math.min(1, (beta - 45) / 45));
+          const nx = Math.max(-1, Math.min(1, gamma / 45));
+
+          const ry = BASE_RY + nx * MAX_TILT;
+          const rx = BASE_RX - ny * MAX_TILT;
+
+          applyTransform(rx, ry);
+        });
       };
 
+      // iOS 13+ requires user permission via a gesture
+      const needsPermission =
+        typeof DeviceOrientationEvent !== "undefined" &&
+        "requestPermission" in DeviceOrientationEvent;
+
+      if (needsPermission) {
+        // Request permission on first tap anywhere on the page
+        const requestOnTap = () => {
+          (DeviceOrientationEvent as unknown as { requestPermission(): Promise<string> })
+            .requestPermission()
+            .then((state) => {
+              if (state === "granted") setupOrientation();
+            });
+          window.removeEventListener("touchend", requestOnTap);
+        };
+        window.addEventListener("touchend", requestOnTap);
+      } else {
+        setupOrientation();
+      }
+    } else {
+      // Desktop: use mouse position to drive the tilt
       document.addEventListener("mousemove", (e) => {
         const rect = img.getBoundingClientRect();
         const imgCx = rect.left + rect.width / 2;
