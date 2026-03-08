@@ -33,8 +33,8 @@ describe("pr list", () => {
   it("displays pull request list in tabular format", async () => {
     mockClient.getPullRequests.mockResolvedValue(samplePullRequests);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "PROJ", repo: "repo" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--project", "PROJ", "--repo", "repo"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getPullRequests).toHaveBeenCalledWith("PROJ", "repo", expect.any(Object));
@@ -46,8 +46,8 @@ describe("pr list", () => {
   it("shows message when no pull requests found", async () => {
     mockClient.getPullRequests.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "PROJ", repo: "repo" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--project", "PROJ", "--repo", "repo"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No pull requests found.");
   });
@@ -55,8 +55,8 @@ describe("pr list", () => {
   it("shows Unassigned for pull requests without assignee", async () => {
     mockClient.getPullRequests.mockResolvedValue([samplePullRequests[1]]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "PROJ", repo: "repo" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--project", "PROJ", "--repo", "repo"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unassigned"));
   });
@@ -64,8 +64,10 @@ describe("pr list", () => {
   it("passes status filter parameter", async () => {
     mockClient.getPullRequests.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "PROJ", repo: "repo", status: "open" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--project", "PROJ", "--repo", "repo", "--status", "open"], {
+      from: "user",
+    });
 
     expect(mockClient.getPullRequests).toHaveBeenCalledWith(
       "PROJ",
@@ -75,17 +77,21 @@ describe("pr list", () => {
   });
 
   it("throws error for unknown status name", async () => {
-    const { list } = await import("./list");
+    const { default: list } = await import("./list");
     await expect(
-      list.run?.({ args: { project: "PROJ", repo: "repo", status: "invalid" } } as never),
+      list.parseAsync(["--project", "PROJ", "--repo", "repo", "--status", "invalid"], {
+        from: "user",
+      }),
     ).rejects.toThrow('Unknown status "invalid"');
   });
 
   it("passes assignee filter parameter", async () => {
     mockClient.getPullRequests.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { project: "PROJ", repo: "repo", assignee: "42" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--project", "PROJ", "--repo", "repo", "--assignee", "42"], {
+      from: "user",
+    });
 
     expect(mockClient.getPullRequests).toHaveBeenCalledWith(
       "PROJ",
@@ -98,8 +104,8 @@ describe("pr list", () => {
     mockClient.getPullRequests.mockResolvedValue(samplePullRequests);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { project: "PROJ", repo: "repo", json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["--project", "PROJ", "--repo", "repo", "--json"], { from: "user" });
     }, "Add feature A");
   });
 });

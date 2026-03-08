@@ -39,8 +39,8 @@ describe("pr view", () => {
   it("displays pull request details", async () => {
     mockClient.getPullRequest.mockResolvedValue(samplePullRequest);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { number: "42", project: "PROJ", repo: "repo" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["42", "--project", "PROJ", "--repo", "repo"], { from: "user" });
 
     expect(mockClient.getPullRequest).toHaveBeenCalledWith("PROJ", "repo", 42);
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("#42"));
@@ -53,8 +53,8 @@ describe("pr view", () => {
   it("shows Unassigned for pull requests without assignee", async () => {
     mockClient.getPullRequest.mockResolvedValue({ ...samplePullRequest, assignee: null });
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { number: "42", project: "PROJ", repo: "repo" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["42", "--project", "PROJ", "--repo", "repo"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unassigned"));
   });
@@ -62,16 +62,18 @@ describe("pr view", () => {
   it("displays description when present", async () => {
     mockClient.getPullRequest.mockResolvedValue(samplePullRequest);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { number: "42", project: "PROJ", repo: "repo" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["42", "--project", "PROJ", "--repo", "repo"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Description"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Detailed description"));
   });
 
   it("opens browser with --web flag", async () => {
-    const { view } = await import("./view");
-    await view.run?.({ args: { number: "42", project: "PROJ", repo: "repo", web: true } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["42", "--project", "PROJ", "--repo", "repo", "--web"], {
+      from: "user",
+    });
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/git/PROJ/repo/pullRequests/42",
@@ -85,10 +87,10 @@ describe("pr view", () => {
     mockClient.getPullRequest.mockResolvedValue(samplePullRequest);
 
     await expectStdoutContaining(async () => {
-      const { view } = await import("./view");
-      await view.run?.({
-        args: { number: "42", project: "PROJ", repo: "repo", json: "" },
-      } as never);
+      const { default: view } = await import("./view");
+      await view.parseAsync(["42", "--project", "PROJ", "--repo", "repo", "--json"], {
+        from: "user",
+      });
     }, "Add feature A");
   });
 });

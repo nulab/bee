@@ -19,10 +19,10 @@ describe("pr edit", () => {
   it("updates pull request summary", async () => {
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "New title" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: { number: "42", project: "PROJ", repo: "repo", title: "New title" },
-    } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["42", "--project", "PROJ", "--repo", "repo", "--title", "New title"], {
+      from: "user",
+    });
 
     expect(mockClient.patchPullRequest).toHaveBeenCalledWith("PROJ", "repo", 42, {
       summary: "New title",
@@ -38,16 +38,11 @@ describe("pr edit", () => {
   it("updates pull request with a comment", async () => {
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: {
-        number: "42",
-        project: "PROJ",
-        repo: "repo",
-        title: "Title",
-        comment: "Updated",
-      },
-    } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(
+      ["42", "--project", "PROJ", "--repo", "repo", "--title", "Title", "--comment", "Updated"],
+      { from: "user" },
+    );
 
     expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
       "PROJ",
@@ -60,10 +55,11 @@ describe("pr edit", () => {
   it("updates pull request with notified users", async () => {
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: { number: "42", project: "PROJ", repo: "repo", notify: "111,222" },
-    } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(
+      ["42", "--project", "PROJ", "--repo", "repo", "--notify", "111", "--notify", "222"],
+      { from: "user" },
+    );
 
     expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
       "PROJ",
@@ -77,10 +73,10 @@ describe("pr edit", () => {
     mockClient.getIssue.mockResolvedValue({ id: 789 });
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: { number: "42", project: "PROJ", repo: "repo", issue: "PROJ-123" },
-    } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["42", "--project", "PROJ", "--repo", "repo", "--issue", "PROJ-123"], {
+      from: "user",
+    });
 
     expect(mockClient.getIssue).toHaveBeenCalledWith("PROJ-123");
     expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
@@ -95,10 +91,10 @@ describe("pr edit", () => {
     mockClient.getMyself.mockResolvedValue({ id: 99 });
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: { number: "42", project: "PROJ", repo: "repo", assignee: "@me" },
-    } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["42", "--project", "PROJ", "--repo", "repo", "--assignee", "@me"], {
+      from: "user",
+    });
 
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
@@ -113,10 +109,11 @@ describe("pr edit", () => {
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
     await expectStdoutContaining(async () => {
-      const { edit } = await import("./edit");
-      await edit.run?.({
-        args: { number: "42", project: "PROJ", repo: "repo", title: "Title", json: "" },
-      } as never);
+      const { default: edit } = await import("./edit");
+      await edit.parseAsync(
+        ["42", "--project", "PROJ", "--repo", "repo", "--title", "Title", "--json"],
+        { from: "user" },
+      );
     }, "Title");
   });
 });
