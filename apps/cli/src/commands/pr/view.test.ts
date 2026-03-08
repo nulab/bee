@@ -1,6 +1,7 @@
 import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getPullRequest: vi.fn(),
@@ -83,12 +84,11 @@ describe("pr view", () => {
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getPullRequest.mockResolvedValue(samplePullRequest);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { view } = await import("./view");
-    await view.run?.({ args: { number: "42", project: "PROJ", repo: "repo", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Add feature A"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { view } = await import("./view");
+      await view.run?.({
+        args: { number: "42", project: "PROJ", repo: "repo", json: "" },
+      } as never);
+    }, "Add feature A");
   });
 });

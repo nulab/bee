@@ -1,6 +1,7 @@
 import { confirmOrExit, printTable, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   postIssueComments: vi.fn(),
@@ -66,13 +67,10 @@ describe("issue comment", () => {
   it("outputs JSON when --json flag is set", async () => {
     mockClient.postIssueComments.mockResolvedValue({ id: 1, content: "Hello" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { comment } = await import("./comment");
-    await comment.run?.({ args: { issue: "TEST-1", body: "Hello", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Hello"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { comment } = await import("./comment");
+      await comment.run?.({ args: { issue: "TEST-1", body: "Hello", json: "" } } as never);
+    }, "Hello");
   });
 
   it("lists comments with --list flag", async () => {

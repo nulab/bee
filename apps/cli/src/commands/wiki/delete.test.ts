@@ -1,6 +1,7 @@
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   deleteWiki: vi.fn(),
@@ -66,12 +67,9 @@ describe("wiki delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteWiki.mockResolvedValue({ id: 123, name: "Old Page" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { deleteWiki } = await import("./delete");
-    await deleteWiki.run?.({ args: { wiki: "123", yes: true, json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Old Page"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { deleteWiki } = await import("./delete");
+      await deleteWiki.run?.({ args: { wiki: "123", yes: true, json: "" } } as never);
+    }, "Old Page");
   });
 });

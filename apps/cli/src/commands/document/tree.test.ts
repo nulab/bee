@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getDocumentTree: vi.fn(),
@@ -85,13 +86,10 @@ describe("document tree", () => {
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { tree } = await import("./tree");
-    await tree.run?.({ args: { project: "PROJECT", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("doc-1"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { tree } = await import("./tree");
+      await tree.run?.({ args: { project: "PROJECT", json: "" } } as never);
+    }, "doc-1");
   });
 
   it("renders tree connectors correctly", async () => {

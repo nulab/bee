@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getGitRepository: vi.fn(),

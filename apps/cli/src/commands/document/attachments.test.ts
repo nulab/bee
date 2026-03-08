@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getDocument: vi.fn(),
@@ -99,12 +100,9 @@ describe("document attachments", () => {
       attachments: sampleAttachments,
     });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { attachments } = await import("./attachments");
-    await attachments.run?.({ args: { document: "doc-1", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("report.pdf"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { attachments } = await import("./attachments");
+      await attachments.run?.({ args: { document: "doc-1", json: "" } } as never);
+    }, "report.pdf");
   });
 });

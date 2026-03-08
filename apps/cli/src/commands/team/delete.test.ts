@@ -1,6 +1,7 @@
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   deleteTeam: vi.fn(),
@@ -56,12 +57,9 @@ describe("team delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteTeam.mockResolvedValue({ id: 1, name: "Test Team", members: [] });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { deleteTeam } = await import("./delete");
-    await deleteTeam.run?.({ args: { team: "1", yes: true, json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Test Team"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { deleteTeam } = await import("./delete");
+      await deleteTeam.run?.({ args: { team: "1", yes: true, json: "" } } as never);
+    }, "Test Team");
   });
 });

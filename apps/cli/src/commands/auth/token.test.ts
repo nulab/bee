@@ -1,5 +1,6 @@
 import { resolveSpace } from "@repo/config";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 vi.mock("@repo/config", () => ({
   findSpace: vi.fn(),

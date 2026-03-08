@@ -1,6 +1,7 @@
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   deletehWatchingListItem: vi.fn(),
@@ -56,14 +57,11 @@ describe("watching delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deletehWatchingListItem.mockResolvedValue({ id: 1 });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { deleteWatching } = await import("./delete");
-    await deleteWatching.run?.({
-      args: { watching: "1", yes: true, json: "" },
-    } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("1"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { deleteWatching } = await import("./delete");
+      await deleteWatching.run?.({
+        args: { watching: "1", yes: true, json: "" },
+      } as never);
+    }, "1");
   });
 });

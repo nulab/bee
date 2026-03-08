@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getPullRequestComments: vi.fn(),
@@ -66,14 +67,11 @@ describe("pr comments", () => {
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getPullRequestComments.mockResolvedValue(sampleComments);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { comments } = await import("./comments");
-    await comments.run?.({
-      args: { number: "42", project: "PROJ", repo: "repo", json: "" },
-    } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Looks good!"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { comments } = await import("./comments");
+      await comments.run?.({
+        args: { number: "42", project: "PROJ", repo: "repo", json: "" },
+      } as never);
+    }, "Looks good!");
   });
 });

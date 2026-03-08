@@ -1,6 +1,7 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   postCategories: vi.fn(),
@@ -44,12 +45,9 @@ describe("category create", () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("Bug");
     mockClient.postCategories.mockResolvedValue({ id: 1, name: "Bug" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { create } = await import("./create");
-    await create.run?.({ args: { project: "TEST", name: "Bug", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Bug"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { create } = await import("./create");
+      await create.run?.({ args: { project: "TEST", name: "Bug", json: "" } } as never);
+    }, "Bug");
   });
 });

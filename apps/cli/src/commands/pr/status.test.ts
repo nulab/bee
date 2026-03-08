@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getMyself: vi.fn(),
@@ -52,12 +53,9 @@ describe("pr status", () => {
     mockClient.getMyself.mockResolvedValue({ id: 1, name: "Alice" });
     mockClient.getPullRequests.mockResolvedValue(samplePullRequests);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { status } = await import("./status");
-    await status.run?.({ args: { project: "PROJ", repo: "repo", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Alice"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { status } = await import("./status");
+      await status.run?.({ args: { project: "PROJ", repo: "repo", json: "" } } as never);
+    }, "Alice");
   });
 });
