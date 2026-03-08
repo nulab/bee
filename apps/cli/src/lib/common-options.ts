@@ -16,16 +16,14 @@ const maxId = () => new Option("--max-id <n>", "Maximum ID for cursor-based pagi
 const keyword = () => new Option("-k, --keyword <text>", "Keyword search");
 const assignee = () => new Option("-a, --assignee <id>", "Assignee user ID. Use @me for yourself.");
 const assigneeList = () =>
-  new Option(
-    "-a, --assignee <id>",
-    "Assignee user ID (repeatable). Use @me for yourself.",
-    collect,
-    [],
-  );
+  new Option("-a, --assignee <id>", "Assignee user ID (repeatable). Use @me for yourself.")
+    .argParser(collect)
+    .default([]);
 const issue = () => new Option("--issue <key>", "Issue ID or issue key");
-const notify = () => new Option("--notify <id>", "User IDs to notify (repeatable)", collectNum, []);
+const notify = () =>
+  new Option("--notify <id>", "User IDs to notify (repeatable)").argParser(collectNum).default([]);
 const attachment = () =>
-  new Option("--attachment <id>", "Attachment IDs (repeatable)", collectNum, []);
+  new Option("--attachment <id>", "Attachment IDs (repeatable)").argParser(collectNum).default([]);
 const comment = () => new Option("-c, --comment <text>", "Comment to add with the update");
 const web = (resource: string) => new Option("-w, --web", `Open the ${resource} in the browser`);
 const noBrowser = () =>
@@ -34,7 +32,7 @@ const json = () =>
   new Option(
     "--json [fields]",
     "Output as JSON (optionally filter by field names, comma-separated)",
-  );
+  ).preset("");
 
 export {
   collect,

@@ -7,14 +7,15 @@ import {
   openOrPrintUrl,
 } from "@repo/backlog-utils";
 import { UserError } from "@repo/cli-utils";
-import { defineCommand } from "citty";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../lib/command-usage";
-import * as commonArgs from "../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../lib/bee-command";
+import * as opt from "../lib/common-options";
 import { resolveUrl } from "./browse-url";
 
-const commandUsage: CommandUsage = {
-  long: `Open a Backlog page in the browser.
+const browse = new BeeCommand("browse")
+  .summary("Open a Backlog page in the browser")
+  .description(
+    `Open a Backlog page in the browser.
 
 With no arguments, the behavior depends on context. Inside a Backlog Git
 repository it opens the repository page; otherwise it opens the dashboard.
@@ -27,8 +28,23 @@ to a specific project page.
 A file path opens the file in the Backlog Git viewer (e.g. \`src/main.ts\`).
 Append \`:<line>\` to jump to a specific line (e.g. \`src/main.ts:42\`).
 Paths ending with \`/\` open the directory tree view.`,
-
-  examples: [
+  )
+  .argument("[target]", "Issue key, issue number, file path, or project key")
+  .addOption(opt.project().makeOptionMandatory(false).default(undefined))
+  .option("-b, --branch <name>", "View file at a specific branch")
+  .option("-c, --commit", "View file at the latest commit")
+  .addOption(opt.noBrowser())
+  .option("--issues", "Open the issues page")
+  .option("--board", "Open the board page")
+  .option("--gantt", "Open the Gantt chart page")
+  .option("--wiki", "Open the wiki page")
+  .option("--documents", "Open the documents page")
+  .option("--files", "Open the shared files page")
+  .option("--git", "Open the git repositories page")
+  .option("--svn", "Open the Subversion page")
+  .option("--settings", "Open the project settings page")
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     { description: "Open repository page (in a Backlog repo)", command: "bee browse" },
     { description: "Open dashboard (outside a Backlog repo)", command: "bee browse" },
     { description: "Open an issue", command: "bee browse PROJECT-123" },
@@ -42,100 +58,31 @@ Paths ending with \`/\` open the directory tree view.`,
     { description: "Open project issues page", command: "bee browse -p PROJECT --issues" },
     { description: "Open project board", command: "bee browse -p PROJECT --board" },
     { description: "Open Gantt chart", command: "bee browse -p PROJECT --gantt" },
-  ],
+  ])
+  .action(async (target: string | undefined, opts) => {
+    const { host } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const [context, currentBranch, latestCommit, repoRelativePath] = await Promise.all([
+      detectGitContext(),
+      getCurrentBranch(),
+      getLatestCommit(),
+      getRepoRelativePath(),
+    ]);
 
-const browse = withUsage(
-  defineCommand({
-    meta: {
-      name: "browse",
-      description: "Open a Backlog page in the browser",
-    },
-    args: {
-      target: {
-        type: "positional",
-        description: "Issue key, issue number, file path, or project key",
-        required: false,
-        valueHint: "<PROJECT-123>",
-      },
-      project: commonArgs.project,
-      branch: {
-        type: "string",
-        alias: "b",
-        description: "View file at a specific branch",
-      },
-      commit: {
-        type: "boolean",
-        alias: "c",
-        description: "View file at the latest commit",
-      },
-      "no-browser": commonArgs.noBrowser,
-      issues: {
-        type: "boolean",
-        description: "Open the issues page",
-      },
-      board: {
-        type: "boolean",
-        description: "Open the board page",
-      },
-      gantt: {
-        type: "boolean",
-        description: "Open the Gantt chart page",
-      },
-      wiki: {
-        type: "boolean",
-        description: "Open the wiki page",
-      },
-      documents: {
-        type: "boolean",
-        description: "Open the documents page",
-      },
-      files: {
-        type: "boolean",
-        description: "Open the shared files page",
-      },
-      git: {
-        type: "boolean",
-        description: "Open the git repositories page",
-      },
-      svn: {
-        type: "boolean",
-        description: "Open the Subversion page",
-      },
-      settings: {
-        type: "boolean",
-        description: "Open the project settings page",
-      },
-    },
-    async run({ args }) {
-      const { host } = await getClient();
+    const browseArgs = { target, ...opts };
 
-      const [context, currentBranch, latestCommit, repoRelativePath] = await Promise.all([
-        detectGitContext(),
-        getCurrentBranch(),
-        getLatestCommit(),
-        getRepoRelativePath(),
-      ]);
+    const result = resolveUrl(context?.host ?? host, browseArgs, {
+      context,
+      currentBranch,
+      latestCommit,
+      repoRelativePath,
+    });
 
-      const result = resolveUrl(context?.host ?? host, args, {
-        context,
-        currentBranch,
-        latestCommit,
-        repoRelativePath,
-      });
+    if (!result.ok) {
+      throw new UserError(result.error);
+    }
 
-      if (!result.ok) {
-        throw new UserError(result.error);
-      }
+    await openOrPrintUrl(result.url, opts.browser === false, consola);
+  });
 
-      await openOrPrintUrl(result.url, Boolean(args["no-browser"]), consola);
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, browse };
+export default browse;

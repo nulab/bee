@@ -58,8 +58,8 @@ describe("dashboard", () => {
     mockClient.getIssues.mockResolvedValue(sampleIssues);
     mockClient.getProjects.mockResolvedValue(sampleProjects);
 
-    const { dashboard } = await import("./dashboard");
-    await dashboard.run?.({ args: {} } as never);
+    const { default: dashboard } = await import("./dashboard");
+    await dashboard.parseAsync([], { from: "user" });
 
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.getNotificationsCount).toHaveBeenCalledWith({
@@ -81,8 +81,8 @@ describe("dashboard", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    const { dashboard } = await import("./dashboard");
-    await dashboard.run?.({ args: { web: true } } as never);
+    const { default: dashboard } = await import("./dashboard");
+    await dashboard.parseAsync(["--web"], { from: "user" });
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/dashboard",
@@ -99,8 +99,8 @@ describe("dashboard", () => {
     mockClient.getProjects.mockResolvedValue(sampleProjects);
 
     await expectStdoutContaining(async () => {
-      const { dashboard } = await import("./dashboard");
-      await dashboard.run?.({ args: { json: "" } } as never);
+      const { default: dashboard } = await import("./dashboard");
+      await dashboard.parseAsync(["--json"], { from: "user" });
     }, "Test User");
   });
 
@@ -110,8 +110,8 @@ describe("dashboard", () => {
     mockClient.getIssues.mockResolvedValue([]);
     mockClient.getProjects.mockResolvedValue([]);
 
-    const { dashboard } = await import("./dashboard");
-    await dashboard.run?.({ args: {} } as never);
+    const { default: dashboard } = await import("./dashboard");
+    await dashboard.parseAsync([], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("No assigned issues"));
   });

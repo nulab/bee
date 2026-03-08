@@ -1,10 +1,15 @@
 import { type BacklogClient, getClient } from "@repo/backlog-utils";
-import { UserError, outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../lib/command-usage";
+import { UserError, outputResult } from "@repo/cli-utils";
+import { BeeCommand, ENV_AUTH } from "../lib/bee-command";
+import { collect } from "../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Make an authenticated Backlog API request.
+type ParamValue = string | number | boolean;
+type Params = Record<string, ParamValue | ParamValue[]>;
+
+const api = new BeeCommand("api")
+  .summary("Make an authenticated API request")
+  .description(
+    `Make an authenticated Backlog API request.
 
 The endpoint argument should be a path of the Backlog API
 (e.g. \`users/myself\`). If the path includes the \`/api/v2/\` prefix
@@ -22,8 +27,15 @@ To send a single-element array, append \`[]\` to the key name
 
 For GET requests, fields are sent as query parameters. For POST, PUT,
 PATCH, and DELETE requests, fields are sent as the request body.`,
-
-  examples: [
+  )
+  .argument("<endpoint>", "API endpoint path")
+  .option("-X, --method <method>", "HTTP method", "GET")
+  .option("-f, --field <key=value>", "Add a parameter with type inference (key=value, repeatable)", collect, [])
+  .option("-F, --raw-field <key=value>", "Add a string parameter (key=value, repeatable)", collect, [])
+  .option("--json [fields]", "Output as JSON (optionally filter by field names, comma-separated)")
+  .option("--silent", "Do not print the response body")
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "Get your user profile", command: "bee api users/myself" },
     {
       description: "List issues in a project",
@@ -42,76 +54,27 @@ PATCH, and DELETE requests, fields are sent as the request body.`,
       description: "Select specific fields",
       command: "bee api users/myself --json id,name,mailAddress",
     },
-  ],
+  ])
+  .action(async (endpoint: string, opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const method = opts.method.toUpperCase();
+    const normalizedEndpoint = normalizeEndpoint(endpoint);
 
-type ParamValue = string | number | boolean;
-type Params = Record<string, ParamValue | ParamValue[]>;
+    const params = buildParams(opts.field, opts.rawField);
 
-const api = withUsage(
-  defineCommand({
-    meta: {
-      name: "api",
-      description: "Make an authenticated API request",
-    },
-    args: {
-      endpoint: {
-        type: "positional",
-        description: "API endpoint path",
-        required: true,
-        valueHint: "<endpoint>",
-      },
-      method: {
-        type: "string",
-        alias: "X",
-        description: "HTTP method",
-        valueHint: "{GET|POST|PUT|PATCH|DELETE}",
-      },
-      field: {
-        type: "string",
-        alias: "f",
-        description: "Add a parameter with type inference (key=value, repeatable)",
-      },
-      "raw-field": {
-        type: "string",
-        alias: "F",
-        description: "Add a string parameter (key=value, repeatable)",
-      },
-      ...outputArgs,
-      silent: {
-        type: "boolean",
-        description: "Do not print the response body",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const data = await makeRequest(client, method, normalizedEndpoint, params);
 
-      const method = (args.method ?? "GET").toUpperCase();
-      const endpoint = normalizeEndpoint(args.endpoint);
+    if (opts.silent) {
+      return;
+    }
 
-      const params = buildParams(
-        collectMultiValues("field", process.argv),
-        collectMultiValues("raw-field", process.argv),
-      );
-
-      const data = await makeRequest(client, method, endpoint, params);
-
-      if (args.silent) {
-        return;
-      }
-
-      // Default to JSON output (api always returns JSON).
-      // --json with field names filters the output via outputResult.
-      const jsonArgs = args.json === undefined ? { json: "" } : { json: args.json };
-      outputResult(data, jsonArgs, () => {});
-    },
-  }),
-  commandUsage,
-);
+    // Default to JSON output (api always returns JSON).
+    // --json with field names filters the output via outputResult.
+    // commander gives `true` for bare --json, a string for --json fields
+    const jsonVal = opts.json === undefined ? "" : (opts.json === true ? "" : opts.json);
+    outputResult(data, { json: jsonVal }, () => {});
+  });
 
 /**
  * Normalize API endpoint path for backlog-js client methods.
@@ -122,35 +85,6 @@ const api = withUsage(
 const normalizeEndpoint = (endpoint: string): string => {
   const stripped = endpoint.replace(/^\/?(api\/v2\/?)/, "");
   return stripped;
-};
-
-/**
- * Collect multiple values for repeatable flags from process.argv.
- * citty only provides the last value for string args, so we parse argv directly.
- */
-const collectMultiValues = (flagName: string, argv: string[]): string[] => {
-  const values: string[] = [];
-  const longFlag = `--${flagName}`;
-  const shortFlags: Record<string, string> = {
-    field: "-f",
-    "raw-field": "-F",
-  };
-  const shortFlag = shortFlags[flagName];
-
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i];
-
-    if (arg.startsWith(`${longFlag}=`)) {
-      values.push(arg.slice(longFlag.length + 1));
-    } else if (arg === longFlag || arg === shortFlag) {
-      const next = argv[i + 1];
-      if (next !== undefined) {
-        values.push(next);
-        i++;
-      }
-    }
-  }
-  return values;
 };
 
 /**
@@ -240,4 +174,4 @@ const makeRequest = async (
   }
 };
 
-export { commandUsage, api };
+export default api;

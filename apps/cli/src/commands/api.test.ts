@@ -20,8 +20,8 @@ describe("api", () => {
     mockClient.get.mockResolvedValue({ id: 1, name: "test" });
 
     await expectStdoutContaining(async () => {
-      const { api } = await import("./api");
-      await api.run?.({ args: { endpoint: "/users/myself" } } as never);
+      const { default: api } = await import("./api");
+      await api.parseAsync(["/users/myself"], { from: "user" });
 
       expect(mockClient.get).toHaveBeenCalledWith("/users/myself", {});
     }, '"name"');
@@ -32,8 +32,8 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { api } = await import("./api");
-    await api.run?.({ args: { endpoint: "/projects" } } as never);
+    const { default: api } = await import("./api");
+    await api.parseAsync(["/projects"], { from: "user" });
 
     expect(mockClient.get).toHaveBeenCalledWith("/projects", {});
     writeSpy.mockRestore();
@@ -44,8 +44,8 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { api } = await import("./api");
-    await api.run?.({ args: { endpoint: "/api/v2/space" } } as never);
+    const { default: api } = await import("./api");
+    await api.parseAsync(["/api/v2/space"], { from: "user" });
 
     expect(mockClient.get).toHaveBeenCalledWith("space", {});
     writeSpy.mockRestore();
@@ -56,8 +56,8 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { api } = await import("./api");
-    await api.run?.({ args: { endpoint: "/issues", method: "POST" } } as never);
+    const { default: api } = await import("./api");
+    await api.parseAsync(["/issues", "-X", "POST"], { from: "user" });
 
     expect(mockClient.post).toHaveBeenCalledWith("/issues", {});
     writeSpy.mockRestore();
@@ -68,8 +68,8 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { api } = await import("./api");
-    await api.run?.({ args: { endpoint: "/users/myself", silent: true } } as never);
+    const { default: api } = await import("./api");
+    await api.parseAsync(["/users/myself", "--silent"], { from: "user" });
 
     expect(mockClient.get).toHaveBeenCalled();
     expect(writeSpy).not.toHaveBeenCalled();
@@ -81,8 +81,8 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { api } = await import("./api");
-    await api.run?.({ args: { endpoint: "/users/myself", json: "id,name" } } as never);
+    const { default: api } = await import("./api");
+    await api.parseAsync(["/users/myself", "--json", "id,name"], { from: "user" });
 
     const output = JSON.parse(writeSpy.mock.calls[0][0] as string);
     expect(output).toEqual({ id: 1, name: "Test User" });
@@ -98,8 +98,8 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { api } = await import("./api");
-    await api.run?.({ args: { endpoint: "/projects", json: "id,name" } } as never);
+    const { default: api } = await import("./api");
+    await api.parseAsync(["/projects", "--json", "id,name"], { from: "user" });
 
     const output = JSON.parse(writeSpy.mock.calls[0][0] as string);
     expect(output).toEqual([
@@ -114,8 +114,8 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { api } = await import("./api");
-    await api.run?.({ args: { endpoint: "/users/myself", json: "" } } as never);
+    const { default: api } = await import("./api");
+    await api.parseAsync(["/users/myself", "--json"], { from: "user" });
 
     const output = JSON.parse(writeSpy.mock.calls[0][0] as string);
     expect(output).toEqual({ id: 1, name: "test" });
