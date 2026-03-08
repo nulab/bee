@@ -16,8 +16,8 @@ describe("team edit", () => {
   it("updates team name", async () => {
     mockClient.patchTeam.mockResolvedValue({ id: 1, name: "New Name", members: [] });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({ args: { team: "1", name: "New Name" } } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["1", "--name", "New Name"], { from: "user" });
 
     expect(mockClient.patchTeam).toHaveBeenCalledWith(
       1,
@@ -29,8 +29,8 @@ describe("team edit", () => {
   it("updates team members", async () => {
     mockClient.patchTeam.mockResolvedValue({ id: 1, name: "Team", members: [] });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({ args: { team: "1", members: "111,222" } } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["1", "--members", "111", "--members", "222"], { from: "user" });
 
     expect(mockClient.patchTeam).toHaveBeenCalledWith(
       1,
@@ -42,9 +42,9 @@ describe("team edit", () => {
     const apiError = Object.assign(new Error("Bad Request"), { _status: 400, _body: undefined });
     mockClient.patchTeam.mockRejectedValue(apiError);
 
-    const { edit } = await import("./edit");
+    const { default: edit } = await import("./edit");
 
-    await expect(edit.run?.({ args: { team: "1", name: "X" } } as never)).rejects.toThrow(
+    await expect(edit.parseAsync(["1", "--name", "X"], { from: "user" })).rejects.toThrow(
       "Administrator role",
     );
   });
@@ -53,8 +53,8 @@ describe("team edit", () => {
     mockClient.patchTeam.mockResolvedValue({ id: 1, name: "Team", members: [] });
 
     await expectStdoutContaining(async () => {
-      const { edit } = await import("./edit");
-      await edit.run?.({ args: { team: "1", name: "Team", json: "" } } as never);
+      const { default: edit } = await import("./edit");
+      await edit.parseAsync(["1", "--name", "Team", "--json"], { from: "user" });
     }, "Team");
   });
 });

@@ -26,8 +26,8 @@ describe("watching view", () => {
   it("displays watching item details", async () => {
     mockClient.getWatchingListItem.mockResolvedValue(sampleWatching);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { watching: "1" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["1"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWatchingListItem).toHaveBeenCalledWith(1);
@@ -41,8 +41,8 @@ describe("watching view", () => {
     mockClient.getWatchingListItem.mockResolvedValue(sampleWatching);
 
     await expectStdoutContaining(async () => {
-      const { view } = await import("./view");
-      await view.run?.({ args: { watching: "1", json: "" } } as never);
+      const { default: view } = await import("./view");
+      await view.parseAsync(["1", "--json"], { from: "user" });
     }, "TEST-1");
   });
 });

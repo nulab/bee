@@ -41,8 +41,8 @@ describe("team list", () => {
   it("displays team list in tabular format", async () => {
     mockClient.getTeams.mockResolvedValue(sampleTeams);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getTeams).toHaveBeenCalled();
@@ -54,8 +54,8 @@ describe("team list", () => {
   it("shows message when no teams found", async () => {
     mockClient.getTeams.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No teams found.");
   });
@@ -63,8 +63,8 @@ describe("team list", () => {
   it("passes order parameter", async () => {
     mockClient.getTeams.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { order: "desc" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--order", "desc"], { from: "user" });
 
     expect(mockClient.getTeams).toHaveBeenCalledWith(expect.objectContaining({ order: "desc" }));
   });
@@ -72,8 +72,8 @@ describe("team list", () => {
   it("passes offset and count parameters", async () => {
     mockClient.getTeams.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: { offset: "10", count: "5" } } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--offset", "10", "--count", "5"], { from: "user" });
 
     expect(mockClient.getTeams).toHaveBeenCalledWith(
       expect.objectContaining({ offset: 10, count: 5 }),
@@ -84,8 +84,8 @@ describe("team list", () => {
     mockClient.getTeams.mockResolvedValue(sampleTeams);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["--json"], { from: "user" });
     }, "Design Team");
   });
 });

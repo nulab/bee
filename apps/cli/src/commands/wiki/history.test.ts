@@ -20,8 +20,8 @@ describe("wiki history", () => {
       { version: 2, createdUser: { name: "Bob" }, created: "2025-01-02T00:00:00Z" },
     ]);
 
-    const { history } = await import("./history");
-    await history.run?.({ args: { wiki: "123" } } as never);
+    const { default: history } = await import("./history");
+    await history.parseAsync(["123"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWikisHistory).toHaveBeenCalledWith(123, {
@@ -37,8 +37,8 @@ describe("wiki history", () => {
   it("shows message when no history found", async () => {
     mockClient.getWikisHistory.mockResolvedValue([]);
 
-    const { history } = await import("./history");
-    await history.run?.({ args: { wiki: "123" } } as never);
+    const { default: history } = await import("./history");
+    await history.parseAsync(["123"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No history found.");
   });
@@ -46,8 +46,8 @@ describe("wiki history", () => {
   it("passes order parameter", async () => {
     mockClient.getWikisHistory.mockResolvedValue([]);
 
-    const { history } = await import("./history");
-    await history.run?.({ args: { wiki: "123", order: "asc" } } as never);
+    const { default: history } = await import("./history");
+    await history.parseAsync(["123", "--order", "asc"], { from: "user" });
 
     expect(mockClient.getWikisHistory).toHaveBeenCalledWith(
       123,
@@ -58,10 +58,10 @@ describe("wiki history", () => {
   it("passes count and ID range parameters", async () => {
     mockClient.getWikisHistory.mockResolvedValue([]);
 
-    const { history } = await import("./history");
-    await history.run?.({
-      args: { wiki: "123", count: "10", "min-id": "1", "max-id": "5" },
-    } as never);
+    const { default: history } = await import("./history");
+    await history.parseAsync(["123", "--count", "10", "--min-id", "1", "--max-id", "5"], {
+      from: "user",
+    });
 
     expect(mockClient.getWikisHistory).toHaveBeenCalledWith(123, {
       minId: 1,
@@ -77,8 +77,8 @@ describe("wiki history", () => {
     ]);
 
     await expectStdoutContaining(async () => {
-      const { history } = await import("./history");
-      await history.run?.({ args: { wiki: "123", json: "" } } as never);
+      const { default: history } = await import("./history");
+      await history.parseAsync(["123", "--json"], { from: "user" });
     }, "Alice");
   });
 });

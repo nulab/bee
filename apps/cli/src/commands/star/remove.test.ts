@@ -14,16 +14,16 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 describe("star remove", () => {
   it("removes a star by ID", async () => {
     mockClient.removeStar.mockResolvedValue(undefined);
-    const { remove } = await import("./remove");
-    await remove.run?.({ args: { star: "12345" } } as never);
+    const { default: remove } = await import("./remove");
+    await remove.parseAsync(["12345"], { from: "user" });
     expect(mockClient.removeStar).toHaveBeenCalledWith(12_345);
     expect(consola.success).toHaveBeenCalledWith("Removed star 12345.");
   });
 
   it("converts string ID to number", async () => {
     mockClient.removeStar.mockResolvedValue(undefined);
-    const { remove } = await import("./remove");
-    await remove.run?.({ args: { star: "7" } } as never);
+    const { default: remove } = await import("./remove");
+    await remove.parseAsync(["7"], { from: "user" });
     expect(mockClient.removeStar).toHaveBeenCalledWith(7);
   });
 });

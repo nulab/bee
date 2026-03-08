@@ -16,8 +16,8 @@ describe("watching read", () => {
   it("marks a watching item as read", async () => {
     mockClient.resetWatchingListItemAsRead.mockResolvedValue(undefined);
 
-    const { read } = await import("./read");
-    await read.run?.({ args: { watching: "12345" } } as never);
+    const { default: read } = await import("./read");
+    await read.parseAsync(["12345"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.resetWatchingListItemAsRead).toHaveBeenCalledWith(12_345);
@@ -27,8 +27,8 @@ describe("watching read", () => {
   it("converts string ID to number", async () => {
     mockClient.resetWatchingListItemAsRead.mockResolvedValue(undefined);
 
-    const { read } = await import("./read");
-    await read.run?.({ args: { watching: "42" } } as never);
+    const { default: read } = await import("./read");
+    await read.parseAsync(["42"], { from: "user" });
 
     expect(mockClient.resetWatchingListItemAsRead).toHaveBeenCalledWith(42);
   });

@@ -1,58 +1,44 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `List watching items for the authenticated user.
+const list = new BeeCommand("list")
+  .summary("List watching items")
+  .description(
+    `List watching items for the authenticated user.
 
 Watching items are issue subscriptions. Unread items are marked with an
 asterisk (\`*\`).`,
-
-  examples: [
+  )
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "List your watching items", command: "bee watching list" },
     { description: "Output as JSON", command: "bee watching list --json" },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const myself = await client.getMyself();
+    const watchings = await client.getWatchingListItems(myself.id);
 
-const list = withUsage(
-  defineCommand({
-    meta: {
-      name: "list",
-      description: "List watching items",
-    },
-    args: {
-      ...outputArgs,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    outputResult(watchings, opts, (data) => {
+      if (data.length === 0) {
+        consola.info("No watching items found.");
+        return;
+      }
 
-      const myself = await client.getMyself();
-      const watchings = await client.getWatchingListItems(myself.id);
+      const rows: Row[] = data.map((w) => [
+        { header: "", value: w.resourceAlreadyRead ? " " : "*" },
+        { header: "ID", value: String(w.id) },
+        { header: "ISSUE KEY", value: w.issue.issueKey },
+        { header: "TITLE", value: w.issue.summary },
+      ]);
 
-      outputResult(watchings, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No watching items found.");
-          return;
-        }
+      printTable(rows);
+    });
+  });
 
-        const rows: Row[] = data.map((w) => [
-          { header: "", value: w.resourceAlreadyRead ? " " : "*" },
-          { header: "ID", value: String(w.id) },
-          { header: "ISSUE KEY", value: w.issue.issueKey },
-          { header: "TITLE", value: w.issue.summary },
-        ]);
-
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, list };
+export default list;

@@ -1,57 +1,39 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Add an issue to your watching list.
+const add = new BeeCommand("add")
+  .summary("Add a watching item")
+  .description(
+    `Add an issue to your watching list.
 
 Subscribe to an issue to receive notifications when it is updated. Optionally
 attach a note for your own reference.`,
-
-  examples: [
+  )
+  .requiredOption("--issue <key>", "Issue ID or issue key")
+  .option("--note <text>", "Note to attach to the watching item")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "Watch an issue", command: "bee watching add --issue PROJECT-123" },
     {
       description: "Watch an issue with a note",
       command: 'bee watching add --issue PROJECT-123 --note "Track progress"',
     },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const result = await client.postWatchingListItem({
+      issueIdOrKey: opts.issue,
+      note: opts.note ?? "",
+    });
 
-const add = withUsage(
-  defineCommand({
-    meta: {
-      name: "add",
-      description: "Add a watching item",
-    },
-    args: {
-      ...outputArgs,
-      issue: { ...commonArgs.issue, required: true },
-      note: {
-        type: "string",
-        description: "Note to attach to the watching item",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    outputResult(result, opts, (data) => {
+      consola.success(`Added watching for issue ${data.issue.issueKey} (ID: ${data.id}).`);
+    });
+  });
 
-      const result = await client.postWatchingListItem({
-        issueIdOrKey: args.issue,
-        note: args.note ?? "",
-      });
-
-      outputResult(result, args, (data) => {
-        consola.success(`Added watching for issue ${data.issue.issueKey} (ID: ${data.id}).`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { add, commandUsage };
+export default add;

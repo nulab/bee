@@ -1,17 +1,23 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { confirmOrExit, outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Delete a watching item.
+const deleteWatching = new BeeCommand("delete")
+  .summary("Delete a watching item")
+  .description(
+    `Delete a watching item.
 
 This removes the issue from your watching list. You will no longer receive
 notifications for updates to the issue. You will be prompted for confirmation
 unless \`--yes\` is provided.`,
-
-  examples: [
+  )
+  .argument("<watching>", "Watching ID")
+  .option("-y, --yes", "Skip confirmation prompt")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     {
       description: "Delete a watching item (with confirmation)",
       command: "bee watching delete 12345",
@@ -20,53 +26,24 @@ unless \`--yes\` is provided.`,
       description: "Delete without confirmation",
       command: "bee watching delete 12345 --yes",
     },
-  ],
+  ])
+  .action(async (watching, opts) => {
+    const confirmed = await confirmOrExit(
+      `Are you sure you want to delete watching ${watching}? This cannot be undone.`,
+      opts.yes,
+    );
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    if (!confirmed) {
+      return;
+    }
 
-const deleteWatching = withUsage(
-  defineCommand({
-    meta: {
-      name: "delete",
-      description: "Delete a watching item",
-    },
-    args: {
-      ...outputArgs,
-      watching: {
-        type: "positional",
-        description: "Watching ID",
-        required: true,
-        valueHint: "<number>",
-      },
-      yes: {
-        type: "boolean",
-        alias: "y",
-        description: "Skip confirmation prompt",
-      },
-    },
-    async run({ args }) {
-      const confirmed = await confirmOrExit(
-        `Are you sure you want to delete watching ${args.watching}? This cannot be undone.`,
-        args.yes,
-      );
+    const { client } = await getClient();
 
-      if (!confirmed) {
-        return;
-      }
+    const result = await client.deletehWatchingListItem(Number(watching));
 
-      const { client } = await getClient();
+    outputResult(result, opts, (data) => {
+      consola.success(`Deleted watching ${data.id}.`);
+    });
+  });
 
-      const result = await client.deletehWatchingListItem(Number(args.watching));
-
-      outputResult(result, args, (data) => {
-        consola.success(`Deleted watching ${data.id}.`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, deleteWatching };
+export default deleteWatching;

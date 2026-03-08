@@ -1,17 +1,32 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult, splitArg } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
-import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
+import { collectNum } from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
-const commandUsage: CommandUsage = {
-  long: `Update an existing webhook in a Backlog project.
+const edit = new BeeCommand("edit")
+  .summary("Edit a webhook")
+  .description(
+    `Update an existing webhook in a Backlog project.
 
 All fields are optional. Only the specified fields will be updated.`,
-
-  examples: [
+  )
+  .argument("<webhook>", "Webhook ID")
+  .addOption(opt.project())
+  .option("-n, --name <name>", "New name of the webhook")
+  .option("--hook-url <url>", "New URL to receive webhook notifications")
+  .option("--all-event", "Change whether to subscribe to all event types")
+  .option(
+    "--activity-type-ids <id>",
+    "New activity type IDs to subscribe to (repeatable)",
+    collectNum,
+    [] as number[],
+  )
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH, ENV_PROJECT])
+  .examples([
     {
       description: "Rename a webhook",
       command: 'bee webhook edit 12345 -p PROJECT -n "New Name"',
@@ -24,65 +39,24 @@ All fields are optional. Only the specified fields will be updated.`,
       description: "Subscribe to all events",
       command: "bee webhook edit 12345 -p PROJECT --all-event",
     },
-  ],
+  ])
+  .action(async (webhook, _opts, cmd) => {
+    const opts = await resolveOptions(cmd);
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH, ENV_PROJECT],
-  },
-};
+    const activityTypeIds: number[] = (opts.activityTypeIds as number[]) ?? [];
 
-const edit = withUsage(
-  defineCommand({
-    meta: {
-      name: "edit",
-      description: "Edit a webhook",
-    },
-    args: {
-      ...outputArgs,
-      webhook: {
-        type: "positional",
-        description: "Webhook ID",
-        required: true,
-        valueHint: "<number>",
-      },
-      project: { ...commonArgs.project, required: true },
-      name: {
-        type: "string",
-        alias: "n",
-        description: "New name of the webhook",
-      },
-      "hook-url": {
-        type: "string",
-        description: "New URL to receive webhook notifications",
-      },
-      "all-event": {
-        type: "boolean",
-        description: "Change whether to subscribe to all event types",
-      },
-      "activity-type-ids": {
-        type: "string",
-        description: "New activity type IDs to subscribe to",
-        valueHint: "<1,2,3,...>",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const webhookData = await client.patchWebhook(opts.project as string, webhook, {
+      name: opts.name as string | undefined,
+      hookUrl: opts.hookUrl as string | undefined,
+      allEvent: opts.allEvent as boolean | undefined,
+      activityTypeIds,
+    });
 
-      const activityTypeIds = splitArg(args["activity-type-ids"], v.number());
+    const json = opts.json === true ? "" : (opts.json as string | undefined);
+    outputResult(webhookData, { json }, (data) => {
+      consola.success(`Updated webhook ${data.name} (ID: ${data.id})`);
+    });
+  });
 
-      const webhook = await client.patchWebhook(args.project, args.webhook, {
-        name: args.name,
-        hookUrl: args["hook-url"],
-        allEvent: args["all-event"],
-        activityTypeIds,
-      });
-
-      outputResult(webhook, args, (data) => {
-        consola.success(`Updated webhook ${data.name} (ID: ${data.id})`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, edit };
+export default edit;

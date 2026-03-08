@@ -28,8 +28,8 @@ describe("user view", () => {
   it("displays user details", async () => {
     mockClient.getUser.mockResolvedValue(sampleUser);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { user: "12345" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["12345"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getUser).toHaveBeenCalledWith(12_345);
@@ -43,8 +43,8 @@ describe("user view", () => {
   it("displays role label correctly for administrator", async () => {
     mockClient.getUser.mockResolvedValue({ ...sampleUser, roleType: 1 });
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { user: "12345" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["12345"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Administrator"));
   });
@@ -53,8 +53,8 @@ describe("user view", () => {
     mockClient.getUser.mockResolvedValue(sampleUser);
 
     await expectStdoutContaining(async () => {
-      const { view } = await import("./view");
-      await view.run?.({ args: { user: "12345", json: "" } } as never);
+      const { default: view } = await import("./view");
+      await view.parseAsync(["12345", "--json"], { from: "user" });
     }, "testuser");
   });
 });

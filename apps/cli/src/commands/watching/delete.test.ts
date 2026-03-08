@@ -23,8 +23,8 @@ describe("watching delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deletehWatchingListItem.mockResolvedValue({ id: 1 });
 
-    const { deleteWatching } = await import("./delete");
-    await deleteWatching.run?.({ args: { watching: "1" } } as never);
+    const { default: deleteWatching } = await import("./delete");
+    await deleteWatching.parseAsync(["1"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete watching 1? This cannot be undone.",
@@ -38,8 +38,8 @@ describe("watching delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deletehWatchingListItem.mockResolvedValue({ id: 1 });
 
-    const { deleteWatching } = await import("./delete");
-    await deleteWatching.run?.({ args: { watching: "1", yes: true } } as never);
+    const { default: deleteWatching } = await import("./delete");
+    await deleteWatching.parseAsync(["1", "--yes"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete watching 1? This cannot be undone.",
@@ -50,8 +50,8 @@ describe("watching delete", () => {
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
 
-    const { deleteWatching } = await import("./delete");
-    await deleteWatching.run?.({ args: { watching: "1" } } as never);
+    const { default: deleteWatching } = await import("./delete");
+    await deleteWatching.parseAsync(["1"], { from: "user" });
 
     expect(mockClient.deletehWatchingListItem).not.toHaveBeenCalled();
   });
@@ -61,10 +61,8 @@ describe("watching delete", () => {
     mockClient.deletehWatchingListItem.mockResolvedValue({ id: 1 });
 
     await expectStdoutContaining(async () => {
-      const { deleteWatching } = await import("./delete");
-      await deleteWatching.run?.({
-        args: { watching: "1", yes: true, json: "" },
-      } as never);
+      const { default: deleteWatching } = await import("./delete");
+      await deleteWatching.parseAsync(["1", "--yes", "--json"], { from: "user" });
     }, "1");
   });
 });

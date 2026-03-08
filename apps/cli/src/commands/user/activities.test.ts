@@ -34,8 +34,8 @@ describe("user activities", () => {
       },
     ]);
 
-    const { activities } = await import("./activities");
-    await activities.run?.({ args: { user: "12345" } } as never);
+    const { default: activities } = await import("./activities");
+    await activities.parseAsync(["12345"], { from: "user" });
 
     expect(mockClient.getUserActivities).toHaveBeenCalledWith(12_345, expect.any(Object));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("2024-01-15"));
@@ -48,8 +48,8 @@ describe("user activities", () => {
   it("shows message when no activities found", async () => {
     mockClient.getUserActivities.mockResolvedValue([]);
 
-    const { activities } = await import("./activities");
-    await activities.run?.({ args: { user: "12345" } } as never);
+    const { default: activities } = await import("./activities");
+    await activities.parseAsync(["12345"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No activities found.");
   });
@@ -57,10 +57,11 @@ describe("user activities", () => {
   it("passes activity type filter as array of numbers", async () => {
     mockClient.getUserActivities.mockResolvedValue([]);
 
-    const { activities } = await import("./activities");
-    await activities.run?.({
-      args: { user: "12345", "activity-type": "1,2,3" },
-    } as never);
+    const { default: activities } = await import("./activities");
+    await activities.parseAsync(
+      ["12345", "--activity-type", "1", "--activity-type", "2", "--activity-type", "3"],
+      { from: "user" },
+    );
 
     expect(mockClient.getUserActivities).toHaveBeenCalledWith(
       12_345,
@@ -73,10 +74,8 @@ describe("user activities", () => {
   it("passes count parameter", async () => {
     mockClient.getUserActivities.mockResolvedValue([]);
 
-    const { activities } = await import("./activities");
-    await activities.run?.({
-      args: { user: "12345", count: "50" },
-    } as never);
+    const { default: activities } = await import("./activities");
+    await activities.parseAsync(["12345", "--count", "50"], { from: "user" });
 
     expect(mockClient.getUserActivities).toHaveBeenCalledWith(
       12_345,
@@ -97,8 +96,8 @@ describe("user activities", () => {
     ]);
 
     await expectStdoutContaining(async () => {
-      const { activities } = await import("./activities");
-      await activities.run?.({ args: { user: "12345", json: "" } } as never);
+      const { default: activities } = await import("./activities");
+      await activities.parseAsync(["12345", "--json"], { from: "user" });
     }, "Test");
   });
 });

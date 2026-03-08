@@ -13,6 +13,11 @@ vi.mock("@repo/backlog-utils", () => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
+}));
+
 const sampleWebhook = {
   id: 1,
   name: "Deploy Hook",
@@ -26,8 +31,8 @@ describe("webhook view", () => {
   it("displays webhook details", async () => {
     mockClient.getWebhook.mockResolvedValue(sampleWebhook);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { webhook: "1", project: "TEST" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["1", "-p", "TEST"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWebhook).toHaveBeenCalledWith("TEST", "1");
@@ -41,8 +46,8 @@ describe("webhook view", () => {
     mockClient.getWebhook.mockResolvedValue(sampleWebhook);
 
     await expectStdoutContaining(async () => {
-      const { view } = await import("./view");
-      await view.run?.({ args: { webhook: "1", project: "TEST", json: "" } } as never);
+      const { default: view } = await import("./view");
+      await view.parseAsync(["1", "-p", "TEST", "--json"], { from: "user" });
     }, "Deploy Hook");
   });
 });

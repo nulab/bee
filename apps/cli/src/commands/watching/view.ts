@@ -1,62 +1,43 @@
 import { getClient } from "@repo/backlog-utils";
-import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { formatDate, outputResult, printDefinitionList } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Display details of a watching item.
+const view = new BeeCommand("view")
+  .summary("View a watching item")
+  .description(
+    `Display details of a watching item.
 
 Shows the watching ID, associated issue, note, read status, and timestamps.`,
-
-  examples: [
+  )
+  .argument("<watching>", "Watching ID")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "View a watching item", command: "bee watching view 12345" },
     { description: "Output as JSON", command: "bee watching view 12345 --json" },
-  ],
+  ])
+  .action(async (watching, opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const watchingData = await client.getWatchingListItem(Number(watching));
 
-const view = withUsage(
-  defineCommand({
-    meta: {
-      name: "view",
-      description: "View a watching item",
-    },
-    args: {
-      ...outputArgs,
-      watching: {
-        type: "positional",
-        description: "Watching ID",
-        required: true,
-        valueHint: "<number>",
-      },
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    outputResult(watchingData, opts, (data) => {
+      consola.log("");
+      consola.log(`  ${data.issue.issueKey}: ${data.issue.summary}`);
+      consola.log("");
+      printDefinitionList([
+        ["ID", String(data.id)],
+        ["Issue Key", data.issue.issueKey],
+        ["Title", data.issue.summary],
+        ["Note", data.note || undefined],
+        ["Read", data.resourceAlreadyRead ? "Read" : "Unread"],
+        ["Created", formatDate(data.created)],
+        ["Updated", formatDate(data.updated)],
+      ]);
+      consola.log("");
+    });
+  });
 
-      const watching = await client.getWatchingListItem(Number(args.watching));
-
-      outputResult(watching, args, (data) => {
-        consola.log("");
-        consola.log(`  ${data.issue.issueKey}: ${data.issue.summary}`);
-        consola.log("");
-        printDefinitionList([
-          ["ID", String(data.id)],
-          ["Issue Key", data.issue.issueKey],
-          ["Title", data.issue.summary],
-          ["Note", data.note || undefined],
-          ["Read", data.resourceAlreadyRead ? "Read" : "Unread"],
-          ["Created", formatDate(data.created)],
-          ["Updated", formatDate(data.updated)],
-        ]);
-        consola.log("");
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, view };
+export default view;

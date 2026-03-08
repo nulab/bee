@@ -20,8 +20,8 @@ describe("watching add", () => {
       issue: { issueKey: "TEST-1", summary: "Fix bug" },
     });
 
-    const { add } = await import("./add");
-    await add.run?.({ args: { issue: "TEST-1" } } as never);
+    const { default: add } = await import("./add");
+    await add.parseAsync(["--issue", "TEST-1"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.postWatchingListItem).toHaveBeenCalledWith({
@@ -37,8 +37,8 @@ describe("watching add", () => {
       issue: { issueKey: "TEST-2", summary: "Add feature" },
     });
 
-    const { add } = await import("./add");
-    await add.run?.({ args: { issue: "TEST-2", note: "Track progress" } } as never);
+    const { default: add } = await import("./add");
+    await add.parseAsync(["--issue", "TEST-2", "--note", "Track progress"], { from: "user" });
 
     expect(mockClient.postWatchingListItem).toHaveBeenCalledWith({
       issueIdOrKey: "TEST-2",
@@ -54,8 +54,8 @@ describe("watching add", () => {
     });
 
     await expectStdoutContaining(async () => {
-      const { add } = await import("./add");
-      await add.run?.({ args: { issue: "TEST-1", json: "" } } as never);
+      const { default: add } = await import("./add");
+      await add.parseAsync(["--issue", "TEST-1", "--json"], { from: "user" });
     }, "TEST-1");
   });
 });

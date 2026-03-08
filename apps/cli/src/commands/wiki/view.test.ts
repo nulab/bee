@@ -31,8 +31,8 @@ describe("wiki view", () => {
   it("displays wiki page details", async () => {
     mockClient.getWiki.mockResolvedValue(sampleWiki);
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { wiki: "123" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["123"], { from: "user" });
 
     expect(mockClient.getWiki).toHaveBeenCalledWith(123);
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Home"));
@@ -42,8 +42,8 @@ describe("wiki view", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    const { view } = await import("./view");
-    await view.run?.({ args: { wiki: "123", web: true } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["123", "--web"], { from: "user" });
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/alias/wiki/123",
@@ -57,16 +57,16 @@ describe("wiki view", () => {
     mockClient.getWiki.mockResolvedValue(sampleWiki);
 
     await expectStdoutContaining(async () => {
-      const { view } = await import("./view");
-      await view.run?.({ args: { wiki: "123", json: "" } } as never);
+      const { default: view } = await import("./view");
+      await view.parseAsync(["123", "--json"], { from: "user" });
     }, "Home");
   });
 
   it("handles wiki page with no tags", async () => {
     mockClient.getWiki.mockResolvedValue({ ...sampleWiki, tags: [] });
 
-    const { view } = await import("./view");
-    await view.run?.({ args: { wiki: "123" } } as never);
+    const { default: view } = await import("./view");
+    await view.parseAsync(["123"], { from: "user" });
 
     expect(mockClient.getWiki).toHaveBeenCalledWith(123);
   });

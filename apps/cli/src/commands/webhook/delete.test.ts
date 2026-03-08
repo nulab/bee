@@ -14,6 +14,7 @@ vi.mock("@repo/backlog-utils", () => ({
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
   confirmOrExit: vi.fn(),
+  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -23,8 +24,8 @@ describe("webhook delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteWebhook.mockResolvedValue({ id: 1, name: "Deploy Hook" });
 
-    const { deleteWebhook } = await import("./delete");
-    await deleteWebhook.run?.({ args: { webhook: "1", project: "TEST" } } as never);
+    const { default: deleteWebhook } = await import("./delete");
+    await deleteWebhook.parseAsync(["1", "-p", "TEST"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete webhook 1? This cannot be undone.",
@@ -38,8 +39,8 @@ describe("webhook delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteWebhook.mockResolvedValue({ id: 1, name: "Deploy Hook" });
 
-    const { deleteWebhook } = await import("./delete");
-    await deleteWebhook.run?.({ args: { webhook: "1", project: "TEST", yes: true } } as never);
+    const { default: deleteWebhook } = await import("./delete");
+    await deleteWebhook.parseAsync(["1", "-p", "TEST", "--yes"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete webhook 1? This cannot be undone.",
@@ -50,8 +51,8 @@ describe("webhook delete", () => {
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
 
-    const { deleteWebhook } = await import("./delete");
-    await deleteWebhook.run?.({ args: { webhook: "1", project: "TEST" } } as never);
+    const { default: deleteWebhook } = await import("./delete");
+    await deleteWebhook.parseAsync(["1", "-p", "TEST"], { from: "user" });
 
     expect(mockClient.deleteWebhook).not.toHaveBeenCalled();
   });
@@ -61,10 +62,8 @@ describe("webhook delete", () => {
     mockClient.deleteWebhook.mockResolvedValue({ id: 1, name: "Deploy Hook" });
 
     await expectStdoutContaining(async () => {
-      const { deleteWebhook } = await import("./delete");
-      await deleteWebhook.run?.({
-        args: { webhook: "1", project: "TEST", yes: true, json: "" },
-      } as never);
+      const { default: deleteWebhook } = await import("./delete");
+      await deleteWebhook.parseAsync(["1", "-p", "TEST", "--yes", "--json"], { from: "user" });
     }, "Deploy Hook");
   });
 });

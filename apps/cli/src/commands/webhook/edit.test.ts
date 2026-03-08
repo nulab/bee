@@ -10,16 +10,19 @@ vi.mock("@repo/backlog-utils", () => ({
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
 }));
 
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
+}));
+
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("webhook edit", () => {
   it("updates webhook name", async () => {
     mockClient.patchWebhook.mockResolvedValue({ id: 1, name: "New Name" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: { webhook: "1", project: "TEST", name: "New Name" },
-    } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["1", "-p", "TEST", "--name", "New Name"], { from: "user" });
 
     expect(mockClient.patchWebhook).toHaveBeenCalledWith("TEST", "1", {
       name: "New Name",
@@ -33,10 +36,10 @@ describe("webhook edit", () => {
   it("updates webhook hook URL", async () => {
     mockClient.patchWebhook.mockResolvedValue({ id: 1, name: "Hook" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: { webhook: "1", project: "TEST", "hook-url": "https://example.com/new" },
-    } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["1", "-p", "TEST", "--hook-url", "https://example.com/new"], {
+      from: "user",
+    });
 
     expect(mockClient.patchWebhook).toHaveBeenCalledWith("TEST", "1", {
       name: undefined,
@@ -46,13 +49,24 @@ describe("webhook edit", () => {
     });
   });
 
-  it("updates activity type IDs from comma-separated string", async () => {
+  it("updates activity type IDs from repeatable option", async () => {
     mockClient.patchWebhook.mockResolvedValue({ id: 1, name: "Hook" });
 
-    const { edit } = await import("./edit");
-    await edit.run?.({
-      args: { webhook: "1", project: "TEST", "activity-type-ids": "1,2,3" },
-    } as never);
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(
+      [
+        "1",
+        "-p",
+        "TEST",
+        "--activity-type-ids",
+        "1",
+        "--activity-type-ids",
+        "2",
+        "--activity-type-ids",
+        "3",
+      ],
+      { from: "user" },
+    );
 
     expect(mockClient.patchWebhook).toHaveBeenCalledWith("TEST", "1", {
       name: undefined,
@@ -66,10 +80,8 @@ describe("webhook edit", () => {
     mockClient.patchWebhook.mockResolvedValue({ id: 1, name: "Hook" });
 
     await expectStdoutContaining(async () => {
-      const { edit } = await import("./edit");
-      await edit.run?.({
-        args: { webhook: "1", project: "TEST", name: "Hook", json: "" },
-      } as never);
+      const { default: edit } = await import("./edit");
+      await edit.parseAsync(["1", "-p", "TEST", "--name", "Hook", "--json"], { from: "user" });
     }, "Hook");
   });
 });

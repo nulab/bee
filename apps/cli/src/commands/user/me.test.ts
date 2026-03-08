@@ -28,8 +28,8 @@ describe("user me", () => {
   it("displays authenticated user details", async () => {
     mockClient.getMyself.mockResolvedValue(sampleUser);
 
-    const { me } = await import("./me");
-    await me.run?.({ args: {} } as never);
+    const { default: me } = await import("./me");
+    await me.parseAsync([], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getMyself).toHaveBeenCalled();
@@ -43,8 +43,8 @@ describe("user me", () => {
     mockClient.getMyself.mockResolvedValue(sampleUser);
 
     await expectStdoutContaining(async () => {
-      const { me } = await import("./me");
-      await me.run?.({ args: { json: "" } } as never);
+      const { default: me } = await import("./me");
+      await me.parseAsync(["--json"], { from: "user" });
     }, "myself");
   });
 });

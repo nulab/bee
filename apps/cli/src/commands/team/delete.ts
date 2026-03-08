@@ -1,16 +1,22 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { confirmOrExit, outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Delete a Backlog team.
+const deleteTeam = new BeeCommand("delete")
+  .summary("Delete a team")
+  .description(
+    `Delete a Backlog team.
 
 This action is irreversible. You will be prompted for confirmation unless
 \`--yes\` is provided.`,
-
-  examples: [
+  )
+  .argument("<team>", "Team ID")
+  .option("-y, --yes", "Skip confirmation prompt")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     {
       description: "Delete a team (with confirmation)",
       command: "bee team delete 12345",
@@ -19,53 +25,24 @@ This action is irreversible. You will be prompted for confirmation unless
       description: "Delete a team without confirmation",
       command: "bee team delete 12345 --yes",
     },
-  ],
+  ])
+  .action(async (team, opts) => {
+    const confirmed = await confirmOrExit(
+      `Are you sure you want to delete team ${team}? This cannot be undone.`,
+      opts.yes,
+    );
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    if (!confirmed) {
+      return;
+    }
 
-const deleteTeam = withUsage(
-  defineCommand({
-    meta: {
-      name: "delete",
-      description: "Delete a team",
-    },
-    args: {
-      ...outputArgs,
-      team: {
-        type: "positional",
-        description: "Team ID",
-        required: true,
-        valueHint: "<number>",
-      },
-      yes: {
-        type: "boolean",
-        alias: "y",
-        description: "Skip confirmation prompt",
-      },
-    },
-    async run({ args }) {
-      const confirmed = await confirmOrExit(
-        `Are you sure you want to delete team ${args.team}? This cannot be undone.`,
-        args.yes,
-      );
+    const { client } = await getClient();
 
-      if (!confirmed) {
-        return;
-      }
+    const t = await client.deleteTeam(Number(team));
 
-      const { client } = await getClient();
+    outputResult(t, opts, (data) => {
+      consola.success(`Deleted team ${data.name} (ID: ${data.id})`);
+    });
+  });
 
-      const t = await client.deleteTeam(Number(args.team));
-
-      outputResult(t, args, (data) => {
-        consola.success(`Deleted team ${data.name} (ID: ${data.id})`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, deleteTeam };
+export default deleteTeam;

@@ -13,12 +13,17 @@ vi.mock("@repo/backlog-utils", () => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
+}));
+
 describe("wiki count", () => {
   it("displays wiki page count", async () => {
     mockClient.getWikisCount.mockResolvedValue({ count: 42 });
 
-    const { count } = await import("./count");
-    await count.run?.({ args: { project: "TEST" } } as never);
+    const { default: count } = await import("./count");
+    await count.parseAsync(["-p", "TEST"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWikisCount).toHaveBeenCalledWith("TEST");
@@ -29,8 +34,8 @@ describe("wiki count", () => {
     mockClient.getWikisCount.mockResolvedValue({ count: 42 });
 
     await expectStdoutContaining(async () => {
-      const { count } = await import("./count");
-      await count.run?.({ args: { project: "TEST", json: "" } } as never);
+      const { default: count } = await import("./count");
+      await count.parseAsync(["-p", "TEST", "--json"], { from: "user" });
     }, "42");
   });
 });

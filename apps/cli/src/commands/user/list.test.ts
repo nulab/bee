@@ -21,8 +21,8 @@ describe("user list", () => {
       { id: 2, userId: "user2", name: "User Two", roleType: 2 },
     ]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getUsers).toHaveBeenCalled();
@@ -35,8 +35,8 @@ describe("user list", () => {
   it("shows message when no users found", async () => {
     mockClient.getUsers.mockResolvedValue([]);
 
-    const { list } = await import("./list");
-    await list.run?.({ args: {} } as never);
+    const { default: list } = await import("./list");
+    await list.parseAsync([], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No users found.");
   });
@@ -47,8 +47,8 @@ describe("user list", () => {
     ]);
 
     await expectStdoutContaining(async () => {
-      const { list } = await import("./list");
-      await list.run?.({ args: { json: "" } } as never);
+      const { default: list } = await import("./list");
+      await list.parseAsync(["--json"], { from: "user" });
     }, "user1");
   });
 });

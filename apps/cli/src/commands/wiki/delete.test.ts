@@ -23,8 +23,8 @@ describe("wiki delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteWiki.mockResolvedValue({ id: 123, name: "Old Page" });
 
-    const { deleteWiki } = await import("./delete");
-    await deleteWiki.run?.({ args: { wiki: "123" } } as never);
+    const { default: deleteWiki } = await import("./delete");
+    await deleteWiki.parseAsync(["123"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete wiki page 123? This cannot be undone.",
@@ -38,8 +38,8 @@ describe("wiki delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteWiki.mockResolvedValue({ id: 123, name: "Old Page" });
 
-    const { deleteWiki } = await import("./delete");
-    await deleteWiki.run?.({ args: { wiki: "123", yes: true } } as never);
+    const { default: deleteWiki } = await import("./delete");
+    await deleteWiki.parseAsync(["123", "--yes"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete wiki page 123? This cannot be undone.",
@@ -50,8 +50,8 @@ describe("wiki delete", () => {
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
 
-    const { deleteWiki } = await import("./delete");
-    await deleteWiki.run?.({ args: { wiki: "123" } } as never);
+    const { default: deleteWiki } = await import("./delete");
+    await deleteWiki.parseAsync(["123"], { from: "user" });
 
     expect(mockClient.deleteWiki).not.toHaveBeenCalled();
   });
@@ -60,8 +60,8 @@ describe("wiki delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteWiki.mockResolvedValue({ id: 123, name: "Old Page" });
 
-    const { deleteWiki } = await import("./delete");
-    await deleteWiki.run?.({ args: { wiki: "123", yes: true, "mail-notify": true } } as never);
+    const { default: deleteWiki } = await import("./delete");
+    await deleteWiki.parseAsync(["123", "--yes", "--mail-notify"], { from: "user" });
 
     expect(mockClient.deleteWiki).toHaveBeenCalledWith(123, true);
   });
@@ -71,8 +71,8 @@ describe("wiki delete", () => {
     mockClient.deleteWiki.mockResolvedValue({ id: 123, name: "Old Page" });
 
     await expectStdoutContaining(async () => {
-      const { deleteWiki } = await import("./delete");
-      await deleteWiki.run?.({ args: { wiki: "123", yes: true, json: "" } } as never);
+      const { default: deleteWiki } = await import("./delete");
+      await deleteWiki.parseAsync(["123", "--yes", "--json"], { from: "user" });
     }, "Old Page");
   });
 });

@@ -1,16 +1,23 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputArgs, outputResult } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { confirmOrExit, outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `Delete a Backlog wiki page.
+const deleteWiki = new BeeCommand("delete")
+  .summary("Delete a wiki page")
+  .description(
+    `Delete a Backlog wiki page.
 
 This action is irreversible. You will be prompted for confirmation unless
 \`--yes\` is provided.`,
-
-  examples: [
+  )
+  .argument("<wiki>", "Wiki page ID")
+  .option("-y, --yes", "Skip confirmation prompt")
+  .option("--mail-notify", "Send notification email")
+  .addOption(opt.json())
+  .envVars([...ENV_AUTH])
+  .examples([
     {
       description: "Delete a wiki page (with confirmation)",
       command: "bee wiki delete 12345",
@@ -19,57 +26,24 @@ This action is irreversible. You will be prompted for confirmation unless
       description: "Delete a wiki page without confirmation",
       command: "bee wiki delete 12345 --yes",
     },
-  ],
+  ])
+  .action(async (wiki, opts) => {
+    const confirmed = await confirmOrExit(
+      `Are you sure you want to delete wiki page ${wiki}? This cannot be undone.`,
+      opts.yes,
+    );
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    if (!confirmed) {
+      return;
+    }
 
-const deleteWiki = withUsage(
-  defineCommand({
-    meta: {
-      name: "delete",
-      description: "Delete a wiki page",
-    },
-    args: {
-      ...outputArgs,
-      wiki: {
-        type: "positional",
-        description: "Wiki page ID",
-        valueHint: "<number>",
-        required: true,
-      },
-      yes: {
-        type: "boolean",
-        alias: "y",
-        description: "Skip confirmation prompt",
-      },
-      "mail-notify": {
-        type: "boolean",
-        description: "Send notification email",
-      },
-    },
-    async run({ args }) {
-      const confirmed = await confirmOrExit(
-        `Are you sure you want to delete wiki page ${args.wiki}? This cannot be undone.`,
-        args.yes,
-      );
+    const { client } = await getClient();
 
-      if (!confirmed) {
-        return;
-      }
+    const wikiData = await client.deleteWiki(Number(wiki), opts.mailNotify ?? false);
 
-      const { client } = await getClient();
+    outputResult(wikiData, opts, (data) => {
+      consola.success(`Deleted wiki page ${data.id}: ${data.name}`);
+    });
+  });
 
-      const wiki = await client.deleteWiki(Number(args.wiki), args["mail-notify"] ?? false);
-
-      outputResult(wiki, args, (data) => {
-        consola.success(`Deleted wiki page ${data.id}: ${data.name}`);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, deleteWiki };
+export default deleteWiki;

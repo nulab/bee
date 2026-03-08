@@ -1,67 +1,52 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, outputArgs, outputResult, printTable } from "@repo/cli-utils";
-import { defineCommand } from "citty";
+import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
 import * as v from "valibot";
-import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
-import * as commonArgs from "../../lib/common-args";
+import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
-const commandUsage: CommandUsage = {
-  long: `List teams in the space.
+const list = new BeeCommand("list")
+  .summary("List teams")
+  .description(
+    `List teams in the space.
 
 Teams are groups of users that can be assigned to projects collectively.
 Use \`--order\` to control sort direction and \`--offset\` / \`--count\` for
 pagination.`,
-
-  examples: [
+  )
+  .addOption(opt.json())
+  .addOption(opt.order())
+  .addOption(opt.offset())
+  .addOption(opt.count())
+  .envVars([...ENV_AUTH])
+  .examples([
     { description: "List all teams", command: "bee team list" },
     { description: "List teams in descending order", command: "bee team list --order desc" },
     { description: "Output as JSON", command: "bee team list --json" },
-  ],
+  ])
+  .action(async (opts) => {
+    const { client } = await getClient();
 
-  annotations: {
-    environment: [...ENV_AUTH],
-  },
-};
+    const order = v.parse(v.optional(v.picklist(["asc", "desc"])), opts.order);
+    const offset = v.parse(v.optional(v.pipe(v.string(), v.transform(Number))), opts.offset);
+    const count = v.parse(v.optional(v.pipe(v.string(), v.transform(Number))), opts.count);
 
-const list = withUsage(
-  defineCommand({
-    meta: {
-      name: "list",
-      description: "List teams",
-    },
-    args: {
-      ...outputArgs,
-      order: commonArgs.order,
-      offset: commonArgs.offset,
-      count: commonArgs.count,
-    },
-    async run({ args }) {
-      const { client } = await getClient();
+    const teams = await client.getTeams({ order, offset, count });
 
-      const order = v.parse(v.optional(v.picklist(["asc", "desc"])), args.order);
-      const offset = v.parse(v.optional(v.pipe(v.string(), v.transform(Number))), args.offset);
-      const count = v.parse(v.optional(v.pipe(v.string(), v.transform(Number))), args.count);
+    outputResult(teams, opts, (data) => {
+      if (data.length === 0) {
+        consola.info("No teams found.");
+        return;
+      }
 
-      const teams = await client.getTeams({ order, offset, count });
+      const rows: Row[] = data.map((t) => [
+        { header: "ID", value: String(t.id) },
+        { header: "NAME", value: t.name },
+        { header: "MEMBERS", value: String(t.members.length) },
+      ]);
 
-      outputResult(teams, args, (data) => {
-        if (data.length === 0) {
-          consola.info("No teams found.");
-          return;
-        }
+      printTable(rows);
+    });
+  });
 
-        const rows: Row[] = data.map((t) => [
-          { header: "ID", value: String(t.id) },
-          { header: "NAME", value: t.name },
-          { header: "MEMBERS", value: String(t.members.length) },
-        ]);
-
-        printTable(rows);
-      });
-    },
-  }),
-  commandUsage,
-);
-
-export { commandUsage, list };
+export default list;
