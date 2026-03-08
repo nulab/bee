@@ -42,8 +42,8 @@
           const ny = Math.max(-1, Math.min(1, (beta - 45) / 45));
           const nx = Math.max(-1, Math.min(1, gamma / 45));
 
-          const ry = BASE_RY + nx * MAX_TILT;
-          const rx = BASE_RX - ny * MAX_TILT;
+          const ry = BASE_RY - nx * MAX_TILT;
+          const rx = BASE_RX + ny * MAX_TILT;
 
           applyTransform(rx, ry);
         });
