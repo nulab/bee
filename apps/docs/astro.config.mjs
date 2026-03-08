@@ -86,7 +86,7 @@ export default defineConfig({
           label: "Recipes",
           items: [
             {
-              label: "PR と Backlog 課題を連動させる",
+              label: "GitHub Issues のように PR と課題を連動させる",
               slug: "recipes/pr-lifecycle-sync",
             },
             {
