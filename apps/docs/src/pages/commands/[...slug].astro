@@ -21,36 +21,21 @@ const flags = entry.args.filter((a: NormalizedArg) => a.type !== "positional");
 const positionals = entry.args.filter((a: NormalizedArg) => a.type === "positional");
 const usageLine = buildUsageLine(entry.title, entry.args);
 
-// Build headings for table of contents
-const headings: { depth: number; slug: string; text: string }[] = [
-  { depth: 2, slug: "usage", text: "Usage" },
-];
-if (positionals.length > 0) {
-  headings.push({ depth: 2, slug: "arguments", text: "Arguments" });
-}
-if (flags.length > 0) {
-  headings.push({ depth: 2, slug: "flags", text: "Flags" });
-}
-if (entry.examples && entry.examples.length > 0) {
-  headings.push({ depth: 2, slug: "examples", text: "Examples" });
-}
-if (entry.environment && entry.environment.length > 0) {
-  headings.push({ depth: 2, slug: "environment-variables", text: "Environment variables" });
-}
-
 ---
 
 <StarlightPage
   frontmatter={{
     title: entry.title,
-    description: entry.description,
+    tableOfContents: false,
     head: [
       { tag: "meta", attrs: { property: "og:locale", content: "en" } },
+      { tag: "meta", attrs: { name: "description", content: entry.description } },
     ],
   }}
   lang="en"
-  headings={headings}
 >
+  <AnchorHeading level="2" id="overview">Overview</AnchorHeading>
+  <p>{entry.description}</p>
   {entry.long && <div set:html={renderMarkdown(entry.long)} />}
 
   <AnchorHeading level="2" id="usage">Usage</AnchorHeading>
