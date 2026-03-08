@@ -26,10 +26,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm run typecheck
+
+      - name: Lint
+        run: pnpm exec oxlint --ignore-pattern 'apps/docs' --max-warnings 0
+
+      - name: Test
+        run: pnpm exec vitest run
+
   build:
+    needs: ci
     runs-on: ubuntu-latest
     outputs:
       new_tag: ${{ steps.bump_version.outputs.new_tag }}
+      previous_tag: ${{ steps.get_latest_tag.outputs.latest_tag }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
@@ -38,11 +58,6 @@ jobs:
       - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
 
       - run: pnpm install --frozen-lockfile
-
-      - name: Configure git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Get the latest tag
         id: get_latest_tag
@@ -62,7 +77,6 @@ jobs:
 
           new_version=$(node -p "require('./package.json').version")
           new_tag="v${new_version}"
-          git tag "${new_tag}"
 
           echo "Created new tag: ${new_tag}"
           echo "new_tag=${new_tag}" >> "$GITHUB_OUTPUT"
@@ -73,7 +87,9 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: cli-build
-          path: apps/cli/dist
+          path: |
+            apps/cli/dist
+            apps/cli/package.json
 
   publish:
     needs: build
@@ -94,18 +110,7 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: cli-build
-          path: apps/cli/dist
-
-      - name: Configure git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Update version
-        working-directory: apps/cli
-        env:
-          NEW_TAG: ${{ needs.build.outputs.new_tag }}
-        run: npm version "$NEW_TAG" --no-git-tag-version
+          path: apps/cli
 
       - name: Publish to npm
         if: inputs.environment != 'dry-run'
@@ -117,17 +122,21 @@ jobs:
         working-directory: apps/cli
         run: npm publish --provenance --access public --dry-run
 
+      - name: Configure git
+        if: inputs.environment != 'dry-run'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Push version commit and tag
         if: inputs.environment != 'dry-run'
         env:
           NEW_TAG: ${{ needs.build.outputs.new_tag }}
           REF_NAME: ${{ github.ref_name }}
         run: |
-          cd apps/cli
-          git add package.json
+          git add apps/cli/package.json
           git commit -m "${NEW_TAG}"
-          cd ../..
-          git tag -f "${NEW_TAG}"
+          git tag "${NEW_TAG}"
           git push origin "HEAD:refs/heads/${REF_NAME}"
           git push origin "${NEW_TAG}"
 
@@ -136,13 +145,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NEW_TAG: ${{ needs.build.outputs.new_tag }}
-        run: gh release create "$NEW_TAG" --generate-notes
+          PREVIOUS_TAG: ${{ needs.build.outputs.previous_tag }}
+        run: gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_TAG"
 
       - name: Preview release notes (dry-run)
         if: inputs.environment == 'dry-run'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NEW_TAG: ${{ needs.build.outputs.new_tag }}
+          PREVIOUS_TAG: ${{ needs.build.outputs.previous_tag }}
           REPOSITORY: ${{ github.repository }}
           TARGET_COMMITISH: ${{ github.sha }}
         run: |
@@ -151,4 +162,5 @@ jobs:
           gh api "repos/${REPOSITORY}/releases/generate-notes" \
             -f tag_name="$NEW_TAG" \
             -f target_commitish="$TARGET_COMMITISH" \
+            -f previous_tag_name="$PREVIOUS_TAG" \
             --jq '.body' >> "$GITHUB_STEP_SUMMARY"
