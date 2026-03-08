@@ -53,7 +53,7 @@
     "@repo/tsconfigs": "workspace:*",
     "tsx": "^4.19.0",
     "unbuild": "^3.5.0",
-    "vitest": "^3.1.0"
+    "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=20"
