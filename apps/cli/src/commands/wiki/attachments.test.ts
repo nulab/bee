@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getWikisAttachments: vi.fn(),
@@ -58,12 +59,9 @@ describe("wiki attachments", () => {
       },
     ]);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { attachments } = await import("./attachments");
-    await attachments.run?.({ args: { wiki: "123", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("doc.pdf"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { attachments } = await import("./attachments");
+      await attachments.run?.({ args: { wiki: "123", json: "" } } as never);
+    }, "doc.pdf");
   });
 });

@@ -1,6 +1,7 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   postWebhook: vi.fn(),
@@ -85,19 +86,16 @@ describe("webhook create", () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("Hook");
     mockClient.postWebhook.mockResolvedValue({ id: 1, name: "Hook" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "TEST",
-        name: "Hook",
-        "hook-url": "https://example.com/hook",
-        json: "",
-      },
-    } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Hook"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { create } = await import("./create");
+      await create.run?.({
+        args: {
+          project: "TEST",
+          name: "Hook",
+          "hook-url": "https://example.com/hook",
+          json: "",
+        },
+      } as never);
+    }, "Hook");
   });
 });

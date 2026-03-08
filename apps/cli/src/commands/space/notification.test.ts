@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getSpaceNotification: vi.fn(),
@@ -46,12 +47,9 @@ describe("space notification", () => {
       updated: "2024-03-01T09:00:00Z",
     });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { notification } = await import("./notification");
-    await notification.run?.({ args: { json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Important notice"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { notification } = await import("./notification");
+      await notification.run?.({ args: { json: "" } } as never);
+    }, "Important notice");
   });
 });

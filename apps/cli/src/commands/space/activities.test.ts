@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getSpaceActivities: vi.fn(),
@@ -93,12 +94,9 @@ describe("space activities", () => {
       },
     ]);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { activities } = await import("./activities");
-    await activities.run?.({ args: { json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Test"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { activities } = await import("./activities");
+      await activities.run?.({ args: { json: "" } } as never);
+    }, "Test");
   });
 });
