@@ -19,7 +19,7 @@ type GitContext = {
 const parseBacklogRemoteUrl = (url: string): GitContext | undefined => {
   // SSH URL format: ssh://<user>@<space>.git.backlog.com/<PROJECT>/<repo>.git
   const sshUrlMatch = url.match(
-    /^ssh:\/\/.+@(.+)\.git\.(backlog\.(?:com|jp))\/([^/]+)\/([^/]+?)(?:\.git)?$/,
+    /^ssh:\/\/[^@]+@([^.]+)\.git\.(backlog\.(?:com|jp))\/([^/]+)\/([^/.]+?)(?:\.git)?$/,
   );
   if (sshUrlMatch) {
     const [, space, domain, projectKey, repoName] = sshUrlMatch;
@@ -32,7 +32,7 @@ const parseBacklogRemoteUrl = (url: string): GitContext | undefined => {
 
   // SCP-like format: <user>@<space>.git.backlog.com:/<PROJECT>/<repo>.git
   const scpMatch = url.match(
-    /^.+@(.+)\.git\.(backlog\.(?:com|jp)):\/?([^/]+)\/([^/]+?)(?:\.git)?$/,
+    /^[^@]+@([^.]+)\.git\.(backlog\.(?:com|jp)):\/?([^/]+)\/([^/.]+?)(?:\.git)?$/,
   );
   if (scpMatch) {
     const [, space, domain, projectKey, repoName] = scpMatch;

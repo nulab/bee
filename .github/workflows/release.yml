@@ -22,9 +22,7 @@ on:
         required: true
 
 permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
+  contents: read
 
 concurrency:
   group: release
@@ -33,6 +31,9 @@ concurrency:
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+      pull-requests: write
 
   build:
     needs: ci
