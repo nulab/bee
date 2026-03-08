@@ -3,17 +3,23 @@ title: GitHub Issues のように PR と課題を連動させる
 description: GitHub Issues の「Closes #123」のように、PR の操作で Backlog 課題のステータス更新・クローズを自動化する
 ---
 
-import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import { Steps, LinkCard, CardGrid } from "@astrojs/starlight/components";
 
-GitHub Issues では、PR に `Closes #123` と書くだけで Issue のリンク・ステータス更新・クローズが自動で行われます。このレシピで Backlog 課題でも同じ操作感を実現できます。
+GitHub Issues では、PR に `Closes #123` と書くだけで Issue のリンク・ステータス更新・クローズが自動で行われます。このレシピで Backlog 課題でも同じ操作感を実現できます。PR 本文に `PROJECT-123` のような課題キーを書くだけで動作します。
 
-| GitHub Issues での体験 | このレシピで実現すること |
-|---|---|
-| PR を作ると Issue にリンクが付く | 課題に PR リンクをコメント＋ステータスを「処理中」に |
-| PR の本文で Issue を追加・削除できる | 新たに追加された課題キーにだけコメント |
-| PR をマージすると Issue がクローズされる | 課題を自動クローズ |
+<Steps>
+1. **PR 作成**
 
-PR 本文に `PROJECT-123` のような課題キーを書くだけで動作します。複数の課題キーにも対応しています。
+   課題に PR リンクをコメント＋ステータスを「処理中」に
+
+2. **PR 本文の編集**
+
+   新たに追加された課題キーにだけコメント
+
+3. **PR マージ**
+
+   課題を自動クローズ
+</Steps>
 
 :::note[前提]
 リポジトリに `BACKLOG_API_KEY` と `BACKLOG_SPACE` のシークレットを登録する必要があります。詳しくは [CI/CD での利用](../integrations/ci-cd/) を参照してください。
