@@ -3,7 +3,6 @@ import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
-import { resolveOptions } from "../../lib/required-option";
 
 const list = new BeeCommand("list")
   .summary("List repositories in a project")
@@ -12,18 +11,17 @@ const list = new BeeCommand("list")
 
 By default, repositories are listed in the configured display order.`,
   )
-  .addOption(opt.project())
+  .argument("<project>", "Project ID or project key")
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
-    { description: "List repositories in a project", command: "bee repo list -p PROJECT_KEY" },
-    { description: "Output as JSON", command: "bee repo list -p PROJECT_KEY --json" },
+    { description: "List repositories in a project", command: "bee repo list PROJECT_KEY" },
+    { description: "Output as JSON", command: "bee repo list PROJECT_KEY --json" },
   ])
-  .action(async (opts, cmd) => {
-    await resolveOptions(cmd);
+  .action(async (project, opts) => {
     const { client } = await getClient();
 
-    const repos = await client.getGitRepositories(opts.project);
+    const repos = await client.getGitRepositories(project);
 
     outputResult(repos, opts, (data) => {
       if (data.length === 0) {

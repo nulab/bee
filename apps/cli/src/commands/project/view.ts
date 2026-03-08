@@ -3,7 +3,6 @@ import { outputResult, printDefinitionList } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
-import { resolveOptions } from "../../lib/required-option";
 
 const view = new BeeCommand("view")
   .summary("View a project")
@@ -15,31 +14,29 @@ and git/subversion integration status.
 
 Use \`--web\` to open the project in your default browser instead.`,
   )
-  .addOption(opt.project())
+  .argument("<project>", "Project ID or project key")
   .addOption(opt.web("project"))
   .addOption(opt.noBrowser())
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
-    { description: "View project details", command: "bee project view -p PROJECT_KEY" },
-    { description: "Open project in browser", command: "bee project view -p PROJECT_KEY --web" },
-    { description: "Output as JSON", command: "bee project view -p PROJECT_KEY --json" },
+    { description: "View project details", command: "bee project view PROJECT_KEY" },
+    { description: "Open project in browser", command: "bee project view PROJECT_KEY --web" },
+    { description: "Output as JSON", command: "bee project view PROJECT_KEY --json" },
   ])
-  .action(async (opts, cmd) => {
-    await resolveOptions(cmd);
-
+  .action(async (project, opts) => {
     const { client, host } = await getClient();
 
     if (opts.web || opts.browser === false) {
-      const url = projectUrl(host, opts.project);
+      const url = projectUrl(host, project);
       await openOrPrintUrl(url, opts.browser === false, consola);
       return;
     }
 
-    const project = await client.getProject(opts.project);
+    const projectData = await client.getProject(project);
 
     const jsonArg = opts.json === true ? "" : opts.json;
-    outputResult(project, { ...opts, json: jsonArg }, (data) => {
+    outputResult(projectData, { ...opts, json: jsonArg }, (data) => {
       consola.log("");
       consola.log(`  ${data.name} (${data.projectKey})`);
       consola.log("");

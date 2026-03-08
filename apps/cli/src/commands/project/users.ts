@@ -3,7 +3,6 @@ import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
-import { resolveOptions } from "../../lib/required-option";
 
 const users = new BeeCommand("users")
   .summary("List project users")
@@ -12,19 +11,17 @@ const users = new BeeCommand("users")
 
 Displays each user's ID, user ID, name, and role within the project.`,
   )
-  .addOption(opt.project())
+  .argument("<project>", "Project ID or project key")
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
-    { description: "List project members", command: "bee project users -p PROJECT_KEY" },
-    { description: "Output as JSON", command: "bee project users -p PROJECT_KEY --json" },
+    { description: "List project members", command: "bee project users PROJECT_KEY" },
+    { description: "Output as JSON", command: "bee project users PROJECT_KEY --json" },
   ])
-  .action(async (opts, cmd) => {
-    await resolveOptions(cmd);
-
+  .action(async (project, opts) => {
     const { client } = await getClient();
 
-    const members = await client.getProjectUsers(opts.project);
+    const members = await client.getProjectUsers(project);
 
     const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(members, { ...opts, json: jsonArg }, (data) => {

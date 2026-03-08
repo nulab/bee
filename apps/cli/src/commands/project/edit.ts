@@ -3,7 +3,6 @@ import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
-import { resolveOptions } from "../../lib/required-option";
 
 const edit = new BeeCommand("edit")
   .summary("Edit a project")
@@ -13,7 +12,7 @@ const edit = new BeeCommand("edit")
 Only the specified fields will be updated. Fields that are not provided
 will remain unchanged.`,
   )
-  .addOption(opt.project())
+  .argument("<project>", "Project ID or project key")
   .option("-n, --name <name>", "New name of the project")
   .option("-k, --key <key>", "New key of the project")
   .option("--chart-enabled", "Change whether the chart is enabled")
@@ -29,23 +28,21 @@ will remain unchanged.`,
   .examples([
     {
       description: "Rename a project",
-      command: 'bee project edit -p PROJECT_KEY --name "New Name"',
+      command: 'bee project edit PROJECT_KEY --name "New Name"',
     },
     {
       description: "Archive a project",
-      command: "bee project edit -p PROJECT_KEY --archived",
+      command: "bee project edit PROJECT_KEY --archived",
     },
     {
       description: "Change formatting rule to markdown",
-      command: "bee project edit -p PROJECT_KEY --text-formatting-rule markdown",
+      command: "bee project edit PROJECT_KEY --text-formatting-rule markdown",
     },
   ])
-  .action(async (opts, cmd) => {
-    await resolveOptions(cmd);
-
+  .action(async (project, opts) => {
     const { client } = await getClient();
 
-    const project = await client.patchProject(opts.project, {
+    const projectData = await client.patchProject(project, {
       name: opts.name,
       key: opts.key,
       chartEnabled: opts.chartEnabled,
@@ -56,7 +53,7 @@ will remain unchanged.`,
     });
 
     const jsonArg = opts.json === true ? "" : opts.json;
-    outputResult(project, { ...opts, json: jsonArg }, (data) => {
+    outputResult(projectData, { ...opts, json: jsonArg }, (data) => {
       consola.success(`Updated project ${data.projectKey}: ${data.name}`);
     });
   });

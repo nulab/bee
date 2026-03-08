@@ -41,7 +41,7 @@ describe("project view", () => {
     mockClient.getProject.mockResolvedValue(sampleProject);
 
     const { default: view } = await import("./view");
-    await view.parseAsync(["--project", "PROJ1"], { from: "user" });
+    await view.parseAsync(["PROJ1"], { from: "user" });
 
     expect(mockClient.getProject).toHaveBeenCalledWith("PROJ1");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Test Project"));
@@ -54,14 +54,14 @@ describe("project view", () => {
     mockClient.getProject.mockResolvedValue({ ...sampleProject, archived: true });
 
     const { default: view } = await import("./view");
-    await view.parseAsync(["--project", "PROJ1"], { from: "user" });
+    await view.parseAsync(["PROJ1"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Archived"));
   });
 
   it("opens browser with --web flag", async () => {
     const { default: view } = await import("./view");
-    await view.parseAsync(["--project", "PROJ1", "--web"], { from: "user" });
+    await view.parseAsync(["PROJ1", "--web"], { from: "user" });
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/projects/PROJ1",
@@ -76,7 +76,7 @@ describe("project view", () => {
 
     await expectStdoutContaining(async () => {
       const { default: view } = await import("./view");
-      await view.parseAsync(["--project", "PROJ1", "--json"], { from: "user" });
+      await view.parseAsync(["PROJ1", "--json"], { from: "user" });
     }, "PROJ1");
   });
 });

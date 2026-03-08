@@ -26,7 +26,7 @@ describe("project users", () => {
     ]);
 
     const { default: users } = await import("./users");
-    await users.parseAsync(["--project", "PROJ1"], { from: "user" });
+    await users.parseAsync(["PROJ1"], { from: "user" });
 
     expect(mockClient.getProjectUsers).toHaveBeenCalledWith("PROJ1");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
@@ -39,7 +39,7 @@ describe("project users", () => {
     mockClient.getProjectUsers.mockResolvedValue([]);
 
     const { default: users } = await import("./users");
-    await users.parseAsync(["--project", "PROJ1"], { from: "user" });
+    await users.parseAsync(["PROJ1"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No users found.");
   });
@@ -51,7 +51,7 @@ describe("project users", () => {
 
     await expectStdoutContaining(async () => {
       const { default: users } = await import("./users");
-      await users.parseAsync(["--project", "PROJ1", "--json"], { from: "user" });
+      await users.parseAsync(["PROJ1", "--json"], { from: "user" });
     }, "user1");
   });
 });

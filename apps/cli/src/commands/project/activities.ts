@@ -4,7 +4,6 @@ import { Option } from "commander";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
-import { resolveOptions } from "../../lib/required-option";
 
 const getActivitySummary = (activity: {
   type: number;
@@ -47,37 +46,35 @@ Use \`--count\` to control how many activities are returned (default: 20, max: 1
 For a list of activity type IDs, see:
 https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#activity-type`,
   )
-  .addOption(opt.project())
+  .argument("<project>", "Project ID or project key")
   .addOption(new Option("--activity-type <ids>", "Filter by activity type IDs (comma-separated)"))
   .addOption(opt.count())
   .addOption(opt.order())
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
-    { description: "List recent activities", command: "bee project activities -p PROJECT_KEY" },
+    { description: "List recent activities", command: "bee project activities PROJECT_KEY" },
     {
       description: "Show only issue-related activities",
-      command: "bee project activities -p PROJECT_KEY --activity-type 1,2,3",
+      command: "bee project activities PROJECT_KEY --activity-type 1,2,3",
     },
     {
       description: "Show last 50 activities",
-      command: "bee project activities -p PROJECT_KEY --count 50",
+      command: "bee project activities PROJECT_KEY --count 50",
     },
     {
       description: "Output as JSON",
-      command: "bee project activities -p PROJECT_KEY --json",
+      command: "bee project activities PROJECT_KEY --json",
     },
   ])
-  .action(async (opts, cmd) => {
-    await resolveOptions(cmd);
-
+  .action(async (project, opts) => {
     const { client } = await getClient();
 
     const activityTypeId = opts.activityType
       ? String(opts.activityType).split(",").map(Number)
       : undefined;
 
-    const activityList = await client.getProjectActivities(opts.project, {
+    const activityList = await client.getProjectActivities(project, {
       activityTypeId,
       count: opts.count ? Number(opts.count) : undefined,
       order: opts.order,

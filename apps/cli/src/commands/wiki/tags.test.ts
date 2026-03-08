@@ -26,7 +26,7 @@ describe("wiki tags", () => {
     ]);
 
     const { default: tags } = await import("./tags");
-    await tags.parseAsync(["-p", "TEST"], { from: "user" });
+    await tags.parseAsync(["TEST"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWikisTags).toHaveBeenCalledWith("TEST");
@@ -38,7 +38,7 @@ describe("wiki tags", () => {
     mockClient.getWikisTags.mockResolvedValue([]);
 
     const { default: tags } = await import("./tags");
-    await tags.parseAsync(["-p", "TEST"], { from: "user" });
+    await tags.parseAsync(["TEST"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No wiki tags found.");
   });
@@ -48,7 +48,7 @@ describe("wiki tags", () => {
 
     await expectStdoutContaining(async () => {
       const { default: tags } = await import("./tags");
-      await tags.parseAsync(["-p", "TEST", "--json"], { from: "user" });
+      await tags.parseAsync(["TEST", "--json"], { from: "user" });
     }, "guide");
   });
 });

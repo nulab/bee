@@ -26,7 +26,7 @@ describe("wiki list", () => {
     ]);
 
     const { default: list } = await import("./list");
-    await list.parseAsync(["-p", "TEST"], { from: "user" });
+    await list.parseAsync(["TEST"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWikis).toHaveBeenCalledWith({
@@ -42,7 +42,7 @@ describe("wiki list", () => {
     mockClient.getWikis.mockResolvedValue([]);
 
     const { default: list } = await import("./list");
-    await list.parseAsync(["-p", "TEST"], { from: "user" });
+    await list.parseAsync(["TEST"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No wiki pages found.");
   });
@@ -51,7 +51,7 @@ describe("wiki list", () => {
     mockClient.getWikis.mockResolvedValue([]);
 
     const { default: list } = await import("./list");
-    await list.parseAsync(["-p", "TEST", "--keyword", "setup"], { from: "user" });
+    await list.parseAsync(["TEST", "--keyword", "setup"], { from: "user" });
 
     expect(mockClient.getWikis).toHaveBeenCalledWith({
       projectIdOrKey: "TEST",
@@ -66,7 +66,7 @@ describe("wiki list", () => {
 
     await expectStdoutContaining(async () => {
       const { default: list } = await import("./list");
-      await list.parseAsync(["-p", "TEST", "--json"], { from: "user" });
+      await list.parseAsync(["TEST", "--json"], { from: "user" });
     }, "Home");
   });
 });

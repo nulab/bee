@@ -45,7 +45,7 @@ describe("repo list", () => {
     mockClient.getGitRepositories.mockResolvedValue(sampleRepos);
 
     const { default: list } = await import("./list");
-    await list.parseAsync(["--project", "PROJ"], { from: "user" });
+    await list.parseAsync(["PROJ"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getGitRepositories).toHaveBeenCalledWith("PROJ");
@@ -58,7 +58,7 @@ describe("repo list", () => {
     mockClient.getGitRepositories.mockResolvedValue([]);
 
     const { default: list } = await import("./list");
-    await list.parseAsync(["--project", "PROJ"], { from: "user" });
+    await list.parseAsync(["PROJ"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No repositories found.");
   });
@@ -68,7 +68,7 @@ describe("repo list", () => {
 
     await expectStdoutContaining(async () => {
       const { default: list } = await import("./list");
-      await list.parseAsync(["--project", "PROJ", "--json"], { from: "user" });
+      await list.parseAsync(["PROJ", "--json"], { from: "user" });
     }, "api-server");
   });
 });

@@ -25,7 +25,7 @@ describe("project delete", () => {
     mockClient.deleteProject.mockResolvedValue({ projectKey: "TEST", name: "Test Project" });
 
     const { default: deleteProject } = await import("./delete");
-    await deleteProject.parseAsync(["--project", "TEST"], { from: "user" });
+    await deleteProject.parseAsync(["TEST"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete project TEST? This cannot be undone.",
@@ -40,7 +40,7 @@ describe("project delete", () => {
     mockClient.deleteProject.mockResolvedValue({ projectKey: "TEST", name: "Test Project" });
 
     const { default: deleteProject } = await import("./delete");
-    await deleteProject.parseAsync(["--project", "TEST", "--yes"], { from: "user" });
+    await deleteProject.parseAsync(["TEST", "--yes"], { from: "user" });
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete project TEST? This cannot be undone.",
@@ -52,7 +52,7 @@ describe("project delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
 
     const { default: deleteProject } = await import("./delete");
-    await deleteProject.parseAsync(["--project", "TEST"], { from: "user" });
+    await deleteProject.parseAsync(["TEST"], { from: "user" });
 
     expect(mockClient.deleteProject).not.toHaveBeenCalled();
   });
@@ -63,7 +63,7 @@ describe("project delete", () => {
 
     await expectStdoutContaining(async () => {
       const { default: deleteProject } = await import("./delete");
-      await deleteProject.parseAsync(["--project", "TEST", "--yes", "--json"], { from: "user" });
+      await deleteProject.parseAsync(["TEST", "--yes", "--json"], { from: "user" });
     }, "TEST");
   });
 });

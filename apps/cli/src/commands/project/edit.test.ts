@@ -22,7 +22,7 @@ describe("project edit", () => {
     mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "New Name" });
 
     const { default: edit } = await import("./edit");
-    await edit.parseAsync(["--project", "TEST", "--name", "New Name"], { from: "user" });
+    await edit.parseAsync(["TEST", "--name", "New Name"], { from: "user" });
 
     expect(mockClient.patchProject).toHaveBeenCalledWith(
       "TEST",
@@ -35,7 +35,7 @@ describe("project edit", () => {
     mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "Test" });
 
     const { default: edit } = await import("./edit");
-    await edit.parseAsync(["--project", "TEST", "--archived"], { from: "user" });
+    await edit.parseAsync(["TEST", "--archived"], { from: "user" });
 
     expect(mockClient.patchProject).toHaveBeenCalledWith(
       "TEST",
@@ -47,7 +47,7 @@ describe("project edit", () => {
     mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "Test" });
 
     const { default: edit } = await import("./edit");
-    await edit.parseAsync(["--project", "TEST", "--text-formatting-rule", "markdown"], {
+    await edit.parseAsync(["TEST", "--text-formatting-rule", "markdown"], {
       from: "user",
     });
 
@@ -62,7 +62,7 @@ describe("project edit", () => {
 
     await expectStdoutContaining(async () => {
       const { default: edit } = await import("./edit");
-      await edit.parseAsync(["--project", "TEST", "--name", "Test", "--json"], { from: "user" });
+      await edit.parseAsync(["TEST", "--name", "Test", "--json"], { from: "user" });
     }, "TEST");
   });
 });

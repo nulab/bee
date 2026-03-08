@@ -23,7 +23,7 @@ describe("wiki count", () => {
     mockClient.getWikisCount.mockResolvedValue({ count: 42 });
 
     const { default: count } = await import("./count");
-    await count.parseAsync(["-p", "TEST"], { from: "user" });
+    await count.parseAsync(["TEST"], { from: "user" });
 
     expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWikisCount).toHaveBeenCalledWith("TEST");
@@ -35,7 +35,7 @@ describe("wiki count", () => {
 
     await expectStdoutContaining(async () => {
       const { default: count } = await import("./count");
-      await count.parseAsync(["-p", "TEST", "--json"], { from: "user" });
+      await count.parseAsync(["TEST", "--json"], { from: "user" });
     }, "42");
   });
 });
