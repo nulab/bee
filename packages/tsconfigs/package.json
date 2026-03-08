@@ -11,6 +11,6 @@
   "devDependencies": {
     "@tsconfig/node-lts": "^24.0.0",
     "@tsconfig/node-ts": "^23.6.4",
-    "typescript": "^6.0.0-beta"
+    "typescript": "^6.0.0-dev.20260205"
   }
 }
