@@ -141,6 +141,16 @@ const web = (resource: string) => ({
   description: `Open the ${resource} in the browser`,
 });
 
+// ---------------------------------------------------------------------------
+// --no-browser flag (print URL instead of opening browser)
+// ---------------------------------------------------------------------------
+
+const noBrowser = {
+  type: "boolean" as const,
+  alias: "n",
+  description: "Print the URL instead of opening the browser",
+};
+
 export {
   project,
   projectPositional,
@@ -158,4 +168,5 @@ export {
   attachment,
   comment,
   web,
+  noBrowser,
 };

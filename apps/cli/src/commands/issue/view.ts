@@ -1,4 +1,4 @@
-import { getClient, issueUrl, openUrl } from "@repo/backlog-utils";
+import { getClient, issueUrl, openOrPrintUrl } from "@repo/backlog-utils";
 import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
@@ -44,14 +44,14 @@ const view = withUsage(
         description: "Include comments",
       },
       web: commonArgs.web("issue"),
+      "no-browser": commonArgs.noBrowser,
     },
     async run({ args }) {
       const { client, host } = await getClient();
 
-      if (args.web) {
+      if (args.web || args["no-browser"]) {
         const url = issueUrl(host, args.issue);
-        await openUrl(url);
-        consola.info(`Opening ${url} in your browser.`);
+        await openOrPrintUrl(url, Boolean(args["no-browser"]), consola);
         return;
       }
 

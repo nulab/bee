@@ -46,11 +46,67 @@ const documentUrl = (host: string, projectKey: string, documentId: string): stri
 /** Returns the URL for the dashboard. */
 const dashboardUrl = (host: string): string => buildBacklogUrl(host, "/dashboard");
 
+/** Returns the URL for a file blob in the git viewer. */
+const gitBlobUrl = (
+  host: string,
+  projectKey: string,
+  repoName: string,
+  branch: string,
+  filePath: string,
+  line?: number,
+): string => {
+  const url = buildBacklogUrl(host, `/git/${projectKey}/${repoName}/blob/${branch}/${filePath}`);
+  return line ? `${url}#${line}` : url;
+};
+
+/** Returns the URL for a directory tree in the git viewer. */
+const gitTreeUrl = (
+  host: string,
+  projectKey: string,
+  repoName: string,
+  branch: string,
+  dirPath?: string,
+): string => {
+  const base = `/git/${projectKey}/${repoName}/tree/${branch}`;
+  return buildBacklogUrl(host, dirPath ? `${base}/${dirPath}` : base);
+};
+
+/** Returns the URL for a commit in the git viewer. */
+const gitCommitUrl = (
+  host: string,
+  projectKey: string,
+  repoName: string,
+  commitSha: string,
+): string => buildBacklogUrl(host, `/git/${projectKey}/${repoName}/commit/${commitSha}`);
+
+/**
+ * Opens a URL in the browser or prints it to stdout.
+ *
+ * When `noBrowser` is true, the URL is logged via `consola.log` for piping.
+ * Otherwise it opens in the default browser and logs an info message.
+ */
+const openOrPrintUrl = async (
+  url: string,
+  noBrowser: boolean,
+  log: { log: (msg: string) => void; info: (msg: string) => void },
+): Promise<void> => {
+  if (noBrowser) {
+    log.log(url);
+    return;
+  }
+  await openUrl(url);
+  log.info(`Opening ${url} in your browser.`);
+};
+
 export {
   buildBacklogUrl,
   dashboardUrl,
   documentUrl,
+  gitBlobUrl,
+  gitCommitUrl,
+  gitTreeUrl,
   issueUrl,
+  openOrPrintUrl,
   openUrl,
   projectUrl,
   pullRequestUrl,

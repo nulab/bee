@@ -1,4 +1,4 @@
-import { openUrl } from "@repo/backlog-utils";
+import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -12,6 +12,7 @@ const mockClient = {
 vi.mock("@repo/backlog-utils", () => ({
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
   openUrl: vi.fn(),
+  openOrPrintUrl: vi.fn(),
   dashboardUrl: vi.fn((host: string) => `https://${host}/dashboard`),
 }));
 
@@ -82,9 +83,10 @@ describe("dashboard", () => {
     const { dashboard } = await import("./dashboard");
     await dashboard.run?.({ args: { web: true } } as never);
 
-    expect(openUrl).toHaveBeenCalledWith("https://example.backlog.com/dashboard");
-    expect(consola.info).toHaveBeenCalledWith(
-      "Opening https://example.backlog.com/dashboard in your browser.",
+    expect(openOrPrintUrl).toHaveBeenCalledWith(
+      "https://example.backlog.com/dashboard",
+      false,
+      consola,
     );
     expect(mockClient.getMyself).not.toHaveBeenCalled();
   });

@@ -3,6 +3,9 @@ import {
   buildBacklogUrl,
   dashboardUrl,
   documentUrl,
+  gitBlobUrl,
+  gitCommitUrl,
+  gitTreeUrl,
   issueUrl,
   openUrl,
   projectUrl,
@@ -79,6 +82,42 @@ describe("documentUrl", () => {
 describe("dashboardUrl", () => {
   it("builds dashboard URL", () => {
     expect(dashboardUrl("example.backlog.com")).toBe("https://example.backlog.com/dashboard");
+  });
+});
+
+describe("gitBlobUrl", () => {
+  it("builds file blob URL", () => {
+    expect(gitBlobUrl("example.backlog.com", "PROJ", "my-repo", "main", "src/index.ts")).toBe(
+      "https://example.backlog.com/git/PROJ/my-repo/blob/main/src/index.ts",
+    );
+  });
+
+  it("builds file blob URL with line number", () => {
+    expect(gitBlobUrl("example.backlog.com", "PROJ", "my-repo", "main", "src/index.ts", 42)).toBe(
+      "https://example.backlog.com/git/PROJ/my-repo/blob/main/src/index.ts#42",
+    );
+  });
+});
+
+describe("gitTreeUrl", () => {
+  it("builds tree URL at branch root", () => {
+    expect(gitTreeUrl("example.backlog.com", "PROJ", "my-repo", "main")).toBe(
+      "https://example.backlog.com/git/PROJ/my-repo/tree/main",
+    );
+  });
+
+  it("builds tree URL with directory path", () => {
+    expect(gitTreeUrl("example.backlog.com", "PROJ", "my-repo", "main", "src/lib")).toBe(
+      "https://example.backlog.com/git/PROJ/my-repo/tree/main/src/lib",
+    );
+  });
+});
+
+describe("gitCommitUrl", () => {
+  it("builds commit URL", () => {
+    expect(gitCommitUrl("example.backlog.com", "PROJ", "my-repo", "abc1234")).toBe(
+      "https://example.backlog.com/git/PROJ/my-repo/commit/abc1234",
+    );
   });
 });
 

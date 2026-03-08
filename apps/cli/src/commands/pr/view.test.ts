@@ -1,4 +1,4 @@
-import { getClient, openUrl } from "@repo/backlog-utils";
+import { getClient, openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -9,6 +9,7 @@ const mockClient = {
 vi.mock("@repo/backlog-utils", () => ({
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
   openUrl: vi.fn(),
+  openOrPrintUrl: vi.fn(),
   pullRequestUrl: vi.fn(
     (host: string, project: string, repo: string, num: number) =>
       `https://${host}/git/${project}/${repo}/pullRequests/${num}`,
@@ -83,11 +84,10 @@ describe("pr view", () => {
     const { view } = await import("./view");
     await view.run?.({ args: { number: "42", project: "PROJ", repo: "repo", web: true } } as never);
 
-    expect(openUrl).toHaveBeenCalledWith(
+    expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/git/PROJ/repo/pullRequests/42",
-    );
-    expect(consola.info).toHaveBeenCalledWith(
-      "Opening https://example.backlog.com/git/PROJ/repo/pullRequests/42 in your browser.",
+      false,
+      consola,
     );
     expect(mockClient.getPullRequest).not.toHaveBeenCalled();
   });

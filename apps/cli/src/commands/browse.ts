@@ -1,43 +1,52 @@
 import {
-  buildBacklogUrl,
-  dashboardUrl,
+  detectGitContext,
+  getCurrentBranch,
+  getLatestCommit,
+  getRepoRelativePath,
   getClient,
-  issueUrl,
-  openUrl,
-  projectUrl,
+  openOrPrintUrl,
 } from "@repo/backlog-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../lib/command-usage";
 import * as commonArgs from "../lib/common-args";
+import { resolveUrl } from "./browse-url";
 
 const commandUsage: CommandUsage = {
   long: `Open a Backlog page in the browser.
 
-With no arguments, opens the dashboard. When given an issue key (e.g.
-\`PROJECT-123\`), opens that issue. Use \`--project\` with section flags
-to navigate directly to a specific project page.`,
+With no arguments, the behavior depends on context. Inside a Backlog Git
+repository it opens the repository page; otherwise it opens the dashboard.
+
+When given an issue key (e.g. \`PROJECT-123\`), opens that issue. A bare
+number like \`123\` is also accepted when the project can be inferred from
+the Git remote. Use \`--project\` with section flags to navigate directly
+to a specific project page.
+
+A file path opens the file in the Backlog Git viewer (e.g. \`src/main.ts\`).
+Append \`:<line>\` to jump to a specific line (e.g. \`src/main.ts:42\`).
+Paths ending with \`/\` open the directory tree view.`,
 
   examples: [
-    { description: "Open dashboard", command: "bee browse" },
+    { description: "Open repository page (in a Backlog repo)", command: "bee browse" },
+    { description: "Open dashboard (outside a Backlog repo)", command: "bee browse" },
     { description: "Open an issue", command: "bee browse PROJECT-123" },
+    { description: "Open issue by number (inferred project)", command: "bee browse 123" },
+    { description: "Open a file in git viewer", command: "bee browse src/main.ts" },
+    { description: "Open a file at a specific line", command: "bee browse src/main.ts:42" },
+    { description: "Open a directory in git viewer", command: "bee browse src/" },
+    { description: "Browse at a specific branch", command: "bee browse src/main.ts -b develop" },
+    { description: "Browse at the latest commit", command: "bee browse -c" },
+    { description: "Print URL without opening browser", command: "bee browse -n" },
     { description: "Open project issues page", command: "bee browse -p PROJECT --issues" },
     { description: "Open project board", command: "bee browse -p PROJECT --board" },
     { description: "Open Gantt chart", command: "bee browse -p PROJECT --gantt" },
-    { description: "Open project wiki", command: "bee browse -p PROJECT --wiki" },
-    { description: "Open project documents", command: "bee browse -p PROJECT --documents" },
-    { description: "Open shared files", command: "bee browse -p PROJECT --files" },
-    { description: "Open git repositories", command: "bee browse -p PROJECT --git" },
-    { description: "Open Subversion", command: "bee browse -p PROJECT --svn" },
-    { description: "Open project settings", command: "bee browse -p PROJECT --settings" },
   ],
 
   annotations: {
     environment: [...ENV_AUTH, ENV_PROJECT],
   },
 };
-
-const ISSUE_KEY_PATTERN = /^[A-Z][A-Z0-9_]+-\d+$/;
 
 const browse = withUsage(
   defineCommand({
@@ -48,11 +57,22 @@ const browse = withUsage(
     args: {
       target: {
         type: "positional",
-        description: "Issue ID or issue key",
+        description: "Issue key, issue number, file path, or project key",
         required: false,
         valueHint: "<PROJECT-123>",
       },
       project: commonArgs.project,
+      branch: {
+        type: "string",
+        alias: "b",
+        description: "View file at a specific branch",
+      },
+      commit: {
+        type: "boolean",
+        alias: "c",
+        description: "View file at the latest commit",
+      },
+      "no-browser": commonArgs.noBrowser,
       issues: {
         type: "boolean",
         description: "Open the issues page",
@@ -93,70 +113,29 @@ const browse = withUsage(
     async run({ args }) {
       const { host } = await getClient();
 
-      const url = resolveUrl(host, args);
-      await openUrl(url);
-      consola.info(`Opening ${url} in your browser.`);
+      const [context, currentBranch, latestCommit, repoRelativePath] = await Promise.all([
+        detectGitContext(),
+        getCurrentBranch(),
+        getLatestCommit(),
+        getRepoRelativePath(),
+      ]);
+
+      const result = resolveUrl(context?.host ?? host, args, {
+        context,
+        currentBranch,
+        latestCommit,
+        repoRelativePath,
+      });
+
+      if (!result.ok) {
+        consola.error(result.error);
+        process.exit(1);
+      }
+
+      await openOrPrintUrl(result.url, Boolean(args["no-browser"]), consola);
     },
   }),
   commandUsage,
 );
-
-type SectionArgs = {
-  target?: string;
-  project?: string;
-  issues?: boolean;
-  board?: boolean;
-  gantt?: boolean;
-  wiki?: boolean;
-  documents?: boolean;
-  files?: boolean;
-  git?: boolean;
-  svn?: boolean;
-  settings?: boolean;
-};
-
-const resolveUrl = (host: string, args: SectionArgs): string => {
-  // Issue key target takes priority
-  if (args.target && ISSUE_KEY_PATTERN.test(args.target)) {
-    return issueUrl(host, args.target);
-  }
-
-  // Project section pages require --project or target
-  const projectKey = args.target ?? args.project;
-
-  if (projectKey) {
-    if (args.issues) {
-      return buildBacklogUrl(host, `/find/${projectKey}`);
-    }
-    if (args.board) {
-      return buildBacklogUrl(host, `/board/${projectKey}`);
-    }
-    if (args.gantt) {
-      return buildBacklogUrl(host, `/gantt/${projectKey}`);
-    }
-    if (args.wiki) {
-      return buildBacklogUrl(host, `/wiki/${projectKey}`);
-    }
-    if (args.documents) {
-      return buildBacklogUrl(host, `/document/${projectKey}`);
-    }
-    if (args.files) {
-      return buildBacklogUrl(host, `/file/${projectKey}`);
-    }
-    if (args.git) {
-      return buildBacklogUrl(host, `/git/${projectKey}`);
-    }
-    if (args.svn) {
-      return buildBacklogUrl(host, `/subversion/${projectKey}`);
-    }
-    if (args.settings) {
-      return buildBacklogUrl(host, `/EditProject.action?project.id=${projectKey}`);
-    }
-    return projectUrl(host, projectKey);
-  }
-
-  // Default: dashboard
-  return dashboardUrl(host);
-};
 
 export { commandUsage, browse };

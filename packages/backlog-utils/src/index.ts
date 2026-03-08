@@ -23,10 +23,22 @@ export {
   buildBacklogUrl,
   dashboardUrl,
   documentUrl,
+  gitBlobUrl,
+  gitCommitUrl,
+  gitTreeUrl,
   issueUrl,
+  openOrPrintUrl,
   openUrl,
   projectUrl,
   pullRequestUrl,
   repositoryUrl,
   wikiUrl,
 } from "./url";
+export {
+  type GitContext,
+  detectGitContext,
+  getCurrentBranch,
+  getLatestCommit,
+  getRepoRelativePath,
+  parseBacklogRemoteUrl,
+} from "./git-context";
