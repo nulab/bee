@@ -51,6 +51,7 @@ const edit = withUsage(
         type: "string",
         alias: "n",
         description: "New name of the milestone",
+        required: true,
       },
       description: {
         type: "string",

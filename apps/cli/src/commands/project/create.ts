@@ -77,8 +77,8 @@ const create = withUsage(
       const project = await client.postProject({
         key,
         name,
-        chartEnabled: args["chart-enabled"],
-        subtaskingEnabled: args["subtasking-enabled"],
+        chartEnabled: args["chart-enabled"] ?? false,
+        subtaskingEnabled: args["subtasking-enabled"] ?? false,
         projectLeaderCanEditProjectLeader: args["project-leader-can-edit-project-leader"],
         textFormattingRule: (args["text-formatting-rule"] ?? "markdown") as "backlog" | "markdown",
       });

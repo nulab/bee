@@ -41,10 +41,10 @@
     "@repo/cli-utils": "workspace:*",
     "@repo/config": "workspace:*",
     "backlog-js": "^0.16.0",
-    "citty": "^0.1.6",
+    "citty": "^0.2.1",
     "consola": "^3.4.2",
     "is-unicode-supported": "^2.1.0",
-    "open": "^10.1.0",
+    "open": "^11.0.0",
     "ufo": "^1.5.4",
     "valibot": "^1.2.0"
   },
