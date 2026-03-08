@@ -12,13 +12,10 @@ vi.mock("@repo/backlog-utils", () => ({
   getRepoRelativePath: vi.fn(() => Promise.resolve(undefined)),
 }));
 
-vi.mock("./browse-url", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./browse-url")>();
-  return {
-    ...actual,
-    resolveUrl: vi.fn(() => ({ ok: true, url: "https://example.backlog.com/mock-url" })),
-  };
-});
+vi.mock("./browse-url", () => ({
+  resolveUrl: vi.fn(() => ({ ok: true, url: "https://example.backlog.com/mock-url" })),
+  isFilePath: vi.fn(),
+}));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
