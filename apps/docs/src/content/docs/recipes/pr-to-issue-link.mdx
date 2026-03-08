@@ -55,15 +55,6 @@ jobs:
           done
 ```
 
-:::tip[npx の実行速度について]
-各レシピでは `setup-node` を省略して `npx @nulab/bee` で直接実行しています。`npx` は毎回パッケージを解決するため、複数コマンドを実行するレシピでは `npm install -g @nulab/bee` でグローバルインストールしてから `bee` を直接呼ぶ方が高速です。
-
-```yaml
-- run: npm install -g @nulab/bee
-- run: bee issue comment "$KEY" --body "..."
-```
-:::
-
 ## ポイント
 
 - ブランチ名の規約は `feature/PROJECT-123-description` や `PROJECT-123/description` など自由に決められます。正規表現 `[A-Z_]+-[0-9]+` で最初にマッチした課題キーを使います。
