@@ -82,6 +82,23 @@ export default defineConfig({
             { label: "AI エージェントとの連携", slug: "integrations/ai-agent" },
           ],
         },
+        {
+          label: "Recipes",
+          items: [
+            {
+              label: "GitHub Issues のように PR と課題を連動させる",
+              slug: "recipes/pr-lifecycle-sync",
+            },
+            {
+              label: "リリース時に関連課題へ通知",
+              slug: "recipes/release-notify-issues",
+            },
+            {
+              label: "AI エージェント向けプロンプト集",
+              slug: "recipes/useful-prompts",
+            },
+          ],
+        },
         ...commandSidebar,
       ],
     }),

@@ -1,0 +1,92 @@
+---
+title: リリース時に関連課題へ通知する
+description: リリースタグ作成時に、関連課題への通知とリリースノートの Backlog ドキュメント投稿を行う
+---
+
+リリースタグの作成をトリガーに、前回タグからのコミットに含まれる課題キーを抽出し、各課題にリリースバージョンをコメントします。あわせて、GitHub Release の本文を Backlog ドキュメントとしても投稿します。
+
+:::note[前提]
+リポジトリの **Settings → Secrets and variables → Actions** に `BACKLOG_API_KEY` と `BACKLOG_SPACE` を登録してください。設定方法は [CI/CD での利用](../integrations/ci-cd/) を参照してください。
+:::
+
+```yaml
+name: Notify Backlog Issues on Release
+on:
+  release:
+    types: [published]
+
+# リポジトリへの書き込みは不要なので全権限を無効化
+permissions: {}
+
+env:
+  BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+  BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+  # ドキュメント投稿先のプロジェクトキー
+  BACKLOG_PROJECT: MY_PROJECT
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 前回タグから現在のタグまでのコミットに含まれる課題キーを収集する
+      - name: Collect issue keys from commits since last tag
+        id: collect
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            RANGE="${PREV_TAG}..HEAD"
+            echo "Range: ${PREV_TAG}..HEAD"
+          else
+            RANGE="HEAD"
+            echo "Range: all commits (no previous tag)"
+          fi
+          KEYS=$(git log "$RANGE" --oneline | grep -oE '[A-Z_]+-[0-9]+' | sort -u | tr '\n' ' ')
+          echo "Detected issue keys: ${KEYS:-(none)}"
+          echo "issue_keys=$KEYS" >> "$GITHUB_OUTPUT"
+
+      # 各課題にリリースバージョンをコメントする
+      - name: Comment release info on each issue
+        if: steps.collect.outputs.issue_keys != ''
+        run: |
+          for KEY in ${{ steps.collect.outputs.issue_keys }}; do
+            echo "Commenting on: $KEY (release ${{ github.event.release.tag_name }})"
+            npx @nulab/bee issue comment "$KEY" \
+              --body "リリース ${{ github.event.release.tag_name }} に含まれています: ${{ github.event.release.html_url }}" \
+              || echo "::warning::Failed to process $KEY"
+          done
+
+      # GitHub Release の本文を Backlog ドキュメントとして投稿する
+      - name: Post release notes to Backlog document
+        run: |
+          echo "Creating document: ${{ github.event.release.tag_name }}"
+          npx @nulab/bee document create \
+            --project "$BACKLOG_PROJECT" \
+            --title "リリースノート ${{ github.event.release.tag_name }}" \
+            --body "$RELEASE_BODY" \
+            || echo "::warning::Failed to create release document"
+        env:
+          RELEASE_BODY: ${{ github.event.release.body }}
+```
+
+## カスタマイズ
+
+ドキュメント投稿が不要
+: 「Post release notes to Backlog document」ステップと `BACKLOG_PROJECT` 環境変数を削除してください。
+
+課題への通知が不要
+: 「Collect issue keys ...」と「Comment release info ...」の2ステップを削除してください。
+
+ドキュメントを特定のフォルダに入れたい
+: `bee document create` に `--parent-id <フォルダのドキュメントID>` を追加してください。
+
+## ポイント
+
+- `fetch-depth: 0` で全履歴を取得する必要があります。
+- コミットメッセージに `PROJECT-123` を含める運用が前提です。Conventional Commits と組み合わせると効果的です（例: `feat(PROJECT-123): ログイン機能を追加`）。
+- 課題が見つからない場合はスキップするため、関係ないコミットが混ざっていても安全です。
+- このワークフローは **直前のタグから現在のタグまで** のコミットだけを対象にするため、プロジェクトが長期化してもコミット数の増加による影響はありません。安定性はリリースの粒度（タグの間隔）にのみ依存します。初回リリースでタグが 1 つしかない場合は全コミットが対象になるため、初回は手動で範囲を絞るか、空のタグを打っておくことをおすすめします。
