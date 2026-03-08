@@ -79,11 +79,36 @@ export default defineConfig({
           label: "Integrations",
           items: [
             { label: "CI/CD での利用", slug: "integrations/ci-cd" },
-            {
-              label: "Backlog 課題ワークフロー",
-              slug: "integrations/backlog-issue-workflow",
-            },
             { label: "AI エージェントとの連携", slug: "integrations/ai-agent" },
+          ],
+        },
+        {
+          label: "Recipes",
+          items: [
+            {
+              label: "PR 作成時に課題へリンクを貼る",
+              slug: "recipes/pr-to-issue-link",
+            },
+            {
+              label: "PR マージで課題を自動クローズ",
+              slug: "recipes/auto-close-on-merge",
+            },
+            {
+              label: "PR に連動して課題ステータスを更新",
+              slug: "recipes/pr-status-sync",
+            },
+            {
+              label: "リリース時に関連課題へ通知",
+              slug: "recipes/release-notify-issues",
+            },
+            {
+              label: "期限切れ課題を定期リマインド",
+              slug: "recipes/scheduled-housekeeping",
+            },
+            {
+              label: "Backlog Webhook で Actions を起動",
+              slug: "recipes/webhook-to-actions",
+            },
           ],
         },
         ...commandSidebar,

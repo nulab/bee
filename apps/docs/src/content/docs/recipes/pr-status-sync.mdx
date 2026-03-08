@@ -1,0 +1,62 @@
+---
+title: PR の進行に合わせて課題ステータスを更新する
+description: PR のオープン・マージに連動して、Backlog 課題のステータスを自動的に「処理中」→「完了」と進める
+---
+
+PR のライフサイクルに合わせて Backlog 課題のステータスを自動で進めるワークフローです。PR 作成で「処理中」、マージで「完了」に変更します。
+
+```yaml
+name: Sync PR Lifecycle to Backlog Issue Status
+on:
+  pull_request:
+    types: [opened, closed]
+    branches: [main]
+
+jobs:
+  # PR 作成 → 課題を「処理中」に
+  on-opened:
+    if: github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - name: Extract issue key
+        id: extract
+        run: |
+          ISSUE_KEY=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' | head -1)
+          echo "issue_key=$ISSUE_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Set status to processing
+        if: steps.extract.outputs.issue_key != ''
+        run: |
+          npx @nulab/bee issue edit ${{ steps.extract.outputs.issue_key }} \
+            --status processing
+          npx @nulab/bee issue comment ${{ steps.extract.outputs.issue_key }} \
+            --body "レビュー中: ${{ github.event.pull_request.html_url }}"
+
+  # PR マージ → 課題をクローズ
+  on-merged:
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - name: Extract issue key
+        id: extract
+        run: |
+          ISSUE_KEY=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' | head -1)
+          echo "issue_key=$ISSUE_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Close issue
+        if: steps.extract.outputs.issue_key != ''
+        run: |
+          npx @nulab/bee issue close ${{ steps.extract.outputs.issue_key }} \
+            --comment "PR #${{ github.event.pull_request.number }} マージ完了"
+```
+
+## ポイント
+
+- このレシピは [PR 作成時に課題へリンクを貼る](../pr-to-issue-link/) と [PR マージで課題を自動クローズする](../auto-close-on-merge/) を 1 つのワークフローにまとめたものです。
+- `--status processing` は Backlog のデフォルトステータス「処理中」に対応します。カスタムステータスを使っている場合はステータス ID を指定してください。

@@ -1,0 +1,108 @@
+---
+title: Backlog Webhook で GitHub Actions を起動する
+description: Backlog の課題イベントを Webhook 経由で GitHub Actions にブリッジし、イベント駆動ワークフローを実現する
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+GitHub Issues ではイベントが直接 Actions をトリガーしますが、Backlog の Webhook は GitHub Actions を直接起動できません。中継サーバーで `repository_dispatch` に変換することで同等のイベント駆動ワークフローを実現できます。
+
+```
+Backlog Webhook → 中継サーバー → GitHub repository_dispatch → GitHub Actions
+```
+
+## 中継サーバーの例
+
+<Tabs>
+<TabItem label="Cloudflare Workers">
+
+```js
+export default {
+  async fetch(request, env) {
+    if (request.method !== "POST") {
+      return new Response("Method not allowed", { status: 405 });
+    }
+
+    const payload = await request.json();
+
+    // アクティビティタイプ: 1=追加, 2=更新, 3=コメント, 4=削除
+    const eventMap = { 1: "created", 2: "updated", 3: "commented", 4: "deleted" };
+    const eventType = eventMap[payload.type];
+    if (!eventType) {
+      return new Response("Ignored", { status: 200 });
+    }
+
+    const issue = payload.content;
+    await fetch(
+      `https://api.github.com/repos/${env.GITHUB_REPO}/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `token ${env.GITHUB_TOKEN}`,
+          Accept: "application/vnd.github+json",
+        },
+        body: JSON.stringify({
+          event_type: `backlog_issue_${eventType}`,
+          client_payload: {
+            issue_key: `${payload.project.projectKey}-${issue.key_id}`,
+            summary: issue.summary,
+            priority: issue.priority?.name,
+            assignee: issue.assignee?.name,
+          },
+        }),
+      }
+    );
+
+    return new Response("OK", { status: 200 });
+  },
+};
+```
+
+</TabItem>
+</Tabs>
+
+## 受信側の GitHub Actions
+
+```yaml
+name: Handle Backlog Issue Event
+on:
+  repository_dispatch:
+    types:
+      - backlog_issue_created
+      - backlog_issue_updated
+      - backlog_issue_commented
+
+jobs:
+  handle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log event
+        run: |
+          echo "Event: ${{ github.event.action }}"
+          echo "Issue: ${{ github.event.client_payload.issue_key }}"
+          echo "Summary: ${{ github.event.client_payload.summary }}"
+
+      # 例: Backlog に課題が追加されたら GitHub Issue も作成
+      - name: Create GitHub Issue
+        if: github.event.action == 'backlog_issue_created'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "[${{ github.event.client_payload.issue_key }}] ${{ github.event.client_payload.summary }}" \
+            --body "Backlog 課題から自動作成。担当: ${{ github.event.client_payload.assignee }}"
+```
+
+## Backlog 側の Webhook 設定
+
+`bee webhook create` で Webhook を登録します。
+
+```sh
+bee webhook create -p PROJECT -n "GitHub連携" \
+  --hook-url "https://your-worker.workers.dev/webhook" \
+  --activity-type-ids 1,2,3
+```
+
+:::tip
+主なアクティビティタイプ ID: `1` = 課題の追加、`2` = 課題の更新、`3` = 課題にコメント、`4` = 課題の削除
+:::

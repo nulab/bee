@@ -1,0 +1,37 @@
+---
+title: PR 作成時に課題へリンクを貼る
+description: ブランチ名から Backlog 課題キーを抽出し、PR の URL を課題にコメントする
+---
+
+ブランチ名に `PROJECT-123` のような課題キーを含める運用をしていれば、PR 作成時に Backlog 課題へ自動でリンクを追加できます。
+
+```yaml
+name: Link PR to Backlog Issue
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  link:
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - name: Extract issue key from branch name
+        id: extract
+        run: |
+          ISSUE_KEY=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' | head -1)
+          echo "issue_key=$ISSUE_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Comment PR link on Backlog issue
+        if: steps.extract.outputs.issue_key != ''
+        run: |
+          npx @nulab/bee issue comment ${{ steps.extract.outputs.issue_key }} \
+            --body "PR が作成されました: ${{ github.event.pull_request.html_url }}"
+```
+
+## ポイント
+
+- ブランチ名の規約は `feature/PROJECT-123-description` や `PROJECT-123/description` など自由に決められます。正規表現 `[A-Z_]+-[0-9]+` で最初にマッチした課題キーを使います。
+- PR タイトルから抽出したい場合は `github.head_ref` を `github.event.pull_request.title` に変更してください。

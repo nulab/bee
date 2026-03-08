@@ -1,0 +1,51 @@
+---
+title: リリース時に関連課題へ通知する
+description: リリースタグ作成時に、含まれるコミットから課題キーを抽出して各課題にリリース情報をコメントする
+---
+
+リリースタグの作成をトリガーに、前回タグからのコミットに含まれる課題キーを抽出し、各課題にリリースバージョンをコメントします。
+
+```yaml
+name: Notify Backlog Issues on Release
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect issue keys from commits
+        id: collect
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            RANGE="${PREV_TAG}..HEAD"
+          else
+            RANGE="HEAD"
+          fi
+          KEYS=$(git log "$RANGE" --oneline | grep -oE '[A-Z_]+-[0-9]+' | sort -u | tr '\n' ' ')
+          echo "issue_keys=$KEYS" >> "$GITHUB_OUTPUT"
+
+      - name: Comment release info on each issue
+        if: steps.collect.outputs.issue_keys != ''
+        run: |
+          for KEY in ${{ steps.collect.outputs.issue_keys }}; do
+            npx @nulab/bee issue comment "$KEY" \
+              --body "リリース ${{ github.event.release.tag_name }} に含まれています: ${{ github.event.release.html_url }}" \
+              || echo "Warning: Failed to comment on $KEY"
+          done
+```
+
+## ポイント
+
+- `fetch-depth: 0` で全履歴を取得する必要があります。
+- コミットメッセージに `PROJECT-123` を含める運用が前提です。Conventional Commits と組み合わせると効果的です（例: `feat(PROJECT-123): ログイン機能を追加`）。
+- 課題が見つからない場合はスキップするため、関係ないコミットが混ざっていても安全です。
