@@ -1,6 +1,7 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   patchCategories: vi.fn(),
@@ -43,12 +44,11 @@ describe("category edit", () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("Name");
     mockClient.patchCategories.mockResolvedValue({ id: 1, name: "Name" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { edit } = await import("./edit");
-    await edit.run?.({ args: { category: "1", project: "TEST", name: "Name", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Name"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { edit } = await import("./edit");
+      await edit.run?.({
+        args: { category: "1", project: "TEST", name: "Name", json: "" },
+      } as never);
+    }, "Name");
   });
 });

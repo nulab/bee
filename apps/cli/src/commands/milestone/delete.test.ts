@@ -1,6 +1,7 @@
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   deleteVersions: vi.fn(),
@@ -40,7 +41,10 @@ describe("milestone delete", () => {
     const { deleteMilestone } = await import("./delete");
     await deleteMilestone.run?.({ args: { milestone: "1", project: "TEST", yes: true } } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete milestone 1? This cannot be undone.",
+      true,
+    );
   });
 
   it("cancels when user declines confirmation", async () => {
@@ -56,14 +60,11 @@ describe("milestone delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { deleteMilestone } = await import("./delete");
-    await deleteMilestone.run?.({
-      args: { milestone: "1", project: "TEST", yes: true, json: "" },
-    } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("v1.0.0"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { deleteMilestone } = await import("./delete");
+      await deleteMilestone.run?.({
+        args: { milestone: "1", project: "TEST", yes: true, json: "" },
+      } as never);
+    }, "v1.0.0");
   });
 });

@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getPullRequestsCount: vi.fn(),
@@ -43,10 +44,18 @@ describe("pr count", () => {
 
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getPullRequestsCount.mockResolvedValue({ count: 10 });
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    await expectStdoutContaining(async () => {
+      const { count } = await import("./count");
+      await count.run?.({ args: { project: "TEST", repo: "my-repo", json: "" } } as never);
+    }, "10");
+  });
+
+  it("throws error for unknown status name", async () => {
     const { count } = await import("./count");
-    await count.run?.({ args: { project: "TEST", repo: "my-repo", json: "" } } as never);
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("10"));
-    writeSpy.mockRestore();
+    await expect(
+      count.run?.({
+        args: { repo: "my-repo", status: "invalid" },
+      } as never),
+    ).rejects.toThrow('Unknown status "invalid". Valid values: open, closed, merged');
   });
 });

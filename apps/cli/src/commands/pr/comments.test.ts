@@ -1,6 +1,6 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getPullRequestComments: vi.fn(),
@@ -11,13 +11,6 @@ vi.mock("@repo/backlog-utils", () => ({
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
 
 const sampleComments = [
   {
@@ -36,7 +29,6 @@ const sampleComments = [
 
 describe("pr comments", () => {
   it("displays pull request comments", async () => {
-    setupMocks();
     mockClient.getPullRequestComments.mockResolvedValue(sampleComments);
 
     const { comments } = await import("./comments");
@@ -53,7 +45,6 @@ describe("pr comments", () => {
   });
 
   it("shows message when no comments found", async () => {
-    setupMocks();
     mockClient.getPullRequestComments.mockResolvedValue([]);
 
     const { comments } = await import("./comments");
@@ -63,7 +54,6 @@ describe("pr comments", () => {
   });
 
   it("filters out comments without content", async () => {
-    setupMocks();
     mockClient.getPullRequestComments.mockResolvedValue([
       { id: 1, content: "", createdUser: { name: "Alice" }, created: "2025-01-01T00:00:00Z" },
     ]);
@@ -75,17 +65,13 @@ describe("pr comments", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.getPullRequestComments.mockResolvedValue(sampleComments);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { comments } = await import("./comments");
-    await comments.run?.({
-      args: { number: "42", project: "PROJ", repo: "repo", json: "" },
-    } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Looks good!"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { comments } = await import("./comments");
+      await comments.run?.({
+        args: { number: "42", project: "PROJ", repo: "repo", json: "" },
+      } as never);
+    }, "Looks good!");
   });
 });

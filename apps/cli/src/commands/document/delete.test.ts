@@ -1,6 +1,7 @@
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   deleteDocument: vi.fn(),
@@ -40,7 +41,10 @@ describe("document delete", () => {
     const { deleteDocument } = await import("./delete");
     await deleteDocument.run?.({ args: { document: "12345", yes: true } } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete document 12345? This cannot be undone.",
+      true,
+    );
   });
 
   it("cancels when user declines confirmation", async () => {
@@ -56,12 +60,9 @@ describe("document delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteDocument.mockResolvedValue({ id: "1", title: "My Doc" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { deleteDocument } = await import("./delete");
-    await deleteDocument.run?.({ args: { document: "12345", yes: true, json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("My Doc"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { deleteDocument } = await import("./delete");
+      await deleteDocument.run?.({ args: { document: "12345", yes: true, json: "" } } as never);
+    }, "My Doc");
   });
 });

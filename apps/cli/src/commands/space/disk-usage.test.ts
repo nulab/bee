@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getSpaceDiskUsage: vi.fn(),
@@ -39,12 +40,9 @@ describe("space disk-usage", () => {
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getSpaceDiskUsage.mockResolvedValue(sampleDiskUsage);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { diskUsage } = await import("./disk-usage");
-    await diskUsage.run?.({ args: { json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("1073741824"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { diskUsage } = await import("./disk-usage");
+      await diskUsage.run?.({ args: { json: "" } } as never);
+    }, "1073741824");
   });
 });

@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   postWatchingListItem: vi.fn(),
@@ -52,12 +53,9 @@ describe("watching add", () => {
       issue: { issueKey: "TEST-1", summary: "Fix bug" },
     });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { add } = await import("./add");
-    await add.run?.({ args: { issue: "TEST-1", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("TEST-1"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { add } = await import("./add");
+      await add.run?.({ args: { issue: "TEST-1", json: "" } } as never);
+    }, "TEST-1");
   });
 });
