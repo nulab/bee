@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const tags = new BeeCommand("tags")
   .summary("List wiki tags")
-  .description(
-    `List wiki tags in a Backlog project.
-
-Tags are labels attached to wiki pages for organization.`,
-  )
+  .description(`Tags are labels attached to wiki pages for organization.`)
   .argument("<project>", "Project ID or project key")
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])

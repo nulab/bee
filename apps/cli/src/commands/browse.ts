@@ -15,19 +15,9 @@ import { resolveUrl } from "./browse-url";
 const browse = new BeeCommand("browse")
   .summary("Open a Backlog page in the browser")
   .description(
-    `Open a Backlog page in the browser.
+    `With no arguments, opens the repository page (inside a Backlog repo) or the dashboard.
 
-With no arguments, the behavior depends on context. Inside a Backlog Git
-repository it opens the repository page; otherwise it opens the dashboard.
-
-When given an issue key (e.g. \`PROJECT-123\`), opens that issue. A bare
-number like \`123\` is also accepted when the project can be inferred from
-the Git remote. Use \`--project\` with section flags to navigate directly
-to a specific project page.
-
-A file path opens the file in the Backlog Git viewer (e.g. \`src/main.ts\`).
-Append \`:<line>\` to jump to a specific line (e.g. \`src/main.ts:42\`).
-Paths ending with \`/\` open the directory tree view.`,
+Accepts an issue key (\`PROJECT-123\`), bare number (\`123\`, project inferred from Git remote), file path (\`src/main.ts\`), or path with line (\`src/main.ts:42\`). Paths ending with \`/\` open the directory tree. Use \`--project\` with section flags (e.g. \`--issues\`, \`--board\`) for project pages.`,
   )
   .argument("[target]", "Issue key, issue number, file path, or project key")
   .addOption(opt.project().makeOptionMandatory(false).default(undefined))

@@ -14,14 +14,9 @@ import * as opt from "../../lib/common-options";
 const comment = new BeeCommand("comment")
   .summary("Add a comment to an issue")
   .description(
-    `Add a comment to a Backlog issue.
+    `When input is piped, it is used as the body automatically.
 
-The comment body is required when adding a comment. When input is piped,
-it is used as the body automatically.
-
-Use \`--list\` to list all comments on an issue.
-Use \`--edit-last\` to edit your most recent comment.
-Use \`--delete-last\` to delete your most recent comment.`,
+Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operations.`,
   )
   .argument("<issue>", "Issue ID or issue key")
   .option("-b, --body <text>", "Comment body")

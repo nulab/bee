@@ -7,12 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const edit = new BeeCommand("edit")
   .summary("Edit an issue type")
-  .description(
-    `Update an existing issue type in a Backlog project.
-
-Only the specified fields will be updated. Fields that are not provided
-will remain unchanged.`,
-  )
+  .description(`Only specified fields are updated; others remain unchanged.`)
   .argument("<issueType>", "Issue type ID")
   .addOption(opt.project())
   .option("-n, --name <value>", "New name of the issue type")

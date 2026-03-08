@@ -24,12 +24,7 @@ const resolvePriorityIds = (priorities: string[]): number[] =>
 const list = new BeeCommand("list")
   .summary("List issues")
   .description(
-    `List issues from one or more Backlog projects.
-
-By default, issues are sorted by last updated date in descending order.
-Use filtering flags to narrow results by assignee, status, priority, and more.
-
-Multiple project keys can be specified as a comma-separated list.`,
+    `By default, sorted by last updated date in descending order. Multiple project keys can be comma-separated.`,
   )
   .addOption(
     new Option(

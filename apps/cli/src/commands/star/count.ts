@@ -6,12 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const count = new BeeCommand("count")
   .summary("Count received stars")
-  .description(
-    `Count stars received by a user.
-
-If no user ID is specified, counts stars for the authenticated user. Use
-\`--since\` and \`--until\` to filter by date range.`,
-  )
+  .description(`Defaults to the authenticated user if no user ID is given.`)
   .argument("[user]", "User ID")
   .option("--since <yyyy-MM-dd>", "Count stars received on or after this date")
   .option("--until <yyyy-MM-dd>", "Count stars received on or before this date")

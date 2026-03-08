@@ -7,12 +7,7 @@ import * as opt from "../../lib/common-options";
 const close = new BeeCommand("close")
   .summary("Close an issue")
   .description(
-    `Close a Backlog issue by setting its status to \`Closed\`.
-
-By default the resolution is set to \`Fixed\`. Use \`--resolution\` to
-specify a different resolution.
-
-Optionally add a comment with \`--comment\`.`,
+    `Sets the status to Closed with resolution \`Fixed\` by default. Use \`--resolution\` for a different resolution.`,
   )
   .argument("<issue>", "Issue ID or issue key")
   .option("-c, --comment <text>", "Comment to add when closing")

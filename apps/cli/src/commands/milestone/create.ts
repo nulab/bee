@@ -7,12 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const create = new BeeCommand("create")
   .summary("Create a milestone")
-  .description(
-    `Create a new milestone in a Backlog project.
-
-If \`--name\` is not provided, you will be prompted interactively.
-Use \`--start-date\` and \`--release-due-date\` to set the milestone schedule.`,
-  )
+  .description(`Omitted fields will be prompted interactively.`)
   .addOption(opt.project())
   .option("-n, --name <value>", "Milestone name")
   .option("-d, --description <value>", "Milestone description")

@@ -4,12 +4,7 @@ import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 
 const read = new BeeCommand("read")
   .summary("Mark a watching item as read")
-  .description(
-    `Mark a watching item as read.
-
-Specify the watching ID to mark as read. Use \`bee watching list\`
-to find watching IDs.`,
-  )
+  .description(`Use \`bee watching list\` to find watching IDs.`)
   .argument("<watching>", "Watching ID")
   .envVars([...ENV_AUTH])
   .examples([{ description: "Mark a watching item as read", command: "bee watching read 12345" }])

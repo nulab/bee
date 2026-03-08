@@ -7,13 +7,7 @@ import * as opt from "../../lib/common-options";
 const list = new BeeCommand("list")
   .summary("List projects")
   .description(
-    `List projects accessible to the authenticated user.
-
-By default, only active (non-archived) projects are shown. Use \`--archived\`
-to include archived projects.
-
-Administrators can use \`--all\` to list every project in the space, not just
-the ones they have joined.`,
+    `By default, only active (non-archived) projects are shown. Use \`--all\` to list all projects in the space (admin only).`,
   )
   .option("--archived", "Include archived projects")
   .option("--all", "Include all projects (admin only)")

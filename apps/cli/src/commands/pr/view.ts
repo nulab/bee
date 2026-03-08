@@ -7,14 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const view = new BeeCommand("view")
   .summary("View a pull request")
-  .description(
-    `Display details of a Backlog pull request.
-
-Shows the pull request summary, status, assignee, base/head branches,
-and description.
-
-Use \`--web\` to open the pull request in your default browser instead.`,
-  )
+  .description(`Use \`--web\` to open in the browser.`)
   .argument("<number>", "Pull request number")
   .addOption(opt.project())
   .addOption(opt.repo())

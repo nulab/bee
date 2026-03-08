@@ -17,12 +17,7 @@ const resolveStatusIds = (statuses: string[]): number[] =>
 
 const count = new BeeCommand("count")
   .summary("Count pull requests")
-  .description(
-    `Count pull requests in a Backlog repository.
-
-Accepts the same status filter as \`bee pr list\`. Outputs a plain number
-by default, or a JSON object with \`--json\`.`,
-  )
+  .description(`Accepts the same filter flags as \`bee pr list\`.`)
   .addOption(opt.project())
   .addOption(opt.repo())
   .option("-S, --status <name>", "Status name (repeatable)", collect, [] satisfies string[])

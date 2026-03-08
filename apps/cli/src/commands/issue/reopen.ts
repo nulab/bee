@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const reopen = new BeeCommand("reopen")
   .summary("Reopen an issue")
-  .description(
-    `Reopen a closed Backlog issue by setting its status back to \`Open\`.
-
-Optionally add a comment with \`--comment\`.`,
-  )
+  .description(`Sets the status back to Open.`)
   .argument("<issue>", "Issue ID or issue key")
   .option("-c, --comment <text>", "Comment to add when reopening")
   .addOption(opt.notify())

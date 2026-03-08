@@ -6,12 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const create = new BeeCommand("create")
   .summary("Create a wiki page")
-  .description(
-    `Create a new Backlog wiki page.
-
-Requires a project, page name, and body content. When input is piped,
-it is used as the body automatically.`,
-  )
+  .description(`When input is piped, it is used as the body automatically.`)
   .option("-p, --project <id>", "Project ID or project key")
   .option("-n, --name <name>", "Wiki page name")
   .option("-b, --body <text>", "Wiki page content")

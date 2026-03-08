@@ -35,15 +35,9 @@ const getActivitySummary = (activity: {
 const activities = new BeeCommand("activities")
   .summary("List project activities")
   .description(
-    `List recent activities of a Backlog project.
+    `Results are ordered by most recent first. Use \`--activity-type\` to filter by type.
 
-Shows the most recent updates including issue changes, wiki edits, git pushes,
-and other project activities. Results are ordered by most recent first.
-
-Use \`--activity-type\` to filter by specific activity types (repeatable).
-Use \`--count\` to control how many activities are returned (default: 20, max: 100).
-
-For a list of activity type IDs, see:
+For activity type IDs, see:
 https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#activity-type`,
   )
   .argument("<project>", "Project ID or project key")

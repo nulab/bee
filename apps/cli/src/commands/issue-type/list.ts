@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const list = new BeeCommand("list")
   .summary("List issue types")
-  .description(
-    `List issue types in a Backlog project.
-
-Issue types categorize issues and are displayed with their associated color.`,
-  )
+  .description(`Issue types categorize issues and are displayed with their associated color.`)
   .argument("[project]", "Project ID or project key")
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])

@@ -6,12 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const list = new BeeCommand("list")
   .summary("List milestones")
-  .description(
-    `List milestones in a Backlog project.
-
-Milestones (also known as versions) help track release schedules and
-group issues by development cycle.`,
-  )
+  .description(`Milestones (versions) track release schedules and group issues by development cycle.`)
   .argument("[project]", "Project ID or project key")
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])

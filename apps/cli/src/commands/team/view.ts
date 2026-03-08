@@ -6,12 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const view = new BeeCommand("view")
   .summary("View a team")
-  .description(
-    `Display details of a Backlog team.
-
-Shows team name, ID, creator, creation date, and the list of members
-belonging to the team.`,
-  )
+  .description(`Shows team details and the list of members.`)
   .argument("<team>", "Team ID")
   .addOption(opt.json())
   .envVars([...ENV_AUTH])

@@ -6,13 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const add = new BeeCommand("add")
   .summary("Add a star")
-  .description(
-    `Add a star to an issue, comment, wiki page, or pull request comment.
-
-Exactly one of \`--issue\`, \`--comment\`, \`--wiki\`, or \`--pr-comment\` must be
-provided. The \`--issue\` flag accepts an issue key (e.g., PROJECT-123) or a
-numeric ID. Other flags require numeric IDs.`,
-  )
+  .description(`Specify exactly one target: \`--issue\` (accepts key or ID), \`--comment\`, \`--wiki\`, or \`--pr-comment\`.`)
   .addOption(opt.issue())
   .option("--comment <number>", "Comment ID to star")
   .option("--wiki <number>", "Wiki page ID to star")

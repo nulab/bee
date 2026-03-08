@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const users = new BeeCommand("users")
   .summary("List project users")
-  .description(
-    `List members of a Backlog project.
-
-Displays each user's ID, user ID, name, and role within the project.`,
-  )
+  .description(`Displays each member's ID, name, and role.`)
   .argument("<project>", "Project ID or project key")
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])

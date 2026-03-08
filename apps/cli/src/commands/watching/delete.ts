@@ -6,13 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const deleteWatching = new BeeCommand("delete")
   .summary("Delete a watching item")
-  .description(
-    `Delete a watching item.
-
-This removes the issue from your watching list. You will no longer receive
-notifications for updates to the issue. You will be prompted for confirmation
-unless \`--yes\` is provided.`,
-  )
+  .description(`Removes the issue from your watching list. You will no longer receive update notifications.`)
   .argument("<watching>", "Watching ID")
   .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())

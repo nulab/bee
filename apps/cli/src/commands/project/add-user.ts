@@ -7,14 +7,7 @@ import { RequiredOption, resolveOptions } from "../../lib/required-option";
 
 const addUser = new BeeCommand("add-user")
   .summary("Add a user to a project")
-  .description(
-    `Add a user to a Backlog project.
-
-The user is specified by their numeric user ID. Use \`bee project users\`
-to look up user IDs.
-
-Requires Administrator or Project Administrator role.`,
-  )
+  .description(`Use \`bee project users\` to look up user IDs.`)
   .addOption(opt.project())
   .addOption(new RequiredOption("--user-id <id>", "User ID"))
   .addOption(opt.json())

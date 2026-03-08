@@ -7,12 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const create = new BeeCommand("create")
   .summary("Create a pull request")
-  .description(
-    `Create a new pull request in a Backlog repository.
-
-Requires a base branch, head branch, title, and description. When run
-interactively, omitted required fields will be prompted.`,
-  )
+  .description(`Omitted required fields will be prompted interactively.`)
   .addOption(opt.project())
   .addOption(opt.repo())
   .option("--base <branch>", "Base branch name")

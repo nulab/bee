@@ -6,14 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const view = new BeeCommand("view")
   .summary("View a user")
-  .description(
-    `Display details of a Backlog user.
-
-Shows user profile information including name, user ID, email address,
-role, language, and last login time.
-
-Use \`bee user me\` as a shortcut to view your own profile.`,
-  )
+  .description(`Use \`bee user me\` as a shortcut to view your own profile.`)
   .argument("<user>", "User ID")
   .addOption(opt.json())
   .envVars([...ENV_AUTH])

@@ -35,11 +35,7 @@ const renderTree = (children: Entity.Document.DocumentTreeNode[]): string[] => {
 
 const tree = new BeeCommand("tree")
   .summary("Display document tree")
-  .description(
-    `Display the document tree structure of a Backlog project.
-
-Shows the hierarchical structure of documents with tree-style indentation.`,
-  )
+  .description(`Shows the hierarchical structure of documents with tree-style indentation.`)
   .argument("[project]", "Project ID or project key", process.env.BACKLOG_PROJECT)
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])

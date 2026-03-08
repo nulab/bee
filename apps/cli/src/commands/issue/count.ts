@@ -23,12 +23,7 @@ const resolvePriorityIds = (priorities: string[]): number[] =>
 
 const count = new BeeCommand("count")
   .summary("Count issues")
-  .description(
-    `Count issues matching the given filter criteria.
-
-Accepts the same filter flags as \`bee issue list\`. Outputs a plain number
-by default, or a JSON object with \`--json\`.`,
-  )
+  .description(`Accepts the same filter flags as \`bee issue list\`.`)
   .addOption(
     new Option(
       "-p, --project <id>",

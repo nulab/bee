@@ -7,11 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const comments = new BeeCommand("comments")
   .summary("List comments on a pull request")
-  .description(
-    `List comments on a Backlog pull request.
-
-Displays all comments in chronological order with the author and date.`,
-  )
+  .description(`Displays all comments in chronological order.`)
   .argument("<number>", "Pull request number")
   .addOption(opt.project())
   .addOption(opt.repo())

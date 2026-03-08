@@ -6,12 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const list = new BeeCommand("list")
   .summary("List users")
-  .description(
-    `List all users in the Backlog space.
-
-Displays each user's ID, user ID, name, and role. Only space administrators
-can see the full list of users.`,
-  )
+  .description(`Only space administrators can see the full list of users.`)
   .addOption(opt.json())
   .envVars([...ENV_AUTH])
   .examples([

@@ -6,12 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const edit = new BeeCommand("edit")
   .summary("Edit a project")
-  .description(
-    `Update an existing Backlog project.
-
-Only the specified fields will be updated. Fields that are not provided
-will remain unchanged.`,
-  )
+  .description(`Only specified fields are updated; others remain unchanged.`)
   .argument("<project>", "Project ID or project key")
   .option("-n, --name <name>", "New name of the project")
   .option("-k, --key <key>", "New key of the project")

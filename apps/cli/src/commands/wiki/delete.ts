@@ -6,12 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const deleteWiki = new BeeCommand("delete")
   .summary("Delete a wiki page")
-  .description(
-    `Delete a Backlog wiki page.
-
-This action is irreversible. You will be prompted for confirmation unless
-\`--yes\` is provided.`,
-  )
+  .description(`This action is irreversible.`)
   .argument("<wiki>", "Wiki page ID")
   .option("-y, --yes", "Skip confirmation prompt")
   .option("--mail-notify", "Send notification email")

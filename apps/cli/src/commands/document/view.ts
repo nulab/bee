@@ -6,14 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const view = new BeeCommand("view")
   .summary("View a document")
-  .description(
-    `Display details of a Backlog document.
-
-Shows the document title, metadata, and body content.
-
-Use \`--web\` to open the document in your default browser instead. The
-\`--project\` flag is required when using \`--web\`.`,
-  )
+  .description(`Use \`--web\` to open in the browser (\`--project\` is required for \`--web\`).`)
   .argument("<document>", "Document ID")
   .option("-p, --project <id>", "Project ID or project key (required for --web)")
   .addOption(opt.web("document"))

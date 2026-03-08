@@ -14,10 +14,7 @@ const parseReadFilter = (value: string | undefined): boolean | undefined => {
 const count = new BeeCommand("count")
   .summary("Count notifications")
   .description(
-    `Display the count of notifications for the authenticated user.
-
-By default, returns the count of all notifications regardless of read status.
-Use \`--already-read\` and \`--resource-already-read\` to filter by read status.
+    `By default, counts all notifications regardless of read status.
 
 For details, see:
 https://developer.nulab.com/docs/backlog/api/2/count-notifications/`,

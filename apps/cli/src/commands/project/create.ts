@@ -7,11 +7,7 @@ import * as opt from "../../lib/common-options";
 const create = new BeeCommand("create")
   .summary("Create a project")
   .description(
-    `Create a new Backlog project.
-
-Project key must consist of uppercase letters (A\u2013Z), numbers (0\u20139), and
-underscores (\`_\`). If \`--name\` or \`--key\` is not provided, you will be
-prompted interactively.`,
+    `Project key must consist of uppercase letters, numbers, and underscores. Omitted fields will be prompted interactively.`,
   )
   .option("-k, --key <key>", "Project key")
   .option("-n, --name <name>", "Project name")

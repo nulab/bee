@@ -8,14 +8,10 @@ import { BeeCommand } from "../../lib/bee-command";
 const login = new BeeCommand("login")
   .summary("Authenticate with a Backlog space")
   .description(
-    `Authenticate with a Backlog space.
+    `The default mode is API key with interactive prompts.
 
-The default authentication mode is API key. You will be prompted to enter
-the space hostname and API key interactively.
-
-Alternatively, use \`--with-token\` to pass an API key on standard input.
-For OAuth authentication, use \`--method oauth\`. You will need to provide
-an OAuth Client ID and Client Secret, then authorize in the browser.`,
+Use \`--with-token\` to pass an API key on standard input.
+Use \`--method oauth\` for OAuth authentication via the browser.`,
   )
   .option("-m, --method <method>", "The authentication method to use", "api-key")
   .option("--with-token", "Read token from standard input")

@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const list = new BeeCommand("list")
   .summary("List received stars")
-  .description(
-    `List stars received by a user.
-
-If no user ID is specified, lists stars for the authenticated user.`,
-  )
+  .description(`Defaults to the authenticated user if no user ID is given.`)
   .argument("[user]", "User ID")
   .addOption(opt.json())
   .envVars([...ENV_AUTH])

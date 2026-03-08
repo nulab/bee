@@ -7,14 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const view = new BeeCommand("view")
   .summary("View a repository")
-  .description(
-    `Display details of a Git repository in a Backlog project.
-
-Shows repository name, description, HTTP and SSH clone URLs, size,
-creation and update timestamps.
-
-Use \`--web\` to open the repository in your default browser instead.`,
-  )
+  .description(`Use \`--web\` to open in the browser.`)
   .argument("<repository>", "Repository name or ID")
   .addOption(opt.project())
   .addOption(opt.web("repository"))

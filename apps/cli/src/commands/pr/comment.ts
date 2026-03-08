@@ -8,13 +8,9 @@ import { resolveOptions } from "../../lib/required-option";
 const comment = new BeeCommand("comment")
   .summary("Add a comment to a pull request")
   .description(
-    `Add a comment to a Backlog pull request.
+    `When input is piped, it is used as the body automatically.
 
-The comment body is required when adding a comment. When input is piped,
-it is used as the body automatically.
-
-Use \`--list\` to list all comments on a pull request.
-Use \`--edit-last\` to edit your most recent comment.`,
+Use \`--list\` or \`--edit-last\` for other comment operations.`,
   )
   .argument("<number>", "Pull request number")
   .addOption(opt.project())
