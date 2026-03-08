@@ -88,7 +88,14 @@ jobs:
 
 ## カスタマイズ
 
-- **ステータス変更が不要な場合** — `bee issue edit` の行を削除すれば、リンクのコメントだけになります。
-- **自動クローズが不要な場合** — 「Close linked issues」ステップを削除してください。
-- **クローズではなく別のステータスにしたい場合** — `bee issue close` を `bee issue edit --status processed` に変更してください。
-- **`edited` イベントが不要な場合** — トリガーの `types` から `edited` を削除し、「Comment PR link on newly added issues」ステップを削除してください。
+ステータス変更が不要
+: `bee issue edit` の行を削除すれば、リンクのコメントだけになります。
+
+自動クローズが不要
+: 「Close linked issues」ステップを削除してください。
+
+クローズではなく別のステータスにしたい
+: `bee issue close` を `bee issue edit --status processed` に変更してください。
+
+`edited` イベントが不要
+: トリガーの `types` から `edited` を削除し、「Comment PR link on newly added issues」ステップを削除してください。
