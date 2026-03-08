@@ -1,4 +1,4 @@
-import { getClient, resolveUserId } from "@repo/backlog-utils";
+import { getClient, pullRequestUrl, resolveUserId } from "@repo/backlog-utils";
 import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT, ENV_REPO } from "../../lib/bee-command";
@@ -44,7 +44,7 @@ interactively, omitted required fields will be prompted.`,
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client, host } = await getClient();
 
     const base = await promptRequired("Base branch:", opts.base);
     const head = await promptRequired("Head branch:", opts.head);
@@ -79,6 +79,7 @@ interactively, omitted required fields will be prompted.`,
     const json = opts.json === true ? "" : opts.json;
     outputResult(pullRequest, { json }, (data) => {
       consola.success(`Created pull request #${data.number}: ${data.summary}`);
+      consola.info(pullRequestUrl(host, opts.project, opts.repo, data.number));
     });
   });
 

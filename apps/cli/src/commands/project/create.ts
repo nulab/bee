@@ -1,4 +1,4 @@
-import { getClient } from "@repo/backlog-utils";
+import { getClient, projectUrl } from "@repo/backlog-utils";
 import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
@@ -40,7 +40,7 @@ prompted interactively.`,
     },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client, host } = await getClient();
 
     const key = await promptRequired("Project key:", opts.key);
     const name = await promptRequired("Project name:", opts.name);
@@ -57,6 +57,7 @@ prompted interactively.`,
     const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(project, { ...opts, json: jsonArg }, (data) => {
       consola.success(`Created project ${data.projectKey}: ${data.name}`);
+      consola.info(projectUrl(host, data.projectKey));
     });
   });
 

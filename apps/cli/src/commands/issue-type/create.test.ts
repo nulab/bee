@@ -20,7 +20,12 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("issue-type create", () => {
   it("creates an issue type with provided name and color", async () => {
-    mockClient.postIssueType.mockResolvedValue({ id: 1, name: "Enhancement", color: "#2779ca" });
+    mockClient.postIssueType.mockResolvedValue({
+      id: 1,
+      name: "Enhancement",
+      color: "#2779ca",
+      projectId: 100,
+    });
 
     const { default: create } = await import("./create");
     await create.parseAsync(["-p", "TEST", "-n", "Enhancement", "--color", "#2779ca"], {
@@ -32,11 +37,19 @@ describe("issue-type create", () => {
       color: "#2779ca",
     });
     expect(consola.success).toHaveBeenCalledWith("Created issue type Enhancement (ID: 1)");
+    expect(consola.info).toHaveBeenCalledWith(
+      "https://example.backlog.com/EditIssueType.action?issueType.id=1&issueType.projectId=100",
+    );
   });
 
   it("prompts for name when not provided", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Prompted Type");
-    mockClient.postIssueType.mockResolvedValue({ id: 2, name: "Prompted Type", color: "#2779ca" });
+    mockClient.postIssueType.mockResolvedValue({
+      id: 2,
+      name: "Prompted Type",
+      color: "#2779ca",
+      projectId: 100,
+    });
 
     const { default: create } = await import("./create");
     await create.parseAsync(["-p", "TEST", "--color", "#2779ca"], { from: "user" });
@@ -45,7 +58,12 @@ describe("issue-type create", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    mockClient.postIssueType.mockResolvedValue({ id: 1, name: "Bug", color: "#e30000" });
+    mockClient.postIssueType.mockResolvedValue({
+      id: 1,
+      name: "Bug",
+      color: "#e30000",
+      projectId: 100,
+    });
 
     await expectStdoutContaining(async () => {
       const { default: create } = await import("./create");

@@ -54,6 +54,9 @@ describe("pr create", () => {
       attachmentId: [],
     });
     expect(consola.success).toHaveBeenCalledWith("Created pull request #1: Add feature");
+    expect(consola.info).toHaveBeenCalledWith(
+      "https://example.backlog.com/git/PROJ/repo/pullRequests/1",
+    );
   });
 
   it("creates a pull request with assignee @me", async () => {

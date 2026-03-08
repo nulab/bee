@@ -1,4 +1,4 @@
-import { getClient } from "@repo/backlog-utils";
+import { getClient, statusUrl } from "@repo/backlog-utils";
 import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
@@ -33,7 +33,7 @@ The \`--color\` flag must be one of the predefined Backlog colors.`,
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client, host } = await getClient();
 
     const name = await promptRequired("Status name:", opts.name);
 
@@ -44,6 +44,7 @@ The \`--color\` flag must be one of the predefined Backlog colors.`,
 
     outputResult(status, opts, (data) => {
       consola.success(`Created status ${data.name} (ID: ${data.id})`);
+      consola.info(statusUrl(host, opts.project, data.id));
     });
   });
 

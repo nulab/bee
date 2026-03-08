@@ -1,4 +1,4 @@
-import { getClient } from "@repo/backlog-utils";
+import { categoryUrl, getClient } from "@repo/backlog-utils";
 import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
@@ -22,7 +22,7 @@ If \`--name\` is not provided, you will be prompted interactively.`,
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client, host } = await getClient();
 
     const name = await promptRequired("Category name:", opts.name);
 
@@ -30,6 +30,7 @@ If \`--name\` is not provided, you will be prompted interactively.`,
 
     outputResult(category, opts, (data) => {
       consola.success(`Created category ${data.name} (ID: ${data.id})`);
+      consola.info(categoryUrl(host, data.id, data.projectId));
     });
   });
 

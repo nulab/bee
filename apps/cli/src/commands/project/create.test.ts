@@ -37,6 +37,7 @@ describe("project create", () => {
       }),
     );
     expect(consola.success).toHaveBeenCalledWith("Created project TEST: Test Project");
+    expect(consola.info).toHaveBeenCalledWith("https://example.backlog.com/projects/TEST");
   });
 
   it("prompts for key and name when not provided", async () => {

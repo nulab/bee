@@ -43,6 +43,28 @@ const wikiUrl = (host: string, wikiId: number): string =>
 const documentUrl = (host: string, projectKey: string, documentId: string): string =>
   buildBacklogUrl(host, `/document/${projectKey}/${documentId}`);
 
+/** Returns the URL for a category (component) edit page. */
+const categoryUrl = (host: string, categoryId: number, projectId: number): string =>
+  buildBacklogUrl(
+    host,
+    `/EditComponent.action?component.id=${categoryId}&component.projectId=${projectId}`,
+  );
+
+/** Returns the URL for a milestone (version) edit page. */
+const milestoneUrl = (host: string, milestoneId: number): string =>
+  buildBacklogUrl(host, `/EditVersion.action?version.id=${milestoneId}`);
+
+/** Returns the URL for an issue type edit page. */
+const issueTypeUrl = (host: string, issueTypeId: number, projectId: number): string =>
+  buildBacklogUrl(
+    host,
+    `/EditIssueType.action?issueType.id=${issueTypeId}&issueType.projectId=${projectId}`,
+  );
+
+/** Returns the URL for a status settings page. */
+const statusUrl = (host: string, projectKey: string, statusId: number): string =>
+  buildBacklogUrl(host, `/projects/${projectKey}/statuses/${statusId}`);
+
 /** Returns the URL for the dashboard. */
 const dashboardUrl = (host: string): string => buildBacklogUrl(host, "/dashboard");
 
@@ -100,16 +122,20 @@ const openOrPrintUrl = async (
 
 export {
   buildBacklogUrl,
+  categoryUrl,
   dashboardUrl,
   documentUrl,
   gitBlobUrl,
   gitCommitUrl,
   gitTreeUrl,
+  issueTypeUrl,
   issueUrl,
+  milestoneUrl,
   openOrPrintUrl,
   openUrl,
   projectUrl,
   pullRequestUrl,
   repositoryUrl,
+  statusUrl,
   wikiUrl,
 };

@@ -30,6 +30,9 @@ describe("milestone create", () => {
       expect.objectContaining({ name: "v1.0.0" }),
     );
     expect(consola.success).toHaveBeenCalledWith("Created milestone v1.0.0 (ID: 1)");
+    expect(consola.info).toHaveBeenCalledWith(
+      "https://example.backlog.com/EditVersion.action?version.id=1",
+    );
   });
 
   it("prompts for name when not provided", async () => {

@@ -2,6 +2,7 @@ import {
   PRIORITY_NAMES,
   PriorityId,
   getClient,
+  issueUrl,
   resolveProjectIds,
   resolveUserId,
 } from "@repo/backlog-utils";
@@ -57,7 +58,7 @@ or \`low\`.`,
     },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client, host } = await getClient();
 
     const project = await promptRequired("Project:", opts.project);
     const title = await promptRequired("Summary:", opts.title);
@@ -93,6 +94,7 @@ or \`low\`.`,
 
     outputResult(issue, opts as { json?: string }, (data) => {
       consola.success(`Created issue ${data.issueKey}: ${data.summary}`);
+      consola.info(issueUrl(host, data.issueKey));
     });
   });
 

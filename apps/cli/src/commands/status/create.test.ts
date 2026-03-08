@@ -32,6 +32,9 @@ describe("status create", () => {
       color: "#2779ca",
     });
     expect(consola.success).toHaveBeenCalledWith("Created status In Review (ID: 1)");
+    expect(consola.info).toHaveBeenCalledWith(
+      "https://example.backlog.com/projects/TEST/statuses/1",
+    );
   });
 
   it("prompts for name when not provided", async () => {

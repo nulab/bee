@@ -21,17 +21,21 @@ export { startCallbackServer } from "./oauth-callback";
 export type { CallbackServer } from "./oauth-callback";
 export {
   buildBacklogUrl,
+  categoryUrl,
   dashboardUrl,
   documentUrl,
   gitBlobUrl,
   gitCommitUrl,
   gitTreeUrl,
+  issueTypeUrl,
   issueUrl,
+  milestoneUrl,
   openOrPrintUrl,
   openUrl,
   projectUrl,
   pullRequestUrl,
   repositoryUrl,
+  statusUrl,
   wikiUrl,
 } from "./url";
 export {

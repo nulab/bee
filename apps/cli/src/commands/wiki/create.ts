@@ -1,4 +1,4 @@
-import { getClient, resolveProjectIds } from "@repo/backlog-utils";
+import { getClient, resolveProjectIds, wikiUrl } from "@repo/backlog-utils";
 import { outputResult, promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
@@ -33,7 +33,7 @@ it is used as the body automatically.`,
     },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client, host } = await getClient();
 
     const project = await promptRequired("Project:", opts.project);
     const name = await promptRequired("Page name:", opts.name);
@@ -50,6 +50,7 @@ it is used as the body automatically.`,
 
     outputResult(wiki, opts, (data) => {
       consola.success(`Created wiki page ${data.id}: ${data.name}`);
+      consola.info(wikiUrl(host, data.id));
     });
   });
 

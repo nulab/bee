@@ -1,4 +1,4 @@
-import { getClient } from "@repo/backlog-utils";
+import { getClient, milestoneUrl } from "@repo/backlog-utils";
 import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
@@ -30,7 +30,7 @@ Use \`--start-date\` and \`--release-due-date\` to set the milestone schedule.`,
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client, host } = await getClient();
 
     const name = await promptRequired("Milestone name:", opts.name);
 
@@ -43,6 +43,7 @@ Use \`--start-date\` and \`--release-due-date\` to set the milestone schedule.`,
 
     outputResult(milestone, opts, (data) => {
       consola.success(`Created milestone ${data.name} (ID: ${data.id})`);
+      consola.info(milestoneUrl(host, data.id));
     });
   });
 

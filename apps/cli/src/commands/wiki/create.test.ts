@@ -37,6 +37,7 @@ describe("wiki create", () => {
       mailNotify: undefined,
     });
     expect(consola.success).toHaveBeenCalledWith("Created wiki page 1: My Page");
+    expect(consola.info).toHaveBeenCalledWith("https://example.backlog.com/alias/wiki/1");
   });
 
   it("reads body from stdin when piped", async () => {

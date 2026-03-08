@@ -42,6 +42,7 @@ describe("document create", () => {
       }),
     );
     expect(consola.success).toHaveBeenCalledWith("Created document Meeting Notes (ID: 1)");
+    expect(consola.info).toHaveBeenCalledWith("https://example.backlog.com/document/100/1");
   });
 
   it("prompts for required fields when not provided", async () => {

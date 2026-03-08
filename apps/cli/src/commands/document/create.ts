@@ -1,4 +1,4 @@
-import { getClient, resolveProjectIds } from "@repo/backlog-utils";
+import { documentUrl, getClient, resolveProjectIds } from "@repo/backlog-utils";
 import { outputResult, promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
@@ -41,7 +41,7 @@ When input is piped, it is used as the body automatically.`,
     },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client, host } = await getClient();
 
     const project = await promptRequired("Project:", opts.project);
     const title = await promptRequired("Title:", opts.title);
@@ -61,6 +61,7 @@ When input is piped, it is used as the body automatically.`,
 
     outputResult(doc, opts, (data) => {
       consola.success(`Created document ${data.title} (ID: ${data.id})`);
+      consola.info(documentUrl(host, project, data.id));
     });
   });
 

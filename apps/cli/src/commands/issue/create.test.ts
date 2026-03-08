@@ -48,6 +48,7 @@ describe("issue create", () => {
       }),
     );
     expect(consola.success).toHaveBeenCalledWith("Created issue TEST-1: Fix bug");
+    expect(consola.info).toHaveBeenCalledWith("https://example.backlog.com/view/TEST-1");
   });
 
   it("prompts for required fields when not provided", async () => {
