@@ -1,5 +1,5 @@
 import { UserError } from "@repo/cli-utils";
-import { Backlog, Error as BacklogErrors } from "backlog-js";
+import { Backlog } from "backlog-js";
 import { refreshAccessToken } from "./oauth";
 import { formatResetTime } from "./rate-limit";
 import { resolveSpace, updateSpaceAuth } from "@repo/config";
@@ -140,7 +140,7 @@ const createOAuthClient = (
         } catch (error) {
           handleRateLimitError(error);
 
-          if (error instanceof BacklogErrors.BacklogAuthError && error.status === 401) {
+          if (isBacklogAuthError(error)) {
             await refreshTokenIfNeeded();
             // Retry with the new client
             const retryValue = Reflect.get(currentClient, prop, receiver);
@@ -156,8 +156,24 @@ const createOAuthClient = (
   return proxy;
 };
 
+/**
+ * Duck-typing check for backlog-js auth errors.
+ *
+ * backlog-js compiles classes to ES5, so `instanceof` doesn't work
+ * across CJS/ESM boundaries. We check `_name` and `_status` instead.
+ */
+const isBacklogAuthError = (error: unknown): boolean =>
+  error instanceof Error &&
+  (error as Record<string, unknown>)._name === "BacklogAuthError" &&
+  (error as Record<string, unknown>)._status === 401;
+
+const isBacklogRateLimitError = (error: unknown): error is Error & { response: Response } =>
+  error instanceof Error &&
+  (error as Record<string, unknown>)._name === "BacklogApiError" &&
+  (error as Record<string, unknown>)._status === 429;
+
 const handleRateLimitError = (error: unknown): void => {
-  if (error instanceof BacklogErrors.BacklogApiError && error.status === 429) {
+  if (isBacklogRateLimitError(error)) {
     const resetEpoch = error.response.headers.get("X-RateLimit-Reset");
     const resetMessage = resetEpoch
       ? `Rate limit resets at ${formatResetTime(Number(resetEpoch))} (X-RateLimit-Reset: ${resetEpoch}).`
