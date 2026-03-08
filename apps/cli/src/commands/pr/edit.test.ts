@@ -91,6 +91,24 @@ describe("pr edit", () => {
     );
   });
 
+  it("resolves @me to current user ID for assignee", async () => {
+    mockClient.getMyself.mockResolvedValue({ id: 99 });
+    mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
+
+    const { edit } = await import("./edit");
+    await edit.run?.({
+      args: { number: "42", project: "PROJ", repo: "repo", assignee: "@me" },
+    } as never);
+
+    expect(mockClient.getMyself).toHaveBeenCalled();
+    expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
+      "PROJ",
+      "repo",
+      42,
+      expect.objectContaining({ assigneeId: 99 }),
+    );
+  });
+
   it("outputs JSON when --json flag is set", async () => {
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
