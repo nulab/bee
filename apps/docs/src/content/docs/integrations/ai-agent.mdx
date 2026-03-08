@@ -8,6 +8,23 @@ import { Card, Steps, LinkCard } from "@astrojs/starlight/components";
 
 bee はターミナルツールとして、AI エージェントの「手足」としても活用できます。LLM ベースのエージェントが Backlog のデータを取得・操作する手段として、大きく 2 つのアプローチがあります。
 
+## LLM 向けドキュメントエンドポイント
+
+bee のドキュメントサイトでは、LLM がコマンドの使い方を効率的に取得できるエンドポイントを提供しています。AI エージェントにドキュメントを読み込ませる際に活用してください。
+
+<dl>
+  <dt>[`/llms.txt`](/bee/llms.txt)</dt>
+  <dd>コマンド一覧のサマリー。全体像の把握に最適。</dd>
+
+  <dt>[`/llms-full.txt`](/bee/llms-full.txt)</dt>
+  <dd>全コマンドの完全なリファレンスを 1 ファイルで取得。</dd>
+</dl>
+
+各ドキュメントページにも `.md` エンドポイントがあり、個別のページを Markdown 形式で取得できます。
+
+- [`/getting-started.md`](/bee/getting-started.md)
+- [`/commands/issue/list.md`](/bee/commands/issue/list.md)
+
 ## どちらを使うべきか
 
 <Card title="bee + Skills" icon="seti:shell">
