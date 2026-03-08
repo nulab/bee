@@ -13,12 +13,14 @@ It supports issue tracking, pull requests, wikis, notifications, and project adm
 Authenticate with \`bee auth login\`, then set \`BACKLOG_PROJECT\` to target a project.
 `;
 
-const renderCommandMarkdown = (entry: CommandEntry): string => {
+const renderCommandMarkdown = (entry: CommandEntry, headingLevel = 2): string => {
+  const h = "#".repeat(headingLevel);
+  const h2 = "#".repeat(headingLevel + 1);
   const flags = entry.args.filter((a) => a.type !== "positional");
   const positionals = entry.args.filter((a) => a.type === "positional");
   const lines: string[] = [];
 
-  lines.push(`## ${entry.title}`);
+  lines.push(`${h} ${entry.title}`);
   lines.push("");
   lines.push(entry.description);
   lines.push("");
@@ -28,15 +30,13 @@ const renderCommandMarkdown = (entry: CommandEntry): string => {
     lines.push("");
   }
 
-  // Usage
-  lines.push("### Usage");
+  lines.push(`${h2} Usage`);
   lines.push("");
   lines.push(`\`\`\`sh\n${buildUsageLine(entry.title, entry.args)}\n\`\`\``);
   lines.push("");
 
-  // Arguments
   if (positionals.length > 0) {
-    lines.push("### Arguments");
+    lines.push(`${h2} Arguments`);
     lines.push("");
     for (const arg of positionals) {
       let line = `- \`${arg.name.toUpperCase()}\`: ${arg.description ?? ""}`;
@@ -51,9 +51,8 @@ const renderCommandMarkdown = (entry: CommandEntry): string => {
     lines.push("");
   }
 
-  // Flags
   if (flags.length > 0) {
-    lines.push("### Flags");
+    lines.push(`${h2} Flags`);
     lines.push("");
     for (const arg of flags) {
       let line = `- \`${buildFlagParts(arg).join(", ")}\`: ${arg.description ?? ""}`;
@@ -65,9 +64,8 @@ const renderCommandMarkdown = (entry: CommandEntry): string => {
     lines.push("");
   }
 
-  // Examples
   if (entry.examples && entry.examples.length > 0) {
-    lines.push("### Examples");
+    lines.push(`${h2} Examples`);
     lines.push("");
     for (const ex of entry.examples) {
       lines.push(ex.description);
@@ -77,9 +75,8 @@ const renderCommandMarkdown = (entry: CommandEntry): string => {
     }
   }
 
-  // Environment variables
   if (entry.environment && entry.environment.length > 0) {
-    lines.push("### Environment variables");
+    lines.push(`${h2} Environment variables`);
     lines.push("");
     for (const [key, desc] of entry.environment) {
       lines.push(`- \`${key}\`: ${desc}`);
@@ -128,7 +125,7 @@ const renderDocPage = (slug: string): string => {
   const body = raw.replace(/^---[\s\S]*?---\s*/, "");
   const titleMatch = raw.match(/^title:\s*(.+)$/m);
   const title = titleMatch?.[1] ?? slug;
-  return `## ${title}\n\n${body.trim()}`;
+  return `# ${title}\n\n${body.trim()}`;
 };
 
 const buildLlmsFullTxt = async (): Promise<string> => {
@@ -144,7 +141,7 @@ const buildLlmsFullTxt = async (): Promise<string> => {
   lines.push("");
 
   for (const entry of commands) {
-    lines.push(renderCommandMarkdown(entry));
+    lines.push(renderCommandMarkdown(entry, 1));
   }
 
   return lines.join("\n");
