@@ -4,7 +4,7 @@ description: |-
   bee CLI のタブ補完を Bash・Zsh・Fish でセットアップする方法。
 ---
 
-import { Tabs, TabItem } from "@astrojs/starlight/components";
+import { Tabs, TabItem, LinkCard } from "@astrojs/starlight/components";
 
 bee は Bash、Zsh、Fish のタブ補完をサポートしています。コマンド名やフラグ名を途中まで入力して Tab キーを押すと、候補が自動補完されます。
 
@@ -50,3 +50,7 @@ bee <Tab>
 ### 補完候補が古い場合
 
 bee をアップデートした後は、補完スクリプトを再生成してください。セットアップと同じコマンドを再度実行するだけで更新されます。
+
+## 関連コマンド
+
+<LinkCard title="completion" href="../../commands/completion" description="シェル補完スクリプトの生成" />
