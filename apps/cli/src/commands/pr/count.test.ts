@@ -44,10 +44,9 @@ describe("pr count", () => {
 
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getPullRequestsCount.mockResolvedValue({ count: 10 });
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-    const { count } = await import("./count");
-    await count.run?.({ args: { project: "TEST", repo: "my-repo", json: "" } } as never);
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("10"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { count } = await import("./count");
+      await count.run?.({ args: { project: "TEST", repo: "my-repo", json: "" } } as never);
+    }, "10");
   });
 });

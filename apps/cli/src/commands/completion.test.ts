@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
 
 describe("completion", () => {
   it("generates bash completion script", async () => {
