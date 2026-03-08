@@ -49,4 +49,11 @@ describe("webhook list", () => {
       await list.run?.({ args: { project: "TEST", json: "" } } as never);
     }, "Deploy Hook");
   });
+
+  it("propagates API errors", async () => {
+    mockClient.getWebhooks.mockRejectedValue(new Error("Forbidden"));
+
+    const { list } = await import("./list");
+    await expect(list.run?.({ args: { project: "TEST" } } as never)).rejects.toThrow("Forbidden");
+  });
 });

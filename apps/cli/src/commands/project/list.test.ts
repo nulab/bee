@@ -69,4 +69,11 @@ describe("project list", () => {
       await list.run?.({ args: { json: "" } } as never);
     }, "PROJ1");
   });
+
+  it("propagates API errors", async () => {
+    mockClient.getProjects.mockRejectedValue(new Error("Unauthorized"));
+
+    const { list } = await import("./list");
+    await expect(list.run?.({ args: {} } as never)).rejects.toThrow("Unauthorized");
+  });
 });

@@ -113,4 +113,13 @@ describe("document list", () => {
       await list.run?.({ args: { project: "PROJECT", json: "" } } as never);
     }, "doc-1");
   });
+
+  it("propagates API errors", async () => {
+    mockClient.getDocuments.mockRejectedValue(new Error("API error"));
+
+    const { list } = await import("./list");
+    await expect(list.run?.({ args: { project: "PROJECT" } } as never)).rejects.toThrow(
+      "API error",
+    );
+  });
 });

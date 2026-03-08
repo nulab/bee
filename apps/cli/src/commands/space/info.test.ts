@@ -44,4 +44,11 @@ describe("space info", () => {
       await info.run?.({ args: { json: "" } } as never);
     }, "TESTSPACE");
   });
+
+  it("propagates API errors", async () => {
+    mockClient.getSpace.mockRejectedValue(new Error("Unauthorized"));
+
+    const { info } = await import("./info");
+    await expect(info.run?.({ args: {} } as never)).rejects.toThrow("Unauthorized");
+  });
 });

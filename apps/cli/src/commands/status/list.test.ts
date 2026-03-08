@@ -58,4 +58,11 @@ describe("status list", () => {
       await list.run?.({ args: { project: "TEST", json: "" } } as never);
     }, "Open");
   });
+
+  it("propagates API errors", async () => {
+    mockClient.getProjectStatuses.mockRejectedValue(new Error("Not Found"));
+
+    const { list } = await import("./list");
+    await expect(list.run?.({ args: { project: "TEST" } } as never)).rejects.toThrow("Not Found");
+  });
 });

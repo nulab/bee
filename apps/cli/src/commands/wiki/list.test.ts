@@ -64,4 +64,11 @@ describe("wiki list", () => {
       await list.run?.({ args: { project: "TEST", json: "" } } as never);
     }, "Home");
   });
+
+  it("propagates API errors", async () => {
+    mockClient.getWikis.mockRejectedValue(new Error("Forbidden"));
+
+    const { list } = await import("./list");
+    await expect(list.run?.({ args: { project: "TEST" } } as never)).rejects.toThrow("Forbidden");
+  });
 });

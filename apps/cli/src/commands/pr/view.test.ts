@@ -91,4 +91,13 @@ describe("pr view", () => {
       } as never);
     }, "Add feature A");
   });
+
+  it("propagates API errors", async () => {
+    mockClient.getPullRequest.mockRejectedValue(new Error("Not Found"));
+
+    const { view } = await import("./view");
+    await expect(
+      view.run?.({ args: { number: "42", project: "PROJ", repo: "repo" } } as never),
+    ).rejects.toThrow("Not Found");
+  });
 });
