@@ -34,11 +34,7 @@ If only one space is configured, it will be selected automatically. If multiple 
       const [firstSpace] = config.spaces;
       if (config.spaces.length === 1) {
         hostname = firstSpace.host;
-      } else if (!process.stdin.isTTY) {
-        throw new UserError(
-          "Hostname is required. Use --space to provide it in non-interactive mode.",
-        );
-      } else {
+      } else if (process.stdin.isTTY) {
         hostname = await consola.prompt("Select a space to log out from:", {
           type: "select",
           options: config.spaces.map((s) => s.host),
@@ -47,6 +43,10 @@ If only one space is configured, it will be selected automatically. If multiple 
         if (typeof hostname !== "string" || !hostname) {
           throw new UserError("No space selected.");
         }
+      } else {
+        throw new UserError(
+          "Hostname is required. Use --space to provide it in non-interactive mode.",
+        );
       }
     }
 
