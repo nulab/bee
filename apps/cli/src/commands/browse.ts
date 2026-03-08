@@ -6,6 +6,7 @@ import {
   getClient,
   openOrPrintUrl,
 } from "@repo/backlog-utils";
+import { UserError } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../lib/command-usage";
@@ -128,8 +129,7 @@ const browse = withUsage(
       });
 
       if (!result.ok) {
-        consola.error(result.error);
-        process.exit(1);
+        throw new UserError(result.error);
       }
 
       await openOrPrintUrl(result.url, Boolean(args["no-browser"]), consola);

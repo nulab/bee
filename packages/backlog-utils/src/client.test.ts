@@ -1,4 +1,3 @@
-import { spyOnProcessExit } from "@repo/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getClient } from "./client";
 import { Backlog } from "backlog-js";
@@ -97,24 +96,16 @@ describe("getClient", () => {
     expect(result.host).toBe("env.backlog.com");
   });
 
-  it("calls process.exit(1) when BACKLOG_API_KEY set but no BACKLOG_SPACE", async () => {
+  it("throws error when BACKLOG_API_KEY set but no BACKLOG_SPACE", async () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
     process.env.BACKLOG_API_KEY = "env-api-key";
-    const mockExit = spyOnProcessExit();
 
-    await getClient();
-
-    expect(mockExit).toHaveBeenCalledWith(1);
-    mockExit.mockRestore();
+    await expect(async () => getClient()).rejects.toThrow("No space configured");
   });
 
-  it("calls process.exit(1) when no space and no env vars configured", async () => {
+  it("throws error when no space and no env vars configured", async () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
-    const mockExit = spyOnProcessExit();
 
-    await getClient();
-
-    expect(mockExit).toHaveBeenCalledWith(1);
-    mockExit.mockRestore();
+    await expect(async () => getClient()).rejects.toThrow("No space configured");
   });
 });

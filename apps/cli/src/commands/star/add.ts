@@ -1,4 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
+import { UserError } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../../lib/command-usage";
@@ -54,17 +55,15 @@ const add = withUsage(
       );
 
       if (flags.length === 0) {
-        consola.error(
+        throw new UserError(
           "Exactly one of --issue, --comment, --wiki, or --pr-comment must be provided.",
         );
-        process.exit(1);
       }
 
       if (flags.length > 1) {
-        consola.error(
+        throw new UserError(
           "Only one of --issue, --comment, --wiki, or --pr-comment can be provided at a time.",
         );
-        process.exit(1);
       }
 
       const { client } = await getClient();

@@ -1,3 +1,4 @@
+import { UserError } from "@repo/cli-utils";
 import { loadConfig, removeSpace } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
@@ -56,10 +57,9 @@ const logout = withUsage(
         if (config.spaces.length === 1) {
           hostname = firstSpace.host;
         } else if (isNoInput()) {
-          consola.error(
+          throw new UserError(
             "Hostname is required. Use --space to provide it in BACKLOG_NO_INPUT mode.",
           );
-          return process.exit(1);
         } else {
           hostname = await consola.prompt("Select a space to log out from:", {
             type: "select",
@@ -67,8 +67,7 @@ const logout = withUsage(
           });
 
           if (typeof hostname !== "string" || !hostname) {
-            consola.error("No space selected.");
-            return process.exit(1);
+            throw new UserError("No space selected.");
           }
         }
       }
@@ -76,8 +75,7 @@ const logout = withUsage(
       try {
         removeSpace(hostname);
       } catch {
-        consola.error(`Space "${hostname}" is not configured.`);
-        return process.exit(1);
+        throw new UserError(`Space "${hostname}" is not configured.`);
       }
 
       consola.success(`Logged out of ${hostname}.`);

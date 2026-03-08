@@ -60,10 +60,8 @@ const create = withUsage(
           members: members.length > 0 ? members : undefined,
         });
       } catch (error) {
-        if (!handleTeamWriteError(error)) {
-          throw error;
-        }
-        return;
+        handleTeamWriteError(error);
+        throw error;
       }
 
       outputResult(t, args, (data) => {

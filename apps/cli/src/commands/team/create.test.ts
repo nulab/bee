@@ -54,18 +54,16 @@ describe("team create", () => {
     );
   });
 
-  it("shows error and exits when API returns 400 with empty body", async () => {
+  it("throws error when API returns 400 with empty body", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("Team");
     const apiError = Object.assign(new Error("Bad Request"), { _status: 400, _body: undefined });
     mockClient.postTeam.mockRejectedValue(apiError);
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
 
     const { create } = await import("./create");
-    await create.run?.({ args: { name: "Team" } } as never);
 
-    expect(consola.error).toHaveBeenCalledWith(expect.stringContaining("Administrator role"));
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
+    await expect(create.run?.({ args: { name: "Team" } } as never)).rejects.toThrow(
+      "Administrator role",
+    );
   });
 
   it("outputs JSON when --json flag is set", async () => {

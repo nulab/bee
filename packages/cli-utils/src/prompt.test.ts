@@ -1,4 +1,3 @@
-import { spyOnProcessExit } from "@repo/test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import consola from "consola";
 import { confirmOrExit, promptRequired } from "./prompt";
@@ -20,15 +19,9 @@ describe("promptRequired", () => {
     expect(consola.prompt).not.toHaveBeenCalled();
   });
 
-  it("exits with error when existing value is an empty string", async () => {
-    const mockExit = spyOnProcessExit();
-
-    await promptRequired("Label:", "");
-
-    expect(consola.error).toHaveBeenCalledWith("Label is required.");
-    expect(mockExit).toHaveBeenCalledWith(1);
+  it("throws error when existing value is an empty string", async () => {
+    await expect(promptRequired("Label:", "")).rejects.toThrow("Label is required.");
     expect(consola.prompt).not.toHaveBeenCalled();
-    mockExit.mockRestore();
   });
 
   it("shows prompt when no existing value is provided", async () => {
@@ -47,15 +40,10 @@ describe("promptRequired", () => {
     expect(result).toBe("prompted");
   });
 
-  it("calls process.exit(1) when prompt input is empty", async () => {
+  it("throws error when prompt input is empty", async () => {
     vi.mocked(consola.prompt).mockResolvedValue("" as never);
-    const mockExit = spyOnProcessExit();
 
-    await promptRequired("Label:");
-
-    expect(consola.error).toHaveBeenCalledWith("Label is required.");
-    expect(mockExit).toHaveBeenCalledWith(1);
-    mockExit.mockRestore();
+    await expect(promptRequired("Label:")).rejects.toThrow("Label is required.");
   });
 
   it("passes options to consola.prompt", async () => {
@@ -89,12 +77,8 @@ describe("promptRequired", () => {
 
   it("strips trailing colon from label for error message", async () => {
     vi.mocked(consola.prompt).mockResolvedValue("" as never);
-    const mockExit = spyOnProcessExit();
 
-    await promptRequired("Project key:");
-
-    expect(consola.error).toHaveBeenCalledWith("Project key is required.");
-    mockExit.mockRestore();
+    await expect(promptRequired("Project key:")).rejects.toThrow("Project key is required.");
   });
 
   it("returns existing value without prompting in --no-input mode", async () => {
@@ -105,18 +89,13 @@ describe("promptRequired", () => {
     expect(consola.prompt).not.toHaveBeenCalled();
   });
 
-  it("exits with error when value is missing in --no-input mode", async () => {
+  it("throws error when value is missing in --no-input mode", async () => {
     process.env.BACKLOG_NO_INPUT = "1";
-    const mockExit = spyOnProcessExit();
 
-    await promptRequired("Project key:");
-
-    expect(consola.error).toHaveBeenCalledWith(
+    await expect(promptRequired("Project key:")).rejects.toThrow(
       "Project key is required. Use arguments to provide it in BACKLOG_NO_INPUT mode.",
     );
-    expect(mockExit).toHaveBeenCalledWith(1);
     expect(consola.prompt).not.toHaveBeenCalled();
-    mockExit.mockRestore();
   });
 });
 
@@ -176,17 +155,12 @@ describe("confirmOrExit", () => {
     expect(consola.prompt).not.toHaveBeenCalled();
   });
 
-  it("exits with error when skipConfirm is not specified in --no-input mode", async () => {
+  it("throws error when skipConfirm is not specified in --no-input mode", async () => {
     process.env.BACKLOG_NO_INPUT = "1";
-    const mockExit = spyOnProcessExit();
 
-    await confirmOrExit("Are you sure?");
-
-    expect(consola.error).toHaveBeenCalledWith(
+    await expect(confirmOrExit("Are you sure?")).rejects.toThrow(
       "Confirmation required. Use --yes to skip in BACKLOG_NO_INPUT mode.",
     );
-    expect(mockExit).toHaveBeenCalledWith(1);
     expect(consola.prompt).not.toHaveBeenCalled();
-    mockExit.mockRestore();
   });
 });

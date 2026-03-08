@@ -37,17 +37,15 @@ describe("team edit", () => {
     );
   });
 
-  it("shows error and exits when API returns 400 with empty body", async () => {
+  it("throws error when API returns 400 with empty body", async () => {
     const apiError = Object.assign(new Error("Bad Request"), { _status: 400, _body: undefined });
     mockClient.patchTeam.mockRejectedValue(apiError);
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
 
     const { edit } = await import("./edit");
-    await edit.run?.({ args: { team: "1", name: "X" } } as never);
 
-    expect(consola.error).toHaveBeenCalledWith(expect.stringContaining("Administrator role"));
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
+    await expect(edit.run?.({ args: { team: "1", name: "X" } } as never)).rejects.toThrow(
+      "Administrator role",
+    );
   });
 
   it("outputs JSON when --json flag is set", async () => {

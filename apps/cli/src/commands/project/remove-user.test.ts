@@ -24,22 +24,14 @@ describe("project remove-user", () => {
     expect(consola.success).toHaveBeenCalledWith("Removed user John Doe from project TEST.");
   });
 
-  it("shows error when user-id is not a number", async () => {
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => {
-      throw new Error("process.exit");
-    });
-
+  it("throws error when user-id is not a number", async () => {
     const { removeUser } = await import("./remove-user");
 
     await expect(
       removeUser.run?.({
         args: { project: "TEST", "user-id": "abc" },
       } as never),
-    ).rejects.toThrow("process.exit");
-
-    expect(consola.error).toHaveBeenCalledWith("User ID must be a number.");
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
+    ).rejects.toThrow("User ID must be a number.");
   });
 
   it("outputs JSON when --json flag is set", async () => {

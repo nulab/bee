@@ -1,7 +1,4 @@
-import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-
-vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("completion", () => {
   it("generates bash completion script", async () => {
@@ -45,14 +42,11 @@ describe("completion", () => {
     writeSpy.mockRestore();
   });
 
-  it("shows error for unsupported shell", async () => {
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
-
+  it("throws error for unsupported shell", async () => {
     const { completion } = await import("./completion");
-    completion.run?.({ args: { shell: "powershell" } } as never);
 
-    expect(consola.error).toHaveBeenCalledWith(expect.stringContaining("Unsupported shell"));
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
+    expect(() => completion.run?.({ args: { shell: "powershell" } } as never)).toThrow(
+      "Unsupported shell",
+    );
   });
 });

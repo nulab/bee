@@ -1,5 +1,5 @@
 import { exchangeAuthorizationCode, openUrl, startCallbackServer } from "@repo/backlog-utils";
-import { promptRequired, readStdin } from "@repo/cli-utils";
+import { UserError, promptRequired, readStdin } from "@repo/cli-utils";
 import { type RcAuth, updateConfig } from "@repo/config";
 import { Backlog, OAuth2 } from "backlog-js";
 import { defineCommand } from "citty";
@@ -65,8 +65,7 @@ const login = withUsage(
       const { method } = args;
 
       if (method !== "api-key" && method !== "oauth") {
-        consola.error('Invalid auth method. Use "api-key" or "oauth".');
-        return process.exit(1);
+        throw new UserError('Invalid auth method. Use "api-key" or "oauth".');
       }
 
       const hostname = await promptRequired("Backlog space hostname:", process.env.BACKLOG_SPACE, {
@@ -97,10 +96,9 @@ const loginWithApiKey = async (
     const client = new Backlog({ host: hostname, apiKey });
     user = await client.getMyself();
   } catch {
-    consola.error(
+    throw new UserError(
       `Authentication failed. Could not connect to ${hostname} with the provided API key.`,
     );
-    return process.exit(1);
   }
 
   saveSpace(hostname, { method: "api-key", apiKey });
@@ -138,10 +136,9 @@ const loginWithOAuth = async (
     code = await callbackServer.waitForCallback(state);
   } catch (error) {
     callbackServer.stop();
-    consola.error(
+    throw new UserError(
       `OAuth authorization failed: ${error instanceof Error ? error.message : String(error)}`,
     );
-    return process.exit(1);
   } finally {
     callbackServer.stop();
   }
@@ -157,8 +154,7 @@ const loginWithOAuth = async (
       redirectUri,
     });
   } catch {
-    consola.error("Failed to exchange authorization code for tokens.");
-    return process.exit(1);
+    throw new UserError("Failed to exchange authorization code for tokens.");
   }
 
   let user;
@@ -166,8 +162,7 @@ const loginWithOAuth = async (
     const client = new Backlog({ host: hostname, accessToken: tokenResponse.access_token });
     user = await client.getMyself();
   } catch {
-    consola.error("Authentication verification failed.");
-    return process.exit(1);
+    throw new UserError("Authentication verification failed.");
   }
 
   saveSpace(hostname, {

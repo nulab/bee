@@ -1,5 +1,5 @@
 import { handleBacklogApiError } from "@repo/backlog-utils";
-import { handleValidationError } from "@repo/cli-utils";
+import { UserError, handleValidationError } from "@repo/cli-utils";
 import { defineCommand, runCommand, runMain } from "citty";
 import { showCommandUsage } from "./lib/command-usage";
 import pkg from "../package.json" with { type: "json" };
@@ -49,7 +49,11 @@ if (rawArgs.includes("--help") || rawArgs.includes("-h") || rawArgs.includes("--
   try {
     await runCommand(main, { rawArgs });
   } catch (error) {
-    if (!handleBacklogApiError(error, { json: useJson }) && !handleValidationError(error)) {
+    // UserError = expected failure (bad input, missing config, …) → message only
+    if (error instanceof UserError) {
+      consola.error(error.message);
+    } else if (!handleBacklogApiError(error, { json: useJson }) && !handleValidationError(error)) {
+      // Unrecognised error = unexpected bug → full object (includes stack trace)
       consola.error(error);
     }
     process.exit(1);

@@ -1,3 +1,4 @@
+import { UserError } from "@repo/cli-utils";
 import { Backlog, Error as BacklogErrors } from "backlog-js";
 import { refreshAccessToken } from "./oauth";
 import { formatResetTime } from "./rate-limit";
@@ -49,8 +50,7 @@ const getClient = async (): Promise<{
     return { client, host: envHost };
   }
 
-  consola.error("No space configured. Run `bee auth login` to authenticate.");
-  return process.exit(1);
+  throw new UserError("No space configured. Run `bee auth login` to authenticate.");
 };
 
 /**
@@ -71,18 +71,23 @@ const createOAuthClient = (
   let currentClient = new Backlog({ host, accessToken: oauthAuth.accessToken });
   let refreshPromise: Promise<boolean> | null = null;
 
-  const refreshTokenIfNeeded = async (): Promise<boolean> => {
+  const refreshTokenIfNeeded = async (): Promise<void> => {
     if (refreshPromise) {
-      return refreshPromise;
+      const result = await refreshPromise;
+      if (!result) {
+        throw new UserError(
+          "OAuth session has expired. Run `bee auth login -m oauth` to re-authenticate.",
+        );
+      }
+      return;
     }
 
     const { clientId, clientSecret, refreshToken } = oauthAuth;
 
     if (!clientId || !clientSecret || !refreshToken) {
-      consola.error(
+      throw new UserError(
         "OAuth credentials are incomplete. Run `bee auth login -m oauth` to re-authenticate.",
       );
-      return false;
     }
 
     refreshPromise = (async () => {
@@ -110,16 +115,17 @@ const createOAuthClient = (
         consola.success("Token refreshed successfully.");
         return true;
       } catch {
-        consola.error(
-          "OAuth session has expired. Run `bee auth login -m oauth` to re-authenticate.",
-        );
         return false;
       }
     })();
 
     const result = await refreshPromise;
     refreshPromise = null;
-    return result;
+    if (!result) {
+      throw new UserError(
+        "OAuth session has expired. Run `bee auth login -m oauth` to re-authenticate.",
+      );
+    }
   };
 
   const proxy = new Proxy(currentClient, {
@@ -135,10 +141,7 @@ const createOAuthClient = (
           handleRateLimitError(error);
 
           if (error instanceof BacklogErrors.BacklogAuthError && error.status === 401) {
-            const refreshed = await refreshTokenIfNeeded();
-            if (!refreshed) {
-              process.exit(1);
-            }
+            await refreshTokenIfNeeded();
             // Retry with the new client
             const retryValue = Reflect.get(currentClient, prop, receiver);
             return await (retryValue as (...a: unknown[]) => unknown).apply(currentClient, args);
@@ -159,7 +162,7 @@ const handleRateLimitError = (error: unknown): void => {
     const resetMessage = resetEpoch
       ? `Rate limit resets at ${formatResetTime(Number(resetEpoch))}.`
       : "Please wait and try again later.";
-    throw new Error(`API rate limit exceeded. ${resetMessage}`);
+    throw new UserError(`API rate limit exceeded. ${resetMessage}`);
   }
 };
 

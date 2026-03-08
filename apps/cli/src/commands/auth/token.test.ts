@@ -1,6 +1,4 @@
 import { resolveSpace } from "@repo/config";
-import { spyOnProcessExit } from "@repo/test-utils";
-import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@repo/config", () => ({
@@ -8,8 +6,6 @@ vi.mock("@repo/config", () => ({
   loadConfig: vi.fn(),
   resolveSpace: vi.fn(),
 }));
-
-vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("auth token", () => {
   it("outputs API key to stdout", async () => {
@@ -46,20 +42,12 @@ describe("auth token", () => {
     }
   });
 
-  it("calls process.exit(1) when no space is configured", async () => {
+  it("throws error when no space is configured", async () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
-    const exitSpy = spyOnProcessExit();
 
-    try {
-      const { token } = await import("./token");
-      token.run?.({ args: {} } as never);
-
-      expect(consola.error).toHaveBeenCalledWith(
-        "No space configured. Run `bee auth login` to authenticate.",
-      );
-      expect(exitSpy).toHaveBeenCalledWith(1);
-    } finally {
-      exitSpy.mockRestore();
-    }
+    const { token } = await import("./token");
+    expect(() => token.run?.({ args: {} } as never)).toThrow(
+      "No space configured. Run `bee auth login` to authenticate.",
+    );
   });
 });

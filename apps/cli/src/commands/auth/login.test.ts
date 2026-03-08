@@ -2,7 +2,6 @@ import { exchangeAuthorizationCode, startCallbackServer } from "@repo/backlog-ut
 import { promptRequired } from "@repo/cli-utils";
 import { updateConfig } from "@repo/config";
 import { Backlog, OAuth2 } from "backlog-js";
-import { spyOnProcessExit } from "@repo/test-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -26,7 +25,8 @@ vi.mock("@repo/backlog-utils", () => ({
   openUrl: vi.fn(),
 }));
 
-vi.mock("@repo/cli-utils", () => ({
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
   promptRequired: vi.fn(),
   readStdin: vi.fn(),
 }));
@@ -103,34 +103,27 @@ describe("auth login", () => {
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("bad-key");
-      const exitSpy = spyOnProcessExit();
 
       const { login } = await import("./login");
-      await login.run?.({
-        args: { method: "api-key" },
-      } as never);
-
-      expect(consola.error).toHaveBeenCalledWith(
+      await expect(
+        login.run?.({
+          args: { method: "api-key" },
+        } as never),
+      ).rejects.toThrow(
         "Authentication failed. Could not connect to example.backlog.com with the provided API key.",
       );
-      expect(exitSpy).toHaveBeenCalledWith(1);
       expect(updateConfig).not.toHaveBeenCalled();
-      exitSpy.mockRestore();
     });
   });
 
   describe("invalid method", () => {
     it("returns error for invalid method", async () => {
-      const exitSpy = spyOnProcessExit();
-
       const { login } = await import("./login");
-      await login.run?.({
-        args: { method: "invalid" },
-      } as never);
-
-      expect(consola.error).toHaveBeenCalledWith('Invalid auth method. Use "api-key" or "oauth".');
-      expect(exitSpy).toHaveBeenCalledWith(1);
-      exitSpy.mockRestore();
+      await expect(
+        login.run?.({
+          args: { method: "invalid" },
+        } as never),
+      ).rejects.toThrow('Invalid auth method. Use "api-key" or "oauth".');
     });
   });
 
@@ -214,7 +207,7 @@ describe("auth login", () => {
       );
     });
 
-    it("calls process.exit(1) when error occurs during callback", async () => {
+    it("throws error when error occurs during callback", async () => {
       const mockStop = vi.fn();
       vi.mocked(startCallbackServer).mockReturnValue({
         port: 5033,
@@ -227,71 +220,58 @@ describe("auth login", () => {
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
-      const exitSpy = spyOnProcessExit();
 
       const { login } = await import("./login");
-      await login.run?.({
-        args: {
-          method: "oauth",
-          "client-id": "my-client-id",
-          "client-secret": "my-client-secret",
-        },
-      } as never);
-
-      expect(consola.error).toHaveBeenCalledWith(
-        "OAuth authorization failed: OAuth callback timed out after 5 minutes",
-      );
-      expect(exitSpy).toHaveBeenCalledWith(1);
+      await expect(
+        login.run?.({
+          args: {
+            method: "oauth",
+            "client-id": "my-client-id",
+            "client-secret": "my-client-secret",
+          },
+        } as never),
+      ).rejects.toThrow("OAuth authorization failed: OAuth callback timed out after 5 minutes");
       expect(mockStop).toHaveBeenCalled();
-      exitSpy.mockRestore();
     });
 
-    it("calls process.exit(1) when token exchange fails", async () => {
+    it("throws error when token exchange fails", async () => {
       setupOAuthMocks();
       vi.mocked(exchangeAuthorizationCode).mockRejectedValue(new Error("invalid_grant"));
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
-      const exitSpy = spyOnProcessExit();
 
       const { login } = await import("./login");
-      await login.run?.({
-        args: {
-          method: "oauth",
-          "client-id": "my-client-id",
-          "client-secret": "my-client-secret",
-        },
-      } as never);
-
-      expect(consola.error).toHaveBeenCalledWith(
-        "Failed to exchange authorization code for tokens.",
-      );
-      expect(exitSpy).toHaveBeenCalledWith(1);
-      exitSpy.mockRestore();
+      await expect(
+        login.run?.({
+          args: {
+            method: "oauth",
+            "client-id": "my-client-id",
+            "client-secret": "my-client-secret",
+          },
+        } as never),
+      ).rejects.toThrow("Failed to exchange authorization code for tokens.");
     });
 
-    it("calls process.exit(1) when token verification fails", async () => {
+    it("throws error when token verification fails", async () => {
       setupOAuthMocks();
       mockGetMyself.mockRejectedValue(new Error("Unauthorized"));
       vi.mocked(promptRequired)
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
-      const exitSpy = spyOnProcessExit();
 
       const { login } = await import("./login");
-      await login.run?.({
-        args: {
-          method: "oauth",
-          "client-id": "my-client-id",
-          "client-secret": "my-client-secret",
-        },
-      } as never);
-
-      expect(consola.error).toHaveBeenCalledWith("Authentication verification failed.");
-      expect(exitSpy).toHaveBeenCalledWith(1);
-      exitSpy.mockRestore();
+      await expect(
+        login.run?.({
+          args: {
+            method: "oauth",
+            "client-id": "my-client-id",
+            "client-secret": "my-client-secret",
+          },
+        } as never),
+      ).rejects.toThrow("Authentication verification failed.");
     });
 
     it("updates OAuth credentials for existing space", async () => {

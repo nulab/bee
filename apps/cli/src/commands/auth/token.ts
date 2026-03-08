@@ -1,6 +1,6 @@
+import { UserError } from "@repo/cli-utils";
 import { findSpace, loadConfig, resolveSpace } from "@repo/config";
 import { defineCommand } from "citty";
-import consola from "consola";
 import { type CommandUsage, withUsage } from "../../lib/command-usage";
 
 const commandUsage: CommandUsage = {
@@ -46,8 +46,7 @@ const tokenCommand = withUsage(
       const space = args.space ? findSpace(loadConfig().spaces, args.space) : resolveSpace();
 
       if (!space) {
-        consola.error("No space configured. Run `bee auth login` to authenticate.");
-        return process.exit(1);
+        throw new UserError("No space configured. Run `bee auth login` to authenticate.");
       }
 
       const token = space.auth.method === "api-key" ? space.auth.apiKey : space.auth.accessToken;

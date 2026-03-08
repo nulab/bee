@@ -1,3 +1,4 @@
+import { UserError } from "@repo/cli-utils";
 import { loadConfig, writeConfig } from "@repo/config";
 import { defineCommand } from "citty";
 import consola from "consola";
@@ -53,15 +54,13 @@ const switchSpace = withUsage(
 
       if (!hostname) {
         if (config.spaces.length === 0) {
-          consola.error("No spaces configured. Run `bee auth login` to add a space.");
-          return process.exit(1);
+          throw new UserError("No spaces configured. Run `bee auth login` to add a space.");
         }
 
         if (isNoInput()) {
-          consola.error(
+          throw new UserError(
             "Hostname is required. Use --space to provide it in BACKLOG_NO_INPUT mode.",
           );
-          return process.exit(1);
         }
 
         const hosts = config.spaces.map((s) => s.host);
@@ -71,18 +70,16 @@ const switchSpace = withUsage(
         });
 
         if (typeof hostname !== "string" || !hostname) {
-          consola.error("No space selected.");
-          return process.exit(1);
+          throw new UserError("No space selected.");
         }
       }
 
       const space = config.spaces.find((s) => s.host === hostname);
 
       if (!space) {
-        consola.error(
+        throw new UserError(
           `Space "${hostname}" not found. Available spaces: ${config.spaces.map((s) => s.host).join(", ")}`,
         );
-        return process.exit(1);
       }
 
       writeConfig({ ...config, defaultSpace: hostname });
