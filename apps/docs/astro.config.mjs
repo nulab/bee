@@ -86,16 +86,8 @@ export default defineConfig({
           label: "Recipes",
           items: [
             {
-              label: "PR 作成時に課題へリンクを貼る",
-              slug: "recipes/pr-to-issue-link",
-            },
-            {
-              label: "PR マージで課題を自動クローズ",
-              slug: "recipes/auto-close-on-merge",
-            },
-            {
-              label: "PR に連動して課題ステータスを更新",
-              slug: "recipes/pr-status-sync",
+              label: "PR と Backlog 課題を連動させる",
+              slug: "recipes/pr-lifecycle-sync",
             },
             {
               label: "リリース時に関連課題へ通知",

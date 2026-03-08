@@ -1,0 +1,138 @@
+---
+title: PR と Backlog 課題を連動させる
+description: PR の作成・マージに連動して Backlog 課題へのリンク追加・ステータス更新・自動クローズを行う
+---
+
+GitHub Issues では PR と Issue が自動で連動しますが、Backlog 課題でも同じ体験を実現できます。このワークフローは PR のライフサイクル全体をカバーします。
+
+| PR イベント | Backlog への操作 |
+|---|---|
+| PR 作成 | 課題にPRリンクをコメント＋ステータスを「処理中」に変更 |
+| PR 本文の編集 | 新たに追加された課題キーにだけコメント |
+| PR マージ | 課題をクローズ |
+
+:::note[前提]
+リポジトリの **Settings → Secrets and variables → Actions** に `BACKLOG_API_KEY` と `BACKLOG_SPACE` を登録してください。設定方法は [CI/CD での利用](../integrations/ci-cd/) を参照してください。
+:::
+
+```yaml
+name: Sync PR Lifecycle to Backlog Issues
+on:
+  pull_request:
+    types: [opened, edited, closed]
+    branches: [main]
+
+jobs:
+  # --------------------------------------------------
+  # PR 作成 → 課題にリンク＋ステータスを「処理中」に
+  # --------------------------------------------------
+  on-opened:
+    if: github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - name: ブランチ名と PR 本文から課題キーを収集する
+        id: collect
+        run: |
+          BRANCH_KEYS=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' || true)
+          BODY_KEYS=$(echo "$PR_BODY" | grep -oE '[A-Z_]+-[0-9]+' || true)
+          KEYS=$(echo -e "${BRANCH_KEYS}\n${BODY_KEYS}" | sort -u | grep -v '^$' | tr '\n' ' ')
+          echo "検出した課題キー: ${KEYS:-(なし)}"
+          echo "keys=$KEYS" >> "$GITHUB_OUTPUT"
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+
+      - name: 各課題のステータスを「処理中」に変更して PR リンクをコメントする
+        if: steps.collect.outputs.keys != ''
+        run: |
+          for KEY in ${{ steps.collect.outputs.keys }}; do
+            echo "処理中に変更: $KEY"
+            npx @nulab/bee issue edit "$KEY" --status processing \
+              || echo "⚠ 失敗: $KEY のステータス変更に失敗しました"
+            echo "コメント追加: $KEY に PR リンクを送信します"
+            npx @nulab/bee issue comment "$KEY" \
+              --body "レビュー中: ${{ github.event.pull_request.html_url }}" \
+              || echo "⚠ 失敗: $KEY へのコメントに失敗しました"
+          done
+
+  # --------------------------------------------------
+  # PR 本文の編集 → 新しく追加された課題キーにだけコメント
+  # --------------------------------------------------
+  on-edited:
+    if: github.event.action == 'edited'
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - name: 変更前後の課題キーを比較する
+        id: diff
+        run: |
+          BRANCH_KEYS=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' || true)
+          BODY_KEYS=$(echo "$PR_BODY" | grep -oE '[A-Z_]+-[0-9]+' || true)
+          CURRENT=$(echo -e "${BRANCH_KEYS}\n${BODY_KEYS}" | sort -u | grep -v '^$' | tr '\n' ' ')
+          echo "現在の課題キー: ${CURRENT:-(なし)}"
+
+          PREV=$(echo "$PREV_BODY" | grep -oE '[A-Z_]+-[0-9]+' | sort -u | tr '\n' ' ')
+          echo "変更前の課題キー: ${PREV:-(なし)}"
+
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "prev=$PREV" >> "$GITHUB_OUTPUT"
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PREV_BODY: ${{ github.event.changes.body.from }}
+
+      - name: 新しく追加された課題に PR リンクをコメントする
+        if: steps.diff.outputs.current != ''
+        run: |
+          for KEY in ${{ steps.diff.outputs.current }}; do
+            if echo "${{ steps.diff.outputs.prev }}" | grep -qw "$KEY"; then
+              echo "スキップ: $KEY (変更前から存在)"
+              continue
+            fi
+            echo "コメント追加: $KEY に PR リンクを送信します"
+            npx @nulab/bee issue comment "$KEY" \
+              --body "レビュー中: ${{ github.event.pull_request.html_url }}" \
+              || echo "⚠ 失敗: $KEY へのコメントに失敗しました"
+          done
+
+  # --------------------------------------------------
+  # PR マージ → 課題をクローズ
+  # --------------------------------------------------
+  on-merged:
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    env:
+      BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+      BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+    steps:
+      - name: ブランチ名と PR 本文から課題キーを収集する
+        id: collect
+        run: |
+          BRANCH_KEYS=$(echo "${{ github.head_ref }}" | grep -oE '[A-Z_]+-[0-9]+' || true)
+          BODY_KEYS=$(echo "$PR_BODY" | grep -oE '[A-Z_]+-[0-9]+' || true)
+          KEYS=$(echo -e "${BRANCH_KEYS}\n${BODY_KEYS}" | sort -u | grep -v '^$' | tr '\n' ' ')
+          echo "検出した課題キー: ${KEYS:-(なし)}"
+          echo "keys=$KEYS" >> "$GITHUB_OUTPUT"
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+
+      - name: 各課題をクローズする
+        if: steps.collect.outputs.keys != ''
+        run: |
+          for KEY in ${{ steps.collect.outputs.keys }}; do
+            echo "クローズ: $KEY"
+            npx @nulab/bee issue close "$KEY" \
+              --comment "PR #${{ github.event.pull_request.number }} のマージにより自動クローズ" \
+              || echo "⚠ 失敗: $KEY のクローズに失敗しました"
+          done
+```
+
+## カスタマイズ
+
+- **ステータス変更が不要な場合** — `on-opened` ジョブ内の `bee issue edit` の行を削除すれば、リンクのコメントだけになります。
+- **自動クローズが不要な場合** — `on-merged` ジョブを丸ごと削除してください。
+- **クローズではなく別のステータスにしたい場合** — `bee issue close` を `bee issue edit --status processed` に変更してください。
+- **`edited` イベントが不要な場合** — トリガーの `types` から `edited` を削除し、`on-edited` ジョブを削除してください。
