@@ -41,7 +41,10 @@ describe("wiki delete", () => {
     const { deleteWiki } = await import("./delete");
     await deleteWiki.run?.({ args: { wiki: "123", yes: true } } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete wiki page 123? This cannot be undone.",
+      true,
+    );
   });
 
   it("cancels when user declines confirmation", async () => {

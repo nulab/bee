@@ -41,7 +41,10 @@ describe("issue delete", () => {
     const { deleteIssue } = await import("./delete");
     await deleteIssue.run?.({ args: { issue: "TEST-1", yes: true } } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete issue TEST-1? This cannot be undone.",
+      true,
+    );
   });
 
   it("cancels when user declines confirmation", async () => {

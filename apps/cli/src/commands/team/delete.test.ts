@@ -41,7 +41,10 @@ describe("team delete", () => {
     const { deleteTeam } = await import("./delete");
     await deleteTeam.run?.({ args: { team: "1", yes: true } } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete team 1? This cannot be undone.",
+      true,
+    );
   });
 
   it("cancels when user declines confirmation", async () => {

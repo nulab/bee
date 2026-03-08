@@ -95,7 +95,8 @@ describe("document view", () => {
     const { view } = await import("./view");
     await view.run?.({ args: { document: "doc-1" } } as never);
 
-    // Tags line should not appear when there are no tags
     expect(mockClient.getDocument).toHaveBeenCalledWith("doc-1");
+    const allCalls = vi.mocked(consola.log).mock.calls.map((c) => c[0]);
+    expect(allCalls.every((c) => !String(c).includes("Tags"))).toBe(true);
   });
 });

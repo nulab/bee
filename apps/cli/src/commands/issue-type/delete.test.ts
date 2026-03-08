@@ -47,7 +47,10 @@ describe("issue-type delete", () => {
       args: { issueType: "1", project: "TEST", "substitute-issue-type-id": "2", yes: true },
     } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete issue type 1? This cannot be undone.",
+      true,
+    );
   });
 
   it("cancels when user declines confirmation", async () => {

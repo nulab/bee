@@ -154,7 +154,10 @@ describe("issue comment", () => {
     const { comment } = await import("./comment");
     await comment.run?.({ args: { issue: "TEST-1", "delete-last": true, yes: true } } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete your comment on TEST-1?",
+      true,
+    );
   });
 
   it("cancels delete when user declines", async () => {

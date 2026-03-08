@@ -41,7 +41,10 @@ describe("document delete", () => {
     const { deleteDocument } = await import("./delete");
     await deleteDocument.run?.({ args: { document: "12345", yes: true } } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete document 12345? This cannot be undone.",
+      true,
+    );
   });
 
   it("cancels when user declines confirmation", async () => {

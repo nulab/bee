@@ -45,7 +45,10 @@ describe("status delete", () => {
       args: { status: "1", project: "TEST", "substitute-status-id": "2", yes: true },
     } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete status 1? This cannot be undone.",
+      true,
+    );
   });
 
   it("cancels when user declines confirmation", async () => {
