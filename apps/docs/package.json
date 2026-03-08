@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "commander": "^14.0.3",
-    "jiti": "^2.6.1"
+    "jiti": "^2.6.1",
+    "starlight-links-validator": "^0.19.2"
   }
 }

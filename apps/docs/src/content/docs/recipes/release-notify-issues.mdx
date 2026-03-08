@@ -9,7 +9,7 @@ import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 リリースタグの作成をトリガーに、前回タグからのコミットに含まれる課題キーを抽出し、各課題にリリースバージョンをコメントします。あわせて、GitHub Release の本文を Backlog ドキュメントとしても投稿します。
 
 :::note[前提]
-リポジトリに `BACKLOG_API_KEY` と `BACKLOG_SPACE` のシークレットを登録する必要があります。詳しくは [CI/CD での利用](../integrations/ci-cd/) を参照してください。
+リポジトリに `BACKLOG_API_KEY` と `BACKLOG_SPACE` のシークレットを登録する必要があります。詳しくは [CI/CD での利用](/bee/integrations/ci-cd/) を参照してください。
 :::
 
 ```yaml
@@ -101,6 +101,6 @@ jobs:
 ## 関連するコマンド
 
 <CardGrid>
-  <LinkCard title="issue comment" href="../../commands/issue/comment" description="課題へのコメント" />
-  <LinkCard title="document create" href="../../commands/document/create" description="ドキュメントの作成" />
+  <LinkCard title="issue comment" href="/bee/commands/issue/comment/" description="課題へのコメント" />
+  <LinkCard title="document create" href="/bee/commands/document/create/" description="ドキュメントの作成" />
 </CardGrid>

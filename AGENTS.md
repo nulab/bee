@@ -66,6 +66,36 @@ Command reference pages are **auto-generated** from CLI source code — do NOT c
 
 **When adding or removing CLI commands**, also update the command table in `skills/using-bee/SKILL.md` to keep the Skill in sync with the CLI.
 
+#### Internal link conventions
+
+All internal links in documentation content (`apps/docs/src/content/docs/`) must use **absolute paths with the base prefix `/bee/` and a trailing slash**:
+
+```mdx
+<!-- Correct -->
+
+[認証ガイド](/bee/guides/authentication/)
+
+<LinkCard title="CI/CD" href="/bee/integrations/ci-cd/" />
+
+<!-- Wrong — relative paths -->
+
+[認証ガイド](../guides/authentication/)
+
+<LinkCard title="CI/CD" href="../../integrations/ci-cd/" />
+
+<!-- Wrong — missing trailing slash -->
+
+[認証ガイド](/bee/guides/authentication)
+
+<!-- Wrong — missing base prefix -->
+
+[認証ガイド](/guides/authentication/)
+```
+
+- Links to file resources (`.md`, `.txt`) do NOT get a trailing slash: `[file](/bee/llms.txt)`
+- `starlight-links-validator` runs at build time and fails on broken links
+- Command reference pages (`/bee/commands/**`) are dynamically generated and excluded from link validation
+
 **To add docs for a new command group**, only add sidebar entries to `apps/docs/astro.config.mjs`:
 
 ```js

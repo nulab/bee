@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import starlightLinksValidator from "starlight-links-validator";
 import { loadCommandSidebar } from "./src/lib/sidebar-commands";
 
 const commandSidebar = await loadCommandSidebar();
@@ -9,6 +10,11 @@ export default defineConfig({
   base: "/bee",
   integrations: [
     starlight({
+      plugins: [
+        starlightLinksValidator({
+          exclude: ["/bee/commands/**"],
+        }),
+      ],
       title: "Backlog CLI",
       logo: {
         src: "./src/assets/title.svg",
