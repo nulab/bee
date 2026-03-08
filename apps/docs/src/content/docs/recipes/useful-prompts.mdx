@@ -1,0 +1,140 @@
+---
+title: AI エージェント向けプロンプト集
+description: Claude Code などの AI エージェントに bee コマンドを使わせるための、コピペで使えるプロンプト集
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+[AI エージェントとの連携](../integrations/ai-agent/) で bee を使えるようにしたあと、以下のプロンプトで日常的な Backlog 操作を指示できます。
+
+:::tip
+プロンプト中の `MY_PROJECT` や課題キーは、実際のプロジェクトキーや課題キーに読み替えてください。
+:::
+
+## 課題の棚卸し
+
+<Tabs>
+<TabItem label="期限切れの課題を一覧">
+
+```
+MY_PROJECT の未完了かつ期限切れの課題を一覧にして。
+bee issue list で取得して、期限が今日より前のものだけ表示して。
+```
+
+</TabItem>
+<TabItem label="担当者別の課題数を集計">
+
+```
+MY_PROJECT の未完了課題を担当者別に集計して。
+bee issue list で全件取得して、担当者ごとの件数を表にまとめて。
+```
+
+</TabItem>
+<TabItem label="放置されている課題を検出">
+
+```
+MY_PROJECT で、ステータスが「処理中」のまま最終更新から2週間以上経っている課題を探して。
+bee issue list で取得して、更新日が古いものをリストアップして。
+```
+
+</TabItem>
+</Tabs>
+
+## 課題の一括操作
+
+<Tabs>
+<TabItem label="マイルストーンの一括変更">
+
+```
+MY_PROJECT でマイルストーン「v1.0」に紐づいている未完了課題を、
+すべて「v1.1」に変更して。
+bee milestone list でマイルストーン ID を確認してから、
+bee issue list で対象を取得して、bee issue edit で一件ずつ更新して。
+```
+
+</TabItem>
+<TabItem label="カテゴリの一括付与">
+
+```
+MY_PROJECT で「バグ」種別の未完了課題のうち、カテゴリが未設定のものに
+「要トリアージ」カテゴリを付与して。
+bee category list でカテゴリ ID を確認してから、bee issue edit で更新して。
+```
+
+</TabItem>
+</Tabs>
+
+## リリース準備
+
+<Tabs>
+<TabItem label="リリースノートの下書き">
+
+```
+MY_PROJECT のマイルストーン「v1.2」に含まれる完了済み課題から、
+リリースノートの下書きを作って。
+課題を「機能追加」「バグ修正」「改善」にカテゴリ分けして、
+各課題のタイトルと課題キーを箇条書きにして。
+```
+
+</TabItem>
+<TabItem label="マイルストーンの未完了チェック">
+
+```
+MY_PROJECT のマイルストーン「v1.2」に含まれる課題の進捗を確認して。
+bee issue list で取得して、ステータスごとの件数と、未完了課題のリストを出して。
+リリース判断できるようにまとめて。
+```
+
+</TabItem>
+</Tabs>
+
+## ドキュメント・Wiki
+
+<Tabs>
+<TabItem label="議事録のテンプレ作成">
+
+```
+MY_PROJECT の Backlog ドキュメントに、今日の日付で議事録を作成して。
+bee document create で以下のテンプレートで作って:
+- 日時
+- 参加者
+- アジェンダ
+- 決定事項
+- TODO
+```
+
+</TabItem>
+<TabItem label="Wiki の棚卸し">
+
+```
+MY_PROJECT の Wiki ページ一覧を取得して、最終更新が6ヶ月以上前のページをリストアップして。
+bee wiki list で取得して、古い順に並べて。
+```
+
+</TabItem>
+</Tabs>
+
+## プロジェクト横断
+
+<Tabs>
+<TabItem label="自分の全課題を一覧">
+
+```
+自分がアサインされている全プロジェクトの未完了課題を一覧にして。
+bee user me で自分の情報を確認してから、
+bee project list で参加プロジェクトを取得して、
+各プロジェクトごとに bee issue list で自分の課題を集めて。
+期限が近い順にまとめて。
+```
+
+</TabItem>
+<TabItem label="通知の一括既読">
+
+```
+未読の通知を確認して、1週間以上前の通知はすべて既読にして。
+bee notification list で取得して、古いものを bee notification read で既読にして。
+最後に bee notification count で残りの未読数を教えて。
+```
+
+</TabItem>
+</Tabs>

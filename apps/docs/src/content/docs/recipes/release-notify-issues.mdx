@@ -1,9 +1,9 @@
 ---
 title: リリース時に関連課題へ通知する
-description: リリースタグ作成時に、含まれるコミットから課題キーを抽出して各課題にリリース情報をコメントする
+description: リリースタグ作成時に、関連課題への通知とリリースノートの Backlog ドキュメント投稿を行う
 ---
 
-リリースタグの作成をトリガーに、前回タグからのコミットに含まれる課題キーを抽出し、各課題にリリースバージョンをコメントします。
+リリースタグの作成をトリガーに、前回タグからのコミットに含まれる課題キーを抽出し、各課題にリリースバージョンをコメントします。あわせて、GitHub Release の本文を Backlog ドキュメントとしても投稿します。
 
 :::note[前提]
 リポジトリの **Settings → Secrets and variables → Actions** に `BACKLOG_API_KEY` と `BACKLOG_SPACE` を登録してください。設定方法は [CI/CD での利用](../integrations/ci-cd/) を参照してください。
@@ -21,6 +21,8 @@ permissions: {}
 env:
   BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
   BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+  # ドキュメント投稿先のプロジェクトキー
+  BACKLOG_PROJECT: MY_PROJECT
 
 jobs:
   notify:
@@ -54,9 +56,33 @@ jobs:
           for KEY in ${{ steps.collect.outputs.issue_keys }}; do
             echo "Commenting on: $KEY (release ${{ github.event.release.tag_name }})"
             npx @nulab/bee issue comment "$KEY" \
-              --body "リリース ${{ github.event.release.tag_name }} に含まれています: ${{ github.event.release.html_url }}" || echo "::warning::Failed to process $KEY"
+              --body "リリース ${{ github.event.release.tag_name }} に含まれています: ${{ github.event.release.html_url }}" \
+              || echo "::warning::Failed to process $KEY"
           done
+
+      # GitHub Release の本文を Backlog ドキュメントとして投稿する
+      - name: Post release notes to Backlog document
+        run: |
+          echo "Creating document: ${{ github.event.release.tag_name }}"
+          npx @nulab/bee document create \
+            --project "$BACKLOG_PROJECT" \
+            --title "リリースノート ${{ github.event.release.tag_name }}" \
+            --body "$RELEASE_BODY" \
+            || echo "::warning::Failed to create release document"
+        env:
+          RELEASE_BODY: ${{ github.event.release.body }}
 ```
+
+## カスタマイズ
+
+ドキュメント投稿が不要
+: 「Post release notes to Backlog document」ステップと `BACKLOG_PROJECT` 環境変数を削除してください。
+
+課題への通知が不要
+: 「Collect issue keys ...」と「Comment release info ...」の2ステップを削除してください。
+
+ドキュメントを特定のフォルダに入れたい
+: `bee document create` に `--parent-id <フォルダのドキュメントID>` を追加してください。
 
 ## ポイント
 

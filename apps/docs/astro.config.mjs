@@ -93,6 +93,10 @@ export default defineConfig({
               label: "リリース時に関連課題へ通知",
               slug: "recipes/release-notify-issues",
             },
+            {
+              label: "AI エージェント向けプロンプト集",
+              slug: "recipes/useful-prompts",
+            },
           ],
         },
         ...commandSidebar,
