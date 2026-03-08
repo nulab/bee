@@ -19,4 +19,11 @@ describe("star remove", () => {
     expect(mockClient.removeStar).toHaveBeenCalledWith(12_345);
     expect(consola.success).toHaveBeenCalledWith("Removed star 12345.");
   });
+
+  it("converts string ID to number", async () => {
+    mockClient.removeStar.mockResolvedValue(undefined);
+    const { remove } = await import("./remove");
+    await remove.run?.({ args: { star: "7" } } as never);
+    expect(mockClient.removeStar).toHaveBeenCalledWith(7);
+  });
 });

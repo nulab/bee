@@ -1,6 +1,7 @@
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   deleteProject: vi.fn(),
@@ -40,7 +41,10 @@ describe("project delete", () => {
     const { deleteProject } = await import("./delete");
     await deleteProject.run?.({ args: { project: "TEST", yes: true } } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete project TEST? This cannot be undone.",
+      true,
+    );
   });
 
   it("cancels when user declines confirmation", async () => {
@@ -56,12 +60,9 @@ describe("project delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteProject.mockResolvedValue({ projectKey: "TEST", name: "Test Project" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { deleteProject } = await import("./delete");
-    await deleteProject.run?.({ args: { project: "TEST", yes: true, json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("TEST"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { deleteProject } = await import("./delete");
+      await deleteProject.run?.({ args: { project: "TEST", yes: true, json: "" } } as never);
+    }, "TEST");
   });
 });

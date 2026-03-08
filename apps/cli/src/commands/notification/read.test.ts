@@ -23,4 +23,13 @@ describe("notification read", () => {
     expect(mockClient.markAsReadNotification).toHaveBeenCalledWith(12_345);
     expect(consola.success).toHaveBeenCalledWith("Marked notification 12345 as read.");
   });
+
+  it("converts string ID to number", async () => {
+    mockClient.markAsReadNotification.mockResolvedValue(undefined);
+
+    const { read } = await import("./read");
+    await read.run?.({ args: { id: "99" } } as never);
+
+    expect(mockClient.markAsReadNotification).toHaveBeenCalledWith(99);
+  });
 });

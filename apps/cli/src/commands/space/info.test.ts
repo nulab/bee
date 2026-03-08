@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getSpace: vi.fn(),
@@ -38,12 +39,9 @@ describe("space info", () => {
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getSpace.mockResolvedValue(sampleSpace);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { info } = await import("./info");
-    await info.run?.({ args: { json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("TESTSPACE"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { info } = await import("./info");
+      await info.run?.({ args: { json: "" } } as never);
+    }, "TESTSPACE");
   });
 });

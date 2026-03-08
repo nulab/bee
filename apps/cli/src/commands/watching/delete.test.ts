@@ -1,6 +1,7 @@
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   deletehWatchingListItem: vi.fn(),
@@ -40,7 +41,10 @@ describe("watching delete", () => {
     const { deleteWatching } = await import("./delete");
     await deleteWatching.run?.({ args: { watching: "1", yes: true } } as never);
 
-    expect(confirmOrExit).toHaveBeenCalledWith(expect.any(String), true);
+    expect(confirmOrExit).toHaveBeenCalledWith(
+      "Are you sure you want to delete watching 1? This cannot be undone.",
+      true,
+    );
   });
 
   it("cancels when user declines confirmation", async () => {
@@ -56,14 +60,11 @@ describe("watching delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deletehWatchingListItem.mockResolvedValue({ id: 1 });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { deleteWatching } = await import("./delete");
-    await deleteWatching.run?.({
-      args: { watching: "1", yes: true, json: "" },
-    } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("1"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { deleteWatching } = await import("./delete");
+      await deleteWatching.run?.({
+        args: { watching: "1", yes: true, json: "" },
+      } as never);
+    }, "1");
   });
 });

@@ -1,6 +1,6 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   patchPullRequest: vi.fn(),
@@ -15,16 +15,8 @@ vi.mock("@repo/backlog-utils", async (importOriginal) => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
-
 describe("pr edit", () => {
   it("updates pull request summary", async () => {
-    setupMocks();
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "New title" });
 
     const { edit } = await import("./edit");
@@ -44,7 +36,6 @@ describe("pr edit", () => {
   });
 
   it("updates pull request with a comment", async () => {
-    setupMocks();
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
     const { edit } = await import("./edit");
@@ -67,7 +58,6 @@ describe("pr edit", () => {
   });
 
   it("updates pull request with notified users", async () => {
-    setupMocks();
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
     const { edit } = await import("./edit");
@@ -84,7 +74,6 @@ describe("pr edit", () => {
   });
 
   it("resolves issue key to issue ID", async () => {
-    setupMocks();
     mockClient.getIssue.mockResolvedValue({ id: 789 });
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
@@ -102,18 +91,32 @@ describe("pr edit", () => {
     );
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
+  it("resolves @me to current user ID for assignee", async () => {
+    mockClient.getMyself.mockResolvedValue({ id: 99 });
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
-
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     const { edit } = await import("./edit");
     await edit.run?.({
-      args: { number: "42", project: "PROJ", repo: "repo", title: "Title", json: "" },
+      args: { number: "42", project: "PROJ", repo: "repo", assignee: "@me" },
     } as never);
 
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Title"));
-    writeSpy.mockRestore();
+    expect(mockClient.getMyself).toHaveBeenCalled();
+    expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
+      "PROJ",
+      "repo",
+      42,
+      expect.objectContaining({ assigneeId: 99 }),
+    );
+  });
+
+  it("outputs JSON when --json flag is set", async () => {
+    mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
+
+    await expectStdoutContaining(async () => {
+      const { edit } = await import("./edit");
+      await edit.run?.({
+        args: { number: "42", project: "PROJ", repo: "repo", title: "Title", json: "" },
+      } as never);
+    }, "Title");
   });
 });

@@ -23,4 +23,13 @@ describe("watching read", () => {
     expect(mockClient.resetWatchingListItemAsRead).toHaveBeenCalledWith(12_345);
     expect(consola.success).toHaveBeenCalledWith("Marked watching 12345 as read.");
   });
+
+  it("converts string ID to number", async () => {
+    mockClient.resetWatchingListItemAsRead.mockResolvedValue(undefined);
+
+    const { read } = await import("./read");
+    await read.run?.({ args: { watching: "42" } } as never);
+
+    expect(mockClient.resetWatchingListItemAsRead).toHaveBeenCalledWith(42);
+  });
 });
