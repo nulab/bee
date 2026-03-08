@@ -1,14 +1,12 @@
-import { defineCommand } from "citty";
+import { BeeCommand } from "../../lib/bee-command";
 
-export const notification = defineCommand({
-  meta: {
-    name: "notification",
-    description: "Manage Backlog notifications",
-  },
-  subCommands: {
-    list: () => import("./list").then((m) => m.list),
-    count: () => import("./count").then((m) => m.count),
-    read: () => import("./read").then((m) => m.read),
-    "read-all": () => import("./read-all").then((m) => m.readAll),
-  },
-});
+const notification = new BeeCommand("notification").summary("Manage Backlog notifications");
+
+await notification.addCommands([
+  import("./list.js"),
+  import("./count.js"),
+  import("./read.js"),
+  import("./read-all.js"),
+]);
+
+export default notification;

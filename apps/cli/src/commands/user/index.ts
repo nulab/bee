@@ -1,14 +1,12 @@
-import { defineCommand } from "citty";
+import { BeeCommand } from "../../lib/bee-command";
 
-export const user = defineCommand({
-  meta: {
-    name: "user",
-    description: "Manage Backlog users",
-  },
-  subCommands: {
-    list: () => import("./list").then((m) => m.list),
-    view: () => import("./view").then((m) => m.view),
-    me: () => import("./me").then((m) => m.me),
-    activities: () => import("./activities").then((m) => m.activities),
-  },
-});
+const user = new BeeCommand("user").summary("Manage Backlog users");
+
+await user.addCommands([
+  import("./list.js"),
+  import("./view.js"),
+  import("./me.js"),
+  import("./activities.js"),
+]);
+
+export default user;

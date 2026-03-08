@@ -1,14 +1,12 @@
-import { defineCommand } from "citty";
+import { BeeCommand } from "../../lib/bee-command";
 
-export const issueType = defineCommand({
-  meta: {
-    name: "issue-type",
-    description: "Manage project issue types",
-  },
-  subCommands: {
-    list: () => import("./list").then((m) => m.list),
-    create: () => import("./create").then((m) => m.create),
-    edit: () => import("./edit").then((m) => m.edit),
-    delete: () => import("./delete").then((m) => m.deleteIssueType),
-  },
-});
+const issueType = new BeeCommand("issue-type").summary("Manage project issue types");
+
+await issueType.addCommands([
+  import("./list.js"),
+  import("./create.js"),
+  import("./edit.js"),
+  import("./delete.js"),
+]);
+
+export default issueType;
