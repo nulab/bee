@@ -1,4 +1,10 @@
-import { PRIORITY_NAMES, PriorityId, getClient, resolveUserId } from "@repo/backlog-utils";
+import {
+  PRIORITY_NAMES,
+  PriorityId,
+  getClient,
+  resolveStatusId,
+  resolveUserId,
+} from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
@@ -15,7 +21,7 @@ will remain unchanged.`,
   .argument("<issue>", "Issue ID or issue key")
   .option("-t, --title <text>", "New title of the issue")
   .option("-d, --description <text>", "New description of the issue")
-  .option("-S, --status <id>", "New status ID")
+  .option("-S, --status <name-or-id>", "New status (name or ID)")
   .option("-P, --priority <name>", `Change priority`)
   .option("-T, --type <id>", "New issue type ID")
   .option("--assignee <id>", "New assignee user ID. Use @me for yourself.")
@@ -60,10 +66,16 @@ will remain unchanged.`,
       }
     }
 
+    let statusId: number | undefined;
+    if (opts.status) {
+      const projectKey = issue.includes("-") ? issue.split("-")[0] : undefined;
+      statusId = await resolveStatusId(client, opts.status, projectKey);
+    }
+
     const issueData = await client.patchIssue(issue, {
       summary: opts.title,
       description: opts.description,
-      statusId: opts.status ? Number(opts.status) : undefined,
+      statusId,
       priorityId,
       issueTypeId: opts.type ? Number(opts.type) : undefined,
       assigneeId: opts.assignee ? await resolveUserId(client, opts.assignee) : undefined,

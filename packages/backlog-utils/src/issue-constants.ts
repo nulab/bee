@@ -36,4 +36,23 @@ const PriorityId: Record<string, number> = {
 
 const PRIORITY_NAMES = Object.keys(PriorityId);
 
-export { IssueStatusId, ResolutionId, RESOLUTION_NAMES, PriorityId, PRIORITY_NAMES };
+/** Issue status name-to-ID map (lowercase keys for user input). */
+const IssueStatusName: Record<string, number> = {
+  open: IssueStatusId.Open,
+  "in-progress": IssueStatusId.InProgress,
+  inprogress: IssueStatusId.InProgress,
+  resolved: IssueStatusId.Resolved,
+  closed: IssueStatusId.Closed,
+};
+
+const ISSUE_STATUS_NAMES = ["open", "in-progress", "resolved", "closed"];
+
+export {
+  IssueStatusId,
+  IssueStatusName,
+  ISSUE_STATUS_NAMES,
+  ResolutionId,
+  RESOLUTION_NAMES,
+  PriorityId,
+  PRIORITY_NAMES,
+};

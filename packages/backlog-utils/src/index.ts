@@ -2,12 +2,15 @@ export { formatBacklogError, handleBacklogApiError, isBacklogErrorResponse } fro
 export type { BacklogErrorResponse } from "./api-error";
 export { ACTIVITY_LABELS } from "./activity-labels";
 export {
+  ISSUE_STATUS_NAMES,
   IssueStatusId,
+  IssueStatusName,
   PRIORITY_NAMES,
   PriorityId,
   RESOLUTION_NAMES,
   ResolutionId,
 } from "./issue-constants";
+export { resolveStatusId } from "./resolve-status";
 export { NOTIFICATION_REASON_LABELS } from "./notification-reason-labels";
 export { PR_STATUS_NAMES, PrStatusId, PrStatusName } from "./pr-constants";
 export { resolveProjectIds } from "./resolve-project";

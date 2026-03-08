@@ -3,6 +3,7 @@ import {
   PriorityId,
   getClient,
   resolveProjectIds,
+  resolveStatusId,
   resolveUserId,
 } from "@repo/backlog-utils";
 import { type Row, outputResult, printTable } from "@repo/cli-utils";
@@ -10,7 +11,7 @@ import consola from "consola";
 import { Option } from "commander";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
-import { collect, collectNum } from "../../lib/common-options";
+import { collect } from "../../lib/common-options";
 
 const resolvePriorityIds = (priorities: string[]): number[] =>
   priorities.map((name) => {
@@ -38,7 +39,12 @@ Multiple project keys can be specified as a comma-separated list.`,
     ).env("BACKLOG_PROJECT"),
   )
   .addOption(opt.assigneeList())
-  .option("-S, --status <id>", "Status ID (repeatable)", collectNum, [] satisfies number[])
+  .option(
+    "-S, --status <name-or-id>",
+    "Status name or ID (repeatable)",
+    collect,
+    [] satisfies string[],
+  )
   .option("-P, --priority <name>", "Priority name (repeatable)", collect, [] satisfies string[])
   .addOption(opt.keyword())
   .option("--created-since <date>", "Show issues created on or after this date")
@@ -77,7 +83,10 @@ Multiple project keys can be specified as a comma-separated list.`,
     const assigneeId = await Promise.all(
       (opts.assignee ?? []).map((id: string) => resolveUserId(client, id)),
     );
-    const statusId: number[] = opts.status;
+    const projectForStatus = opts.project?.split(",")[0]?.trim() || undefined;
+    const statusId: number[] = await Promise.all(
+      opts.status.map((s: string) => resolveStatusId(client, s, projectForStatus)),
+    );
     const priorityId = opts.priority.length > 0 ? resolvePriorityIds(opts.priority) : [];
 
     const issues = await client.getIssues({

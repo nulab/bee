@@ -5,6 +5,7 @@ import { expectStdoutContaining } from "@repo/test-utils";
 const mockClient = {
   patchIssue: vi.fn(),
   getMyself: vi.fn().mockResolvedValue({ id: 99 }),
+  getProjectStatuses: vi.fn().mockResolvedValue([]),
 };
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
@@ -106,6 +107,44 @@ describe("issue edit", () => {
       const { default: edit } = await import("./edit");
       await edit.parseAsync(["TEST-1", "--title", "Title", "--json"], { from: "user" });
     }, "TEST-1");
+  });
+
+  it("resolves status by name", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
+
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["TEST-1", "--status", "closed"], { from: "user" });
+
+    expect(mockClient.patchIssue).toHaveBeenCalledWith(
+      "TEST-1",
+      expect.objectContaining({ statusId: 4 }),
+    );
+  });
+
+  it("resolves status by numeric ID", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
+
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["TEST-1", "--status", "2"], { from: "user" });
+
+    expect(mockClient.patchIssue).toHaveBeenCalledWith(
+      "TEST-1",
+      expect.objectContaining({ statusId: 2 }),
+    );
+  });
+
+  it("resolves custom project status by name", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
+    mockClient.getProjectStatuses.mockResolvedValue([{ id: 1000, name: "Reviewing" }]);
+
+    const { default: edit } = await import("./edit");
+    await edit.parseAsync(["TEST-1", "--status", "Reviewing"], { from: "user" });
+
+    expect(mockClient.getProjectStatuses).toHaveBeenCalledWith("TEST");
+    expect(mockClient.patchIssue).toHaveBeenCalledWith(
+      "TEST-1",
+      expect.objectContaining({ statusId: 1000 }),
+    );
   });
 
   it("throws error for unknown priority name", async () => {
