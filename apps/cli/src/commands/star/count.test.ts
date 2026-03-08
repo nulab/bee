@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getUserStarsCount: vi.fn(),
@@ -56,12 +57,9 @@ describe("star count", () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getUserStarsCount.mockResolvedValue({ count: 42 });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { count } = await import("./count");
-    await count.run?.({ args: { json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("42"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { count } = await import("./count");
+      await count.run?.({ args: { json: "" } } as never);
+    }, "42");
   });
 });

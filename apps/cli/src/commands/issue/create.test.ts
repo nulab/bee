@@ -1,6 +1,7 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   postIssue: vi.fn(),
@@ -174,14 +175,26 @@ describe("issue create", () => {
       summary: "Title",
     });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    await expectStdoutContaining(async () => {
+      const { create } = await import("./create");
+      await create.run?.({
+        args: { project: "100", title: "Title", type: "1", priority: "normal", json: "" },
+      } as never);
+    }, "TEST-4");
+  });
+
+  it("throws error for unknown priority name", async () => {
+    vi.mocked(promptRequired)
+      .mockResolvedValueOnce("TEST")
+      .mockResolvedValueOnce("test")
+      .mockResolvedValueOnce("1")
+      .mockResolvedValueOnce("invalid");
 
     const { create } = await import("./create");
-    await create.run?.({
-      args: { project: "100", title: "Title", type: "1", priority: "normal", json: "" },
-    } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("TEST-4"));
-    writeSpy.mockRestore();
+    await expect(
+      create.run?.({
+        args: { project: "TEST", summary: "test", priority: "invalid" },
+      } as never),
+    ).rejects.toThrow('Unknown priority "invalid". Valid values: high, normal, low');
   });
 });

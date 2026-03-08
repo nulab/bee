@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getUserStars: vi.fn(),
@@ -66,12 +67,9 @@ describe("star list", () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getUserStars.mockResolvedValue(sampleStars);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { list } = await import("./list");
-    await list.run?.({ args: { json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Sample issue"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { list } = await import("./list");
+      await list.run?.({ args: { json: "" } } as never);
+    }, "Sample issue");
   });
 });

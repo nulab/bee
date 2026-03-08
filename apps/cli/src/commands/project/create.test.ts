@@ -1,6 +1,7 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   postProject: vi.fn(),
@@ -95,12 +96,9 @@ describe("project create", () => {
       textFormattingRule: "markdown",
     });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { create } = await import("./create");
-    await create.run?.({ args: { key: "TEST", name: "Test", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("TEST"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { create } = await import("./create");
+      await create.run?.({ args: { key: "TEST", name: "Test", json: "" } } as never);
+    }, "TEST");
   });
 });

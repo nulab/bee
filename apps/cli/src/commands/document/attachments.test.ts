@@ -1,6 +1,6 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getDocument: vi.fn(),
@@ -11,13 +11,6 @@ vi.mock("@repo/backlog-utils", () => ({
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
 
 const sampleAttachments = [
   {
@@ -38,7 +31,6 @@ const sampleAttachments = [
 
 describe("document attachments", () => {
   it("displays attachment list in tabular format", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue({
       id: "doc-1",
       attachments: sampleAttachments,
@@ -55,7 +47,6 @@ describe("document attachments", () => {
   });
 
   it("shows message when no attachments found", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue({
       id: "doc-1",
       attachments: [],
@@ -68,7 +59,6 @@ describe("document attachments", () => {
   });
 
   it("formats file sizes correctly", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue({
       id: "doc-1",
       attachments: [
@@ -105,18 +95,14 @@ describe("document attachments", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue({
       id: "doc-1",
       attachments: sampleAttachments,
     });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { attachments } = await import("./attachments");
-    await attachments.run?.({ args: { document: "doc-1", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("report.pdf"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { attachments } = await import("./attachments");
+      await attachments.run?.({ args: { document: "doc-1", json: "" } } as never);
+    }, "report.pdf");
   });
 });
