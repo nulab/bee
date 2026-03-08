@@ -13,5 +13,6 @@ export const pr = defineCommand({
     create: () => import("./create").then((m) => m.create),
     edit: () => import("./edit").then((m) => m.edit),
     comment: () => import("./comment").then((m) => m.comment),
+    count: () => import("./count").then((m) => m.count),
   },
 });

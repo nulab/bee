@@ -13,7 +13,9 @@ export const issue = defineCommand({
     edit: () => import("./edit").then((m) => m.edit),
     close: () => import("./close").then((m) => m.close),
     reopen: () => import("./reopen").then((m) => m.reopen),
+    attachments: () => import("./attachments").then((m) => m.attachments),
     comment: () => import("./comment").then((m) => m.comment),
+    count: () => import("./count").then((m) => m.count),
     delete: () => import("./delete").then((m) => m.deleteIssue),
   },
 });
