@@ -25,7 +25,7 @@ activity type IDs with \`--activity-type-ids\`.`,
     "--activity-type-ids <id>",
     "Activity type IDs to subscribe to (repeatable)",
     collectNum,
-    [] as number[],
+    [] satisfies number[],
   )
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])

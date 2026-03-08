@@ -58,7 +58,10 @@ describe("user activities", () => {
     mockClient.getUserActivities.mockResolvedValue([]);
 
     const { default: activities } = await import("./activities");
-    await activities.parseAsync(["12345", "--activity-type", "1,2,3"], { from: "user" });
+    await activities.parseAsync(
+      ["12345", "--activity-type", "1", "--activity-type", "2", "--activity-type", "3"],
+      { from: "user" },
+    );
 
     expect(mockClient.getUserActivities).toHaveBeenCalledWith(
       12_345,

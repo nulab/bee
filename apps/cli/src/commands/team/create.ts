@@ -17,7 +17,12 @@ Optionally specify \`--members\` with user IDs (repeatable) to add members
 when creating the team.`,
   )
   .option("-n, --name <name>", "Team name")
-  .option("--members <id>", "User IDs to add as members (repeatable)", collectNum, [] as number[])
+  .option(
+    "--members <id>",
+    "User IDs to add as members (repeatable)",
+    collectNum,
+    [] satisfies number[],
+  )
   .addOption(opt.json())
   .envVars([...ENV_AUTH])
   .examples([

@@ -22,7 +22,7 @@ All fields are optional. Only the specified fields will be updated.`,
     "--activity-type-ids <id>",
     "New activity type IDs to subscribe to (repeatable)",
     collectNum,
-    [] as number[],
+    [] satisfies number[],
   )
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])

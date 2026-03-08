@@ -23,7 +23,7 @@ the given user IDs.`,
     "--members <id>",
     "Replace members with user IDs (repeatable)",
     collectNum,
-    [] as number[],
+    [] satisfies number[],
   )
   .addOption(opt.json())
   .envVars([...ENV_AUTH])

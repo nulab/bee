@@ -58,7 +58,10 @@ describe("space activities", () => {
     mockClient.getSpaceActivities.mockResolvedValue([]);
 
     const { default: activities } = await import("./activities");
-    await activities.parseAsync(["--activity-type", "1,2,3"], { from: "user" });
+    await activities.parseAsync(
+      ["--activity-type", "1", "--activity-type", "2", "--activity-type", "3"],
+      { from: "user" },
+    );
 
     expect(mockClient.getSpaceActivities).toHaveBeenCalledWith(
       expect.objectContaining({

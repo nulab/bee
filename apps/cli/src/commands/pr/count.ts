@@ -1,10 +1,19 @@
-import { PR_STATUS_NAMES, PrStatusName, getClient } from "@repo/backlog-utils";
-import { outputResult, splitArg } from "@repo/cli-utils";
+import { PR_STATUS_NAMES, PrStatusName, getClient, resolveUserId } from "@repo/backlog-utils";
+import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT, ENV_REPO } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
+import { collect, collectNum } from "../../lib/common-options";
 import { resolveOptions } from "../../lib/required-option";
+
+const resolveStatusIds = (statuses: string[]): number[] =>
+  statuses.map((name) => {
+    const id = PrStatusName[name.toLowerCase()];
+    if (id === undefined) {
+      throw new Error(`Unknown status "${name}". Valid values: ${PR_STATUS_NAMES.join(", ")}`);
+    }
+    return id;
+  });
 
 const count = new BeeCommand("count")
   .summary("Count pull requests")
@@ -16,10 +25,10 @@ by default, or a JSON object with \`--json\`.`,
   )
   .addOption(opt.project())
   .addOption(opt.repo())
-  .option("-S, --status <name>", "Status name (comma-separated for multiple)")
+  .option("-S, --status <name>", "Status name (repeatable)", collect, [] satisfies string[])
   .addOption(opt.assigneeList())
-  .option("--issue <ids>", "Issue ID (comma-separated for multiple)")
-  .option("--created-user <ids>", "Created user ID (comma-separated for multiple)")
+  .option("--issue <id>", "Issue ID (repeatable)", collectNum, [] satisfies number[])
+  .option("--created-user <id>", "Created user ID (repeatable)", collectNum, [] satisfies number[])
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT, ENV_REPO])
   .examples([
@@ -34,25 +43,12 @@ by default, or a JSON object with \`--json\`.`,
     await resolveOptions(cmd);
     const { client } = await getClient();
 
-    const statusId = opts.status
-      ? opts.status
-          .split(",")
-          .map((s: string) => s.trim())
-          .filter(Boolean)
-          .map((name: string) => {
-            const id = PrStatusName[name.toLowerCase()];
-            if (id === undefined) {
-              throw new Error(
-                `Unknown status "${name}". Valid values: ${PR_STATUS_NAMES.join(", ")}`,
-              );
-            }
-            return id;
-          })
-      : undefined;
-
-    const assigneeId = (opts.assignee ?? []).map(Number).filter((n: number) => !Number.isNaN(n));
-    const issueId = splitArg(opts.issue, v.number());
-    const createdUserId = splitArg(opts.createdUser, v.number());
+    const statusId = opts.status.length > 0 ? resolveStatusIds(opts.status) : undefined;
+    const assigneeId = await Promise.all(
+      (opts.assignee ?? []).map((id: string) => resolveUserId(client, id)),
+    );
+    const issueId: number[] = opts.issue;
+    const createdUserId: number[] = opts.createdUser;
 
     const result = await client.getPullRequestsCount(opts.project, opts.repo, {
       statusId,

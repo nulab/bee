@@ -10,6 +10,16 @@ import consola from "consola";
 import { Option } from "commander";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
+import { collect, collectNum } from "../../lib/common-options";
+
+const resolvePriorityIds = (priorities: string[]): number[] =>
+  priorities.map((name) => {
+    const id = PriorityId[name.toLowerCase()];
+    if (id === undefined) {
+      throw new Error(`Unknown priority "${name}". Valid values: ${PRIORITY_NAMES.join(", ")}`);
+    }
+    return id;
+  });
 
 const list = new BeeCommand("list")
   .summary("List issues")
@@ -28,8 +38,8 @@ Multiple project keys can be specified as a comma-separated list.`,
     ).env("BACKLOG_PROJECT"),
   )
   .addOption(opt.assigneeList())
-  .option("-S, --status <id>", "Status ID (comma-separated for multiple)")
-  .option("-P, --priority <name>", `Priority name (comma-separated for multiple)`)
+  .option("-S, --status <id>", "Status ID (repeatable)", collectNum, [] satisfies number[])
+  .option("-P, --priority <name>", "Priority name (repeatable)", collect, [] satisfies string[])
   .addOption(opt.keyword())
   .option("--created-since <date>", "Show issues created on or after this date")
   .option("--created-until <date>", "Show issues created on or before this date")
@@ -67,28 +77,8 @@ Multiple project keys can be specified as a comma-separated list.`,
     const assigneeId = await Promise.all(
       (opts.assignee ?? []).map((id: string) => resolveUserId(client, id)),
     );
-    const statusId = opts.status
-      ? opts.status
-          .split(",")
-          .map((s: string) => s.trim())
-          .filter(Boolean)
-          .map(Number)
-      : [];
-    const priorityId = opts.priority
-      ? opts.priority
-          .split(",")
-          .map((s: string) => s.trim())
-          .filter(Boolean)
-          .map((name: string) => {
-            const id = PriorityId[name.toLowerCase()];
-            if (id === undefined) {
-              throw new Error(
-                `Unknown priority "${name}". Valid values: ${PRIORITY_NAMES.join(", ")}`,
-              );
-            }
-            return id;
-          })
-      : [];
+    const statusId: number[] = opts.status;
+    const priorityId = opts.priority.length > 0 ? resolvePriorityIds(opts.priority) : [];
 
     const issues = await client.getIssues({
       projectId,
@@ -108,7 +98,7 @@ Multiple project keys can be specified as a comma-separated list.`,
       dueDateUntil: opts.dueUntil,
     });
 
-    outputResult(issues, opts as { json?: string }, (data) => {
+    outputResult(issues, { json: opts.json }, (data) => {
       if (data.length === 0) {
         consola.info("No issues found.");
         return;

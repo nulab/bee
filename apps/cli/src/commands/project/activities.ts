@@ -1,9 +1,9 @@
 import { ACTIVITY_LABELS, getClient } from "@repo/backlog-utils";
 import { type Row, formatDate, outputResult, printTable } from "@repo/cli-utils";
-import { Option } from "commander";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
+import { collectNum } from "../../lib/common-options";
 
 const getActivitySummary = (activity: {
   type: number;
@@ -40,14 +40,19 @@ const activities = new BeeCommand("activities")
 Shows the most recent updates including issue changes, wiki edits, git pushes,
 and other project activities. Results are ordered by most recent first.
 
-Use \`--activity-type\` to filter by specific activity types (comma-separated IDs).
+Use \`--activity-type\` to filter by specific activity types (repeatable).
 Use \`--count\` to control how many activities are returned (default: 20, max: 100).
 
 For a list of activity type IDs, see:
 https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#activity-type`,
   )
   .argument("<project>", "Project ID or project key")
-  .addOption(new Option("--activity-type <ids>", "Filter by activity type IDs (comma-separated)"))
+  .option(
+    "--activity-type <id>",
+    "Filter by activity type IDs (repeatable)",
+    collectNum,
+    [] satisfies number[],
+  )
   .addOption(opt.count())
   .addOption(opt.order())
   .addOption(opt.json())
@@ -56,7 +61,8 @@ https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#activ
     { description: "List recent activities", command: "bee project activities PROJECT_KEY" },
     {
       description: "Show only issue-related activities",
-      command: "bee project activities PROJECT_KEY --activity-type 1,2,3",
+      command:
+        "bee project activities PROJECT_KEY --activity-type 1 --activity-type 2 --activity-type 3",
     },
     {
       description: "Show last 50 activities",
@@ -70,9 +76,7 @@ https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#activ
   .action(async (project, opts) => {
     const { client } = await getClient();
 
-    const activityTypeId = opts.activityType
-      ? String(opts.activityType).split(",").map(Number)
-      : undefined;
+    const activityTypeId: number[] = opts.activityType;
 
     const activityList = await client.getProjectActivities(project, {
       activityTypeId,

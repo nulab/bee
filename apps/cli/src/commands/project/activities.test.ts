@@ -60,9 +60,10 @@ describe("project activities", () => {
     mockClient.getProjectActivities.mockResolvedValue([]);
 
     const { default: activities } = await import("./activities");
-    await activities.parseAsync(["PROJ1", "--activity-type", "1,2,3"], {
-      from: "user",
-    });
+    await activities.parseAsync(
+      ["PROJ1", "--activity-type", "1", "--activity-type", "2", "--activity-type", "3"],
+      { from: "user" },
+    );
 
     expect(mockClient.getProjectActivities).toHaveBeenCalledWith(
       "PROJ1",

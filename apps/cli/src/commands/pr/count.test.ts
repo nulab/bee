@@ -4,12 +4,12 @@ import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getPullRequestsCount: vi.fn(),
+  getMyself: vi.fn().mockResolvedValue({ id: 99 }),
 };
 
-vi.mock("@repo/backlog-utils", () => ({
+vi.mock("@repo/backlog-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-  PR_STATUS_NAMES: ["open", "closed", "merged"],
-  PrStatusName: { open: 1, closed: 2, merged: 3 },
 }));
 
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
