@@ -1,6 +1,7 @@
-import { getClient, openOrPrintUrl } from "@repo/backlog-utils";
+import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getPullRequest: vi.fn(),
@@ -17,13 +18,6 @@ vi.mock("@repo/backlog-utils", () => ({
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
 
 const samplePullRequest = {
   id: 1,
@@ -43,7 +37,6 @@ const samplePullRequest = {
 
 describe("pr view", () => {
   it("displays pull request details", async () => {
-    setupMocks();
     mockClient.getPullRequest.mockResolvedValue(samplePullRequest);
 
     const { view } = await import("./view");
@@ -58,7 +51,6 @@ describe("pr view", () => {
   });
 
   it("shows Unassigned for pull requests without assignee", async () => {
-    setupMocks();
     mockClient.getPullRequest.mockResolvedValue({ ...samplePullRequest, assignee: null });
 
     const { view } = await import("./view");
@@ -68,7 +60,6 @@ describe("pr view", () => {
   });
 
   it("displays description when present", async () => {
-    setupMocks();
     mockClient.getPullRequest.mockResolvedValue(samplePullRequest);
 
     const { view } = await import("./view");
@@ -79,8 +70,6 @@ describe("pr view", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    setupMocks();
-
     const { view } = await import("./view");
     await view.run?.({ args: { number: "42", project: "PROJ", repo: "repo", web: true } } as never);
 
@@ -93,15 +82,13 @@ describe("pr view", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.getPullRequest.mockResolvedValue(samplePullRequest);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { view } = await import("./view");
-    await view.run?.({ args: { number: "42", project: "PROJ", repo: "repo", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Add feature A"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { view } = await import("./view");
+      await view.run?.({
+        args: { number: "42", project: "PROJ", repo: "repo", json: "" },
+      } as never);
+    }, "Add feature A");
   });
 });

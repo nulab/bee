@@ -1,6 +1,7 @@
-import { getClient, openOrPrintUrl } from "@repo/backlog-utils";
+import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getDocument: vi.fn(),
@@ -17,13 +18,6 @@ vi.mock("@repo/backlog-utils", () => ({
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
 
 const sampleDocument = {
   id: "doc-1",
@@ -43,7 +37,6 @@ const sampleDocument = {
 
 describe("document view", () => {
   it("displays document details", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
     const { view } = await import("./view");
@@ -57,7 +50,6 @@ describe("document view", () => {
   });
 
   it("displays emoji when present", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
     const { view } = await import("./view");
@@ -67,7 +59,6 @@ describe("document view", () => {
   });
 
   it("displays body content", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
     const { view } = await import("./view");
@@ -78,8 +69,6 @@ describe("document view", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    setupMocks();
-
     const { view } = await import("./view");
     await view.run?.({ args: { document: "doc-1", project: "PROJECT", web: true } } as never);
 
@@ -92,26 +81,31 @@ describe("document view", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { view } = await import("./view");
-    await view.run?.({ args: { document: "doc-1", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("doc-1"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { view } = await import("./view");
+      await view.run?.({ args: { document: "doc-1", json: "" } } as never);
+    }, "doc-1");
   });
 
   it("hides tags when none exist", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue({ ...sampleDocument, tags: [] });
 
     const { view } = await import("./view");
     await view.run?.({ args: { document: "doc-1" } } as never);
 
-    // Tags line should not appear when there are no tags
     expect(mockClient.getDocument).toHaveBeenCalledWith("doc-1");
+    const allCalls = vi.mocked(consola.log).mock.calls.map((c) => c[0]);
+    expect(allCalls.every((c) => !String(c).includes("Tags"))).toBe(true);
+  });
+
+  it("throws error when --web used without --project", async () => {
+    const { view } = await import("./view");
+    await expect(
+      view.run?.({
+        args: { document: "123", web: true },
+      } as never),
+    ).rejects.toThrow("The --project flag is required when using --web.");
   });
 });

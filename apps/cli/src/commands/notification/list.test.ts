@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getNotifications: vi.fn(),
@@ -102,12 +103,9 @@ describe("notification list", () => {
       },
     ]);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { list } = await import("./list");
-    await list.run?.({ args: { json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { list } = await import("./list");
+      await list.run?.({ args: { json: "" } } as never);
+    }, "PROJ-1");
   });
 });

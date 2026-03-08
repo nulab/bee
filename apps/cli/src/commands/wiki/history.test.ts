@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getWikisHistory: vi.fn(),
@@ -75,12 +76,9 @@ describe("wiki history", () => {
       { version: 1, createdUser: { name: "Alice" }, created: "2025-01-01T00:00:00Z" },
     ]);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { history } = await import("./history");
-    await history.run?.({ args: { wiki: "123", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Alice"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { history } = await import("./history");
+      await history.run?.({ args: { wiki: "123", json: "" } } as never);
+    }, "Alice");
   });
 });

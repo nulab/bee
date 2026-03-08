@@ -1,6 +1,6 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   postPullRequest: vi.fn(),
@@ -20,16 +20,8 @@ vi.mock("@repo/cli-utils", async (importOriginal) => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
-
 describe("pr create", () => {
   it("creates a pull request with required fields", async () => {
-    setupMocks();
     mockClient.postPullRequest.mockResolvedValue({ number: 1, summary: "Add feature" });
 
     const { create } = await import("./create");
@@ -58,7 +50,6 @@ describe("pr create", () => {
   });
 
   it("creates a pull request with assignee @me", async () => {
-    setupMocks();
     mockClient.getMyself.mockResolvedValue({ id: 99 });
     mockClient.postPullRequest.mockResolvedValue({ number: 2, summary: "Title" });
 
@@ -83,7 +74,6 @@ describe("pr create", () => {
   });
 
   it("creates a pull request with related issue", async () => {
-    setupMocks();
     mockClient.postPullRequest.mockResolvedValue({ number: 3, summary: "Title" });
 
     const { create } = await import("./create");
@@ -107,7 +97,6 @@ describe("pr create", () => {
   });
 
   it("resolves issue key to issue ID", async () => {
-    setupMocks();
     mockClient.getIssue.mockResolvedValue({ id: 789 });
     mockClient.postPullRequest.mockResolvedValue({ number: 4, summary: "Title" });
 
@@ -133,25 +122,21 @@ describe("pr create", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.postPullRequest.mockResolvedValue({ number: 1, summary: "Add feature" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { create } = await import("./create");
-    await create.run?.({
-      args: {
-        project: "PROJ",
-        repo: "repo",
-        base: "main",
-        head: "feature",
-        title: "Add feature",
-        body: "Details",
-        json: "",
-      },
-    } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("Add feature"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { create } = await import("./create");
+      await create.run?.({
+        args: {
+          project: "PROJ",
+          repo: "repo",
+          base: "main",
+          head: "feature",
+          title: "Add feature",
+          body: "Details",
+          json: "",
+        },
+      } as never);
+    }, "Add feature");
   });
 });

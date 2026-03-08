@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getIssuesCount: vi.fn(),
@@ -43,12 +44,18 @@ describe("issue count", () => {
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getIssuesCount.mockResolvedValue({ count: 42 });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    await expectStdoutContaining(async () => {
+      const { count } = await import("./count");
+      await count.run?.({ args: { project: "TEST", json: "" } } as never);
+    }, "42");
+  });
 
+  it("throws error for unknown priority name", async () => {
     const { count } = await import("./count");
-    await count.run?.({ args: { project: "TEST", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("42"));
-    writeSpy.mockRestore();
+    await expect(
+      count.run?.({
+        args: { project: "TEST", priority: "invalid" },
+      } as never),
+    ).rejects.toThrow('Unknown priority "invalid". Valid values: high, normal, low');
   });
 });

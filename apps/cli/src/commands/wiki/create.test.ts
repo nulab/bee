@@ -1,6 +1,7 @@
 import { promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   postWiki: vi.fn(),
@@ -85,14 +86,11 @@ describe("wiki create", () => {
     mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
     mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { create } = await import("./create");
-    await create.run?.({
-      args: { project: "TEST", name: "My Page", body: "Hello", json: "" },
-    } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("My Page"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { create } = await import("./create");
+      await create.run?.({
+        args: { project: "TEST", name: "My Page", body: "Hello", json: "" },
+      } as never);
+    }, "My Page");
   });
 });
