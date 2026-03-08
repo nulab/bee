@@ -21,6 +21,11 @@ on:
         default: patch
         required: true
 
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
 concurrency:
   group: release
   cancel-in-progress: false
