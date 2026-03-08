@@ -26,7 +26,7 @@ describe("loadConfig", () => {
 
     const config = loadConfig();
 
-    expect(mockReadUser).toHaveBeenCalledWith(".backlogrc");
+    expect(mockReadUser).toHaveBeenCalledWith(".beerc");
     expect(config.defaultSpace).toBe("example.backlog.com");
     expect(config.spaces).toHaveLength(1);
     expect(config.spaces[0]?.host).toBe("example.backlog.com");
@@ -65,7 +65,7 @@ describe("writeConfig", () => {
   it("writes config via rc9 writeUser", () => {
     writeConfig(sampleConfig);
 
-    expect(mockWriteUser).toHaveBeenCalledWith(sampleConfig, ".backlogrc");
+    expect(mockWriteUser).toHaveBeenCalledWith(sampleConfig, ".beerc");
   });
 });
 
@@ -88,7 +88,7 @@ describe("updateConfig", () => {
     expect(result.defaultSpace).toBe("example.backlog.com");
     expect(mockWriteUser).toHaveBeenCalledWith(
       expect.objectContaining({ defaultSpace: "example.backlog.com" }),
-      ".backlogrc",
+      ".beerc",
     );
   });
 });

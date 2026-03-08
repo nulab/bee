@@ -3,7 +3,7 @@ import * as v from "valibot";
 import { readUser, writeUser } from "rc9";
 import { type Rc, RcSchema } from "./schema";
 
-const CONFIG_FILE_NAME = ".backlogrc";
+const CONFIG_FILE_NAME = ".beerc";
 
 const loadConfig = (): Rc => {
   const raw = readUser(CONFIG_FILE_NAME);
