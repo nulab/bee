@@ -1,4 +1,4 @@
-import { describe, expect, test, vi, beforeEach } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import consola from "consola";
 import {
   formatBacklogError,
@@ -7,16 +7,7 @@ import {
   errorCodeName,
 } from "./api-error";
 
-vi.mock("consola", () => ({
-  default: {
-    error: vi.fn(),
-    debug: vi.fn(),
-  },
-}));
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
+vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("errorCodeName", () => {
   test("returns error name for known code", () => {

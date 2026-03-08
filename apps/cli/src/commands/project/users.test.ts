@@ -1,5 +1,6 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {
   getProjectUsers: vi.fn(),
@@ -43,12 +44,9 @@ describe("project users", () => {
       { id: 1, userId: "user1", name: "User One", roleType: 1 },
     ]);
 
-    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-
-    const { users } = await import("./users");
-    await users.run?.({ args: { project: "PROJ1", json: "" } } as never);
-
-    expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining("user1"));
-    writeSpy.mockRestore();
+    await expectStdoutContaining(async () => {
+      const { users } = await import("./users");
+      await users.run?.({ args: { project: "PROJ1", json: "" } } as never);
+    }, "user1");
   });
 });
