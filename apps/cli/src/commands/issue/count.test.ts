@@ -49,4 +49,13 @@ describe("issue count", () => {
       await count.run?.({ args: { project: "TEST", json: "" } } as never);
     }, "42");
   });
+
+  it("throws error for unknown priority name", async () => {
+    const { count } = await import("./count");
+    await expect(
+      count.run?.({
+        args: { project: "TEST", priority: "invalid" },
+      } as never),
+    ).rejects.toThrow('Unknown priority "invalid". Valid values: high, normal, low');
+  });
 });

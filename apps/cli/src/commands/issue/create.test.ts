@@ -182,4 +182,19 @@ describe("issue create", () => {
       } as never);
     }, "TEST-4");
   });
+
+  it("throws error for unknown priority name", async () => {
+    vi.mocked(promptRequired)
+      .mockResolvedValueOnce("TEST")
+      .mockResolvedValueOnce("test")
+      .mockResolvedValueOnce("1")
+      .mockResolvedValueOnce("invalid");
+
+    const { create } = await import("./create");
+    await expect(
+      create.run?.({
+        args: { project: "TEST", summary: "test", priority: "invalid" },
+      } as never),
+    ).rejects.toThrow('Unknown priority "invalid". Valid values: high, normal, low');
+  });
 });

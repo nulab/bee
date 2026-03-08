@@ -49,4 +49,13 @@ describe("pr count", () => {
       await count.run?.({ args: { project: "TEST", repo: "my-repo", json: "" } } as never);
     }, "10");
   });
+
+  it("throws error for unknown status name", async () => {
+    const { count } = await import("./count");
+    await expect(
+      count.run?.({
+        args: { repo: "my-repo", status: "invalid" },
+      } as never),
+    ).rejects.toThrow('Unknown status "invalid". Valid values: open, closed, merged');
+  });
 });

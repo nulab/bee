@@ -80,4 +80,13 @@ describe("issue edit", () => {
       await edit.run?.({ args: { issue: "TEST-1", title: "Title", json: "" } } as never);
     }, "TEST-1");
   });
+
+  it("throws error for unknown priority name", async () => {
+    const { edit } = await import("./edit");
+    await expect(
+      edit.run?.({
+        args: { issue: "TEST-1", priority: "invalid" },
+      } as never),
+    ).rejects.toThrow('Unknown priority "invalid". Valid values: high, normal, low');
+  });
 });
