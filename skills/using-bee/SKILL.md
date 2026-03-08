@@ -51,6 +51,10 @@ This table may not reflect the latest version. Run `bee --help` and `bee <comman
 For the full command reference (all flags, arguments, examples, and environment variables), fetch:
 https://nulab.github.io/bee/llms-full.txt
 
+## Non-Interactive Environments
+
+bee cannot prompt interactively in non-TTY environments (CI/CD, piped commands, AI agents). **Always pass all required arguments via flags**, and add `--yes` for destructive operations.
+
 ## Key Patterns
 
 **JSON output** — Always use `--json` to get structured data for processing:

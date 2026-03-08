@@ -1,6 +1,7 @@
 ---
 title: 環境変数
-description: bee で使用できる環境変数の一覧と設定方法。フラグの省略やデフォルト値の設定ができます。
+description: |-
+  bee で使用できる環境変数の一覧と設定方法。BACKLOG_SPACE や BACKLOG_PROJECT などでフラグを省略できます。
 ---
 
 環境変数を設定すると、頻繁に使うフラグを省略できます。
@@ -30,8 +31,6 @@ description: bee で使用できる環境変数の一覧と設定方法。フラ
   <dt><code>BACKLOG_OAUTH_CLIENT_SECRET</code></dt>
   <dd>OAuth 認証で使用するクライアントシークレット。<code>bee auth login --method oauth</code> 時に <code>--client-secret</code> フラグの代わりに使用できます。</dd>
 
-  <dt><code>BACKLOG_NO_INPUT</code></dt>
-  <dd>任意の値（例: <code>1</code>）を設定すると、対話プロンプトを無効化します。必須パラメータが未指定の場合はエラーになります。CI/CD 環境など非対話環境で使用します。</dd>
 </dl>
 
 ## よく使うパターン

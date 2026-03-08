@@ -3,8 +3,6 @@ import { loadConfig, writeConfig } from "@repo/config";
 import consola from "consola";
 import { BeeCommand } from "../../lib/bee-command";
 
-const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
-
 const switchSpace = new BeeCommand("switch")
   .summary("Switch active space")
   .description(
@@ -19,10 +17,7 @@ interactively. Use \`--space\` to switch directly without a prompt.
 For a list of configured spaces, see \`bee auth status\`.`,
   )
   .option("-s, --space <hostname>", "The hostname of the Backlog space")
-  .envVars([
-    ["BACKLOG_SPACE", "Space hostname to switch to"],
-    ["BACKLOG_NO_INPUT", "Set to 1 to disable interactive prompts"],
-  ])
+  .envVars([["BACKLOG_SPACE", "Space hostname to switch to"]])
   .examples([
     { description: "Select space via prompt", command: "bee auth switch" },
     {
@@ -40,9 +35,9 @@ For a list of configured spaces, see \`bee auth status\`.`,
         throw new UserError("No spaces configured. Run `bee auth login` to add a space.");
       }
 
-      if (isNoInput()) {
+      if (!process.stdin.isTTY) {
         throw new UserError(
-          "Hostname is required. Use --space to provide it in BACKLOG_NO_INPUT mode.",
+          "Hostname is required. Use --space to provide it in non-interactive mode.",
         );
       }
 

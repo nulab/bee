@@ -1,8 +1,6 @@
 import consola from "consola";
 import { UserError } from "./user-error";
 
-const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
-
 const promptRequired = async (
   label: string,
   existing?: string,
@@ -15,9 +13,9 @@ const promptRequired = async (
     throw new UserError(`${label.replace(/:$/, "")} is required.`);
   }
 
-  if (isNoInput()) {
+  if (!process.stdin.isTTY) {
     throw new UserError(
-      `${label.replace(/:$/, "")} is required. Use arguments to provide it in BACKLOG_NO_INPUT mode.`,
+      `${label.replace(/:$/, "")} is required. Use arguments to provide it in non-interactive mode.`,
     );
   }
 
@@ -38,8 +36,8 @@ const confirmOrExit = async (message: string, skipConfirm?: boolean): Promise<bo
     return true;
   }
 
-  if (isNoInput()) {
-    throw new UserError("Confirmation required. Use --yes to skip in BACKLOG_NO_INPUT mode.");
+  if (!process.stdin.isTTY) {
+    throw new UserError("Confirmation required. Use --yes to skip in non-interactive mode.");
   }
 
   const confirmed = await consola.prompt(message, { type: "confirm" });

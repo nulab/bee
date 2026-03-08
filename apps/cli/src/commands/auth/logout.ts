@@ -3,8 +3,6 @@ import { loadConfig, removeSpace } from "@repo/config";
 import consola from "consola";
 import { BeeCommand } from "../../lib/bee-command";
 
-const isNoInput = (): boolean => process.env.BACKLOG_NO_INPUT === "1";
-
 const logout = new BeeCommand("logout")
   .summary("Remove authentication for a Backlog space")
   .description(
@@ -15,10 +13,7 @@ The stored credentials are removed locally. This does not revoke API keys or OAu
 If only one space is configured, it will be selected automatically. If multiple spaces are configured, you will be prompted to select one.`,
   )
   .option("-s, --space <hostname>", "The hostname of the Backlog space")
-  .envVars([
-    ["BACKLOG_SPACE", "Space hostname to log out from"],
-    ["BACKLOG_NO_INPUT", "Set to 1 to disable interactive prompts"],
-  ])
+  .envVars([["BACKLOG_SPACE", "Space hostname to log out from"]])
   .examples([
     { description: "Select space via prompt", command: "bee auth logout" },
     {
@@ -39,9 +34,9 @@ If only one space is configured, it will be selected automatically. If multiple 
       const [firstSpace] = config.spaces;
       if (config.spaces.length === 1) {
         hostname = firstSpace.host;
-      } else if (isNoInput()) {
+      } else if (!process.stdin.isTTY) {
         throw new UserError(
-          "Hostname is required. Use --space to provide it in BACKLOG_NO_INPUT mode.",
+          "Hostname is required. Use --space to provide it in non-interactive mode.",
         );
       } else {
         hostname = await consola.prompt("Select a space to log out from:", {

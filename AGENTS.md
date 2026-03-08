@@ -249,7 +249,7 @@ View commands support `--web` to open the resource in a browser. Build the URL (
 
 ### Interactive prompts (`promptRequired` / `confirmOrExit`)
 
-- **`promptRequired(label, existing, options?)`** — if the flag value is provided, returns it; otherwise prompts interactively. Honors `BACKLOG_NO_INPUT=1` for non-interactive environments.
+- **`promptRequired(label, existing, options?)`** — if the flag value is provided, returns it; otherwise prompts interactively. Automatically detects non-interactive environments via `process.stdin.isTTY`.
 - **`confirmOrExit(message, skipConfirm?)`** — confirmation prompt for destructive actions. `--yes` flag skips via `skipConfirm`. Returns `false` if cancelled.
 
 ### Stdin pipe support (`resolveStdinArg`)
