@@ -109,7 +109,6 @@ const CATEGORY_MAP: Record<string, Category> = {
   milestone: "config",
   "issue-type": "config",
   status: "config",
-  webhook: "config",
   // Additional commands — CLI utilities
   api: "additional",
   completion: "additional",

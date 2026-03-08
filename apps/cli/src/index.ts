@@ -14,7 +14,6 @@ await program.addCommands([
   import("./commands/repo/index.js"),
   import("./commands/team/index.js"),
   import("./commands/user/index.js"),
-  import("./commands/webhook/index.js"),
   import("./commands/wiki/index.js"),
   import("./commands/category/index.js"),
   import("./commands/milestone/index.js"),

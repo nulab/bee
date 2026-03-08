@@ -8,7 +8,7 @@ const COMPLETION_SCRIPTS: Record<string, string> = {
 
 _bee_completions() {
   local cur="\${COMP_WORDS[COMP_CWORD]}"
-  local commands="auth project issue document notification pr repo team user webhook wiki category milestone issue-type space status star watching dashboard browse api completion"
+  local commands="auth project issue document notification pr repo team user wiki category milestone issue-type space status star watching dashboard browse api completion"
 
   if [ "\${COMP_CWORD}" -eq 1 ]; then
     COMPREPLY=( $(compgen -W "\${commands}" -- "\${cur}") )
@@ -34,7 +34,6 @@ _bee() {
       'repo:repo commands' \\
       'team:team commands' \\
       'user:user commands' \\
-      'webhook:webhook commands' \\
       'wiki:wiki commands' \\
       'category:category commands' \\
       'milestone:milestone commands' \\
@@ -74,7 +73,6 @@ complete -c bee -n "__fish_use_subcommand" -a "pr" -d "pr commands"
 complete -c bee -n "__fish_use_subcommand" -a "repo" -d "repo commands"
 complete -c bee -n "__fish_use_subcommand" -a "team" -d "team commands"
 complete -c bee -n "__fish_use_subcommand" -a "user" -d "user commands"
-complete -c bee -n "__fish_use_subcommand" -a "webhook" -d "webhook commands"
 complete -c bee -n "__fish_use_subcommand" -a "wiki" -d "wiki commands"
 complete -c bee -n "__fish_use_subcommand" -a "category" -d "category commands"
 complete -c bee -n "__fish_use_subcommand" -a "milestone" -d "milestone commands"
