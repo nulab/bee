@@ -9,10 +9,10 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.34.0",
+    "@astrojs/starlight": "^0.37.6",
     "astro": "^5.5.0",
     "marked": "^17.0.3",
-    "sharp": "^0.33.0"
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "jiti": "^2.6.1"
