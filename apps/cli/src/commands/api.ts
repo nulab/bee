@@ -1,7 +1,6 @@
 import { type BacklogClient, getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
+import { UserError, outputArgs, outputResult } from "@repo/cli-utils";
 import { defineCommand } from "citty";
-import consola from "consola";
 import { type CommandUsage, ENV_AUTH, withUsage } from "../lib/command-usage";
 
 const commandUsage: CommandUsage = {
@@ -180,8 +179,7 @@ const buildParams = (fields: string[], rawFields: string[]): Params => {
   for (const pair of fields) {
     const eqIndex = pair.indexOf("=");
     if (eqIndex === -1) {
-      consola.error(`Invalid field format: "${pair}". Expected key=value.`);
-      process.exit(1);
+      throw new UserError(`Invalid field format: "${pair}". Expected key=value.`);
     }
     addParam(pair.slice(0, eqIndex), inferType(pair.slice(eqIndex + 1)));
   }
@@ -189,8 +187,7 @@ const buildParams = (fields: string[], rawFields: string[]): Params => {
   for (const pair of rawFields) {
     const eqIndex = pair.indexOf("=");
     if (eqIndex === -1) {
-      consola.error(`Invalid field format: "${pair}". Expected key=value.`);
-      process.exit(1);
+      throw new UserError(`Invalid field format: "${pair}". Expected key=value.`);
     }
     addParam(pair.slice(0, eqIndex), pair.slice(eqIndex + 1));
   }
@@ -238,8 +235,7 @@ const makeRequest = async (
       return client.delete(endpoint, params);
     }
     default: {
-      consola.error(`Unsupported HTTP method: ${method}`);
-      return process.exit(1);
+      throw new UserError(`Unsupported HTTP method: ${method}`);
     }
   }
 };

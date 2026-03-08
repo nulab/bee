@@ -1,7 +1,6 @@
 import { refreshAccessToken } from "@repo/backlog-utils";
 import { resolveSpace, updateSpaceAuth } from "@repo/config";
 import { Backlog } from "backlog-js";
-import { spyOnProcessExit } from "@repo/test-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -27,18 +26,13 @@ vi.mock("@repo/config", () => ({
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("auth refresh", () => {
-  it("calls process.exit(1) when no space is configured", async () => {
+  it("throws error when no space is configured", async () => {
     vi.mocked(resolveSpace).mockReturnValue(null);
-    const exitSpy = spyOnProcessExit();
 
     const { refresh } = await import("./refresh");
-    await refresh.run?.({ args: {} } as never);
-
-    expect(consola.error).toHaveBeenCalledWith(
+    await expect(refresh.run?.({ args: {} } as never)).rejects.toThrow(
       "No space configured. Run `bee auth login` to authenticate.",
     );
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
   });
 
   it("shows error for API key authentication", async () => {
@@ -46,16 +40,11 @@ describe("auth refresh", () => {
       host: "example.backlog.com",
       auth: { method: "api-key" as const, apiKey: "key" },
     });
-    const exitSpy = spyOnProcessExit();
 
     const { refresh } = await import("./refresh");
-    await refresh.run?.({ args: {} } as never);
-
-    expect(consola.error).toHaveBeenCalledWith(
+    await expect(refresh.run?.({ args: {} } as never)).rejects.toThrow(
       "Token refresh is only available for OAuth authentication. Current space uses API key.",
     );
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
   });
 
   it("shows error when clientId/clientSecret are missing", async () => {
@@ -67,16 +56,11 @@ describe("auth refresh", () => {
         refreshToken: "refresh",
       },
     });
-    const exitSpy = spyOnProcessExit();
 
     const { refresh } = await import("./refresh");
-    await refresh.run?.({ args: {} } as never);
-
-    expect(consola.error).toHaveBeenCalledWith(
+    await expect(refresh.run?.({ args: {} } as never)).rejects.toThrow(
       "Client ID and Client Secret are missing from the stored OAuth configuration. Please re-authenticate with `bee auth login -m oauth`.",
     );
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
   });
 
   it("successfully refreshes token", async () => {
@@ -135,16 +119,11 @@ describe("auth refresh", () => {
       },
     });
     vi.mocked(refreshAccessToken).mockRejectedValue(new Error("invalid_grant"));
-    const exitSpy = spyOnProcessExit();
 
     const { refresh } = await import("./refresh");
-    await refresh.run?.({ args: {} } as never);
-
-    expect(consola.error).toHaveBeenCalledWith(
+    await expect(refresh.run?.({ args: {} } as never)).rejects.toThrow(
       "Failed to refresh OAuth token. Please re-authenticate with `bee auth login -m oauth`.",
     );
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
   });
 
   it("shows error when token verification fails after refresh", async () => {
@@ -165,13 +144,10 @@ describe("auth refresh", () => {
       refresh_token: "new-refresh",
     });
     mockGetMyself.mockRejectedValue(new Error("Unauthorized"));
-    const exitSpy = spyOnProcessExit();
 
     const { refresh } = await import("./refresh");
-    await refresh.run?.({ args: {} } as never);
-
-    expect(consola.error).toHaveBeenCalledWith("Token verification failed after refresh.");
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
+    await expect(refresh.run?.({ args: {} } as never)).rejects.toThrow(
+      "Token verification failed after refresh.",
+    );
   });
 });

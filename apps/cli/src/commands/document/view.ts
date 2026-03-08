@@ -1,5 +1,11 @@
 import { documentUrl, getClient, openOrPrintUrl } from "@repo/backlog-utils";
-import { formatDate, outputArgs, outputResult, printDefinitionList } from "@repo/cli-utils";
+import {
+  UserError,
+  formatDate,
+  outputArgs,
+  outputResult,
+  printDefinitionList,
+} from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
@@ -53,8 +59,7 @@ const view = withUsage(
 
       if (args.web || args["no-browser"]) {
         if (!args.project) {
-          consola.error("The --project flag is required when using --web.");
-          process.exit(1);
+          throw new UserError("The --project flag is required when using --web.");
         }
         const url = documentUrl(host, args.project, args.document);
         await openOrPrintUrl(url, Boolean(args["no-browser"]), consola);

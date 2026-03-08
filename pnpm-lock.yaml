@@ -106,6 +106,9 @@ importers:
 
   packages/backlog-utils:
     dependencies:
+      '@repo/cli-utils':
+        specifier: workspace:*
+        version: link:../cli-utils
       '@repo/config':
         specifier: workspace:*
         version: link:../config
@@ -153,6 +156,9 @@ importers:
 
   packages/config:
     dependencies:
+      '@repo/cli-utils':
+        specifier: workspace:*
+        version: link:../cli-utils
       consola:
         specifier: ^3.4.2
         version: 3.4.2

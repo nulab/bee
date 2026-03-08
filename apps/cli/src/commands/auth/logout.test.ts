@@ -1,5 +1,4 @@
 import { loadConfig, removeSpace } from "@repo/config";
-import { spyOnProcessExit } from "@repo/test-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -58,18 +57,12 @@ describe("auth logout", () => {
       throw new Error("not found");
     });
 
-    const exitSpy = spyOnProcessExit();
-
     const { logout } = await import("./logout");
-    await logout.run?.({
-      args: { space: "nonexistent.backlog.com" },
-    } as never);
-
-    expect(consola.error).toHaveBeenCalledWith(
-      'Space "nonexistent.backlog.com" is not configured.',
-    );
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
+    await expect(
+      logout.run?.({
+        args: { space: "nonexistent.backlog.com" },
+      } as never),
+    ).rejects.toThrow('Space "nonexistent.backlog.com" is not configured.');
   });
 
   it("auto-selects and logs out when --space is omitted and one space exists", async () => {

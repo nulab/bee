@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputArgs, outputResult } from "@repo/cli-utils";
+import { UserError, outputArgs, outputResult } from "@repo/cli-utils";
 import { defineCommand } from "citty";
 import consola from "consola";
 import { type CommandUsage, ENV_AUTH, ENV_PROJECT, withUsage } from "../../lib/command-usage";
@@ -49,8 +49,7 @@ const removeUser = withUsage(
     async run({ args }) {
       const userId = Number(args["user-id"]);
       if (Number.isNaN(userId)) {
-        consola.error("User ID must be a number.");
-        return process.exit(1);
+        throw new UserError("User ID must be a number.");
       }
 
       const { client } = await getClient();

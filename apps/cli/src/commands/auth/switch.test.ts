@@ -1,5 +1,4 @@
 import { loadConfig, writeConfig } from "@repo/config";
-import { spyOnProcessExit } from "@repo/test-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -36,22 +35,19 @@ describe("auth switch", () => {
     expect(consola.success).toHaveBeenCalledWith("Switched active space to example.backlog.com.");
   });
 
-  it("shows error when space is not found", async () => {
+  it("throws error when space is not found", async () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [],
       defaultSpace: undefined,
       aliases: {},
     });
 
-    const exitSpy = spyOnProcessExit();
-
     const { switchSpace } = await import("./switch");
-    await switchSpace.run?.({
-      args: { space: "missing.backlog.com" },
-    } as never);
-
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
+    await expect(
+      switchSpace.run?.({
+        args: { space: "missing.backlog.com" },
+      } as never),
+    ).rejects.toThrow();
   });
 
   it("calls writeConfig on successful switch", async () => {

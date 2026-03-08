@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/cli-utils": "workspace:*",
     "consola": "^3.4.2",
     "rc9": "^2.1.2",
     "valibot": "^1.0.0"

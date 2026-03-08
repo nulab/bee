@@ -41,18 +41,12 @@ describe("loadConfig", () => {
     expect(config.defaultSpace).toBeUndefined();
   });
 
-  it("exits process when config validation fails", () => {
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
-
+  it("throws error when config validation fails", () => {
     mockReadUser.mockReturnValue({
       spaces: [{ host: "invalid", auth: { method: "bad" } }],
     });
 
-    loadConfig();
-
-    expect(exitSpy).toHaveBeenCalledWith(1);
-
-    exitSpy.mockRestore();
+    expect(() => loadConfig()).toThrow("Configuration Error:");
   });
 });
 

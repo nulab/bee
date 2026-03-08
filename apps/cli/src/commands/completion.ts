@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { UserError } from "@repo/cli-utils";
 import { defineCommand } from "citty";
-import consola from "consola";
 import { type CommandUsage, withUsage } from "../lib/command-usage";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -61,8 +61,9 @@ const completion = withUsage(
           break;
         }
         default: {
-          consola.error(`Unsupported shell: "${args.shell}". Supported shells: bash, zsh, fish.`);
-          process.exit(1);
+          throw new UserError(
+            `Unsupported shell: "${args.shell}". Supported shells: bash, zsh, fish.`,
+          );
         }
       }
     },

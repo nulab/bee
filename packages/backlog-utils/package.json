@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/cli-utils": "workspace:*",
     "@repo/config": "workspace:*",
     "backlog-js": "^0.16.0",
     "consola": "^3.4.2",

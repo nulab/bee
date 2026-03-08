@@ -1,5 +1,5 @@
+import { UserError } from "@repo/cli-utils";
 import * as v from "valibot";
-import consola from "consola";
 import { readUser, writeUser } from "rc9";
 import { type Rc, RcSchema } from "./schema";
 
@@ -10,11 +10,8 @@ const loadConfig = (): Rc => {
   const result = v.safeParse(RcSchema, raw);
 
   if (!result.success) {
-    consola.error("Configuration Error:");
-    for (const issue of result.issues) {
-      consola.error(issue.message);
-    }
-    process.exit(1);
+    const details = result.issues.map((issue) => issue.message).join("\n");
+    throw new UserError(`Configuration Error:\n${details}`);
   }
 
   return result.output;

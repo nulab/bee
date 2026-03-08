@@ -1,4 +1,5 @@
 import { refreshAccessToken } from "@repo/backlog-utils";
+import { UserError } from "@repo/cli-utils";
 import { findSpace, loadConfig, resolveSpace, updateSpaceAuth } from "@repo/config";
 import { Backlog } from "backlog-js";
 import { defineCommand } from "citty";
@@ -43,23 +44,20 @@ const refresh = withUsage(
       const space = args.space ? findSpace(loadConfig().spaces, args.space) : resolveSpace();
 
       if (!space) {
-        consola.error("No space configured. Run `bee auth login` to authenticate.");
-        return process.exit(1);
+        throw new UserError("No space configured. Run `bee auth login` to authenticate.");
       }
 
       if (space.auth.method !== "oauth") {
-        consola.error(
+        throw new UserError(
           "Token refresh is only available for OAuth authentication. Current space uses API key.",
         );
-        return process.exit(1);
       }
 
       const { clientId, clientSecret } = space.auth;
       if (!clientId || !clientSecret) {
-        consola.error(
+        throw new UserError(
           "Client ID and Client Secret are missing from the stored OAuth configuration. Please re-authenticate with `bee auth login -m oauth`.",
         );
-        return process.exit(1);
       }
 
       consola.start(`Refreshing OAuth token for ${space.host}...`);
@@ -72,10 +70,9 @@ const refresh = withUsage(
           refreshToken: space.auth.refreshToken,
         });
       } catch {
-        consola.error(
+        throw new UserError(
           "Failed to refresh OAuth token. Please re-authenticate with `bee auth login -m oauth`.",
         );
-        return process.exit(1);
       }
 
       let user;
@@ -83,8 +80,7 @@ const refresh = withUsage(
         const client = new Backlog({ host: space.host, accessToken: tokenResponse.access_token });
         user = await client.getMyself();
       } catch {
-        consola.error("Token verification failed after refresh.");
-        return process.exit(1);
+        throw new UserError("Token verification failed after refresh.");
       }
 
       updateSpaceAuth(space.host, {

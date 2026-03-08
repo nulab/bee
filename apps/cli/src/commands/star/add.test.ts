@@ -67,29 +67,19 @@ describe("star add", () => {
     expect(consola.success).toHaveBeenCalledWith("Starred pull request comment 222.");
   });
 
-  it("shows error when no option is provided", async () => {
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
-
+  it("throws error when no option is provided", async () => {
     const { add } = await import("./add");
-    await add.run?.({ args: {} } as never);
 
-    expect(consola.error).toHaveBeenCalledWith(
+    await expect(add.run?.({ args: {} } as never)).rejects.toThrow(
       "Exactly one of --issue, --comment, --wiki, or --pr-comment must be provided.",
     );
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
   });
 
-  it("shows error when multiple options are provided", async () => {
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
-
+  it("throws error when multiple options are provided", async () => {
     const { add } = await import("./add");
-    await add.run?.({ args: { issue: "1", comment: "2" } } as never);
 
-    expect(consola.error).toHaveBeenCalledWith(
+    await expect(add.run?.({ args: { issue: "1", comment: "2" } } as never)).rejects.toThrow(
       "Only one of --issue, --comment, --wiki, or --pr-comment can be provided at a time.",
     );
-    expect(exitSpy).toHaveBeenCalledWith(1);
-    exitSpy.mockRestore();
   });
 });
