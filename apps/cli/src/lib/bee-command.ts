@@ -4,8 +4,8 @@ import { colorize } from "consola/utils";
 type Example = { description: string; command: string };
 
 class BeeCommand extends Command {
-  private _examples: Example[] = [];
-  private _extraEnvVars: [string, string][] = [];
+  readonly beeExamples: Example[] = [];
+  readonly beeEnvVars: [string, string][] = [];
 
   helpInformation(): string {
     return super.helpInformation() + this._renderExamples() + this._renderEnvVars();
@@ -16,12 +16,12 @@ class BeeCommand extends Command {
   }
 
   examples(examples: Example[]): this {
-    this._examples = examples;
+    this.beeExamples.push(...examples);
     return this;
   }
 
   envVars(vars: [string, string][]): this {
-    this._extraEnvVars.push(...vars);
+    this.beeEnvVars.push(...vars);
     return this;
   }
 
@@ -34,10 +34,10 @@ class BeeCommand extends Command {
   }
 
   private _renderExamples(): string {
-    if (this._examples.length === 0) {
+    if (this.beeExamples.length === 0) {
       return "";
     }
-    const lines = this._examples.flatMap((ex) => [
+    const lines = this.beeExamples.flatMap((ex) => [
       `  # ${ex.description}`,
       `  $ ${ex.command}`,
       "",
@@ -49,7 +49,7 @@ class BeeCommand extends Command {
     const fromOptions: [string, string][] = this.options
       .filter((opt) => opt.envVar)
       .map((opt) => [opt.envVar!, opt.description ?? ""]);
-    const vars = [...fromOptions, ...this._extraEnvVars];
+    const vars = [...fromOptions, ...this.beeEnvVars];
     if (vars.length === 0) {
       return "";
     }

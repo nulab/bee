@@ -2,6 +2,7 @@ import { readdir } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
+import { type Command, type Option } from "commander";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const CLI_COMMANDS_DIR = resolve(__dirname, "../../../cli/src/commands");
@@ -26,26 +27,60 @@ type CommandEntry = {
   environment?: [string, string][];
 };
 
-const toAliasArray = (alias: unknown): string[] => {
-  if (Array.isArray(alias)) {
-    return alias.map(String);
-  }
-  if (typeof alias === "string") {
-    return [alias];
-  }
-  return [];
+/** Extract the long option name from commander's Option (e.g. "--project" → "project"). */
+const longName = (opt: Option): string => (opt.long ?? opt.short ?? "").replace(/^-+/, "");
+
+/** Extract the short alias (without leading dash) if present. */
+const shortAlias = (opt: Option): string[] => (opt.short ? [opt.short.replace(/^-/, "")] : []);
+
+/** Extract the value placeholder from a commander Option's flags string (e.g. "<id>" from "-p, --project <id>"). */
+const extractValueHint = (opt: Option): string | undefined => {
+  const match = opt.flags.match(/<([^>]+)>|\[([^\]]+)\]/);
+  return match ? `<${match[1] ?? match[2]}>` : undefined;
 };
 
-const normalizeArgs = (argsDef: Record<string, Record<string, unknown>>): NormalizedArg[] =>
-  Object.entries(argsDef).map(([name, def]) => ({
-    name,
-    type: def.type as NormalizedArg["type"],
-    description: def.description as string | undefined,
-    alias: toAliasArray(def.alias),
-    default: def.default as string | boolean | undefined,
-    required: def.required as boolean | undefined,
-    valueHint: def.valueHint as string | undefined,
-  }));
+/**
+ * Determine the arg type for a commander Option.
+ * Boolean flags have no expected argument; otherwise treat as string.
+ */
+const optionArgType = (opt: Option): "boolean" | "string" =>
+  opt.required || opt.optional ? "string" : "boolean";
+
+/** Convert commander Options and Arguments into the normalized args format. */
+const normalizeCommanderArgs = (cmd: Command): NormalizedArg[] => {
+  const args: NormalizedArg[] = [];
+
+  for (const opt of cmd.options) {
+    args.push({
+      name: longName(opt),
+      type: optionArgType(opt),
+      description: opt.description,
+      alias: shortAlias(opt),
+      default:
+        typeof opt.defaultValue === "string" || typeof opt.defaultValue === "boolean"
+          ? opt.defaultValue
+          : undefined,
+      required: opt.required || undefined,
+      valueHint: extractValueHint(opt),
+    });
+  }
+
+  for (const arg of cmd.registeredArguments) {
+    args.push({
+      name: arg.name(),
+      type: "positional",
+      description: arg.description,
+      alias: [],
+      default:
+        typeof arg.defaultValue === "string" || typeof arg.defaultValue === "boolean"
+          ? arg.defaultValue
+          : undefined,
+      required: arg.required,
+    });
+  }
+
+  return args;
+};
 
 type NormalizedArg = CommandEntry["args"][number];
 
@@ -140,6 +175,12 @@ const loadCommandsImpl = async (): Promise<CommandEntry[]> => {
   return results;
 };
 
+const isCommandLike = (value: unknown): value is Command =>
+  value !== null &&
+  typeof value === "object" &&
+  typeof (value as Record<string, unknown>).name === "function" &&
+  typeof (value as Record<string, unknown>).options === "object";
+
 const loadCommandEntry = async (
   jiti: ReturnType<typeof createJiti>,
   filePath: string,
@@ -148,47 +189,44 @@ const loadCommandEntry = async (
   try {
     const mod = (await jiti.import(filePath)) as Record<string, unknown>;
 
-    const commandUsage = mod.commandUsage as
-      | {
-          long?: string;
-          examples?: { description: string; command: string }[];
-          annotations?: {
-            arguments?: string;
-            environment?: [string, string][];
-          };
-        }
-      | undefined;
-
-    // Find the command definition: an exported object with a `.meta` property
-    let meta: { name?: string; description?: string } | undefined;
-    let args: Record<string, Record<string, unknown>> = {};
-
-    for (const value of Object.values(mod)) {
-      if (value !== null && typeof value === "object" && "meta" in value) {
-        const cmdDef = value as {
-          meta: { name?: string; description?: string };
-          args?: Record<string, Record<string, unknown>>;
-        };
-        ({ meta } = cmdDef);
-        args = cmdDef.args ?? {};
-        break;
-      }
-    }
-
-    if (!meta) {
+    // The default export is a BeeCommand (commander.Command) instance
+    const cmd = mod.default;
+    if (!isCommandLike(cmd)) {
       return undefined;
     }
 
+    const name = cmd.name() || opts.commandName;
+    const summary = cmd.summary();
+    const description = cmd.description();
+
+    // BeeCommand exposes examples and env vars as public properties
+    const beeCmd = cmd as Command & {
+      beeExamples?: { description: string; command: string }[];
+      beeEnvVars?: [string, string][];
+    };
+    const examples = beeCmd.beeExamples;
+    const extraEnvVars = beeCmd.beeEnvVars;
+
+    // Collect environment variables: from option .env() bindings + explicit .envVars()
+    const envFromOptions: [string, string][] = cmd.options
+      .filter((o: Option) => o.envVar)
+      .map((o: Option) => [o.envVar!, o.description ?? ""]);
+    const environment = [...envFromOptions, ...(extraEnvVars ?? [])];
+
+    // Use summary as the short description; if description differs, use as long text
+    const short = summary || description;
+    const long = description && description !== summary ? description : undefined;
+
     return {
       id: opts.id,
-      title: `${opts.titlePrefix} ${meta.name ?? opts.commandName}`,
-      description: meta.description ?? "",
-      long: commandUsage?.long,
+      title: `${opts.titlePrefix} ${name}`,
+      description: short,
+      long,
       parent: opts.parent,
-      name: meta.name ?? opts.commandName,
-      args: normalizeArgs(args),
-      examples: commandUsage?.examples,
-      environment: commandUsage?.annotations?.environment,
+      name,
+      args: normalizeCommanderArgs(cmd),
+      examples: examples && examples.length > 0 ? examples : undefined,
+      environment: environment.length > 0 ? environment : undefined,
     };
   } catch {
     // Skip commands that fail to load
