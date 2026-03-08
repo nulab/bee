@@ -54,4 +54,17 @@ describe("handleValidationError", () => {
     expect(consola.debug).toHaveBeenCalledWith(expect.stringContaining("name:"));
     expect(consola.debug).toHaveBeenCalledWith(expect.stringContaining("age:"));
   });
+
+  it("logs raw error via consola.debug", () => {
+    const schema = v.object({ name: v.string() });
+    const result = v.safeParse(schema, { name: 123 });
+    if (result.success) {
+      throw new Error("Expected validation to fail");
+    }
+    const valiError = new v.ValiError(result.issues);
+
+    handleValidationError(valiError);
+
+    expect(consola.debug).toHaveBeenCalledWith("Raw error:", valiError);
+  });
 });

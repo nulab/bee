@@ -71,6 +71,21 @@ const extractBacklogErrorBody = (error: unknown): unknown => {
 };
 
 /**
+ * Extracts debug details (URL, HTTP status) from a backlog-js error.
+ * backlog-js stores these in private `_url` / `_status` fields.
+ */
+const extractDebugDetails = (error: unknown): { url?: string; status?: number } => {
+  if (!(error instanceof Error)) {
+    return {};
+  }
+  const record = error as unknown as Record<string, unknown>;
+  return {
+    url: typeof record._url === "string" ? record._url : undefined,
+    status: typeof record._status === "number" ? record._status : undefined,
+  };
+};
+
+/**
  * Handles Backlog API error responses thrown by backlog-js.
  * Returns true if the error was a Backlog API error and was handled.
  */
@@ -89,6 +104,15 @@ const handleBacklogApiError = (error: unknown, options: { json: boolean }): bool
   for (const line of formatBacklogError(errorBody)) {
     consola.error(line);
   }
+
+  const details = extractDebugDetails(error);
+  if (details.url) {
+    consola.debug(`Request URL: ${details.url}`);
+  }
+  if (details.status !== undefined) {
+    consola.debug(`HTTP status: ${details.status}`);
+  }
+
   return true;
 };
 

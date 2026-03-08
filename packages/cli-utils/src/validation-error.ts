@@ -27,5 +27,7 @@ export const handleValidationError = (error: unknown): boolean => {
     consola.debug(`  (other): ${flat.other.join(", ")}`);
   }
 
+  consola.debug("Raw error:", error);
+
   return true;
 };

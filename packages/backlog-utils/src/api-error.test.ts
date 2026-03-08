@@ -10,6 +10,7 @@ import {
 vi.mock("consola", () => ({
   default: {
     error: vi.fn(),
+    debug: vi.fn(),
   },
 }));
 
@@ -113,20 +114,33 @@ describe("formatBacklogError", () => {
 
 type ErrorBody = { errors: { message: string; code: number; moreInfo: string }[] };
 
+type MockErrorOptions = {
+  url?: string;
+  status?: number;
+};
+
 /**
  * Creates a mock backlog-js BacklogApiError.
- * backlog-js compiles to ES5 with `_name` and `_body` private fields,
+ * backlog-js compiles to ES5 with `_name`, `_body`, `_url`, `_status` private fields,
  * so we replicate that structure for testing.
  */
-const createBacklogApiError = (body: ErrorBody) => {
+const createBacklogApiError = (body: ErrorBody, options?: MockErrorOptions) => {
   const error = new Error("BacklogApiError");
-  Object.assign(error, { _name: "BacklogApiError", _body: body });
+  Object.assign(error, {
+    _name: "BacklogApiError",
+    _body: body,
+    ...(options && { _url: options.url, _status: options.status }),
+  });
   return error;
 };
 
-const createBacklogAuthError = (body: ErrorBody) => {
+const createBacklogAuthError = (body: ErrorBody, options?: MockErrorOptions) => {
   const error = new Error("BacklogAuthError");
-  Object.assign(error, { _name: "BacklogAuthError", _body: body });
+  Object.assign(error, {
+    _name: "BacklogAuthError",
+    _body: body,
+    ...(options && { _url: options.url, _status: options.status }),
+  });
   return error;
 };
 
@@ -189,6 +203,53 @@ describe("handleBacklogApiError", () => {
     expect(consola.error).not.toHaveBeenCalled();
     expect(stderrWrite).toHaveBeenCalledWith(`${JSON.stringify(body)}\n`);
 
+    stderrWrite.mockRestore();
+  });
+
+  test("logs request URL and HTTP status via debug", () => {
+    const error = createBacklogApiError(
+      { errors: [{ message: "No such project.", code: 6, moreInfo: "" }] },
+      { url: "https://example.backlog.com/api/v2/projects/TEST", status: 404 },
+    );
+
+    handleBacklogApiError(error, { json: false });
+
+    expect(consola.debug).toHaveBeenCalledWith(
+      "Request URL: https://example.backlog.com/api/v2/projects/TEST",
+    );
+    expect(consola.debug).toHaveBeenCalledWith("HTTP status: 404");
+  });
+
+  test("does not log debug details when error has no URL or status", () => {
+    const error = createBacklogApiError({
+      errors: [{ message: "No such project.", code: 6, moreInfo: "" }],
+    });
+
+    handleBacklogApiError(error, { json: false });
+
+    expect(consola.debug).not.toHaveBeenCalled();
+  });
+
+  test("does not log debug details for plain error body", () => {
+    const error = {
+      errors: [{ message: "No such project.", code: 6, moreInfo: "" }],
+    };
+
+    handleBacklogApiError(error, { json: false });
+
+    expect(consola.debug).not.toHaveBeenCalled();
+  });
+
+  test("does not log debug details in json mode", () => {
+    const stderrWrite = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    const error = createBacklogApiError(
+      { errors: [{ message: "Forbidden.", code: 5, moreInfo: "" }] },
+      { url: "https://example.backlog.com/api/v2/projects/TEST", status: 403 },
+    );
+
+    handleBacklogApiError(error, { json: true });
+
+    expect(consola.debug).not.toHaveBeenCalled();
     stderrWrite.mockRestore();
   });
 });
