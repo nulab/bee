@@ -3,7 +3,7 @@ title: AI エージェントとの連携
 description: Claude Code や Claude Desktop などの AI エージェントから bee や Backlog MCP Server を活用する方法
 ---
 
-import { Card, Steps } from "@astrojs/starlight/components";
+import { Card, Steps, LinkCard } from "@astrojs/starlight/components";
 
 bee はターミナルツールとして、AI エージェントの「手足」としても活用できます。LLM ベースのエージェントが Backlog のデータを取得・操作する手段として、大きく 2 つのアプローチがあります。
 
@@ -88,23 +88,8 @@ bee issue list --project MY_PROJECT --json
 bee issue list --project MY_PROJECT --json id,summary,status,assignee
 ```
 
-## プロンプト例
+## レシピ
 
-:::tip
-bee の Skill (`/using-bee`) を導入していれば、エージェントが適切なコマンドを自動的に選択します。プロンプトでは具体的なコマンドを指定する必要はありません。
-:::
+実践的なプロンプトの例を用意しています。
 
-```
-プロジェクト MY_PROJECT の未完了課題を担当者ごとにグループ化して、
-サマリーレポートを作成してください。
-```
-
-```
-今週の課題とプルリクエストの進捗レポートを Markdown 形式で作成してください。
-```
-
-```
-期限切れの課題を見つけて、それぞれに「期限を確認してください」というコメントを追加してください。
-```
-
-エージェントがうまく bee を使えない場合は、プロンプトに `/using-bee` を含めてください。
+<LinkCard title="AI エージェントで使えるプロンプト集" href="../../recipes/useful-prompts" description="bee と AI エージェントを組み合わせた実践的なプロンプト例" />

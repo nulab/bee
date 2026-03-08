@@ -3,7 +3,7 @@ title: CI/CD での利用
 description: GitHub Actions などの CI/CD パイプラインから bee を使って Backlog の課題やプルリクエストを自動操作する方法
 ---
 
-import { Steps, Tabs, TabItem } from "@astrojs/starlight/components";
+import { Steps, Tabs, TabItem, LinkCard, CardGrid } from "@astrojs/starlight/components";
 
 bee は CI/CD 環境でも利用できます。自動テストやデプロイのパイプラインから Backlog の課題やプルリクエストを操作できます。
 
@@ -47,41 +47,26 @@ on:
   push:
     branches: [main]
 
+permissions: {}
+
+env:
+  BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
+  BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
+
 jobs:
   notify:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Comment on issue
+        run: npx @nulab/bee issue comment PROJECT-123 --body "main ブランチにデプロイしました ($COMMIT_SHA)"
         env:
-          BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
-          BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
-        run: npx @nulab/bee issue comment PROJECT-123 --body "main ブランチにデプロイしました (${{ github.sha }})"
+          COMMIT_SHA: ${{ github.sha }}
 ```
 
-### 応用: PR マージ時に課題をクローズする
+## レシピ
 
-マージされた PR のタイトルから課題キーを抽出し、課題をクローズする例です。PR タイトルは `PROJECT-123: タイトル` の形式を前提としています。
+実践的なワークフローの例を用意しています。
 
-```yaml
-name: Close Backlog Issue
-on:
-  pull_request:
-    types: [closed]
-    branches: [main]
-
-jobs:
-  close-issue:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-      - name: Extract issue key from PR title
-        id: extract
-        run: echo "issue_key=$(echo '${{ github.event.pull_request.title }}' | grep -oE '^[A-Z_]+-[0-9]+')" >> "$GITHUB_OUTPUT"
-
-      - name: Close issue
-        if: steps.extract.outputs.issue_key != ''
-        env:
-          BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
-          BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
-        run: npx @nulab/bee issue close ${{ steps.extract.outputs.issue_key }}
-```
+<LinkCard title="PR と課題を連動させる" href="../../recipes/pr-lifecycle-sync" description="PR の作成・編集・マージに連動して課題のステータス更新やクローズを自動化" />
+<LinkCard title="リリース時に課題へ通知" href="../../recipes/release-notify-issues" description="リリースタグの作成時に関連課題へコメントし、リリースノートを Backlog ドキュメントに投稿" />
