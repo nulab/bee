@@ -14,13 +14,6 @@ vi.mock("@repo/backlog-utils", async (importOriginal) => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
-
 const sampleDocuments = [
   {
     id: "doc-1",
@@ -56,7 +49,6 @@ const sampleDocuments = [
 
 describe("document list", () => {
   it("displays document list in tabular format", async () => {
-    setupMocks();
     mockClient.getDocuments.mockResolvedValue(sampleDocuments);
 
     const { list } = await import("./list");
@@ -71,7 +63,6 @@ describe("document list", () => {
   });
 
   it("shows message when no documents found", async () => {
-    setupMocks();
     mockClient.getDocuments.mockResolvedValue([]);
 
     const { list } = await import("./list");
@@ -81,7 +72,6 @@ describe("document list", () => {
   });
 
   it("passes keyword query parameter", async () => {
-    setupMocks();
     mockClient.getDocuments.mockResolvedValue([]);
 
     const { list } = await import("./list");
@@ -93,7 +83,6 @@ describe("document list", () => {
   });
 
   it("passes sort and order parameters", async () => {
-    setupMocks();
     mockClient.getDocuments.mockResolvedValue([]);
 
     const { list } = await import("./list");
@@ -105,7 +94,6 @@ describe("document list", () => {
   });
 
   it("passes count and offset parameters", async () => {
-    setupMocks();
     mockClient.getDocuments.mockResolvedValue([]);
 
     const { list } = await import("./list");
@@ -117,7 +105,6 @@ describe("document list", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.getDocuments.mockResolvedValue(sampleDocuments);
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);

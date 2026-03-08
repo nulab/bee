@@ -13,13 +13,6 @@ vi.mock("@repo/backlog-utils", async (importOriginal) => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
-
 const samplePullRequests = [
   {
     number: 1,
@@ -37,7 +30,6 @@ const samplePullRequests = [
 
 describe("pr list", () => {
   it("displays pull request list in tabular format", async () => {
-    setupMocks();
     mockClient.getPullRequests.mockResolvedValue(samplePullRequests);
 
     const { list } = await import("./list");
@@ -51,7 +43,6 @@ describe("pr list", () => {
   });
 
   it("shows message when no pull requests found", async () => {
-    setupMocks();
     mockClient.getPullRequests.mockResolvedValue([]);
 
     const { list } = await import("./list");
@@ -61,7 +52,6 @@ describe("pr list", () => {
   });
 
   it("shows Unassigned for pull requests without assignee", async () => {
-    setupMocks();
     mockClient.getPullRequests.mockResolvedValue([samplePullRequests[1]]);
 
     const { list } = await import("./list");
@@ -71,7 +61,6 @@ describe("pr list", () => {
   });
 
   it("passes status filter parameter", async () => {
-    setupMocks();
     mockClient.getPullRequests.mockResolvedValue([]);
 
     const { list } = await import("./list");
@@ -85,8 +74,6 @@ describe("pr list", () => {
   });
 
   it("throws error for unknown status name", async () => {
-    setupMocks();
-
     const { list } = await import("./list");
     await expect(
       list.run?.({ args: { project: "PROJ", repo: "repo", status: "invalid" } } as never),
@@ -94,7 +81,6 @@ describe("pr list", () => {
   });
 
   it("passes assignee filter parameter", async () => {
-    setupMocks();
     mockClient.getPullRequests.mockResolvedValue([]);
 
     const { list } = await import("./list");
@@ -108,7 +94,6 @@ describe("pr list", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.getPullRequests.mockResolvedValue(samplePullRequests);
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);

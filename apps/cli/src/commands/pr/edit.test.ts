@@ -1,4 +1,3 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -15,16 +14,8 @@ vi.mock("@repo/backlog-utils", async (importOriginal) => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
-
 describe("pr edit", () => {
   it("updates pull request summary", async () => {
-    setupMocks();
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "New title" });
 
     const { edit } = await import("./edit");
@@ -44,7 +35,6 @@ describe("pr edit", () => {
   });
 
   it("updates pull request with a comment", async () => {
-    setupMocks();
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
     const { edit } = await import("./edit");
@@ -67,7 +57,6 @@ describe("pr edit", () => {
   });
 
   it("updates pull request with notified users", async () => {
-    setupMocks();
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
     const { edit } = await import("./edit");
@@ -84,7 +73,6 @@ describe("pr edit", () => {
   });
 
   it("resolves issue key to issue ID", async () => {
-    setupMocks();
     mockClient.getIssue.mockResolvedValue({ id: 789 });
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
@@ -103,7 +91,6 @@ describe("pr edit", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);

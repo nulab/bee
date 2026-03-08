@@ -1,4 +1,3 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -11,13 +10,6 @@ vi.mock("@repo/backlog-utils", () => ({
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
 
 const sampleAttachments = [
   {
@@ -38,7 +30,6 @@ const sampleAttachments = [
 
 describe("document attachments", () => {
   it("displays attachment list in tabular format", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue({
       id: "doc-1",
       attachments: sampleAttachments,
@@ -55,7 +46,6 @@ describe("document attachments", () => {
   });
 
   it("shows message when no attachments found", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue({
       id: "doc-1",
       attachments: [],
@@ -68,7 +58,6 @@ describe("document attachments", () => {
   });
 
   it("formats file sizes correctly", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue({
       id: "doc-1",
       attachments: [
@@ -105,7 +94,6 @@ describe("document attachments", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue({
       id: "doc-1",
       attachments: sampleAttachments,

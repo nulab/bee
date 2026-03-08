@@ -1,4 +1,3 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -14,14 +13,6 @@ vi.mock("@repo/backlog-utils", async (importOriginal) => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-  mockClient.getMyself.mockResolvedValue({ id: 1, name: "Alice" });
-};
-
 const samplePullRequests = [
   { number: 1, summary: "Add feature A", status: { id: 1, name: "Open" } },
   { number: 2, summary: "Fix bug B", status: { id: 1, name: "Open" } },
@@ -30,7 +21,7 @@ const samplePullRequests = [
 
 describe("pr status", () => {
   it("displays pull requests grouped by status", async () => {
-    setupMocks();
+    mockClient.getMyself.mockResolvedValue({ id: 1, name: "Alice" });
     mockClient.getPullRequests.mockResolvedValue(samplePullRequests);
 
     const { status } = await import("./status");
@@ -48,7 +39,7 @@ describe("pr status", () => {
   });
 
   it("shows message when no pull requests assigned", async () => {
-    setupMocks();
+    mockClient.getMyself.mockResolvedValue({ id: 1, name: "Alice" });
     mockClient.getPullRequests.mockResolvedValue([]);
 
     const { status } = await import("./status");
@@ -58,7 +49,7 @@ describe("pr status", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
+    mockClient.getMyself.mockResolvedValue({ id: 1, name: "Alice" });
     mockClient.getPullRequests.mockResolvedValue(samplePullRequests);
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);

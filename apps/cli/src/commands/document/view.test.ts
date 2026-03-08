@@ -1,4 +1,4 @@
-import { getClient, openOrPrintUrl } from "@repo/backlog-utils";
+import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -18,13 +18,6 @@ vi.mock("@repo/backlog-utils", () => ({
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
-
 const sampleDocument = {
   id: "doc-1",
   projectId: 100,
@@ -43,7 +36,6 @@ const sampleDocument = {
 
 describe("document view", () => {
   it("displays document details", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
     const { view } = await import("./view");
@@ -57,7 +49,6 @@ describe("document view", () => {
   });
 
   it("displays emoji when present", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
     const { view } = await import("./view");
@@ -67,7 +58,6 @@ describe("document view", () => {
   });
 
   it("displays body content", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
     const { view } = await import("./view");
@@ -78,8 +68,6 @@ describe("document view", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    setupMocks();
-
     const { view } = await import("./view");
     await view.run?.({ args: { document: "doc-1", project: "PROJECT", web: true } } as never);
 
@@ -92,7 +80,6 @@ describe("document view", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
@@ -105,7 +92,6 @@ describe("document view", () => {
   });
 
   it("hides tags when none exist", async () => {
-    setupMocks();
     mockClient.getDocument.mockResolvedValue({ ...sampleDocument, tags: [] });
 
     const { view } = await import("./view");

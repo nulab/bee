@@ -1,4 +1,3 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 
@@ -11,13 +10,6 @@ vi.mock("@repo/backlog-utils", () => ({
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-const setupMocks = () => {
-  vi.mocked(getClient).mockResolvedValue({
-    client: mockClient as never,
-    host: "example.backlog.com",
-  });
-};
 
 const sampleTree = {
   projectId: "100",
@@ -47,7 +39,6 @@ const sampleTree = {
 
 describe("document tree", () => {
   it("displays tree structure", async () => {
-    setupMocks();
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 
     const { tree } = await import("./tree");
@@ -60,7 +51,6 @@ describe("document tree", () => {
   });
 
   it("displays emoji in tree nodes", async () => {
-    setupMocks();
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 
     const { tree } = await import("./tree");
@@ -70,7 +60,6 @@ describe("document tree", () => {
   });
 
   it("shows message when no documents found", async () => {
-    setupMocks();
     mockClient.getDocumentTree.mockResolvedValue({
       projectId: "100",
       activeTree: { id: "root", children: [] },
@@ -83,7 +72,6 @@ describe("document tree", () => {
   });
 
   it("shows message when activeTree is undefined", async () => {
-    setupMocks();
     mockClient.getDocumentTree.mockResolvedValue({
       projectId: "100",
     });
@@ -95,7 +83,6 @@ describe("document tree", () => {
   });
 
   it("outputs JSON when --json flag is set", async () => {
-    setupMocks();
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
@@ -108,7 +95,6 @@ describe("document tree", () => {
   });
 
   it("renders tree connectors correctly", async () => {
-    setupMocks();
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 
     const { tree } = await import("./tree");
