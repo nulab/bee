@@ -55,10 +55,10 @@ jobs:
         run: |
           for KEY in ${{ steps.collect.outputs.keys }}; do
             echo "Updating status: $KEY -> processing"
-            npx @nulab/bee issue edit "$KEY" --status processing || true
+            npx @nulab/bee issue edit "$KEY" --status processing || echo "::warning::Failed to process $KEY"
             echo "Commenting on: $KEY"
             npx @nulab/bee issue comment "$KEY" \
-              --body "レビュー中: ${{ github.event.pull_request.html_url }}" || true
+              --body "レビュー中: ${{ github.event.pull_request.html_url }}" || echo "::warning::Failed to process $KEY"
           done
 
       # PR 本文の編集 → 新しく追加された課題キーにだけコメント
@@ -72,7 +72,7 @@ jobs:
             fi
             echo "Commenting on: $KEY"
             npx @nulab/bee issue comment "$KEY" \
-              --body "レビュー中: ${{ github.event.pull_request.html_url }}" || true
+              --body "レビュー中: ${{ github.event.pull_request.html_url }}" || echo "::warning::Failed to process $KEY"
           done
 
       # PR マージ → 課題をクローズ
@@ -82,7 +82,7 @@ jobs:
           for KEY in ${{ steps.collect.outputs.keys }}; do
             echo "Closing: $KEY"
             npx @nulab/bee issue close "$KEY" \
-              --comment "PR #${{ github.event.pull_request.number }} のマージにより自動クローズ" || true
+              --comment "PR #${{ github.event.pull_request.number }} のマージにより自動クローズ" || echo "::warning::Failed to process $KEY"
           done
 ```
 

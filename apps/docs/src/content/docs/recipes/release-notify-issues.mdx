@@ -49,7 +49,7 @@ jobs:
           for KEY in ${{ steps.collect.outputs.issue_keys }}; do
             echo "Commenting on: $KEY (release ${{ github.event.release.tag_name }})"
             npx @nulab/bee issue comment "$KEY" \
-              --body "リリース ${{ github.event.release.tag_name }} に含まれています: ${{ github.event.release.html_url }}" || true
+              --body "リリース ${{ github.event.release.tag_name }} に含まれています: ${{ github.event.release.html_url }}" || echo "::warning::Failed to process $KEY"
           done
 ```
 
