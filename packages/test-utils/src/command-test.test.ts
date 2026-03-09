@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { parseCommand, setupCommandTest } from "./command-test";
+import { mockGetClient, parseCommand, setupCommandTest } from "./command-test";
 
 describe("setupCommandTest", () => {
   it("returns mockClient with specified methods as vi.fn()", () => {
@@ -35,6 +35,22 @@ describe("setupCommandTest", () => {
   it("returns host as example.backlog.com", () => {
     const { host } = setupCommandTest({});
     expect(host).toBe("example.backlog.com");
+  });
+});
+
+describe("mockGetClient", () => {
+  it("returns object with getClient mock", () => {
+    const mockClient = { foo: vi.fn() };
+    const result = mockGetClient(mockClient);
+    expect(vi.isMockFunction(result.getClient)).toBe(true);
+  });
+
+  it("getClient resolves with client and host", async () => {
+    const mockClient = { foo: vi.fn() };
+    const result = mockGetClient(mockClient, "test.backlog.com");
+    const { client, host } = await result.getClient();
+    expect(client).toBe(mockClient);
+    expect(host).toBe("test.backlog.com");
   });
 });
 

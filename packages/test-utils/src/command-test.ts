@@ -10,16 +10,24 @@ type CommandTestContext = {
   host: string;
 };
 
+const MOCK_HOST = "example.backlog.com";
+
 /**
- * Sets up standard mocks for command tests.
+ * Creates a mock client with default `getMyself` and `getProjects` methods.
+ * Call this inside `vi.hoisted()` or at the top level of a test file,
+ * then use the returned values with `vi.mock()`.
  *
- * Mocks `@repo/backlog-utils` (getClient), `consola`, and optionally `@repo/cli-utils`.
- * Returns a `mockClient` object with the specified methods plus default `getMyself` and `getProjects`.
+ * @example
+ * ```typescript
+ * const { mockClient, host } = setupCommandTest({ getCategories: vi.fn() });
+ *
+ * vi.mock("@repo/backlog-utils", () => ({
+ *   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host })),
+ * }));
+ * vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
+ * ```
  */
-const setupCommandTest = (
-  clientMethods: MockClientMethods,
-  options?: { mockPrompt?: boolean },
-): CommandTestContext => {
+const setupCommandTest = (clientMethods: MockClientMethods): CommandTestContext => {
   const defaultMyself = vi.fn().mockResolvedValue({ id: 99 });
   const defaultProjects = vi.fn().mockResolvedValue([{ id: 123, projectKey: "PROJ" }]);
 
@@ -29,25 +37,16 @@ const setupCommandTest = (
     ...clientMethods,
   };
 
-  const host = "example.backlog.com";
-
-  vi.mock("@repo/backlog-utils", async (importOriginal) => ({
-    ...(await importOriginal()),
-    getClient: vi.fn(() => Promise.resolve({ client: mockClient, host })),
-  }));
-
-  vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
-
-  if (options?.mockPrompt) {
-    vi.mock("@repo/cli-utils", async (importOriginal) => ({
-      ...(await importOriginal()),
-      promptRequired: vi.fn(),
-      confirmOrExit: vi.fn(),
-    }));
-  }
-
-  return { mockClient, host };
+  return { mockClient, host: MOCK_HOST };
 };
+
+/**
+ * Standard vi.mock factory for `@repo/backlog-utils`.
+ * Returns a module with only `getClient` mocked.
+ */
+const mockGetClient = (mockClient: MockClientMethods, host = MOCK_HOST) => ({
+  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host })),
+});
 
 /**
  * Dynamically imports a command module and calls parseAsync with the given args.
@@ -68,5 +67,5 @@ const parseCommand = async (
   await command.parseAsync(args, { from: "user" });
 };
 
-export { setupCommandTest, parseCommand };
+export { MOCK_HOST, mockGetClient, parseCommand, setupCommandTest };
 export type { CommandTestContext, MockClientMethods };
