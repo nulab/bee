@@ -2,6 +2,7 @@ import { UserError } from "@repo/cli-utils";
 import { loadConfig, writeConfig } from "@repo/config";
 import consola from "consola";
 import { BeeCommand } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
 const switchSpace = new BeeCommand("switch")
   .summary("Switch active space")
@@ -16,8 +17,7 @@ interactively. Use \`--space\` to switch directly without a prompt.
 
 For a list of configured spaces, see \`bee auth status\`.`,
   )
-  .option("-s, --space <hostname>", "The hostname of the Backlog space")
-  .envVars([["BACKLOG_SPACE", "Space hostname to switch to"]])
+  .addOption(opt.space())
   .examples([
     { description: "Select space via prompt", command: "bee auth switch" },
     {
@@ -28,7 +28,7 @@ For a list of configured spaces, see \`bee auth status\`.`,
   .action(async (opts) => {
     const config = loadConfig();
 
-    let hostname = opts.space || process.env.BACKLOG_SPACE;
+    let hostname = opts.space;
 
     if (!hostname) {
       if (config.spaces.length === 0) {

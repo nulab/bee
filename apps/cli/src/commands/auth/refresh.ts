@@ -1,9 +1,10 @@
 import { refreshAccessToken } from "@repo/backlog-utils";
 import { UserError } from "@repo/cli-utils";
-import { findSpace, loadConfig, resolveSpace, updateSpaceAuth } from "@repo/config";
+import { findSpace, loadConfig, updateSpaceAuth } from "@repo/config";
 import { Backlog } from "backlog-js";
 import consola from "consola";
 import { BeeCommand } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
 const refresh = new BeeCommand("refresh")
   .summary("Refresh OAuth token")
@@ -14,8 +15,7 @@ Uses the stored refresh token to obtain a new access token. Only available for s
 
 If the refresh token is expired or invalid, re-authenticate with \`bee auth login -m oauth\`.`,
   )
-  .option("-s, --space <hostname>", "The hostname of the Backlog space")
-  .envVars([["BACKLOG_SPACE", "Default space hostname"]])
+  .addOption(opt.space())
   .examples([
     { description: "Refresh token for default space", command: "bee auth refresh" },
     {
@@ -24,7 +24,9 @@ If the refresh token is expired or invalid, re-authenticate with \`bee auth logi
     },
   ])
   .action(async (opts) => {
-    const space = opts.space ? findSpace(loadConfig().spaces, opts.space) : resolveSpace();
+    const config = loadConfig();
+    const host = opts.space ?? config.defaultSpace;
+    const space = host ? findSpace(config.spaces, host) : null;
 
     if (!space) {
       throw new UserError("No space configured. Run `bee auth login` to authenticate.");
