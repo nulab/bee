@@ -17,7 +17,7 @@ const count = new BeeCommand("count")
     `By default, counts all notifications regardless of read status.
 
 For details, see:
-https://developer.nulab.com/docs/backlog/api/2/count-notifications/`,
+https://developer.nulab.com/docs/backlog/api/2/count-notification/`,
   )
   .option(
     "--already-read <value>",
