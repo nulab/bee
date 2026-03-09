@@ -1,21 +1,15 @@
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  deleteVersions: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ deleteVersions: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
   confirmOrExit: vi.fn(),
 }));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("milestone delete", () => {
@@ -23,8 +17,7 @@ describe("milestone delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
-    const { default: deleteMilestone } = await import("./delete");
-    await deleteMilestone.parseAsync(["1", "-p", "TEST"], { from: "user" });
+    await parseCommand(() => import("./delete"), ["1", "-p", "TEST"]);
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete milestone 1? This cannot be undone.",
@@ -38,8 +31,7 @@ describe("milestone delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
-    const { default: deleteMilestone } = await import("./delete");
-    await deleteMilestone.parseAsync(["1", "-p", "TEST", "--yes"], { from: "user" });
+    await parseCommand(() => import("./delete"), ["1", "-p", "TEST", "--yes"]);
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete milestone 1? This cannot be undone.",
@@ -49,20 +41,21 @@ describe("milestone delete", () => {
 
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
-
-    const { default: deleteMilestone } = await import("./delete");
-    await deleteMilestone.parseAsync(["1", "-p", "TEST"], { from: "user" });
+    await parseCommand(() => import("./delete"), ["1", "-p", "TEST"]);
 
     expect(mockClient.deleteVersions).not.toHaveBeenCalled();
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    vi.mocked(confirmOrExit).mockResolvedValue(true);
-    mockClient.deleteVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
-
-    await expectStdoutContaining(async () => {
-      const { default: deleteMilestone } = await import("./delete");
-      await deleteMilestone.parseAsync(["1", "-p", "TEST", "--yes", "--json"], { from: "user" });
-    }, "v1.0.0");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./delete"),
+      ["1", "-p", "TEST", "--yes", "--json"],
+      "v1.0.0",
+      () => {
+        vi.mocked(confirmOrExit).mockResolvedValue(true);
+        mockClient.deleteVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
+      },
+    ),
+  );
 });
