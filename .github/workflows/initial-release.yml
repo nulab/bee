@@ -17,7 +17,17 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
-      - name: Publish v0.0.0 to npm
-        run: npm publish --access public
+      - name: Verify npm auth
+        run: |
+          echo "--- .npmrc contents (token masked) ---"
+          cat "$NPM_CONFIG_USERCONFIG" | sed 's/_authToken=.*/_authToken=***/'
+          echo ""
+          echo "--- npm whoami ---"
+          npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Dry run publish
+        run: npm publish --access public --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
