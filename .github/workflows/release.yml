@@ -20,6 +20,14 @@ on:
         description: New version
         default: patch
         required: true
+      prerelease:
+        type: choice
+        options:
+          - ''
+          - rc
+        description: Prerelease tag (leave empty for stable release)
+        default: ''
+        required: false
 
 permissions:
   contents: read
@@ -62,9 +70,20 @@ jobs:
         env:
           LATEST_TAG: ${{ steps.get_latest_tag.outputs.latest_tag }}
           NEW_VERSION_TYPE: ${{ github.event.inputs.newversion }}
+          PRERELEASE: ${{ github.event.inputs.prerelease }}
         run: |
           npm version "$LATEST_TAG" --no-git-tag-version --allow-same-version
-          npm version "$NEW_VERSION_TYPE" --no-git-tag-version
+
+          if [ -n "$PRERELEASE" ]; then
+            current_version=$(node -p "require('./package.json').version")
+            if echo "$current_version" | grep -q -- "-${PRERELEASE}\."; then
+              npm version prerelease --preid "$PRERELEASE" --no-git-tag-version
+            else
+              npm version "pre${NEW_VERSION_TYPE}" --preid "$PRERELEASE" --no-git-tag-version
+            fi
+          else
+            npm version "$NEW_VERSION_TYPE" --no-git-tag-version
+          fi
 
           new_version=$(node -p "require('./package.json').version")
           new_tag="v${new_version}"
@@ -106,12 +125,26 @@ jobs:
       - name: Publish to npm
         if: inputs.environment != 'dry-run'
         working-directory: apps/cli
-        run: npm publish --provenance --access public
+        env:
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          if [ -n "$PRERELEASE" ]; then
+            npm publish --provenance --access public --tag "$PRERELEASE"
+          else
+            npm publish --provenance --access public
+          fi
 
       - name: Publish dry run
         if: inputs.environment == 'dry-run'
         working-directory: apps/cli
-        run: npm publish --provenance --access public --dry-run
+        env:
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          if [ -n "$PRERELEASE" ]; then
+            npm publish --provenance --access public --dry-run --tag "$PRERELEASE"
+          else
+            npm publish --provenance --access public --dry-run
+          fi
 
       - name: Configure git
         if: inputs.environment != 'dry-run'
@@ -137,7 +170,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NEW_TAG: ${{ needs.build.outputs.new_tag }}
           PREVIOUS_TAG: ${{ needs.build.outputs.previous_tag }}
-        run: gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_TAG"
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          if [ -n "$PRERELEASE" ]; then
+            gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_TAG" --prerelease
+          else
+            gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_TAG"
+          fi
 
       - name: Preview release notes (dry-run)
         if: inputs.environment == 'dry-run'
