@@ -1,30 +1,24 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  postCategories: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ postCategories: vi.fn() });
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
-
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
+  promptRequired: vi.fn((_label: string, val?: string) => Promise.resolve(val)),
 }));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("category create", () => {
   it("creates a category with provided name", async () => {
     mockClient.postCategories.mockResolvedValue({ id: 1, name: "Bug Report", projectId: 100 });
-
-    const { default: create } = await import("./create");
-    await create.parseAsync(["-p", "TEST", "-n", "Bug Report"], { from: "user" });
+    await parseCommand(() => import("./create"), ["-p", "TEST", "-n", "Bug Report"]);
 
     expect(mockClient.postCategories).toHaveBeenCalledWith("TEST", { name: "Bug Report" });
     expect(consola.success).toHaveBeenCalledWith("Created category Bug Report (ID: 1)");
@@ -43,19 +37,21 @@ describe("category create", () => {
       projectId: 100,
     });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(["-p", "TEST"], { from: "user" });
+    await parseCommand(() => import("./create"), ["-p", "TEST"]);
 
     expect(promptRequired).toHaveBeenCalledWith("Category name:", undefined);
     expect(mockClient.postCategories).toHaveBeenCalledWith("TEST", { name: "Prompted Category" });
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.postCategories.mockResolvedValue({ id: 1, name: "Bug", projectId: 100 });
-
-    await expectStdoutContaining(async () => {
-      const { default: create } = await import("./create");
-      await create.parseAsync(["-p", "TEST", "-n", "Bug", "--json"], { from: "user" });
-    }, "Bug");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./create"),
+      ["-p", "TEST", "-n", "Bug", "--json"],
+      "Bug",
+      () => {
+        mockClient.postCategories.mockResolvedValue({ id: 1, name: "Bug", projectId: 100 });
+      },
+    ),
+  );
 });
