@@ -1,37 +1,13 @@
 {
-  "private": true,
+  "name": "@nulab/bee",
+  "version": "0.0.0",
+  "description": "Bring Backlog to your command line",
   "license": "MIT",
-  "repository": "nulab/bee",
-  "scripts": {
-    "postinstall": "lefthook install",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "typecheck": "turbo run typecheck",
-    "clean": "turbo run clean",
-    "format": "oxfmt",
-    "format:check": "oxfmt --check",
-    "test": "vitest run"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nulab/bee.git"
   },
-  "devDependencies": {
-    "@types/node": "^25.3.3",
-    "@vitest/coverage-v8": "^4.0.18",
-    "lefthook": "^2.1.2",
-    "oxfmt": "^0.36.0",
-    "oxlint": "^1.51.0",
-    "oxlint-tsgolint": "^0.16.0",
-    "turbo": "^2.8.13",
-    "typescript": "6.0.0-dev.20260301",
-    "vitest": "^4.0.18"
-  },
-  "packageManager": "pnpm@10.30.3",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "lefthook",
-      "sharp",
-      "turbo"
-    ]
+  "publishConfig": {
+    "access": "public"
   }
 }
