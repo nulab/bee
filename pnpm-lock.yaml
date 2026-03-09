@@ -38,15 +38,6 @@ importers:
 
   apps/cli:
     dependencies:
-      '@repo/backlog-utils':
-        specifier: workspace:*
-        version: link:../../packages/backlog-utils
-      '@repo/cli-utils':
-        specifier: workspace:*
-        version: link:../../packages/cli-utils
-      '@repo/config':
-        specifier: workspace:*
-        version: link:../../packages/config
       backlog-js:
         specifier: ^0.16.0
         version: 0.16.0
@@ -69,6 +60,15 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0(typescript@6.0.0-dev.20260301)
     devDependencies:
+      '@repo/backlog-utils':
+        specifier: workspace:*
+        version: link:../../packages/backlog-utils
+      '@repo/cli-utils':
+        specifier: workspace:*
+        version: link:../../packages/cli-utils
+      '@repo/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@repo/test-utils':
         specifier: workspace:*
         version: link:../../packages/test-utils

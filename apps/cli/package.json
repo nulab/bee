@@ -37,9 +37,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/backlog-utils": "workspace:*",
-    "@repo/cli-utils": "workspace:*",
-    "@repo/config": "workspace:*",
     "backlog-js": "^0.16.0",
     "commander": "^14.0.3",
     "consola": "^3.4.2",
@@ -49,6 +46,9 @@
     "valibot": "^1.2.0"
   },
   "devDependencies": {
+    "@repo/backlog-utils": "workspace:*",
+    "@repo/cli-utils": "workspace:*",
+    "@repo/config": "workspace:*",
     "@repo/test-utils": "workspace:*",
     "@repo/tsconfigs": "workspace:*",
     "tsx": "^4.19.0",
