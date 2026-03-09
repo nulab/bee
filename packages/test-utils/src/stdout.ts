@@ -16,3 +16,31 @@ export const expectStdoutContaining = async (
     writeSpy.mockRestore();
   }
 };
+
+/**
+ * Creates a test callback that verifies JSON output for a command.
+ * Use with it():
+ *
+ * @example
+ * ```typescript
+ * it("outputs JSON when --json flag is set",
+ *   itOutputsJson(() => import("./list"), ["TEST", "--json"], "Bug", setup)
+ * );
+ * ```
+ */
+export const itOutputsJson =
+  (
+    importCommand: () => Promise<{
+      default: { parseAsync: (args: string[], opts: { from: string }) => Promise<void> };
+    }>,
+    args: string[],
+    expectedSubstring: string,
+    setup?: () => void | Promise<void>,
+  ): (() => Promise<void>) =>
+  async () => {
+    if (setup) await setup();
+    await expectStdoutContaining(async () => {
+      const { default: command } = await importCommand();
+      await command.parseAsync(args, { from: "user" });
+    }, expectedSubstring);
+  };
