@@ -4,12 +4,7 @@ import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 
 const read = new BeeCommand("read")
   .summary("Mark a notification as read")
-  .description(
-    `Mark a notification as read.
-
-Specify the notification ID to mark as read. Use \`bee notification list\`
-to find notification IDs.`,
-  )
+  .description(`Use \`bee notification list\` to find notification IDs.`)
   .argument("<id>", "Notification ID")
   .envVars([...ENV_AUTH])
   .examples([

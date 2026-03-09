@@ -7,12 +7,7 @@ import * as opt from "../lib/common-options";
 const dashboard = new BeeCommand("dashboard")
   .summary("Show a summary of your Backlog activity")
   .description(
-    `Show a summary of your Backlog activity.
-
-Displays your assigned issues sorted by due date, unread notification count,
-and your projects. The layout is modeled after the Backlog web dashboard.
-
-Use \`--web\` to open the Backlog dashboard in your browser instead.`,
+    `Displays assigned issues, unread notifications, and projects. Use \`--web\` to open in the browser.`,
   )
   .addOption(opt.json())
   .addOption(opt.web("dashboard"))

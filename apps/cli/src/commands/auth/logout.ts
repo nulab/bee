@@ -6,11 +6,7 @@ import { BeeCommand } from "../../lib/bee-command";
 const logout = new BeeCommand("logout")
   .summary("Remove authentication for a Backlog space")
   .description(
-    `Remove authentication for a Backlog space.
-
-The stored credentials are removed locally. This does not revoke API keys or OAuth tokens on the Backlog server.
-
-If only one space is configured, it will be selected automatically. If multiple spaces are configured, you will be prompted to select one.`,
+    `Removes stored credentials locally. Does not revoke API keys or OAuth tokens on the server.`,
   )
   .option("-s, --space <hostname>", "The hostname of the Backlog space")
   .envVars([["BACKLOG_SPACE", "Space hostname to log out from"]])

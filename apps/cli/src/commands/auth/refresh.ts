@@ -8,11 +8,7 @@ import { BeeCommand } from "../../lib/bee-command";
 const refresh = new BeeCommand("refresh")
   .summary("Refresh OAuth token")
   .description(
-    `Refresh the OAuth access token for a Backlog space.
-
-Uses the stored refresh token to obtain a new access token. Only available for spaces authenticated with OAuth.
-
-If the refresh token is expired or invalid, re-authenticate with \`bee auth login -m oauth\`.`,
+    `Only available for spaces authenticated with OAuth. If the refresh token is expired, re-authenticate with \`bee auth login -m oauth\`.`,
   )
   .option("-s, --space <hostname>", "The hostname of the Backlog space")
   .envVars([["BACKLOG_SPACE", "Default space hostname"]])

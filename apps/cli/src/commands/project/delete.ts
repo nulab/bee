@@ -6,14 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const deleteProject = new BeeCommand("delete")
   .summary("Delete a project")
-  .description(
-    `Delete a Backlog project.
-
-This action is irreversible. You will be prompted for confirmation unless
-\`--yes\` is provided.
-
-Requires Administrator role.`,
-  )
+  .description(`This action is irreversible. Requires Administrator role.`)
   .argument("<project>", "Project ID or project key")
   .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())

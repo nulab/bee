@@ -20,15 +20,7 @@ const gitClone = (gitArgs: string[]): Promise<void> =>
 
 const clone = new BeeCommand("clone")
   .summary("Clone a repository")
-  .description(
-    `Clone a Backlog Git repository.
-
-Fetches the repository metadata to obtain the clone URL, then runs
-\`git clone\` as a subprocess. By default the SSH URL is used; pass
-\`--http\` to clone over HTTPS instead.
-
-Use \`--directory\` to specify a custom destination directory.`,
-  )
+  .description(`By default the SSH URL is used; pass \`--http\` to clone over HTTPS instead.`)
   .argument("<repository>", "Repository name or ID")
   .addOption(opt.project())
   .option("-d, --directory <path>", "Directory to clone into")

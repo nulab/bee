@@ -35,17 +35,10 @@ const getActivitySummary = (activity: {
 const activities = new BeeCommand("activities")
   .summary("List user activities")
   .description(
-    `List recent activities of a Backlog user.
+    `Results are ordered by most recent first. Use \`--activity-type\` to filter by type.
 
-Shows the most recent updates performed by the specified user, including
-issue changes, wiki edits, git pushes, and other activities. Results are
-ordered by most recent first.
-
-Use \`--activity-type\` to filter by specific activity types (repeatable).
-Use \`--count\` to control how many activities are returned (default: 20, max: 100).
-
-For a list of activity type IDs, see:
-https://developer.nulab.com/docs/backlog/api/2/get-user-recent-updates/#activity-type`,
+For activity type IDs, see:  
+https://developer.nulab.com/docs/backlog/api/2/get-user-recent-updates/#response-description`,
   )
   .argument("<user>", "User ID")
   .option(

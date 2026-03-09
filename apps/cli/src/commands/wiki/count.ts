@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const count = new BeeCommand("count")
   .summary("Count wiki pages")
-  .description(
-    `Display the number of wiki pages in a Backlog project.
-
-The count includes all wiki pages regardless of tag or keyword.`,
-  )
+  .description(`Counts all wiki pages regardless of tag or keyword.`)
   .argument("<project>", "Project ID or project key")
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])

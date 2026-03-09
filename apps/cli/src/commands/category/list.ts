@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const list = new BeeCommand("list")
   .summary("List categories")
-  .description(
-    `List categories in a Backlog project.
-
-Categories help organize issues by grouping them into logical areas.`,
-  )
+  .description(`Categories help organize issues by grouping them into logical areas.`)
   .argument("[project]", "Project ID or project key")
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])

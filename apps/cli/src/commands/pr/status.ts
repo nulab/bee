@@ -7,12 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const status = new BeeCommand("status")
   .summary("Show pull request status summary for yourself")
-  .description(
-    `Show a summary of pull requests assigned to you, grouped by status.
-
-Fetches pull requests where you are the assignee and displays them
-organized by their current status (Open, Closed, Merged).`,
-  )
+  .description(`Displays your assigned pull requests grouped by status (Open, Closed, Merged).`)
   .addOption(opt.project())
   .addOption(opt.repo())
   .addOption(opt.json())

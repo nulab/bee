@@ -7,11 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const create = new BeeCommand("create")
   .summary("Create a category")
-  .description(
-    `Create a new category in a Backlog project.
-
-If \`--name\` is not provided, you will be prompted interactively.`,
-  )
+  .description(`Omitted fields will be prompted interactively.`)
   .addOption(opt.project())
   .option("-n, --name <value>", "Category name")
   .addOption(opt.json())

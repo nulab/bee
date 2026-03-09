@@ -7,12 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const edit = new BeeCommand("edit")
   .summary("Edit a pull request")
-  .description(
-    `Update an existing Backlog pull request.
-
-Only the specified fields will be updated. Fields that are not provided
-will remain unchanged.`,
-  )
+  .description(`Only specified fields are updated; others remain unchanged.`)
   .argument("<number>", "Pull request number")
   .addOption(opt.project())
   .addOption(opt.repo())

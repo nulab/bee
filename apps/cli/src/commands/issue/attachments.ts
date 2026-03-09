@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const attachments = new BeeCommand("attachments")
   .summary("List issue attachments")
-  .description(
-    `List attachments of a Backlog issue.
-
-Shows file name, size, creator, and creation date.`,
-  )
+  .description(`Shows file name, size, creator, and creation date.`)
   .argument("<issue>", "Issue ID or issue key")
   .addOption(opt.json())
   .envVars([...ENV_AUTH])

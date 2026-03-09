@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const view = new BeeCommand("view")
   .summary("View a watching item")
-  .description(
-    `Display details of a watching item.
-
-Shows the watching ID, associated issue, note, read status, and timestamps.`,
-  )
+  .description(`Shows the associated issue, note, read status, and timestamps.`)
   .argument("<watching>", "Watching ID")
   .addOption(opt.json())
   .envVars([...ENV_AUTH])

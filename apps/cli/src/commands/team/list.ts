@@ -7,13 +7,7 @@ import * as opt from "../../lib/common-options";
 
 const list = new BeeCommand("list")
   .summary("List teams")
-  .description(
-    `List teams in the space.
-
-Teams are groups of users that can be assigned to projects collectively.
-Use \`--order\` to control sort direction and \`--offset\` / \`--count\` for
-pagination.`,
-  )
+  .description(`Teams are groups of users that can be assigned to projects collectively.`)
   .addOption(opt.json())
   .addOption(opt.order())
   .addOption(opt.offset())

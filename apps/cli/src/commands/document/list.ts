@@ -8,12 +8,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const list = new BeeCommand("list")
   .summary("List documents")
-  .description(
-    `List documents from a Backlog project.
-
-Use \`--sort\` to change the sort field and \`--keyword\` to search within
-document titles and content.`,
-  )
+  .description(`Use \`--keyword\` to search within document titles and content.`)
   .addOption(opt.project())
   .addOption(opt.keyword())
   .option("--sort <field>", "Sort field {created|updated}")

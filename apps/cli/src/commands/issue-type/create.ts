@@ -7,12 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const create = new BeeCommand("create")
   .summary("Create an issue type")
-  .description(
-    `Create a new issue type in a Backlog project.
-
-If \`--name\` is not provided, you will be prompted interactively.
-The \`--color\` flag must be one of the predefined Backlog colors.`,
-  )
+  .description(`Omitted fields will be prompted interactively.`)
   .addOption(opt.project())
   .option("-n, --name <value>", "Issue type name")
   .requiredOption(

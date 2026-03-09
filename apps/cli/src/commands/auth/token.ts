@@ -5,11 +5,7 @@ import { BeeCommand } from "../../lib/bee-command";
 const tokenCommand = new BeeCommand("token")
   .summary("Print the auth token to stdout")
   .description(
-    `Print the auth token for a Backlog space to standard output.
-
-Without \`--space\`, the default space is used.
-
-The token output can be used with \`BACKLOG_API_KEY\` or piped to other commands.`,
+    `Prints the token for the default space, or the space given by \`--space\`. Useful for piping to other commands.`,
   )
   .option("-s, --space <hostname>", "The hostname of the Backlog space")
   .envVars([["BACKLOG_SPACE", "Default space hostname"]])

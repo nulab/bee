@@ -90,12 +90,7 @@ complete -c bee -n "__fish_use_subcommand" -a "completion" -d "completion comman
 
 const completion = new BeeCommand("completion")
   .summary("Generate shell completion scripts")
-  .description(
-    `Generate shell completion scripts for bee.
-
-The generated script should be sourced in your shell's configuration file.
-Follow the instructions in the output for your specific shell.`,
-  )
+  .description(`Supported shells: bash, zsh, fish. Source the output in your shell configuration.`)
   .argument("<shell>", "Shell to generate completions for")
   .examples([
     {

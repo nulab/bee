@@ -6,12 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const list = new BeeCommand("list")
   .summary("List watching items")
-  .description(
-    `List watching items for the authenticated user.
-
-Watching items are issue subscriptions. Unread items are marked with an
-asterisk (\`*\`).`,
-  )
+  .description(`Unread items are marked with an asterisk (\`*\`).`)
   .addOption(opt.json())
   .envVars([...ENV_AUTH])
   .examples([

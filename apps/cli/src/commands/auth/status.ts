@@ -10,11 +10,7 @@ const getToken = (auth: RcAuth): string =>
 const status = new BeeCommand("status")
   .summary("Show authentication status")
   .description(
-    `Display authentication status for configured Backlog spaces.
-
-For each space, the authentication method and credential validity are
-verified by calling the Backlog API. The active (default) space is indicated
-so you can see which space is used when \`--space\` is not provided.`,
+    `Verifies credential validity for each configured space via the Backlog API. The active (default) space is indicated.`,
   )
   .option("-s, --space <hostname>", "The hostname of the Backlog space")
   .option("--show-token", "Display the auth token")

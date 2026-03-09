@@ -15,13 +15,7 @@ import * as opt from "../../lib/common-options";
 const create = new BeeCommand("create")
   .summary("Create an issue")
   .description(
-    `Create a new Backlog issue.
-
-Requires a project, title, issue type, and priority. When run
-interactively, omitted required fields will be prompted.
-
-Issue type accepts a numeric ID. Priority accepts a name: \`high\`, \`normal\`,
-or \`low\`.`,
+    `Omitted required fields will be prompted interactively. Priority accepts a name: \`high\`, \`normal\`, or \`low\`.`,
   )
   .addOption(new Option("-p, --project <id>", "Project ID or project key").env("BACKLOG_PROJECT"))
   .option("-t, --title <text>", "Issue title")

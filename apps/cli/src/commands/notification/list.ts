@@ -7,11 +7,7 @@ import * as opt from "../../lib/common-options";
 const list = new BeeCommand("list")
   .summary("List notifications")
   .description(
-    `List notifications for the authenticated user.
-
-Unread notifications are marked with an asterisk (\`*\`). Use \`--count\` to
-control the number of notifications returned, and \`--min-id\` / \`--max-id\`
-for cursor-based pagination.`,
+    `Unread notifications are marked with \`*\`. Use \`--min-id\` / \`--max-id\` for cursor-based pagination.`,
   )
   .addOption(opt.count())
   .addOption(opt.minId())

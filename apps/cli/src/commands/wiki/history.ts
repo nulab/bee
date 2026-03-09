@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const history = new BeeCommand("history")
   .summary("View wiki page history")
-  .description(
-    `Display the revision history of a Backlog wiki page.
-
-Shows version number, updater, and update date for each revision.`,
-  )
+  .description(`Shows version number, updater, and update date for each revision.`)
   .argument("<wiki>", "Wiki page ID")
   .addOption(opt.minId())
   .addOption(opt.maxId())

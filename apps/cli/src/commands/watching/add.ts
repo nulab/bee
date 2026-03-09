@@ -6,12 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const add = new BeeCommand("add")
   .summary("Add a watching item")
-  .description(
-    `Add an issue to your watching list.
-
-Subscribe to an issue to receive notifications when it is updated. Optionally
-attach a note for your own reference.`,
-  )
+  .description(`Subscribe to an issue to receive update notifications.`)
   .requiredOption("--issue <key>", "Issue ID or issue key")
   .option("--note <text>", "Note to attach to the watching item")
   .addOption(opt.json())

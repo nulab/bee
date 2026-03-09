@@ -6,12 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const edit = new BeeCommand("edit")
   .summary("Edit an issue")
-  .description(
-    `Update an existing Backlog issue.
-
-Only the specified fields will be updated. Fields that are not provided
-will remain unchanged.`,
-  )
+  .description(`Only specified fields are updated; others remain unchanged.`)
   .argument("<issue>", "Issue ID or issue key")
   .option("-t, --title <text>", "New title of the issue")
   .option("-d, --description <text>", "New description of the issue")

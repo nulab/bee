@@ -6,14 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const view = new BeeCommand("view")
   .summary("View a wiki page")
-  .description(
-    `Display details of a Backlog wiki page.
-
-Shows the page name, ID, tags, created/updated info, and the full body
-content.
-
-Use \`--web\` to open the wiki page in your default browser instead.`,
-  )
+  .description(`Use \`--web\` to open in the browser.`)
   .argument("<wiki>", "Wiki page ID")
   .addOption(opt.web("wiki page"))
   .addOption(opt.noBrowser())

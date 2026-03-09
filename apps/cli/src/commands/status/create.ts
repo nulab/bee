@@ -7,12 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const create = new BeeCommand("create")
   .summary("Create a status")
-  .description(
-    `Create a new status in a Backlog project.
-
-If \`--name\` is not provided, you will be prompted interactively.
-The \`--color\` flag must be one of the predefined Backlog colors.`,
-  )
+  .description(`Omitted fields will be prompted interactively.`)
   .addOption(opt.project())
   .option("-n, --name <value>", "Status name")
   .requiredOption(

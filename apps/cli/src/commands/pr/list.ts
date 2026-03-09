@@ -17,12 +17,7 @@ const resolveStatusIds = (statuses: string[]): number[] =>
 
 const list = new BeeCommand("list")
   .summary("List pull requests")
-  .description(
-    `List pull requests in a Backlog repository.
-
-By default, all pull requests are returned. Use \`--status\` to filter by
-status (open, closed, merged).`,
-  )
+  .description(`Use \`--status\` to filter by status (open, closed, merged).`)
   .addOption(opt.project())
   .addOption(opt.repo())
   .option("-S, --status <name>", "Status name (repeatable)", collect, [] satisfies string[])

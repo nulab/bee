@@ -6,12 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const list = new BeeCommand("list")
   .summary("List statuses")
-  .description(
-    `List statuses in a Backlog project.
-
-Statuses define the workflow states that issues can move through.
-Each status is displayed with its associated color.`,
-  )
+  .description(`Statuses define the workflow states that issues move through.`)
   .argument("[project]", "Project ID or project key")
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])

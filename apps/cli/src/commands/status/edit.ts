@@ -7,12 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const edit = new BeeCommand("edit")
   .summary("Edit a status")
-  .description(
-    `Update an existing status in a Backlog project.
-
-Only the specified fields will be updated. Fields that are not provided
-will remain unchanged.`,
-  )
+  .description(`Only specified fields are updated; others remain unchanged.`)
   .argument("<status>", "Status ID")
   .addOption(opt.project())
   .option("-n, --name <value>", "New name of the status")

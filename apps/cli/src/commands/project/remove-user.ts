@@ -7,14 +7,7 @@ import { RequiredOption, resolveOptions } from "../../lib/required-option";
 
 const removeUser = new BeeCommand("remove-user")
   .summary("Remove a user from a project")
-  .description(
-    `Remove a user from a Backlog project.
-
-The user is specified by their numeric user ID. Use \`bee project users\`
-to look up user IDs.
-
-Requires Administrator or Project Administrator role.`,
-  )
+  .description(`Use \`bee project users\` to look up user IDs.`)
   .addOption(opt.project())
   .addOption(new RequiredOption("--user-id <id>", "User ID"))
   .addOption(opt.json())

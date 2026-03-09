@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const attachments = new BeeCommand("attachments")
   .summary("List wiki page attachments")
-  .description(
-    `List files attached to a Backlog wiki page.
-
-Shows file name, size, creator, and creation date.`,
-  )
+  .description(`Shows file name, size, creator, and creation date.`)
   .argument("<wiki>", "Wiki page ID")
   .addOption(opt.json())
   .envVars([...ENV_AUTH])

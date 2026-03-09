@@ -7,12 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const deleteMilestone = new BeeCommand("delete")
   .summary("Delete a milestone")
-  .description(
-    `Delete a milestone from a Backlog project.
-
-This action is irreversible. You will be prompted for confirmation unless
-\`--yes\` is provided.`,
-  )
+  .description(`This action is irreversible.`)
   .argument("<milestone>", "Milestone ID")
   .addOption(opt.project())
   .option("-y, --yes", "Skip confirmation prompt")

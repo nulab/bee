@@ -7,11 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const edit = new BeeCommand("edit")
   .summary("Edit a category")
-  .description(
-    `Update an existing category in a Backlog project.
-
-Renames the specified category.`,
-  )
+  .description(`Renames the specified category.`)
   .argument("<category>", "Category ID")
   .addOption(opt.project())
   .option("-n, --name <value>", "New name of the category")

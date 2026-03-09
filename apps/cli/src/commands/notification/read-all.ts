@@ -4,9 +4,7 @@ import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 
 const readAll = new BeeCommand("read-all")
   .summary("Mark all notifications as read")
-  .description(`Mark all notifications as read.
-
-This resets the unread notification count to zero.`)
+  .description(`Resets the unread notification count to zero.`)
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Mark all notifications as read", command: "bee notification read-all" },

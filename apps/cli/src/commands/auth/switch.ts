@@ -5,17 +5,7 @@ import { BeeCommand } from "../../lib/bee-command";
 
 const switchSpace = new BeeCommand("switch")
   .summary("Switch active space")
-  .description(
-    `Switch the active (default) Backlog space.
-
-Changes which space is used by default when running commands without
-\`--space\`.
-
-If multiple spaces are configured, you will be prompted to select one
-interactively. Use \`--space\` to switch directly without a prompt.
-
-For a list of configured spaces, see \`bee auth status\`.`,
-  )
+  .description(`Changes which space is used by default when \`--space\` is not provided.`)
   .option("-s, --space <hostname>", "The hostname of the Backlog space")
   .envVars([["BACKLOG_SPACE", "Space hostname to switch to"]])
   .examples([

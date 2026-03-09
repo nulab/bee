@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const list = new BeeCommand("list")
   .summary("List wiki pages")
-  .description(
-    `List wiki pages in a Backlog project.
-
-Use \`--keyword\` to filter pages by name or content.`,
-  )
+  .description(`Use \`--keyword\` to filter pages by name or content.`)
   .argument("<project>", "Project ID or project key")
   .addOption(opt.keyword())
   .addOption(opt.json())

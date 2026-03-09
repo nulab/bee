@@ -6,14 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const view = new BeeCommand("view")
   .summary("View a project")
-  .description(
-    `Display details of a Backlog project.
-
-Shows project settings including chart, subtasking, wiki, file sharing,
-and git/subversion integration status.
-
-Use \`--web\` to open the project in your default browser instead.`,
-  )
+  .description(`Use \`--web\` to open in the browser.`)
   .argument("<project>", "Project ID or project key")
   .addOption(opt.web("project"))
   .addOption(opt.noBrowser())

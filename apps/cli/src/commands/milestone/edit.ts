@@ -7,13 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const edit = new BeeCommand("edit")
   .summary("Edit a milestone")
-  .description(
-    `Update an existing milestone in a Backlog project.
-
-Only the specified fields will be updated. Fields that are not provided
-will remain unchanged. Use \`--archived\` to archive or \`--no-archived\` to
-unarchive a milestone.`,
-  )
+  .description(`Only specified fields are updated; others remain unchanged.`)
   .argument("<milestone>", "Milestone ID")
   .addOption(opt.project())
   .requiredOption("-n, --name <value>", "New name of the milestone")

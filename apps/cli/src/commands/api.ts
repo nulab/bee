@@ -9,24 +9,11 @@ type Params = Record<string, ParamValue | ParamValue[]>;
 const api = new BeeCommand("api")
   .summary("Make an authenticated API request")
   .description(
-    `Make an authenticated Backlog API request.
+    `The endpoint is a Backlog API path (e.g. \`users/myself\`). A leading \`/api/v2/\` prefix is stripped automatically.
 
-The endpoint argument should be a path of the Backlog API
-(e.g. \`users/myself\`). If the path includes the \`/api/v2/\` prefix
-it is stripped automatically — both \`users/myself\` and
-\`/api/v2/users/myself\` work the same way.
+\`-f\` infers types (number, boolean, string); \`-F\` always sends strings. Repeated keys become arrays. Append \`[]\` for a single-element array (e.g. \`-f projectId[]=12345\`).
 
-Use \`--field\` / \`-f\` to pass parameters with automatic type inference:
-numeric strings become numbers, \`true\`/\`false\` become booleans, and
-everything else stays a string. Use \`--raw-field\` / \`-F\` to force a
-value to remain a string. Both flags can be specified multiple times.
-When the same key is repeated, values are collected into an array
-(e.g. \`-f statusId=1 -f statusId=2 -f statusId=3\`).
-To send a single-element array, append \`[]\` to the key name
-(e.g. \`-f projectId[]=12345\`).
-
-For GET requests, fields are sent as query parameters. For POST, PUT,
-PATCH, and DELETE requests, fields are sent as the request body.`,
+For GET, fields are query parameters. For POST/PUT/PATCH/DELETE, fields are the request body.`,
   )
   .argument("<endpoint>", "API endpoint path")
   .option("-X, --method <method>", "HTTP method", "GET")

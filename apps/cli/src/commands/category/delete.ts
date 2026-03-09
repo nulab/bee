@@ -7,12 +7,7 @@ import { resolveOptions } from "../../lib/required-option";
 
 const deleteCategory = new BeeCommand("delete")
   .summary("Delete a category")
-  .description(
-    `Delete a category from a Backlog project.
-
-This action is irreversible. You will be prompted for confirmation unless
-\`--yes\` is provided.`,
-  )
+  .description(`This action is irreversible.`)
   .argument("<category>", "Category ID")
   .addOption(opt.project())
   .option("-y, --yes", "Skip confirmation prompt")

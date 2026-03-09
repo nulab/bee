@@ -6,12 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const deleteDocument = new BeeCommand("delete")
   .summary("Delete a document")
-  .description(
-    `Delete a Backlog document.
-
-This action is irreversible. You will be prompted for confirmation unless
-\`--yes\` is provided.`,
-  )
+  .description(`This action is irreversible.`)
   .argument("<document>", "Document ID")
   .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())

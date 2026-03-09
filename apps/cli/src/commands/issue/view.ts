@@ -6,14 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const view = new BeeCommand("view")
   .summary("View an issue")
-  .description(
-    `Display details of a Backlog issue.
-
-Shows the issue summary, status, type, priority, assignee, dates, and
-description. Use \`--comments\` to also fetch and display comments.
-
-Use \`--web\` to open the issue in your default browser instead.`,
-  )
+  .description(`Use \`--comments\` to include comments. Use \`--web\` to open in the browser.`)
   .argument("<issue>", "Issue ID or issue key")
   .option("--comments", "Include comments")
   .addOption(opt.web("issue"))

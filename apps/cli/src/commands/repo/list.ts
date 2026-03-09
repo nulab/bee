@@ -6,11 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const list = new BeeCommand("list")
   .summary("List repositories in a project")
-  .description(
-    `List Git repositories in a Backlog project.
-
-By default, repositories are listed in the configured display order.`,
-  )
+  .description(`Repositories are listed in the configured display order.`)
   .argument("<project>", "Project ID or project key")
   .addOption(opt.json())
   .envVars([...ENV_AUTH, ENV_PROJECT])

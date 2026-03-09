@@ -4,11 +4,7 @@ import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 
 const remove = new BeeCommand("remove")
   .summary("Remove a star")
-  .description(
-    `Remove a star.
-
-Use \`bee star list\` to find star IDs.`,
-  )
+  .description(`Use \`bee star list\` to find star IDs.`)
   .argument("<star>", "Star ID")
   .envVars([...ENV_AUTH])
   .examples([{ description: "Remove a star", command: "bee star remove 12345" }])

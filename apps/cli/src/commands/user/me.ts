@@ -6,13 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const me = new BeeCommand("me")
   .summary("View the authenticated user")
-  .description(
-    `Display details of the authenticated user.
-
-This is a shortcut for \`bee user view\` that automatically looks up the
-currently authenticated user. Shows the same profile information: name,
-user ID, email address, role, language, and last login time.`,
-  )
+  .description(`Shortcut for \`bee user view\` using the currently authenticated user.`)
   .addOption(opt.json())
   .envVars([...ENV_AUTH])
   .examples([
