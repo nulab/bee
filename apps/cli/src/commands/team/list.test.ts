@@ -1,16 +1,10 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  getTeams: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ getTeams: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleTeams = [
@@ -41,10 +35,8 @@ describe("team list", () => {
   it("displays team list in tabular format", async () => {
     mockClient.getTeams.mockResolvedValue(sampleTeams);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./list"), []);
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getTeams).toHaveBeenCalled();
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Design Team"));
@@ -54,8 +46,7 @@ describe("team list", () => {
   it("shows message when no teams found", async () => {
     mockClient.getTeams.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./list"), []);
 
     expect(consola.info).toHaveBeenCalledWith("No teams found.");
   });
@@ -63,8 +54,7 @@ describe("team list", () => {
   it("passes order parameter", async () => {
     mockClient.getTeams.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--order", "desc"], { from: "user" });
+    await parseCommand(() => import("./list"), ["--order", "desc"]);
 
     expect(mockClient.getTeams).toHaveBeenCalledWith(expect.objectContaining({ order: "desc" }));
   });
@@ -72,20 +62,22 @@ describe("team list", () => {
   it("passes offset and count parameters", async () => {
     mockClient.getTeams.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--offset", "10", "--count", "5"], { from: "user" });
+    await parseCommand(() => import("./list"), ["--offset", "10", "--count", "5"]);
 
     expect(mockClient.getTeams).toHaveBeenCalledWith(
       expect.objectContaining({ offset: 10, count: 5 }),
     );
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getTeams.mockResolvedValue(sampleTeams);
-
-    await expectStdoutContaining(async () => {
-      const { default: list } = await import("./list");
-      await list.parseAsync(["--json"], { from: "user" });
-    }, "Design Team");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./list"),
+      ["--json"],
+      "Design Team",
+      () => {
+        mockClient.getTeams.mockResolvedValue(sampleTeams);
+      },
+    ),
+  );
 });

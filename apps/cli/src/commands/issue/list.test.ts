@@ -1,19 +1,13 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  getIssues: vi.fn(),
-  getMyself: vi.fn().mockResolvedValue({ id: 99 }),
-  getProjects: vi.fn().mockResolvedValue([{ id: 123, projectKey: "PROJ" }]),
-};
+const { mockClient, host } = setupCommandTest({ getIssues: vi.fn() });
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleIssues = [
@@ -39,10 +33,8 @@ describe("issue list", () => {
   it("displays issue list in tabular format", async () => {
     mockClient.getIssues.mockResolvedValue(sampleIssues);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./list"), []);
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getIssues).toHaveBeenCalled();
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("KEY"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
@@ -52,8 +44,7 @@ describe("issue list", () => {
   it("shows message when no issues found", async () => {
     mockClient.getIssues.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./list"), []);
 
     expect(consola.info).toHaveBeenCalledWith("No issues found.");
   });
@@ -61,8 +52,7 @@ describe("issue list", () => {
   it("shows Unassigned for issues without assignee", async () => {
     mockClient.getIssues.mockResolvedValue([sampleIssues[1]]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./list"), []);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unassigned"));
   });
@@ -70,8 +60,7 @@ describe("issue list", () => {
   it("passes project query parameter", async () => {
     mockClient.getIssues.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--project", "123"], { from: "user" });
+    await parseCommand(() => import("./list"), ["--project", "123"]);
 
     expect(mockClient.getIssues).toHaveBeenCalledWith(
       expect.objectContaining({ projectId: [123] }),
@@ -81,8 +70,7 @@ describe("issue list", () => {
   it("passes assignee query parameter", async () => {
     mockClient.getIssues.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--assignee", "42"], { from: "user" });
+    await parseCommand(() => import("./list"), ["--assignee", "42"]);
 
     expect(mockClient.getIssues).toHaveBeenCalledWith(
       expect.objectContaining({ assigneeId: [42] }),
@@ -92,8 +80,7 @@ describe("issue list", () => {
   it("resolves @me to current user ID for assignee", async () => {
     mockClient.getIssues.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--assignee", "@me"], { from: "user" });
+    await parseCommand(() => import("./list"), ["--assignee", "@me"]);
 
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.getIssues).toHaveBeenCalledWith(
@@ -104,20 +91,22 @@ describe("issue list", () => {
   it("passes keyword query parameter", async () => {
     mockClient.getIssues.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--keyword", "login bug"], { from: "user" });
+    await parseCommand(() => import("./list"), ["--keyword", "login bug"]);
 
     expect(mockClient.getIssues).toHaveBeenCalledWith(
       expect.objectContaining({ keyword: "login bug" }),
     );
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getIssues.mockResolvedValue(sampleIssues);
-
-    await expectStdoutContaining(async () => {
-      const { default: list } = await import("./list");
-      await list.parseAsync(["--json"], { from: "user" });
-    }, "PROJ-1");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./list"),
+      ["--json"],
+      "PROJ-1",
+      () => {
+        mockClient.getIssues.mockResolvedValue(sampleIssues);
+      },
+    ),
+  );
 });

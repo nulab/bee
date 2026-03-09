@@ -1,15 +1,12 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  getNotifications: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ getNotifications: vi.fn() });
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -37,10 +34,8 @@ describe("notification list", () => {
       },
     ]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./list"));
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getNotifications).toHaveBeenCalled();
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-2"));
@@ -59,8 +54,7 @@ describe("notification list", () => {
       },
     ]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./list"));
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("*"));
   });
@@ -68,8 +62,7 @@ describe("notification list", () => {
   it("shows message when no notifications found", async () => {
     mockClient.getNotifications.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./list"));
 
     expect(consola.info).toHaveBeenCalledWith("No notifications found.");
   });
@@ -77,10 +70,10 @@ describe("notification list", () => {
   it("passes limit, min-id, max-id, and order parameters", async () => {
     mockClient.getNotifications.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--count", "5", "--min-id", "10", "--max-id", "100", "--order", "asc"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./list"),
+      ["--count", "5", "--min-id", "10", "--max-id", "100", "--order", "asc"],
+    );
 
     expect(mockClient.getNotifications).toHaveBeenCalledWith({
       count: 5,
@@ -90,22 +83,24 @@ describe("notification list", () => {
     });
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getNotifications.mockResolvedValue([
-      {
-        id: 100,
-        alreadyRead: false,
-        reason: 2,
-        resourceAlreadyRead: false,
-        issue: { issueKey: "PROJ-1", summary: "Bug" },
-        sender: { name: "Alice" },
-        created: "2025-01-15T10:00:00Z",
-      },
-    ]);
-
-    await expectStdoutContaining(async () => {
-      const { default: list } = await import("./list");
-      await list.parseAsync(["--json"], { from: "user" });
-    }, "PROJ-1");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./list"),
+      ["--json"],
+      "PROJ-1",
+      () =>
+        mockClient.getNotifications.mockResolvedValue([
+          {
+            id: 100,
+            alreadyRead: false,
+            reason: 2,
+            resourceAlreadyRead: false,
+            issue: { issueKey: "PROJ-1", summary: "Bug" },
+            sender: { name: "Alice" },
+            created: "2025-01-15T10:00:00Z",
+          },
+        ]),
+    ),
+  );
 });

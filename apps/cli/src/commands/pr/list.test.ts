@@ -1,16 +1,12 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  getPullRequests: vi.fn(),
-  getMyself: vi.fn().mockResolvedValue({ id: 99 }),
-};
+const { mockClient, host } = setupCommandTest({ getPullRequests: vi.fn() });
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -34,10 +30,8 @@ describe("pr list", () => {
   it("displays pull request list in tabular format", async () => {
     mockClient.getPullRequests.mockResolvedValue(samplePullRequests);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--project", "PROJ", "--repo", "repo"], { from: "user" });
+    await parseCommand(() => import("./list"), ["--project", "PROJ", "--repo", "repo"]);
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getPullRequests).toHaveBeenCalledWith("PROJ", "repo", expect.any(Object));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("#"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Add feature A"));
@@ -47,8 +41,7 @@ describe("pr list", () => {
   it("shows message when no pull requests found", async () => {
     mockClient.getPullRequests.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--project", "PROJ", "--repo", "repo"], { from: "user" });
+    await parseCommand(() => import("./list"), ["--project", "PROJ", "--repo", "repo"]);
 
     expect(consola.info).toHaveBeenCalledWith("No pull requests found.");
   });
@@ -56,8 +49,7 @@ describe("pr list", () => {
   it("shows Unassigned for pull requests without assignee", async () => {
     mockClient.getPullRequests.mockResolvedValue([samplePullRequests[1]]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--project", "PROJ", "--repo", "repo"], { from: "user" });
+    await parseCommand(() => import("./list"), ["--project", "PROJ", "--repo", "repo"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unassigned"));
   });
@@ -65,10 +57,10 @@ describe("pr list", () => {
   it("passes status filter parameter", async () => {
     mockClient.getPullRequests.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--project", "PROJ", "--repo", "repo", "--status", "open"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./list"),
+      ["--project", "PROJ", "--repo", "repo", "--status", "open"],
+    );
 
     expect(mockClient.getPullRequests).toHaveBeenCalledWith(
       "PROJ",
@@ -89,10 +81,10 @@ describe("pr list", () => {
   it("passes assignee filter parameter", async () => {
     mockClient.getPullRequests.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--project", "PROJ", "--repo", "repo", "--assignee", "42"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./list"),
+      ["--project", "PROJ", "--repo", "repo", "--assignee", "42"],
+    );
 
     expect(mockClient.getPullRequests).toHaveBeenCalledWith(
       "PROJ",
@@ -104,10 +96,10 @@ describe("pr list", () => {
   it("resolves @me to current user ID for assignee", async () => {
     mockClient.getPullRequests.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["--project", "PROJ", "--repo", "repo", "--assignee", "@me"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./list"),
+      ["--project", "PROJ", "--repo", "repo", "--assignee", "@me"],
+    );
 
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.getPullRequests).toHaveBeenCalledWith(
@@ -117,12 +109,13 @@ describe("pr list", () => {
     );
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getPullRequests.mockResolvedValue(samplePullRequests);
-
-    await expectStdoutContaining(async () => {
-      const { default: list } = await import("./list");
-      await list.parseAsync(["--project", "PROJ", "--repo", "repo", "--json"], { from: "user" });
-    }, "Add feature A");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./list"),
+      ["--project", "PROJ", "--repo", "repo", "--json"],
+      "Add feature A",
+      () => mockClient.getPullRequests.mockResolvedValue(samplePullRequests),
+    ),
+  );
 });
