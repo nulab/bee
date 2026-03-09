@@ -124,22 +124,20 @@ jobs:
 
 ## カスタマイズ
 
-<dl>
-  <dt>ステータス ID を確認するには</dt>
-  <dd>`bee status list <PROJECT>` でプロジェクトのステータス一覧と ID を確認できます。`STATUS_IN_PROGRESS` の値をプロジェクトに合わせて変更してください。</dd>
+ステータス ID を確認するには
+: `bee status list <PROJECT>` でプロジェクトのステータス一覧と ID を確認できます。`STATUS_IN_PROGRESS` の値をプロジェクトに合わせて変更してください。
 
-  <dt>ステータス変更が不要</dt>
-  <dd>`bee issue edit` の行と `STATUS_IN_PROGRESS` 環境変数を削除すれば、リンクのコメントだけになります。</dd>
+ステータス変更が不要
+: `bee issue edit` の行と `STATUS_IN_PROGRESS` 環境変数を削除すれば、リンクのコメントだけになります。
 
-  <dt>自動クローズが不要</dt>
-  <dd>「Close linked issues」ステップを削除してください。</dd>
+自動クローズが不要
+: 「Close linked issues」ステップを削除してください。
 
-  <dt>クローズではなく別のステータスにしたい</dt>
-  <dd>`bee issue close` を `bee issue edit --status <ステータスID>` に変更してください。ステータス ID は `bee status list <PROJECT>` で確認できます。</dd>
+クローズではなく別のステータスにしたい
+: `bee issue close` を `bee issue edit --status <ステータスID>` に変更してください。ステータス ID は `bee status list <PROJECT>` で確認できます。
 
-  <dt>`edited` イベントが不要</dt>
-  <dd>トリガーの `types` から `edited` を削除し、「Comment PR link on newly added issues」ステップを削除してください。</dd>
-</dl>
+`edited` イベントが不要
+: トリガーの `types` から `edited` を削除し、「Comment PR link on newly added issues」ステップを削除してください。
 
 ## 関連するコマンド
 
