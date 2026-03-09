@@ -26,6 +26,7 @@ on:
         default: false
 
 env:
+  NEW_VERSION_TYPE: ${{ inputs.newversion }}
   PRERELEASE: ${{ inputs.prerelease }}
   DRY_RUN: ${{ inputs.environment == 'dry-run' }}
 
@@ -74,7 +75,6 @@ jobs:
         working-directory: apps/cli
         env:
           LATEST_TAG: ${{ steps.get_latest_tag.outputs.latest_tag }}
-          NEW_VERSION_TYPE: ${{ inputs.newversion }}
         run: |
           npm version "$LATEST_TAG" --no-git-tag-version --allow-same-version
 
