@@ -124,28 +124,19 @@ jobs:
           path: apps/cli
 
       - name: Publish to npm
-        if: inputs.environment != 'dry-run'
         working-directory: apps/cli
         env:
           PRERELEASE: ${{ inputs.prerelease }}
+          DRY_RUN: ${{ inputs.environment == 'dry-run' }}
         run: |
+          flags="--provenance --access public"
           if [ "$PRERELEASE" = "true" ]; then
-            npm publish --provenance --access public --tag rc
-          else
-            npm publish --provenance --access public
+            flags="$flags --tag rc"
           fi
-
-      - name: Publish dry run
-        if: inputs.environment == 'dry-run'
-        working-directory: apps/cli
-        env:
-          PRERELEASE: ${{ inputs.prerelease }}
-        run: |
-          if [ "$PRERELEASE" = "true" ]; then
-            npm publish --provenance --access public --dry-run --tag rc
-          else
-            npm publish --provenance --access public --dry-run
+          if [ "$DRY_RUN" = "true" ]; then
+            flags="$flags --dry-run"
           fi
+          npm publish $flags
 
       - name: Configure git
         if: inputs.environment != 'dry-run'
@@ -166,28 +157,13 @@ jobs:
           git push origin "${NEW_TAG}"
 
       - name: Create GitHub release
-        if: inputs.environment != 'dry-run'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NEW_TAG: ${{ needs.build.outputs.new_tag }}
           PREVIOUS_TAG: ${{ needs.build.outputs.previous_tag }}
           PREVIOUS_STABLE_TAG: ${{ needs.build.outputs.previous_stable_tag }}
           PRERELEASE: ${{ inputs.prerelease }}
-        run: |
-          if [ "$PRERELEASE" = "true" ]; then
-            gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_TAG" --prerelease
-          else
-            gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_STABLE_TAG"
-          fi
-
-      - name: Preview release notes (dry-run)
-        if: inputs.environment == 'dry-run'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEW_TAG: ${{ needs.build.outputs.new_tag }}
-          PREVIOUS_TAG: ${{ needs.build.outputs.previous_tag }}
-          PREVIOUS_STABLE_TAG: ${{ needs.build.outputs.previous_stable_tag }}
-          PRERELEASE: ${{ inputs.prerelease }}
+          DRY_RUN: ${{ inputs.environment == 'dry-run' }}
           REPOSITORY: ${{ github.repository }}
           TARGET_COMMITISH: ${{ github.sha }}
         run: |
@@ -197,10 +173,18 @@ jobs:
             notes_start_tag="$PREVIOUS_STABLE_TAG"
           fi
 
-          echo "## Release notes for ${NEW_TAG}" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          gh api "repos/${REPOSITORY}/releases/generate-notes" \
-            -f tag_name="$NEW_TAG" \
-            -f target_commitish="$TARGET_COMMITISH" \
-            -f previous_tag_name="$notes_start_tag" \
-            --jq '.body' >> "$GITHUB_STEP_SUMMARY"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "## Release notes for ${NEW_TAG}" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            gh api "repos/${REPOSITORY}/releases/generate-notes" \
+              -f tag_name="$NEW_TAG" \
+              -f target_commitish="$TARGET_COMMITISH" \
+              -f previous_tag_name="$notes_start_tag" \
+              --jq '.body' >> "$GITHUB_STEP_SUMMARY"
+          else
+            flags="--generate-notes --notes-start-tag $notes_start_tag"
+            if [ "$PRERELEASE" = "true" ]; then
+              flags="$flags --prerelease"
+            fi
+            gh release create "$NEW_TAG" $flags
+          fi
