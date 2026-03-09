@@ -1,14 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 vi.mock("./config", () => ({
-  loadConfig: vi.fn(),
   updateConfig: vi.fn(),
 }));
 
-const { loadConfig, updateConfig } = await import("./config");
-const { addSpace, findSpace, removeSpace, resolveSpace, updateSpaceAuth } = await import("./space");
+const { updateConfig } = await import("./config");
+const { addSpace, findSpace, removeSpace, updateSpaceAuth } = await import("./space");
 
-const mockLoadConfig = vi.mocked(loadConfig);
 const mockUpdateConfig = vi.mocked(updateConfig);
 
 const makeSpace = (host: string) => ({
@@ -166,48 +164,5 @@ describe("findSpace", () => {
     const result = findSpace([], "myspace");
 
     expect(result).toBeNull();
-  });
-});
-
-describe("resolveSpace", () => {
-  beforeEach(() => {
-    delete process.env.BACKLOG_SPACE;
-  });
-
-  it("returns space matching BACKLOG_SPACE env var", () => {
-    const space = makeSpace("env.backlog.com");
-    mockLoadConfig.mockReturnValue(makeConfig([space]));
-    process.env.BACKLOG_SPACE = "env.backlog.com";
-
-    const result = resolveSpace();
-
-    expect(result).toEqual(space);
-  });
-
-  it("returns space matching defaultSpace config", () => {
-    const space = makeSpace("default.backlog.com");
-    mockLoadConfig.mockReturnValue(makeConfig([space], "default.backlog.com"));
-
-    const result = resolveSpace();
-
-    expect(result).toEqual(space);
-  });
-
-  it("returns null when no host is resolvable", () => {
-    mockLoadConfig.mockReturnValue(makeConfig([]));
-
-    const result = resolveSpace();
-
-    expect(result).toBeNull();
-  });
-
-  it("resolves shorthand from BACKLOG_SPACE env var", () => {
-    const space = makeSpace("envspace.backlog.com");
-    mockLoadConfig.mockReturnValue(makeConfig([space]));
-    process.env.BACKLOG_SPACE = "envspace";
-
-    const result = resolveSpace();
-
-    expect(result).toEqual(space);
   });
 });
