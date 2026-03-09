@@ -11,6 +11,7 @@ describe("auth token", () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [{ host: "example.backlog.com", auth: { method: "api-key", apiKey: "my-api-key" } }],
       defaultSpace: "example.backlog.com",
+      aliases: {},
     });
     vi.mocked(findSpace).mockReturnValue({
       host: "example.backlog.com",
@@ -41,6 +42,7 @@ describe("auth token", () => {
         },
       ],
       defaultSpace: "example.backlog.com",
+      aliases: {},
     });
     vi.mocked(findSpace).mockReturnValue({
       host: "example.backlog.com",
@@ -62,6 +64,7 @@ describe("auth token", () => {
     vi.mocked(loadConfig).mockReturnValue({
       spaces: [],
       defaultSpace: undefined,
+      aliases: {},
     });
     vi.mocked(findSpace).mockReturnValue(null);
 

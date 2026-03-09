@@ -28,6 +28,7 @@ const mockDefaultSpace = (space: ReturnType<typeof findSpace>) => {
   vi.mocked(loadConfig).mockReturnValue({
     spaces: space ? [space] : [],
     defaultSpace: space?.host,
+    aliases: {},
   });
   vi.mocked(findSpace).mockReturnValue(space);
 };
