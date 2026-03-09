@@ -38,7 +38,7 @@ const activities = new BeeCommand("activities")
     `Results are ordered by most recent first. Use \`--activity-type\` to filter by type.
 
 For activity type IDs, see:
-https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#activity-type`,
+https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#response-description`,
   )
   .argument("<project>", "Project ID or project key")
   .option(
