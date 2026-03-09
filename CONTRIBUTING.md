@@ -64,15 +64,29 @@ pnpm --filter @nulab/bee build
 Releases are triggered manually via the [Release workflow](https://github.com/nulab/bee/actions/workflows/release.yml) (`workflow_dispatch`).
 
 1. Go to **Actions > Release > Run workflow**.
-2. Select the **environment** (`dry-run` or production).
-3. Select the **version bump** (`patch`, `minor`, or `major`).
-4. The workflow will:
+2. Select the inputs:
+   - **environment** — `dry-run` (default) or `production`
+   - **newversion** — `patch`, `minor`, or `major`
+   - **prerelease** — check to release as rc (prerelease)
+3. The workflow will:
    - Bump the version in `apps/cli/package.json`
    - Build the CLI
    - Publish to npm with provenance
    - Create a git tag and GitHub release with auto-generated notes
 
 Dry-run mode publishes with `--dry-run` and skips git tag/push, so it's safe to test.
+
+### Input combinations
+
+| newversion | prerelease | Example result                                            | npm tag  |
+| ---------- | ---------- | --------------------------------------------------------- | -------- |
+| `minor`    | unchecked  | `1.0.0` → `1.1.0`                                         | `latest` |
+| `major`    | unchecked  | `1.0.0` → `2.0.0`                                         | `latest` |
+| `patch`    | unchecked  | `1.0.1` → `1.0.2`                                         | `latest` |
+| `minor`    | checked    | `1.0.0` → `1.1.0-rc.0`                                    | `rc`     |
+| `major`    | checked    | `1.0.0` → `2.0.0-rc.0`                                    | `rc`     |
+| `minor`    | checked    | `1.1.0-rc.0` → `1.1.0-rc.1` (already rc: bumps rc number) | `rc`     |
+| `minor`    | unchecked  | `1.1.0-rc.1` → `1.1.0` (promote to stable)                | `latest` |
 
 ## Documentation Site
 

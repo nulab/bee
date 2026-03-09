@@ -20,6 +20,15 @@ on:
         description: New version
         default: patch
         required: true
+      prerelease:
+        type: boolean
+        description: Release as rc (prerelease)
+        default: false
+
+env:
+  NEW_VERSION_TYPE: ${{ inputs.newversion }}
+  PRERELEASE: ${{ inputs.prerelease }}
+  DRY_RUN: ${{ inputs.environment == 'dry-run' }}
 
 permissions:
   contents: read
@@ -41,6 +50,7 @@ jobs:
     outputs:
       new_tag: ${{ steps.bump_version.outputs.new_tag }}
       previous_tag: ${{ steps.get_latest_tag.outputs.latest_tag }}
+      previous_stable_tag: ${{ steps.get_latest_tag.outputs.latest_stable_tag }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -56,15 +66,28 @@ jobs:
           latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "latest_tag=${latest_tag}" >> "$GITHUB_OUTPUT"
 
+          latest_stable_tag=$(git tag --list 'v*' --sort=-v:refname | grep -v '-' | head -n 1)
+          latest_stable_tag="${latest_stable_tag:-v0.0.0}"
+          echo "latest_stable_tag=${latest_stable_tag}" >> "$GITHUB_OUTPUT"
+
       - name: Bump version
         id: bump_version
         working-directory: apps/cli
         env:
           LATEST_TAG: ${{ steps.get_latest_tag.outputs.latest_tag }}
-          NEW_VERSION_TYPE: ${{ github.event.inputs.newversion }}
         run: |
           npm version "$LATEST_TAG" --no-git-tag-version --allow-same-version
-          npm version "$NEW_VERSION_TYPE" --no-git-tag-version
+
+          if [ "$PRERELEASE" = "true" ]; then
+            current_version=$(node -p "require('./package.json').version")
+            if echo "$current_version" | grep -q -- "-rc\."; then
+              npm version prerelease --preid rc --no-git-tag-version
+            else
+              npm version "pre${NEW_VERSION_TYPE}" --preid rc --no-git-tag-version
+            fi
+          else
+            npm version "$NEW_VERSION_TYPE" --no-git-tag-version
+          fi
 
           new_version=$(node -p "require('./package.json').version")
           new_tag="v${new_version}"
@@ -90,6 +113,10 @@ jobs:
     permissions:
       contents: write
       id-token: write
+    env:
+      NEW_TAG: ${{ needs.build.outputs.new_tag }}
+      PREVIOUS_TAG: ${{ needs.build.outputs.previous_tag }}
+      PREVIOUS_STABLE_TAG: ${{ needs.build.outputs.previous_stable_tag }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -104,14 +131,16 @@ jobs:
           path: apps/cli
 
       - name: Publish to npm
-        if: inputs.environment != 'dry-run'
         working-directory: apps/cli
-        run: npm publish --provenance --access public
-
-      - name: Publish dry run
-        if: inputs.environment == 'dry-run'
-        working-directory: apps/cli
-        run: npm publish --provenance --access public --dry-run
+        run: |
+          flags="--provenance --access public"
+          if [ "$PRERELEASE" = "true" ]; then
+            flags="$flags --tag rc"
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            flags="$flags --dry-run"
+          fi
+          npm publish $flags
 
       - name: Configure git
         if: inputs.environment != 'dry-run'
@@ -122,7 +151,6 @@ jobs:
       - name: Push version commit and tag
         if: inputs.environment != 'dry-run'
         env:
-          NEW_TAG: ${{ needs.build.outputs.new_tag }}
           REF_NAME: ${{ github.ref_name }}
         run: |
           git add apps/cli/package.json
@@ -132,26 +160,29 @@ jobs:
           git push origin "${NEW_TAG}"
 
       - name: Create GitHub release
-        if: inputs.environment != 'dry-run'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEW_TAG: ${{ needs.build.outputs.new_tag }}
-          PREVIOUS_TAG: ${{ needs.build.outputs.previous_tag }}
-        run: gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_TAG"
-
-      - name: Preview release notes (dry-run)
-        if: inputs.environment == 'dry-run'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEW_TAG: ${{ needs.build.outputs.new_tag }}
-          PREVIOUS_TAG: ${{ needs.build.outputs.previous_tag }}
           REPOSITORY: ${{ github.repository }}
           TARGET_COMMITISH: ${{ github.sha }}
         run: |
-          echo "## Release notes for ${NEW_TAG}" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          gh api "repos/${REPOSITORY}/releases/generate-notes" \
-            -f tag_name="$NEW_TAG" \
-            -f target_commitish="$TARGET_COMMITISH" \
-            -f previous_tag_name="$PREVIOUS_TAG" \
-            --jq '.body' >> "$GITHUB_STEP_SUMMARY"
+          if [ "$PRERELEASE" = "true" ]; then
+            notes_start_tag="$PREVIOUS_TAG"
+          else
+            notes_start_tag="$PREVIOUS_STABLE_TAG"
+          fi
+
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "## Release notes for ${NEW_TAG}" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            gh api "repos/${REPOSITORY}/releases/generate-notes" \
+              -f tag_name="$NEW_TAG" \
+              -f target_commitish="$TARGET_COMMITISH" \
+              -f previous_tag_name="$notes_start_tag" \
+              --jq '.body' >> "$GITHUB_STEP_SUMMARY"
+          else
+            flags="--generate-notes --notes-start-tag $notes_start_tag"
+            if [ "$PRERELEASE" = "true" ]; then
+              flags="$flags --prerelease"
+            fi
+            gh release create "$NEW_TAG" $flags
+          fi
