@@ -6,7 +6,9 @@ import * as opt from "../../lib/common-options";
 
 const list = new BeeCommand("list")
   .summary("List notifications")
-  .description(`Unread notifications are marked with \`*\`. Use \`--min-id\` / \`--max-id\` for cursor-based pagination.`)
+  .description(
+    `Unread notifications are marked with \`*\`. Use \`--min-id\` / \`--max-id\` for cursor-based pagination.`,
+  )
   .addOption(opt.count())
   .addOption(opt.minId())
   .addOption(opt.maxId())

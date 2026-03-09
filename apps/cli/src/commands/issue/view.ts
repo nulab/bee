@@ -6,9 +6,7 @@ import * as opt from "../../lib/common-options";
 
 const view = new BeeCommand("view")
   .summary("View an issue")
-  .description(
-    `Use \`--comments\` to include comments. Use \`--web\` to open in the browser.`,
-  )
+  .description(`Use \`--comments\` to include comments. Use \`--web\` to open in the browser.`)
   .argument("<issue>", "Issue ID or issue key")
   .option("--comments", "Include comments")
   .addOption(opt.web("issue"))

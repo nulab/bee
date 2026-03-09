@@ -6,7 +6,9 @@ import * as opt from "../../lib/common-options";
 
 const status = new BeeCommand("status")
   .summary("Show issue status summary for yourself")
-  .description(`Displays your assigned issues grouped by status (e.g., Open, In Progress, Resolved).`)
+  .description(
+    `Displays your assigned issues grouped by status (e.g., Open, In Progress, Resolved).`,
+  )
   .addOption(opt.json())
   .envVars([...ENV_AUTH])
   .examples([

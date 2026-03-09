@@ -7,7 +7,9 @@ import { resolveOptions } from "../../lib/required-option";
 
 const deleteIssueType = new BeeCommand("delete")
   .summary("Delete an issue type")
-  .description(`All issues of this type are reassigned to the substitute issue type. This action is irreversible.`)
+  .description(
+    `All issues of this type are reassigned to the substitute issue type. This action is irreversible.`,
+  )
   .argument("<issueType>", "Issue type ID")
   .addOption(opt.project())
   .requiredOption(

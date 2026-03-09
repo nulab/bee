@@ -6,7 +6,9 @@ import * as opt from "../../lib/common-options";
 
 const create = new BeeCommand("create")
   .summary("Create a document")
-  .description(`Omitted required fields will be prompted interactively. When input is piped, it is used as the body automatically.`)
+  .description(
+    `Omitted required fields will be prompted interactively. When input is piped, it is used as the body automatically.`,
+  )
   .option("-p, --project <id>", "Project ID or project key")
   .option("-t, --title <text>", "Document title")
   .option("-b, --body <text>", "Document body content")

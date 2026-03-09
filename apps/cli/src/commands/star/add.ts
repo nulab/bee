@@ -6,7 +6,9 @@ import * as opt from "../../lib/common-options";
 
 const add = new BeeCommand("add")
   .summary("Add a star")
-  .description(`Specify exactly one target: \`--issue\` (accepts key or ID), \`--comment\`, \`--wiki\`, or \`--pr-comment\`.`)
+  .description(
+    `Specify exactly one target: \`--issue\` (accepts key or ID), \`--comment\`, \`--wiki\`, or \`--pr-comment\`.`,
+  )
   .addOption(opt.issue())
   .option("--comment <number>", "Comment ID to star")
   .option("--wiki <number>", "Wiki page ID to star")

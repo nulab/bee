@@ -6,7 +6,9 @@ import * as opt from "../lib/common-options";
 
 const dashboard = new BeeCommand("dashboard")
   .summary("Show a summary of your Backlog activity")
-  .description(`Displays assigned issues, unread notifications, and projects. Use \`--web\` to open in the browser.`)
+  .description(
+    `Displays assigned issues, unread notifications, and projects. Use \`--web\` to open in the browser.`,
+  )
   .addOption(opt.json())
   .addOption(opt.web("dashboard"))
   .addOption(opt.noBrowser())

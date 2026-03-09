@@ -5,9 +5,7 @@ import { BeeCommand } from "../../lib/bee-command";
 
 const switchSpace = new BeeCommand("switch")
   .summary("Switch active space")
-  .description(
-    `Changes which space is used by default when \`--space\` is not provided.`,
-  )
+  .description(`Changes which space is used by default when \`--space\` is not provided.`)
   .option("-s, --space <hostname>", "The hostname of the Backlog space")
   .envVars([["BACKLOG_SPACE", "Space hostname to switch to"]])
   .examples([

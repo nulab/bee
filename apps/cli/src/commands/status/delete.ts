@@ -7,7 +7,9 @@ import { resolveOptions } from "../../lib/required-option";
 
 const deleteStatus = new BeeCommand("delete")
   .summary("Delete a status")
-  .description(`All issues with this status are reassigned to the substitute status. This action is irreversible.`)
+  .description(
+    `All issues with this status are reassigned to the substitute status. This action is irreversible.`,
+  )
   .argument("<status>", "Status ID")
   .addOption(opt.project())
   .requiredOption("--substitute-status-id <value>", "Replacement status ID for affected issues")

@@ -6,7 +6,9 @@ import * as opt from "../../lib/common-options";
 
 const edit = new BeeCommand("edit")
   .summary("Edit a wiki page")
-  .description(`Only specified fields are updated. When input is piped, it is used as the body automatically.`)
+  .description(
+    `Only specified fields are updated. When input is piped, it is used as the body automatically.`,
+  )
   .argument("<wiki>", "Wiki page ID")
   .option("-n, --name <name>", "New name of the wiki page")
   .option("-b, --body <text>", "New content of the wiki page")
