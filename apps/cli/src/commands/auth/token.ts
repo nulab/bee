@@ -1,14 +1,14 @@
 import { UserError } from "@repo/cli-utils";
-import { findSpace, loadConfig, resolveSpace } from "@repo/config";
+import { findSpace, loadConfig } from "@repo/config";
 import { BeeCommand } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
 const tokenCommand = new BeeCommand("token")
   .summary("Print the auth token to stdout")
   .description(
     `Prints the token for the default space, or the space given by \`--space\`. Useful for piping to other commands.`,
   )
-  .option("-s, --space <hostname>", "The hostname of the Backlog space")
-  .envVars([["BACKLOG_SPACE", "Default space hostname"]])
+  .addOption(opt.space())
   .examples([
     { description: "Print token for default space", command: "bee auth token" },
     {
@@ -22,7 +22,9 @@ const tokenCommand = new BeeCommand("token")
     },
   ])
   .action((opts) => {
-    const space = opts.space ? findSpace(loadConfig().spaces, opts.space) : resolveSpace();
+    const config = loadConfig();
+    const host = opts.space ?? config.defaultSpace;
+    const space = host ? findSpace(config.spaces, host) : null;
 
     if (!space) {
       throw new UserError("No space configured. Run `bee auth login` to authenticate.");

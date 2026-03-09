@@ -1,5 +1,5 @@
 import { refreshAccessToken } from "@repo/backlog-utils";
-import { resolveSpace, updateSpaceAuth } from "@repo/config";
+import { findSpace, loadConfig, updateSpaceAuth } from "@repo/config";
 import { Backlog } from "backlog-js";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
@@ -19,15 +19,22 @@ vi.mock("@repo/backlog-utils", () => ({
 vi.mock("@repo/config", () => ({
   findSpace: vi.fn(),
   loadConfig: vi.fn(),
-  resolveSpace: vi.fn(),
   updateSpaceAuth: vi.fn(),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
+const mockDefaultSpace = (space: ReturnType<typeof findSpace>) => {
+  vi.mocked(loadConfig).mockReturnValue({
+    spaces: space ? [space] : [],
+    defaultSpace: space?.host,
+  });
+  vi.mocked(findSpace).mockReturnValue(space);
+};
+
 describe("auth refresh", () => {
   it("throws error when no space is configured", async () => {
-    vi.mocked(resolveSpace).mockReturnValue(null);
+    mockDefaultSpace(null);
 
     const { default: refresh } = await import("./refresh");
     await expect(refresh.parseAsync([], { from: "user" })).rejects.toThrow(
@@ -36,7 +43,7 @@ describe("auth refresh", () => {
   });
 
   it("shows error for API key authentication", async () => {
-    vi.mocked(resolveSpace).mockReturnValue({
+    mockDefaultSpace({
       host: "example.backlog.com",
       auth: { method: "api-key" as const, apiKey: "key" },
     });
@@ -48,7 +55,7 @@ describe("auth refresh", () => {
   });
 
   it("shows error when clientId/clientSecret are missing", async () => {
-    vi.mocked(resolveSpace).mockReturnValue({
+    mockDefaultSpace({
       host: "example.backlog.com",
       auth: {
         method: "oauth" as const,
@@ -64,7 +71,7 @@ describe("auth refresh", () => {
   });
 
   it("successfully refreshes token", async () => {
-    vi.mocked(resolveSpace).mockReturnValue({
+    mockDefaultSpace({
       host: "example.backlog.com",
       auth: {
         method: "oauth" as const,
@@ -108,7 +115,7 @@ describe("auth refresh", () => {
   });
 
   it("shows error on refresh failure", async () => {
-    vi.mocked(resolveSpace).mockReturnValue({
+    mockDefaultSpace({
       host: "example.backlog.com",
       auth: {
         method: "oauth" as const,
@@ -127,7 +134,7 @@ describe("auth refresh", () => {
   });
 
   it("shows error when token verification fails after refresh", async () => {
-    vi.mocked(resolveSpace).mockReturnValue({
+    mockDefaultSpace({
       host: "example.backlog.com",
       auth: {
         method: "oauth" as const,

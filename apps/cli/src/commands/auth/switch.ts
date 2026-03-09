@@ -2,12 +2,12 @@ import { UserError } from "@repo/cli-utils";
 import { loadConfig, writeConfig } from "@repo/config";
 import consola from "consola";
 import { BeeCommand } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
 const switchSpace = new BeeCommand("switch")
   .summary("Switch active space")
   .description(`Changes which space is used by default when \`--space\` is not provided.`)
-  .option("-s, --space <hostname>", "The hostname of the Backlog space")
-  .envVars([["BACKLOG_SPACE", "Space hostname to switch to"]])
+  .addOption(opt.space())
   .examples([
     { description: "Select space via prompt", command: "bee auth switch" },
     {
@@ -18,7 +18,7 @@ const switchSpace = new BeeCommand("switch")
   .action(async (opts) => {
     const config = loadConfig();
 
-    let hostname = opts.space || process.env.BACKLOG_SPACE;
+    let hostname = opts.space;
 
     if (!hostname) {
       if (config.spaces.length === 0) {

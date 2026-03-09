@@ -3,6 +3,7 @@ import { type Entity, Backlog } from "backlog-js";
 import consola from "consola";
 import { printDefinitionList } from "@repo/cli-utils";
 import { BeeCommand } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
 const getToken = (auth: RcAuth): string =>
   auth.method === "api-key" ? auth.apiKey : auth.accessToken;
@@ -12,9 +13,8 @@ const status = new BeeCommand("status")
   .description(
     `Verifies credential validity for each configured space via the Backlog API. The active (default) space is indicated.`,
   )
-  .option("-s, --space <hostname>", "The hostname of the Backlog space")
+  .addOption(opt.space())
   .option("--show-token", "Display the auth token")
-  .envVars([["BACKLOG_SPACE", "Filter by space hostname"]])
   .examples([
     { description: "Display status for all spaces", command: "bee auth status" },
     {
@@ -26,7 +26,7 @@ const status = new BeeCommand("status")
   .action(async (opts) => {
     const config = loadConfig();
 
-    const filterSpace = opts.space || process.env.BACKLOG_SPACE;
+    const filterSpace = opts.space;
     const spaces = filterSpace
       ? config.spaces.filter((s) => s.host === filterSpace)
       : config.spaces;
