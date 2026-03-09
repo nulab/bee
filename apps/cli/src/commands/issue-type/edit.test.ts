@@ -1,14 +1,10 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  patchIssueType: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ patchIssueType: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
@@ -16,8 +12,7 @@ describe("issue-type edit", () => {
   it("updates issue type name", async () => {
     mockClient.patchIssueType.mockResolvedValue({ id: 1, name: "New Name", color: "#e30000" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["1", "-p", "TEST", "-n", "New Name"], { from: "user" });
+    await parseCommand(() => import("./edit"), ["1", "-p", "TEST", "-n", "New Name"]);
 
     expect(mockClient.patchIssueType).toHaveBeenCalledWith(
       "TEST",
@@ -30,8 +25,7 @@ describe("issue-type edit", () => {
   it("updates issue type color", async () => {
     mockClient.patchIssueType.mockResolvedValue({ id: 1, name: "Bug", color: "#e30000" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["1", "-p", "TEST", "--color", "#e30000"], { from: "user" });
+    await parseCommand(() => import("./edit"), ["1", "-p", "TEST", "--color", "#e30000"]);
 
     expect(mockClient.patchIssueType).toHaveBeenCalledWith(
       "TEST",
@@ -40,12 +34,13 @@ describe("issue-type edit", () => {
     );
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.patchIssueType.mockResolvedValue({ id: 1, name: "Bug", color: "#e30000" });
-
-    await expectStdoutContaining(async () => {
-      const { default: edit } = await import("./edit");
-      await edit.parseAsync(["1", "-p", "TEST", "-n", "Bug", "--json"], { from: "user" });
-    }, "Bug");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./edit"),
+      ["1", "-p", "TEST", "-n", "Bug", "--json"],
+      "Bug",
+      () => mockClient.patchIssueType.mockResolvedValue({ id: 1, name: "Bug", color: "#e30000" }),
+    ),
+  );
 });

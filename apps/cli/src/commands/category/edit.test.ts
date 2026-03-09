@@ -1,19 +1,15 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  patchCategories: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ patchCategories: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
+  promptRequired: vi.fn((_label: string, val?: string) => Promise.resolve(val)),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -22,8 +18,7 @@ describe("category edit", () => {
   it("updates category name", async () => {
     mockClient.patchCategories.mockResolvedValue({ id: 1, name: "New Name" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["1", "-p", "TEST", "-n", "New Name"], { from: "user" });
+    await parseCommand(() => import("./edit"), ["1", "-p", "TEST", "-n", "New Name"]);
 
     expect(mockClient.patchCategories).toHaveBeenCalledWith("TEST", 1, { name: "New Name" });
     expect(consola.success).toHaveBeenCalledWith("Updated category New Name (ID: 1)");
@@ -33,18 +28,18 @@ describe("category edit", () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Prompted Name");
     mockClient.patchCategories.mockResolvedValue({ id: 1, name: "Prompted Name" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["1", "-p", "TEST"], { from: "user" });
+    await parseCommand(() => import("./edit"), ["1", "-p", "TEST"]);
 
     expect(promptRequired).toHaveBeenCalledWith("Category name:", undefined);
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.patchCategories.mockResolvedValue({ id: 1, name: "Name" });
-
-    await expectStdoutContaining(async () => {
-      const { default: edit } = await import("./edit");
-      await edit.parseAsync(["1", "-p", "TEST", "-n", "Name", "--json"], { from: "user" });
-    }, "Name");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./edit"),
+      ["1", "-p", "TEST", "-n", "Name", "--json"],
+      "Name",
+      () => mockClient.patchCategories.mockResolvedValue({ id: 1, name: "Name" }),
+    ),
+  );
 });

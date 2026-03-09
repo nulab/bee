@@ -1,18 +1,14 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  patchProject: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ patchProject: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn((label: string, value: unknown) => Promise.resolve(value)),
+  promptRequired: vi.fn((_label: string, val?: string) => Promise.resolve(val)),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -21,8 +17,7 @@ describe("project edit", () => {
   it("updates project name", async () => {
     mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "New Name" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["TEST", "--name", "New Name"], { from: "user" });
+    await parseCommand(() => import("./edit"), ["TEST", "--name", "New Name"]);
 
     expect(mockClient.patchProject).toHaveBeenCalledWith(
       "TEST",
@@ -34,8 +29,7 @@ describe("project edit", () => {
   it("updates project archived status", async () => {
     mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "Test" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["TEST", "--archived"], { from: "user" });
+    await parseCommand(() => import("./edit"), ["TEST", "--archived"]);
 
     expect(mockClient.patchProject).toHaveBeenCalledWith(
       "TEST",
@@ -46,10 +40,7 @@ describe("project edit", () => {
   it("passes text formatting rule", async () => {
     mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "Test" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["TEST", "--text-formatting-rule", "markdown"], {
-      from: "user",
-    });
+    await parseCommand(() => import("./edit"), ["TEST", "--text-formatting-rule", "markdown"]);
 
     expect(mockClient.patchProject).toHaveBeenCalledWith(
       "TEST",
@@ -57,12 +48,13 @@ describe("project edit", () => {
     );
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "Test" });
-
-    await expectStdoutContaining(async () => {
-      const { default: edit } = await import("./edit");
-      await edit.parseAsync(["TEST", "--name", "Test", "--json"], { from: "user" });
-    }, "TEST");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./edit"),
+      ["TEST", "--name", "Test", "--json"],
+      "TEST",
+      () => mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "Test" }),
+    ),
+  );
 });

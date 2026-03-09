@@ -1,16 +1,15 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
+const { mockClient, host } = setupCommandTest({
   patchPullRequest: vi.fn(),
   getIssue: vi.fn(),
-  getMyself: vi.fn(),
-};
+});
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -19,10 +18,10 @@ describe("pr edit", () => {
   it("updates pull request summary", async () => {
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "New title" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["42", "--project", "PROJ", "--repo", "repo", "--title", "New title"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./edit"),
+      ["42", "--project", "PROJ", "--repo", "repo", "--title", "New title"],
+    );
 
     expect(mockClient.patchPullRequest).toHaveBeenCalledWith("PROJ", "repo", 42, {
       summary: "New title",
@@ -38,10 +37,9 @@ describe("pr edit", () => {
   it("updates pull request with a comment", async () => {
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(
+    await parseCommand(
+      () => import("./edit"),
       ["42", "--project", "PROJ", "--repo", "repo", "--title", "Title", "--comment", "Updated"],
-      { from: "user" },
     );
 
     expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
@@ -55,10 +53,9 @@ describe("pr edit", () => {
   it("updates pull request with notified users", async () => {
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(
+    await parseCommand(
+      () => import("./edit"),
       ["42", "--project", "PROJ", "--repo", "repo", "--notify", "111", "--notify", "222"],
-      { from: "user" },
     );
 
     expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
@@ -73,10 +70,10 @@ describe("pr edit", () => {
     mockClient.getIssue.mockResolvedValue({ id: 789 });
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["42", "--project", "PROJ", "--repo", "repo", "--issue", "PROJ-123"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./edit"),
+      ["42", "--project", "PROJ", "--repo", "repo", "--issue", "PROJ-123"],
+    );
 
     expect(mockClient.getIssue).toHaveBeenCalledWith("PROJ-123");
     expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
@@ -91,10 +88,10 @@ describe("pr edit", () => {
     mockClient.getMyself.mockResolvedValue({ id: 99 });
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["42", "--project", "PROJ", "--repo", "repo", "--assignee", "@me"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./edit"),
+      ["42", "--project", "PROJ", "--repo", "repo", "--assignee", "@me"],
+    );
 
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
@@ -105,15 +102,13 @@ describe("pr edit", () => {
     );
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
-
-    await expectStdoutContaining(async () => {
-      const { default: edit } = await import("./edit");
-      await edit.parseAsync(
-        ["42", "--project", "PROJ", "--repo", "repo", "--title", "Title", "--json"],
-        { from: "user" },
-      );
-    }, "Title");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./edit"),
+      ["42", "--project", "PROJ", "--repo", "repo", "--title", "Title", "--json"],
+      "Title",
+      () => mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" }),
+    ),
+  );
 });
