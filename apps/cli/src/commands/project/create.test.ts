@@ -1,22 +1,18 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  postProject: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ postProject: vi.fn() });
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
-
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn(),
+  promptRequired: vi.fn((_label: string, val?: string) => Promise.resolve(val)),
 }));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("project create", () => {
@@ -28,8 +24,7 @@ describe("project create", () => {
       textFormattingRule: "markdown",
     });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(["--key", "TEST", "--name", "Test Project"], { from: "user" });
+    await parseCommand(() => import("./create"), ["--key", "TEST", "--name", "Test Project"]);
 
     expect(mockClient.postProject).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -51,8 +46,7 @@ describe("project create", () => {
       textFormattingRule: "backlog",
     });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./create"), []);
 
     expect(promptRequired).toHaveBeenCalledWith("Project key:", undefined);
     expect(promptRequired).toHaveBeenCalledWith("Project name:", undefined);
@@ -72,10 +66,9 @@ describe("project create", () => {
       textFormattingRule: "markdown",
     });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(
+    await parseCommand(
+      () => import("./create"),
       ["--key", "TEST", "--name", "Test", "--chart-enabled", "--text-formatting-rule", "markdown"],
-      { from: "user" },
     );
 
     expect(mockClient.postProject).toHaveBeenCalledWith(
@@ -86,17 +79,20 @@ describe("project create", () => {
     );
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test");
-    mockClient.postProject.mockResolvedValue({
-      projectKey: "TEST",
-      name: "Test",
-      textFormattingRule: "markdown",
-    });
-
-    await expectStdoutContaining(async () => {
-      const { default: create } = await import("./create");
-      await create.parseAsync(["--key", "TEST", "--name", "Test", "--json"], { from: "user" });
-    }, "TEST");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./create"),
+      ["--key", "TEST", "--name", "Test", "--json"],
+      "TEST",
+      () => {
+        vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test");
+        mockClient.postProject.mockResolvedValue({
+          projectKey: "TEST",
+          name: "Test",
+          textFormattingRule: "markdown",
+        });
+      },
+    ),
+  );
 });

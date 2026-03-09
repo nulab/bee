@@ -1,32 +1,28 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  postProjectStatus: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ postProjectStatus: vi.fn() });
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
-
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
+  promptRequired: vi.fn((_label: string, val?: string) => Promise.resolve(val)),
 }));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("status create", () => {
   it("creates a status with provided name and color", async () => {
     mockClient.postProjectStatus.mockResolvedValue({ id: 1, name: "In Review", color: "#2779ca" });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(["-p", "TEST", "-n", "In Review", "--color", "#2779ca"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./create"),
+      ["-p", "TEST", "-n", "In Review", "--color", "#2779ca"],
+    );
 
     expect(mockClient.postProjectStatus).toHaveBeenCalledWith("TEST", {
       name: "In Review",
@@ -48,20 +44,24 @@ describe("status create", () => {
       color: "#2779ca",
     });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(["-p", "TEST", "--color", "#2779ca"], { from: "user" });
+    await parseCommand(() => import("./create"), ["-p", "TEST", "--color", "#2779ca"]);
 
     expect(promptRequired).toHaveBeenCalledWith("Status name:", undefined);
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.postProjectStatus.mockResolvedValue({ id: 1, name: "Open", color: "#e30000" });
-
-    await expectStdoutContaining(async () => {
-      const { default: create } = await import("./create");
-      await create.parseAsync(["-p", "TEST", "-n", "Open", "--color", "#e30000", "--json"], {
-        from: "user",
-      });
-    }, "Open");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./create"),
+      ["-p", "TEST", "-n", "Open", "--color", "#e30000", "--json"],
+      "Open",
+      () => {
+        mockClient.postProjectStatus.mockResolvedValue({
+          id: 1,
+          name: "Open",
+          color: "#e30000",
+        });
+      },
+    ),
+  );
 });

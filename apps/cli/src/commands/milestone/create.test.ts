@@ -1,30 +1,25 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  postVersions: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ postVersions: vi.fn() });
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
-
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
+  promptRequired: vi.fn((_label: string, val?: string) => Promise.resolve(val)),
 }));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("milestone create", () => {
   it("creates a milestone with provided name", async () => {
     mockClient.postVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(["-p", "TEST", "-n", "v1.0.0"], { from: "user" });
+    await parseCommand(() => import("./create"), ["-p", "TEST", "-n", "v1.0.0"]);
 
     expect(mockClient.postVersions).toHaveBeenCalledWith(
       "TEST",
@@ -42,8 +37,7 @@ describe("milestone create", () => {
       .mockResolvedValueOnce("Prompted Milestone");
     mockClient.postVersions.mockResolvedValue({ id: 2, name: "Prompted Milestone" });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(["-p", "TEST"], { from: "user" });
+    await parseCommand(() => import("./create"), ["-p", "TEST"]);
 
     expect(promptRequired).toHaveBeenCalledWith("Milestone name:", undefined);
   });
@@ -51,8 +45,8 @@ describe("milestone create", () => {
   it("passes date parameters", async () => {
     mockClient.postVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(
+    await parseCommand(
+      () => import("./create"),
       [
         "-p",
         "TEST",
@@ -63,7 +57,6 @@ describe("milestone create", () => {
         "--release-due-date",
         "2026-06-30",
       ],
-      { from: "user" },
     );
 
     expect(mockClient.postVersions).toHaveBeenCalledWith(
@@ -75,12 +68,15 @@ describe("milestone create", () => {
     );
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.postVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
-
-    await expectStdoutContaining(async () => {
-      const { default: create } = await import("./create");
-      await create.parseAsync(["-p", "TEST", "-n", "v1.0.0", "--json"], { from: "user" });
-    }, "v1.0.0");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./create"),
+      ["-p", "TEST", "-n", "v1.0.0", "--json"],
+      "v1.0.0",
+      () => {
+        mockClient.postVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
+      },
+    ),
+  );
 });

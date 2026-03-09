@@ -1,22 +1,18 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  postIssueType: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ postIssueType: vi.fn() });
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
-
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn((_, val) => Promise.resolve(val)),
+  promptRequired: vi.fn((_label: string, val?: string) => Promise.resolve(val)),
 }));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("issue-type create", () => {
@@ -28,10 +24,10 @@ describe("issue-type create", () => {
       projectId: 100,
     });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(["-p", "TEST", "-n", "Enhancement", "--color", "#2779ca"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./create"),
+      ["-p", "TEST", "-n", "Enhancement", "--color", "#2779ca"],
+    );
 
     expect(mockClient.postIssueType).toHaveBeenCalledWith("TEST", {
       name: "Enhancement",
@@ -52,25 +48,25 @@ describe("issue-type create", () => {
       projectId: 100,
     });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(["-p", "TEST", "--color", "#2779ca"], { from: "user" });
+    await parseCommand(() => import("./create"), ["-p", "TEST", "--color", "#2779ca"]);
 
     expect(promptRequired).toHaveBeenCalledWith("Issue type name:", undefined);
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.postIssueType.mockResolvedValue({
-      id: 1,
-      name: "Bug",
-      color: "#e30000",
-      projectId: 100,
-    });
-
-    await expectStdoutContaining(async () => {
-      const { default: create } = await import("./create");
-      await create.parseAsync(["-p", "TEST", "-n", "Bug", "--color", "#e30000", "--json"], {
-        from: "user",
-      });
-    }, "Bug");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./create"),
+      ["-p", "TEST", "-n", "Bug", "--color", "#e30000", "--json"],
+      "Bug",
+      () => {
+        mockClient.postIssueType.mockResolvedValue({
+          id: 1,
+          name: "Bug",
+          color: "#e30000",
+          projectId: 100,
+        });
+      },
+    ),
+  );
 });

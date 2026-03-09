@@ -1,31 +1,28 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
+const { mockClient, host } = setupCommandTest({
   postPullRequest: vi.fn(),
-  getMyself: vi.fn(),
   getIssue: vi.fn(),
-};
+});
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
-
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn((_label: string, value: string) => Promise.resolve(value)),
+  promptRequired: vi.fn((_label: string, val?: string) => Promise.resolve(val)),
 }));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("pr create", () => {
   it("creates a pull request with required fields", async () => {
     mockClient.postPullRequest.mockResolvedValue({ number: 1, summary: "Add feature" });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(
+    await parseCommand(
+      () => import("./create"),
       [
         "--project",
         "PROJ",
@@ -40,7 +37,6 @@ describe("pr create", () => {
         "--body",
         "Details here",
       ],
-      { from: "user" },
     );
 
     expect(mockClient.postPullRequest).toHaveBeenCalledWith("PROJ", "repo", {
@@ -63,8 +59,8 @@ describe("pr create", () => {
     mockClient.getMyself.mockResolvedValue({ id: 99 });
     mockClient.postPullRequest.mockResolvedValue({ number: 2, summary: "Title" });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(
+    await parseCommand(
+      () => import("./create"),
       [
         "--project",
         "PROJ",
@@ -81,7 +77,6 @@ describe("pr create", () => {
         "--assignee",
         "@me",
       ],
-      { from: "user" },
     );
 
     expect(mockClient.postPullRequest).toHaveBeenCalledWith(
@@ -94,8 +89,8 @@ describe("pr create", () => {
   it("creates a pull request with related issue", async () => {
     mockClient.postPullRequest.mockResolvedValue({ number: 3, summary: "Title" });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(
+    await parseCommand(
+      () => import("./create"),
       [
         "--project",
         "PROJ",
@@ -112,7 +107,6 @@ describe("pr create", () => {
         "--issue",
         "456",
       ],
-      { from: "user" },
     );
 
     expect(mockClient.postPullRequest).toHaveBeenCalledWith(
@@ -126,8 +120,8 @@ describe("pr create", () => {
     mockClient.getIssue.mockResolvedValue({ id: 789 });
     mockClient.postPullRequest.mockResolvedValue({ number: 4, summary: "Title" });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(
+    await parseCommand(
+      () => import("./create"),
       [
         "--project",
         "PROJ",
@@ -144,7 +138,6 @@ describe("pr create", () => {
         "--issue",
         "PROJ-123",
       ],
-      { from: "user" },
     );
 
     expect(mockClient.getIssue).toHaveBeenCalledWith("PROJ-123");
@@ -155,29 +148,29 @@ describe("pr create", () => {
     );
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.postPullRequest.mockResolvedValue({ number: 1, summary: "Add feature" });
-
-    await expectStdoutContaining(async () => {
-      const { default: create } = await import("./create");
-      await create.parseAsync(
-        [
-          "--project",
-          "PROJ",
-          "--repo",
-          "repo",
-          "--base",
-          "main",
-          "--head",
-          "feature",
-          "--title",
-          "Add feature",
-          "--body",
-          "Details",
-          "--json",
-        ],
-        { from: "user" },
-      );
-    }, "Add feature");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./create"),
+      [
+        "--project",
+        "PROJ",
+        "--repo",
+        "repo",
+        "--base",
+        "main",
+        "--head",
+        "feature",
+        "--title",
+        "Add feature",
+        "--body",
+        "Details",
+        "--json",
+      ],
+      "Add feature",
+      () => {
+        mockClient.postPullRequest.mockResolvedValue({ number: 1, summary: "Add feature" });
+      },
+    ),
+  );
 });

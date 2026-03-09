@@ -1,24 +1,22 @@
 import { promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
+const { mockClient, host } = setupCommandTest({
   postWiki: vi.fn(),
   getProjects: vi.fn(),
-};
+});
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
-
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn(),
+  promptRequired: vi.fn((_label: string, val?: string) => Promise.resolve(val)),
   resolveStdinArg: vi.fn((v: string | undefined) => Promise.resolve(v)),
 }));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("wiki create", () => {
@@ -27,8 +25,7 @@ describe("wiki create", () => {
     mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
     mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(["-p", "TEST", "-n", "My Page", "-b", "Hello"], { from: "user" });
+    await parseCommand(() => import("./create"), ["-p", "TEST", "-n", "My Page", "-b", "Hello"]);
 
     expect(mockClient.postWiki).toHaveBeenCalledWith({
       projectId: 100,
@@ -46,8 +43,7 @@ describe("wiki create", () => {
     mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
     mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(["-p", "TEST", "-n", "My Page", "-b", ""], { from: "user" });
+    await parseCommand(() => import("./create"), ["-p", "TEST", "-n", "My Page", "-b", ""]);
 
     expect(resolveStdinArg).toHaveBeenCalledWith("");
     expect(mockClient.postWiki).toHaveBeenCalledWith(
@@ -62,8 +58,7 @@ describe("wiki create", () => {
     mockClient.getProjects.mockResolvedValue([{ id: 200, projectKey: "PROMPTED" }]);
     mockClient.postWiki.mockResolvedValue({ id: 2, name: "Prompted Page" });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./create"), []);
 
     expect(promptRequired).toHaveBeenCalledWith("Project:", undefined);
     expect(promptRequired).toHaveBeenCalledWith("Page name:", undefined);
@@ -74,24 +69,25 @@ describe("wiki create", () => {
     mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
     mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(["-p", "TEST", "-n", "My Page", "-b", "Hello", "--mail-notify"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./create"),
+      ["-p", "TEST", "-n", "My Page", "-b", "Hello", "--mail-notify"],
+    );
 
     expect(mockClient.postWiki).toHaveBeenCalledWith(expect.objectContaining({ mailNotify: true }));
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("My Page");
-    mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
-    mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
-
-    await expectStdoutContaining(async () => {
-      const { default: create } = await import("./create");
-      await create.parseAsync(["-p", "TEST", "-n", "My Page", "-b", "Hello", "--json"], {
-        from: "user",
-      });
-    }, "My Page");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./create"),
+      ["-p", "TEST", "-n", "My Page", "-b", "Hello", "--json"],
+      "My Page",
+      () => {
+        vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("My Page");
+        mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
+        mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
+      },
+    ),
+  );
 });
