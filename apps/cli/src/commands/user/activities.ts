@@ -52,6 +52,7 @@ https://developer.nulab.com/docs/backlog/api/2/get-user-recent-updates/#response
   .addOption(opt.minId())
   .addOption(opt.maxId())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List user activities", command: "bee user activities 12345" },
@@ -69,7 +70,7 @@ https://developer.nulab.com/docs/backlog/api/2/get-user-recent-updates/#response
     },
   ])
   .action(async (user, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const activityTypeId: number[] = opts.activityType;
 

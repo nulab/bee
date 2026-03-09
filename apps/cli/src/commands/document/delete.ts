@@ -10,6 +10,7 @@ const deleteDocument = new BeeCommand("delete")
   .argument("<document>", "Document ID")
   .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     {
@@ -31,7 +32,7 @@ const deleteDocument = new BeeCommand("delete")
       return;
     }
 
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const doc = await client.deleteDocument(document);
 

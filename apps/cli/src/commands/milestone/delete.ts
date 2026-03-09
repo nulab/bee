@@ -12,6 +12,7 @@ const deleteMilestone = new BeeCommand("delete")
   .addOption(opt.project())
   .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -34,7 +35,7 @@ const deleteMilestone = new BeeCommand("delete")
       return;
     }
 
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const result = await client.deleteVersions(opts.project, Number(milestone));
 

@@ -12,6 +12,7 @@ const deleteWatching = new BeeCommand("delete")
   .argument("<watching>", "Watching ID")
   .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     {
@@ -33,7 +34,7 @@ const deleteWatching = new BeeCommand("delete")
       return;
     }
 
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const result = await client.deletehWatchingListItem(Number(watching));
 

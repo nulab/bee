@@ -10,13 +10,14 @@ const status = new BeeCommand("status")
     `Displays your assigned issues grouped by status (e.g., Open, In Progress, Resolved).`,
   )
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Show your issue status summary", command: "bee issue status" },
     { description: "Output as JSON", command: "bee issue status --json" },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const me = await client.getMyself();
 

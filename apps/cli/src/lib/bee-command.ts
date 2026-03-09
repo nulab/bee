@@ -59,10 +59,7 @@ class BeeCommand extends Command {
   }
 }
 
-const ENV_AUTH: [string, string][] = [
-  ["BACKLOG_API_KEY", "Authenticate with an API key"],
-  ["BACKLOG_SPACE", "Default space hostname"],
-];
+const ENV_AUTH: [string, string][] = [["BACKLOG_API_KEY", "Authenticate with an API key"]];
 const ENV_PROJECT: [string, string] = ["BACKLOG_PROJECT", "Default project ID or project key"];
 const ENV_REPO: [string, string] = ["BACKLOG_REPO", "Default repository name"];
 

@@ -15,6 +15,7 @@ const deleteStatus = new BeeCommand("delete")
   .requiredOption("--substitute-status-id <value>", "Replacement status ID for affected issues")
   .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -37,7 +38,7 @@ const deleteStatus = new BeeCommand("delete")
       return;
     }
 
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const result = await client.deleteProjectStatus(
       opts.project,

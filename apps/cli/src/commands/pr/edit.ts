@@ -18,6 +18,7 @@ const edit = new BeeCommand("edit")
   .addOption(opt.comment())
   .addOption(opt.notify())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT, ENV_REPO])
   .examples([
     {
@@ -35,7 +36,7 @@ const edit = new BeeCommand("edit")
   ])
   .action(async (number, opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const prNumber = Number(number);
     const notifiedUserId = opts.notify ?? [];

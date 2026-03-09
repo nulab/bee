@@ -11,6 +11,7 @@ const create = new BeeCommand("create")
   .addOption(opt.project())
   .option("-n, --name <value>", "Category name")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "Create a category", command: 'bee category create -p PROJECT -n "Bug Report"' },
@@ -18,7 +19,7 @@ const create = new BeeCommand("create")
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     const name = await promptRequired("Category name:", opts.name);
 

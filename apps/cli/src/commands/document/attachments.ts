@@ -9,13 +9,14 @@ const attachments = new BeeCommand("attachments")
   .description(`Shows file name, size, creator, and creation date.`)
   .argument("<document>", "Document ID")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List attachments", command: "bee document attachments 12345" },
     { description: "Output as JSON", command: "bee document attachments 12345 --json" },
   ])
   .action(async (document, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const doc = await client.getDocument(document);
 

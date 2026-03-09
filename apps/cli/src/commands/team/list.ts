@@ -12,6 +12,7 @@ const list = new BeeCommand("list")
   .addOption(opt.order())
   .addOption(opt.offset())
   .addOption(opt.count())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List all teams", command: "bee team list" },
@@ -19,7 +20,7 @@ const list = new BeeCommand("list")
     { description: "Output as JSON", command: "bee team list --json" },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const order = v.parse(v.optional(v.picklist(["asc", "desc"])), opts.order);
     const offset = v.parse(v.optional(v.pipe(v.string(), v.transform(Number))), opts.offset);

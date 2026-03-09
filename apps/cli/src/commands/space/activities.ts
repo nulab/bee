@@ -51,6 +51,7 @@ https://developer.nulab.com/docs/backlog/api/2/get-recent-updates/#response-desc
   .addOption(opt.minId())
   .addOption(opt.maxId())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List space activities", command: "bee space activities" },
@@ -68,7 +69,7 @@ https://developer.nulab.com/docs/backlog/api/2/get-recent-updates/#response-desc
     },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const activityTypeId: number[] = opts.activityType;
 

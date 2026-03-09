@@ -18,6 +18,7 @@ const deleteIssueType = new BeeCommand("delete")
   )
   .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -40,7 +41,7 @@ const deleteIssueType = new BeeCommand("delete")
       return;
     }
 
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const result = await client.deleteIssueType(opts.project, Number(issueType), {
       substituteIssueTypeId: Number(opts.substituteIssueTypeId),

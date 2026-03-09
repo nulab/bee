@@ -19,6 +19,7 @@ const create = new BeeCommand("create")
   )
   .option("--text-formatting-rule <rule>", "Formatting rules")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     {
@@ -36,7 +37,7 @@ const create = new BeeCommand("create")
     },
   ])
   .action(async (opts) => {
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     const key = await promptRequired("Project key:", opts.key);
     const name = await promptRequired("Project name:", opts.name);

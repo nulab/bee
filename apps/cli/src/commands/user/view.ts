@@ -9,13 +9,14 @@ const view = new BeeCommand("view")
   .description(`Use \`bee user me\` as a shortcut to view your own profile.`)
   .argument("<user>", "User ID")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "View user details", command: "bee user view 12345" },
     { description: "Output as JSON", command: "bee user view 12345 --json" },
   ])
   .action(async (user, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const userData = await client.getUser(Number(user));
 

@@ -26,6 +26,7 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
   .option("--delete-last", "Delete your most recent comment")
   .option("--yes", "Skip confirmation prompt for delete")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     {
@@ -47,7 +48,7 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
     },
   ])
   .action(async (issue, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     if (opts.list) {
       const comments = await client.getIssueComments(issue, { order: "asc" });

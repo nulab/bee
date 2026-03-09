@@ -11,6 +11,7 @@ const count = new BeeCommand("count")
   .option("--since <yyyy-MM-dd>", "Count stars received on or after this date")
   .option("--until <yyyy-MM-dd>", "Count stars received on or before this date")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Count your stars", command: "bee star count" },
@@ -22,7 +23,7 @@ const count = new BeeCommand("count")
     { description: "Output as JSON", command: "bee star count --json" },
   ])
   .action(async (user, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     let userId: number;
     if (user) {

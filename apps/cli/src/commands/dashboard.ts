@@ -12,6 +12,7 @@ const dashboard = new BeeCommand("dashboard")
   .addOption(opt.json())
   .addOption(opt.web("dashboard"))
   .addOption(opt.noBrowser())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Show dashboard", command: "bee dashboard" },
@@ -19,7 +20,7 @@ const dashboard = new BeeCommand("dashboard")
     { description: "Output as JSON", command: "bee dashboard --json" },
   ])
   .action(async (opts) => {
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     if (opts.web || opts.browser === false) {
       const url = dashboardUrl(host);

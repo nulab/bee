@@ -9,13 +9,14 @@ const list = new BeeCommand("list")
   .description(`Repositories are listed in the configured display order.`)
   .argument("<project>", "Project ID or project key")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "List repositories in a project", command: "bee repo list PROJECT_KEY" },
     { description: "Output as JSON", command: "bee repo list PROJECT_KEY --json" },
   ])
   .action(async (project, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const repos = await client.getGitRepositories(project);
 

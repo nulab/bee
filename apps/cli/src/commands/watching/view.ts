@@ -9,13 +9,14 @@ const view = new BeeCommand("view")
   .description(`Shows the associated issue, note, read status, and timestamps.`)
   .argument("<watching>", "Watching ID")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "View a watching item", command: "bee watching view 12345" },
     { description: "Output as JSON", command: "bee watching view 12345 --json" },
   ])
   .action(async (watching, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const watchingData = await client.getWatchingListItem(Number(watching));
 

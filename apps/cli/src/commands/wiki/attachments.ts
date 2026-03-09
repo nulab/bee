@@ -9,13 +9,14 @@ const attachments = new BeeCommand("attachments")
   .description(`Shows file name, size, creator, and creation date.`)
   .argument("<wiki>", "Wiki page ID")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List wiki attachments", command: "bee wiki attachments 12345" },
     { description: "Output as JSON", command: "bee wiki attachments 12345 --json" },
   ])
   .action(async (wiki, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const files = await client.getWikisAttachments(Number(wiki));
 

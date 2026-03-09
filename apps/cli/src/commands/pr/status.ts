@@ -11,6 +11,7 @@ const status = new BeeCommand("status")
   .addOption(opt.project())
   .addOption(opt.repo())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT, ENV_REPO])
   .examples([
     {
@@ -21,7 +22,7 @@ const status = new BeeCommand("status")
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const me = await client.getMyself();
 

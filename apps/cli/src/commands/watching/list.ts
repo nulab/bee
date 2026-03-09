@@ -8,13 +8,14 @@ const list = new BeeCommand("list")
   .summary("List watching items")
   .description(`Unread items are marked with an asterisk (\`*\`).`)
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List your watching items", command: "bee watching list" },
     { description: "Output as JSON", command: "bee watching list --json" },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const myself = await client.getMyself();
     const watchings = await client.getWatchingListItems(myself.id);

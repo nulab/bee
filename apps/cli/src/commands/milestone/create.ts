@@ -14,6 +14,7 @@ const create = new BeeCommand("create")
   .option("--start-date <yyyy-MM-dd>", "Start date")
   .option("--release-due-date <yyyy-MM-dd>", "Release due date")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "Create a milestone", command: 'bee milestone create -p PROJECT -n "v1.0.0"' },
@@ -25,7 +26,7 @@ const create = new BeeCommand("create")
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     const name = await promptRequired("Milestone name:", opts.name);
 

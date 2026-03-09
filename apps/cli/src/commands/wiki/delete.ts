@@ -11,6 +11,7 @@ const deleteWiki = new BeeCommand("delete")
   .option("-y, --yes", "Skip confirmation prompt")
   .option("--mail-notify", "Send notification email")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     {
@@ -32,7 +33,7 @@ const deleteWiki = new BeeCommand("delete")
       return;
     }
 
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const wikiData = await client.deleteWiki(Number(wiki), opts.mailNotify ?? false);
 

@@ -14,6 +14,7 @@ const view = new BeeCommand("view")
   .addOption(opt.web("pull request"))
   .addOption(opt.noBrowser())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT, ENV_REPO])
   .examples([
     { description: "View pull request details", command: "bee pr view 42 -p PROJECT -R repo" },
@@ -25,7 +26,7 @@ const view = new BeeCommand("view")
   ])
   .action(async (number, opts, cmd) => {
     await resolveOptions(cmd);
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     const prNumber = Number(number);
 

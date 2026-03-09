@@ -14,6 +14,7 @@ const close = new BeeCommand("close")
   .option("--resolution <name>", `Resolution`)
   .addOption(opt.notify())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Close an issue", command: "bee issue close PROJECT-123" },
@@ -27,7 +28,7 @@ const close = new BeeCommand("close")
     },
   ])
   .action(async (issue, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const resolutionId = opts.resolution
       ? (ResolutionId[opts.resolution] ?? Number(opts.resolution))

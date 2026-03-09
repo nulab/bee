@@ -27,6 +27,7 @@ const list = new BeeCommand("list")
   .addOption(opt.count())
   .addOption(opt.offset())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT, ENV_REPO])
   .examples([
     { description: "List pull requests", command: "bee pr list -p PROJECT -R repo" },
@@ -42,7 +43,7 @@ const list = new BeeCommand("list")
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const statusId = opts.status.length > 0 ? resolveStatusIds(opts.status) : undefined;
     const assigneeId = await Promise.all(

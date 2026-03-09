@@ -9,13 +9,14 @@ const users = new BeeCommand("users")
   .description(`Displays each member's ID, name, and role.`)
   .argument("<project>", "Project ID or project key")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "List project members", command: "bee project users PROJECT_KEY" },
     { description: "Output as JSON", command: "bee project users PROJECT_KEY --json" },
   ])
   .action(async (project, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const members = await client.getProjectUsers(project);
 

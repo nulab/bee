@@ -16,6 +16,7 @@ const list = new BeeCommand("list")
   .addOption(opt.count())
   .addOption(opt.offset())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "List documents in a project", command: "bee document list -p PROJECT" },
@@ -27,7 +28,7 @@ const list = new BeeCommand("list")
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const projectId = await resolveProjectIds(client, splitArg(opts.project, v.string()));
 

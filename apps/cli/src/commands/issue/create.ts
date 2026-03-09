@@ -31,6 +31,7 @@ const create = new BeeCommand("create")
   .addOption(opt.notify())
   .addOption(opt.attachment())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -52,7 +53,7 @@ const create = new BeeCommand("create")
     },
   ])
   .action(async (opts) => {
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     const project = await promptRequired("Project:", opts.project);
     const title = await promptRequired("Summary:", opts.title);

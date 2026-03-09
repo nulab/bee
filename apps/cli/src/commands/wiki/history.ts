@@ -13,6 +13,7 @@ const history = new BeeCommand("history")
   .addOption(opt.count())
   .addOption(opt.order())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "View wiki page history", command: "bee wiki history 12345" },
@@ -23,7 +24,7 @@ const history = new BeeCommand("history")
     { description: "Output as JSON", command: "bee wiki history 12345 --json" },
   ])
   .action(async (wiki, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const histories = await client.getWikisHistory(Number(wiki), {
       minId: opts.minId ? Number(opts.minId) : undefined,

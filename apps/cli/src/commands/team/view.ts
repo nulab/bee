@@ -9,13 +9,14 @@ const view = new BeeCommand("view")
   .description(`Shows team details and the list of members.`)
   .argument("<team>", "Team ID")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "View team details", command: "bee team view 12345" },
     { description: "Output as JSON", command: "bee team view 12345 --json" },
   ])
   .action(async (team, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const t = await client.getTeam(Number(team));
 

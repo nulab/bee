@@ -16,6 +16,7 @@ const edit = new BeeCommand("edit")
   .option("--release-due-date <yyyy-MM-dd>", "New release due date")
   .option("--archived", "Change whether the milestone is archived")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -33,7 +34,7 @@ const edit = new BeeCommand("edit")
   ])
   .action(async (milestone, opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const result = await client.patchVersions(opts.project, Number(milestone), {
       name: opts.name,

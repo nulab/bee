@@ -20,6 +20,7 @@ Use \`--list\` or \`--edit-last\` for other comment operations.`,
   .option("--list", "List comments on the pull request")
   .option("--edit-last", "Edit your most recent comment")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT, ENV_REPO])
   .examples([
     {
@@ -38,7 +39,7 @@ Use \`--list\` or \`--edit-last\` for other comment operations.`,
   ])
   .action(async (number, opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
     const prNumber = Number(number);
 
     const json = opts.json === true ? "" : opts.json;

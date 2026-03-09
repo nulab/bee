@@ -11,6 +11,7 @@ const reopen = new BeeCommand("reopen")
   .option("-c, --comment <text>", "Comment to add when reopening")
   .addOption(opt.notify())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Reopen an issue", command: "bee issue reopen PROJECT-123" },
@@ -20,7 +21,7 @@ const reopen = new BeeCommand("reopen")
     },
   ])
   .action(async (issue, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const notifiedUserId = opts.notify ?? [];
 

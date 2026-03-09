@@ -19,6 +19,7 @@ const create = new BeeCommand("create")
   .addOption(opt.notify())
   .addOption(opt.attachment())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT, ENV_REPO])
   .examples([
     {
@@ -39,7 +40,7 @@ const create = new BeeCommand("create")
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     const base = await promptRequired("Base branch:", opts.base);
     const head = await promptRequired("Head branch:", opts.head);

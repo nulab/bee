@@ -13,6 +13,7 @@ const view = new BeeCommand("view")
   .addOption(opt.web("repository"))
   .addOption(opt.noBrowser())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -27,7 +28,7 @@ const view = new BeeCommand("view")
   ])
   .action(async (repository, opts, cmd) => {
     await resolveOptions(cmd);
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     if (opts.web || opts.browser === false) {
       const url = repositoryUrl(host, opts.project, repository);

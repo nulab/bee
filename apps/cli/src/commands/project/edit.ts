@@ -19,6 +19,7 @@ const edit = new BeeCommand("edit")
   .option("--text-formatting-rule <rule>", "Change text formatting rule")
   .option("--archived", "Change whether the project is archived")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -35,7 +36,7 @@ const edit = new BeeCommand("edit")
     },
   ])
   .action(async (project, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const projectData = await client.patchProject(project, {
       name: opts.name,

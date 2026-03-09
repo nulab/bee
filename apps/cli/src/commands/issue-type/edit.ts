@@ -16,6 +16,7 @@ const edit = new BeeCommand("edit")
     "Change display color {#e30000|#990000|#934981|#814fbc|#2779ca|#007e9a|#7ea800|#ff9200|#ff3265|#666665}",
   )
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -29,7 +30,7 @@ const edit = new BeeCommand("edit")
   ])
   .action(async (issueType, opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const result = await client.patchIssueType(opts.project, Number(issueType), {
       name: opts.name,

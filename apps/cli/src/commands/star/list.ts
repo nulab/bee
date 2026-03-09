@@ -9,6 +9,7 @@ const list = new BeeCommand("list")
   .description(`Defaults to the authenticated user if no user ID is given.`)
   .argument("[user]", "User ID")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List your stars", command: "bee star list" },
@@ -16,7 +17,7 @@ const list = new BeeCommand("list")
     { description: "Output as JSON", command: "bee star list --json" },
   ])
   .action(async (user, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     let userId: number;
     if (user) {

@@ -12,6 +12,7 @@ const edit = new BeeCommand("edit")
   .addOption(opt.project())
   .option("-n, --name <value>", "New name of the category")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -21,7 +22,7 @@ const edit = new BeeCommand("edit")
   ])
   .action(async (category, opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const name = await promptRequired("Category name:", opts.name);
 

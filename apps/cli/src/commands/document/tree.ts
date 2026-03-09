@@ -38,13 +38,14 @@ const tree = new BeeCommand("tree")
   .description(`Shows the hierarchical structure of documents with tree-style indentation.`)
   .argument("[project]", "Project ID or project key", process.env.BACKLOG_PROJECT)
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "Show document tree", command: "bee document tree PROJECT" },
     { description: "Output as JSON", command: "bee document tree PROJECT --json" },
   ])
   .action(async (project, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const docTree = await client.getDocumentTree(project);
 

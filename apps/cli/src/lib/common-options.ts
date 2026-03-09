@@ -28,6 +28,7 @@ const comment = () => new Option("-c, --comment <text>", "Comment to add with th
 const web = (resource: string) => new Option("-w, --web", `Open the ${resource} in the browser`);
 const noBrowser = () =>
   new Option("-n, --no-browser", "Print the URL instead of opening the browser");
+const space = () => new Option("-s, --space <hostname>", "Space hostname").env("BACKLOG_SPACE");
 const json = () =>
   new Option(
     "--json [fields]",
@@ -37,6 +38,7 @@ const json = () =>
 export {
   collect,
   collectNum,
+  space,
   project,
   repo,
   count,

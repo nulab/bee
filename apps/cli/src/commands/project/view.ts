@@ -11,6 +11,7 @@ const view = new BeeCommand("view")
   .addOption(opt.web("project"))
   .addOption(opt.noBrowser())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "View project details", command: "bee project view PROJECT_KEY" },
@@ -18,7 +19,7 @@ const view = new BeeCommand("view")
     { description: "Output as JSON", command: "bee project view PROJECT_KEY --json" },
   ])
   .action(async (project, opts) => {
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     if (opts.web || opts.browser === false) {
       const url = projectUrl(host, project);

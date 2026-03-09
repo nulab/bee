@@ -11,6 +11,7 @@ const removeUser = new BeeCommand("remove-user")
   .addOption(opt.project())
   .addOption(new RequiredOption("--user-id <id>", "User ID"))
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -26,7 +27,7 @@ const removeUser = new BeeCommand("remove-user")
       throw new UserError("User ID must be a number.");
     }
 
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const user = await client.deleteProjectUsers(opts.project, { userId });
 

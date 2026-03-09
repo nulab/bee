@@ -16,6 +16,7 @@ const create = new BeeCommand("create")
   .option("--parent-id <id>", "Parent document ID for creating as a child document")
   .option("--add-last", "Add document to the end of the list")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -36,7 +37,7 @@ const create = new BeeCommand("create")
     },
   ])
   .action(async (opts) => {
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     const project = await promptRequired("Project:", opts.project);
     const title = await promptRequired("Title:", opts.title);

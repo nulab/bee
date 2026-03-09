@@ -13,6 +13,7 @@ const add = new BeeCommand("add")
   .option("--comment <number>", "Comment ID to star")
   .option("--wiki <number>", "Wiki page ID to star")
   .option("--pr-comment <number>", "Pull request comment ID to star")
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Star an issue by key", command: "bee star add --issue PROJECT-123" },
@@ -38,7 +39,7 @@ const add = new BeeCommand("add")
       );
     }
 
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     if (opts.issue) {
       const issue = /^\d+$/.test(opts.issue)
