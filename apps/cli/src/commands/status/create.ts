@@ -20,6 +20,7 @@ The \`--color\` flag must be one of the predefined Backlog colors.`,
     "Display color {#ea2c00|#e87758|#e07b9a|#868cb7|#3b9dbd|#4caf93|#b0be3c|#eda62a|#f42858|#393939}",
   )
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -33,7 +34,7 @@ The \`--color\` flag must be one of the predefined Backlog colors.`,
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     const name = await promptRequired("Status name:", opts.name);
 

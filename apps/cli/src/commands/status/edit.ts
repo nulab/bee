@@ -21,6 +21,7 @@ will remain unchanged.`,
     "Change display color {#ea2c00|#e87758|#e07b9a|#868cb7|#3b9dbd|#4caf93|#b0be3c|#eda62a|#f42858|#393939}",
   )
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -34,7 +35,7 @@ will remain unchanged.`,
   ])
   .action(async (status, opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const result = await client.patchProjectStatus(opts.project, Number(status), {
       name: opts.name,

@@ -15,6 +15,7 @@ attach a note for your own reference.`,
   .requiredOption("--issue <key>", "Issue ID or issue key")
   .option("--note <text>", "Note to attach to the watching item")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Watch an issue", command: "bee watching add --issue PROJECT-123" },
@@ -24,7 +25,7 @@ attach a note for your own reference.`,
     },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const result = await client.postWatchingListItem({
       issueIdOrKey: opts.issue,

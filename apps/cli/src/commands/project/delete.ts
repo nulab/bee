@@ -17,6 +17,7 @@ Requires Administrator role.`,
   .argument("<project>", "Project ID or project key")
   .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -38,7 +39,7 @@ Requires Administrator role.`,
       return;
     }
 
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const projectData = await client.deleteProject(project);
 

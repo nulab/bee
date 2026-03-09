@@ -13,6 +13,7 @@ If no user ID is specified, lists stars for the authenticated user.`,
   )
   .argument("[user]", "User ID")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List your stars", command: "bee star list" },
@@ -20,7 +21,7 @@ If no user ID is specified, lists stars for the authenticated user.`,
     { description: "Output as JSON", command: "bee star list --json" },
   ])
   .action(async (user, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     let userId: number;
     if (user) {

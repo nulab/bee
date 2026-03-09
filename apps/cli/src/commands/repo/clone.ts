@@ -34,6 +34,7 @@ Use \`--directory\` to specify a custom destination directory.`,
   .option("-d, --directory <path>", "Directory to clone into")
   .option("--http", "Clone using HTTP URL instead of SSH")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "Clone a repository", command: "bee repo clone api-server -p PROJECT_KEY" },
@@ -48,7 +49,7 @@ Use \`--directory\` to specify a custom destination directory.`,
   ])
   .action(async (repository, opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const repo = await client.getGitRepository(opts.project, repository);
 

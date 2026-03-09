@@ -18,6 +18,7 @@ for cursor-based pagination.`,
   .addOption(opt.maxId())
   .addOption(opt.order())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List recent notifications", command: "bee notification list" },
@@ -29,7 +30,7 @@ for cursor-based pagination.`,
     { description: "Output as JSON", command: "bee notification list --json" },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const notifications = await client.getNotifications({
       count: opts.count ? Number(opts.count) : undefined,

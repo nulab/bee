@@ -13,13 +13,14 @@ Displays each user's ID, user ID, name, and role. Only space administrators
 can see the full list of users.`,
   )
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List all users", command: "bee user list" },
     { description: "Output as JSON", command: "bee user list --json" },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const users = await client.getUsers();
 

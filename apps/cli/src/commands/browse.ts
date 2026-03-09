@@ -43,6 +43,7 @@ Paths ending with \`/\` open the directory tree view.`,
   .option("--git", "Open the git repositories page")
   .option("--svn", "Open the Subversion page")
   .option("--settings", "Open the project settings page")
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "Open repository page (in a Backlog repo)", command: "bee browse" },
@@ -60,7 +61,7 @@ Paths ending with \`/\` open the directory tree view.`,
     { description: "Open Gantt chart", command: "bee browse -p PROJECT --gantt" },
   ])
   .action(async (target: string | undefined, opts) => {
-    const { host } = await getClient();
+    const { host } = await getClient(opts.space);
 
     const [context, currentBranch, latestCommit, repoRelativePath] = await Promise.all([
       detectGitContext(),

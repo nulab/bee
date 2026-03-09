@@ -16,6 +16,7 @@ organized by their current status (Open, Closed, Merged).`,
   .addOption(opt.project())
   .addOption(opt.repo())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT, ENV_REPO])
   .examples([
     {
@@ -26,7 +27,7 @@ organized by their current status (Open, Closed, Merged).`,
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const me = await client.getMyself();
 

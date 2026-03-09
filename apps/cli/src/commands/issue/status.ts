@@ -13,13 +13,14 @@ Fetches issues where you are the assignee and displays them organized by
 their current status (e.g., Open, In Progress, Resolved).`,
   )
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Show your issue status summary", command: "bee issue status" },
     { description: "Output as JSON", command: "bee issue status --json" },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const me = await client.getMyself();
 

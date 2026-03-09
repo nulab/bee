@@ -16,6 +16,7 @@ If no user ID is specified, counts stars for the authenticated user. Use
   .option("--since <yyyy-MM-dd>", "Count stars received on or after this date")
   .option("--until <yyyy-MM-dd>", "Count stars received on or before this date")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Count your stars", command: "bee star count" },
@@ -27,7 +28,7 @@ If no user ID is specified, counts stars for the authenticated user. Use
     { description: "Output as JSON", command: "bee star count --json" },
   ])
   .action(async (user, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     let userId: number;
     if (user) {

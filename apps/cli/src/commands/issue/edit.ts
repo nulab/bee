@@ -29,6 +29,7 @@ will remain unchanged.`,
   .addOption(opt.notify())
   .addOption(opt.attachment())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     {
@@ -45,7 +46,7 @@ will remain unchanged.`,
     },
   ])
   .action(async (issue, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const notifiedUserId = opts.notify ?? [];
     const attachmentId = opts.attachment ?? [];

@@ -19,6 +19,7 @@ Use \`--web\` to open the issue in your default browser instead.`,
   .addOption(opt.web("issue"))
   .addOption(opt.noBrowser())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "View issue details", command: "bee issue view PROJECT-123" },
@@ -27,7 +28,7 @@ Use \`--web\` to open the issue in your default browser instead.`,
     { description: "Output as JSON", command: "bee issue view PROJECT-123 --json" },
   ])
   .action(async (issue, opts) => {
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     if (opts.web || opts.browser === false) {
       const url = issueUrl(host, issue);

@@ -14,13 +14,14 @@ group issues by development cycle.`,
   )
   .argument("[project]", "Project ID or project key")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "List all milestones", command: "bee milestone list PROJECT" },
     { description: "Output as JSON", command: "bee milestone list PROJECT --json" },
   ])
   .action(async (project, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const milestones = await client.getVersions(project);
 

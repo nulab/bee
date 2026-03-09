@@ -46,6 +46,7 @@ by default, or a JSON object with \`--json\`.`,
   .option("--due-since <date>", "Show issues due on or after this date")
   .option("--due-until <date>", "Show issues due on or before this date")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "Count all issues in a project", command: "bee issue count -p PROJECT" },
@@ -56,7 +57,7 @@ by default, or a JSON object with \`--json\`.`,
     { description: "Output as JSON", command: "bee issue count -p PROJECT --json" },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const projectId = opts.project
       ? await resolveProjectIds(

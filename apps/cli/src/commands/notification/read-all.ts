@@ -1,18 +1,20 @@
 import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
 const readAll = new BeeCommand("read-all")
   .summary("Mark all notifications as read")
   .description(`Mark all notifications as read.
 
 This resets the unread notification count to zero.`)
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Mark all notifications as read", command: "bee notification read-all" },
   ])
-  .action(async () => {
-    const { client } = await getClient();
+  .action(async (opts) => {
+    const { client } = await getClient(opts.space);
 
     await client.resetNotificationsMarkAsRead();
 

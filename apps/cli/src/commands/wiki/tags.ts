@@ -13,13 +13,14 @@ Tags are labels attached to wiki pages for organization.`,
   )
   .argument("<project>", "Project ID or project key")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "List wiki tags", command: "bee wiki tags PROJECT" },
     { description: "Output as JSON", command: "bee wiki tags PROJECT --json" },
   ])
   .action(async (project, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const result = await client.getWikisTags(project);
 

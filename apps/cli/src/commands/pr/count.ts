@@ -30,6 +30,7 @@ by default, or a JSON object with \`--json\`.`,
   .option("--issue <id>", "Issue ID (repeatable)", collectNum, [] satisfies number[])
   .option("--created-user <id>", "Created user ID (repeatable)", collectNum, [] satisfies number[])
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT, ENV_REPO])
   .examples([
     { description: "Count all pull requests", command: "bee pr count -p PROJECT -R repo" },
@@ -41,7 +42,7 @@ by default, or a JSON object with \`--json\`.`,
   ])
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const statusId = opts.status.length > 0 ? resolveStatusIds(opts.status) : undefined;
     const assigneeId = await Promise.all(

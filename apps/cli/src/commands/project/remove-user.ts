@@ -18,6 +18,7 @@ Requires Administrator or Project Administrator role.`,
   .addOption(opt.project())
   .addOption(new RequiredOption("--user-id <id>", "User ID"))
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -33,7 +34,7 @@ Requires Administrator or Project Administrator role.`,
       throw new UserError("User ID must be a number.");
     }
 
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const user = await client.deleteProjectUsers(opts.project, { userId });
 

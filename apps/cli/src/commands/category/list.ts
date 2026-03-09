@@ -13,13 +13,14 @@ Categories help organize issues by grouping them into logical areas.`,
   )
   .argument("[project]", "Project ID or project key")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "List all categories in a project", command: "bee category list PROJECT" },
     { description: "Output as JSON", command: "bee category list PROJECT --json" },
   ])
   .action(async (project, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const categories = await client.getCategories(project);
 

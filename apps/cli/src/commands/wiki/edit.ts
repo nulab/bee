@@ -18,6 +18,7 @@ automatically.`,
   .option("-b, --body <text>", "New content of the wiki page")
   .option("--mail-notify", "Send notification email")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     {
@@ -34,7 +35,7 @@ automatically.`,
     },
   ])
   .action(async (wiki, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const content = await resolveStdinArg(opts.body);
 

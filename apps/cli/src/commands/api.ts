@@ -1,6 +1,7 @@
 import { type BacklogClient, getClient } from "@repo/backlog-utils";
 import { UserError, outputResult } from "@repo/cli-utils";
 import { BeeCommand, ENV_AUTH } from "../lib/bee-command";
+import * as opt from "../lib/common-options";
 import { collect } from "../lib/common-options";
 
 type ParamValue = string | number | boolean;
@@ -44,6 +45,7 @@ PATCH, and DELETE requests, fields are sent as the request body.`,
   )
   .option("--json [fields]", "Output as JSON (optionally filter by field names, comma-separated)")
   .option("--silent", "Do not print the response body")
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Get your user profile", command: "bee api users/myself" },
@@ -66,7 +68,7 @@ PATCH, and DELETE requests, fields are sent as the request body.`,
     },
   ])
   .action(async (endpoint: string, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const method = opts.method.toUpperCase();
     const normalizedEndpoint = normalizeEndpoint(endpoint);

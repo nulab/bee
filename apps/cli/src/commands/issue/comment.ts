@@ -31,6 +31,7 @@ Use \`--delete-last\` to delete your most recent comment.`,
   .option("--delete-last", "Delete your most recent comment")
   .option("--yes", "Skip confirmation prompt for delete")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     {
@@ -52,7 +53,7 @@ Use \`--delete-last\` to delete your most recent comment.`,
     },
   ])
   .action(async (issue, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     if (opts.list) {
       const comments = await client.getIssueComments(issue, { order: "asc" });

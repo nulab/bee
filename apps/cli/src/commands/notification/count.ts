@@ -31,6 +31,7 @@ https://developer.nulab.com/docs/backlog/api/2/count-notifications/`,
     "Filter by resource read status. If omitted, count all. {read|unread|all}",
   )
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "Count all notifications", command: "bee notification count" },
@@ -45,7 +46,7 @@ https://developer.nulab.com/docs/backlog/api/2/count-notifications/`,
     { description: "Output as JSON", command: "bee notification count --json" },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const alreadyRead = parseReadFilter(opts.alreadyRead);
     const resourceAlreadyRead = parseReadFilter(opts.resourceAlreadyRead);

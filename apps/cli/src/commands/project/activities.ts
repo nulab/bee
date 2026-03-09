@@ -56,6 +56,7 @@ https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#activ
   .addOption(opt.count())
   .addOption(opt.order())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "List recent activities", command: "bee project activities PROJECT_KEY" },
@@ -74,7 +75,7 @@ https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#activ
     },
   ])
   .action(async (project, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const activityTypeId: number[] = opts.activityType;
 

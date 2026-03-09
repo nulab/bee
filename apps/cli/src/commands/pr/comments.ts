@@ -20,6 +20,7 @@ Displays all comments in chronological order with the author and date.`,
   .addOption(opt.count())
   .addOption(opt.order())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT, ENV_REPO])
   .examples([
     {
@@ -30,7 +31,7 @@ Displays all comments in chronological order with the author and date.`,
   ])
   .action(async (number, opts, cmd) => {
     await resolveOptions(cmd);
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const prNumber = Number(number);
 

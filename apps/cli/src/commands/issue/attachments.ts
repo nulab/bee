@@ -13,13 +13,14 @@ Shows file name, size, creator, and creation date.`,
   )
   .argument("<issue>", "Issue ID or issue key")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List attachments", command: "bee issue attachments PROJECT-123" },
     { description: "Output as JSON", command: "bee issue attachments PROJECT-123 --json" },
   ])
   .action(async (issue, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const files = await client.getIssueAttachments(issue);
 

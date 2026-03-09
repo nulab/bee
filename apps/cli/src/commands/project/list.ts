@@ -18,6 +18,7 @@ the ones they have joined.`,
   .option("--archived", "Include archived projects")
   .option("--all", "Include all projects (admin only)")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List your active projects", command: "bee project list" },
@@ -26,7 +27,7 @@ the ones they have joined.`,
     { description: "Output as JSON", command: "bee project list --json" },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const projects = await client.getProjects({
       archived: opts.archived,

@@ -14,13 +14,14 @@ currently authenticated user. Shows the same profile information: name,
 user ID, email address, role, language, and last login time.`,
   )
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "View your own profile", command: "bee user me" },
     { description: "Output as JSON", command: "bee user me --json" },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const myself = await client.getMyself();
 

@@ -17,6 +17,7 @@ This action is irreversible. You will be prompted for confirmation unless
   .addOption(opt.project())
   .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -39,7 +40,7 @@ This action is irreversible. You will be prompted for confirmation unless
       return;
     }
 
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const result = await client.deleteVersions(opts.project, Number(milestone));
 

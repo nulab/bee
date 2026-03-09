@@ -19,6 +19,7 @@ Use \`--web\` to open the document in your default browser instead. The
   .addOption(opt.web("document"))
   .addOption(opt.noBrowser())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "View document details", command: "bee document view 12345" },
@@ -29,7 +30,7 @@ Use \`--web\` to open the document in your default browser instead. The
     { description: "Output as JSON", command: "bee document view 12345 --json" },
   ])
   .action(async (document, opts) => {
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     if (opts.web || opts.browser === false) {
       if (!opts.project) {

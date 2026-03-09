@@ -15,6 +15,7 @@ This action is irreversible. You will be prompted for confirmation unless
   .argument("<document>", "Document ID")
   .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     {
@@ -36,7 +37,7 @@ This action is irreversible. You will be prompted for confirmation unless
       return;
     }
 
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const doc = await client.deleteDocument(document);
 

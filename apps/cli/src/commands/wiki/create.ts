@@ -17,6 +17,7 @@ it is used as the body automatically.`,
   .option("-b, --body <text>", "Wiki page content")
   .option("--mail-notify", "Send notification email")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     {
@@ -33,7 +34,7 @@ it is used as the body automatically.`,
     },
   ])
   .action(async (opts) => {
-    const { client, host } = await getClient();
+    const { client, host } = await getClient(opts.space);
 
     const project = await promptRequired("Project:", opts.project);
     const name = await promptRequired("Page name:", opts.name);

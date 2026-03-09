@@ -14,6 +14,7 @@ Use \`--keyword\` to filter pages by name or content.`,
   .argument("<project>", "Project ID or project key")
   .addOption(opt.keyword())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "List all wiki pages in a project", command: "bee wiki list PROJECT" },
@@ -24,7 +25,7 @@ Use \`--keyword\` to filter pages by name or content.`,
     { description: "Output as JSON", command: "bee wiki list PROJECT --json" },
   ])
   .action(async (project, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const wikis = await client.getWikis({
       projectIdOrKey: project,

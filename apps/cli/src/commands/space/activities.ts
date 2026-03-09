@@ -55,6 +55,7 @@ Use \`--count\` to control how many activities are returned (default: 20, max: 1
   .addOption(opt.minId())
   .addOption(opt.maxId())
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH])
   .examples([
     { description: "List space activities", command: "bee space activities" },
@@ -72,7 +73,7 @@ Use \`--count\` to control how many activities are returned (default: 20, max: 1
     },
   ])
   .action(async (opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const activityTypeId: number[] = opts.activityType;
 

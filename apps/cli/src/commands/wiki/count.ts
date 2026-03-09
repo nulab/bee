@@ -13,13 +13,14 @@ The count includes all wiki pages regardless of tag or keyword.`,
   )
   .argument("<project>", "Project ID or project key")
   .addOption(opt.json())
+  .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
     { description: "Count wiki pages", command: "bee wiki count PROJECT" },
     { description: "Output as JSON", command: "bee wiki count PROJECT --json" },
   ])
   .action(async (project, opts) => {
-    const { client } = await getClient();
+    const { client } = await getClient(opts.space);
 
     const result = await client.getWikisCount(project);
 
