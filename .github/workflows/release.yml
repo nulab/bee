@@ -142,21 +142,10 @@ jobs:
           fi
           npm publish $flags
 
-      - name: Configure git
+      - name: Push tag
         if: inputs.environment != 'dry-run'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Push version commit and tag
-        if: inputs.environment != 'dry-run'
-        env:
-          REF_NAME: ${{ github.ref_name }}
-        run: |
-          git add apps/cli/package.json
-          git commit -m "${NEW_TAG}"
           git tag "${NEW_TAG}"
-          git push origin "HEAD:refs/heads/${REF_NAME}"
           git push origin "${NEW_TAG}"
 
       - name: Create GitHub release
