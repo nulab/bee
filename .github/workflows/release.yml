@@ -17,12 +17,13 @@ on:
           - patch
           - minor
           - major
-          - preminor
-          - premajor
-          - prerelease
-        description: New version (preminor/premajor create rc, prerelease bumps rc number)
+        description: New version
         default: patch
         required: true
+      prerelease:
+        type: boolean
+        description: Release as rc (prerelease)
+        default: false
 
 permissions:
   contents: read
@@ -70,17 +71,20 @@ jobs:
         env:
           LATEST_TAG: ${{ steps.get_latest_tag.outputs.latest_tag }}
           NEW_VERSION_TYPE: ${{ github.event.inputs.newversion }}
+          PRERELEASE: ${{ github.event.inputs.prerelease }}
         run: |
           npm version "$LATEST_TAG" --no-git-tag-version --allow-same-version
 
-          case "$NEW_VERSION_TYPE" in
-            preminor|premajor|prerelease)
-              npm version "$NEW_VERSION_TYPE" --preid rc --no-git-tag-version
-              ;;
-            *)
-              npm version "$NEW_VERSION_TYPE" --no-git-tag-version
-              ;;
-          esac
+          if [ "$PRERELEASE" = "true" ]; then
+            current_version=$(node -p "require('./package.json').version")
+            if echo "$current_version" | grep -q -- "-rc\."; then
+              npm version prerelease --preid rc --no-git-tag-version
+            else
+              npm version "pre${NEW_VERSION_TYPE}" --preid rc --no-git-tag-version
+            fi
+          else
+            npm version "$NEW_VERSION_TYPE" --no-git-tag-version
+          fi
 
           new_version=$(node -p "require('./package.json').version")
           new_tag="v${new_version}"
@@ -123,31 +127,25 @@ jobs:
         if: inputs.environment != 'dry-run'
         working-directory: apps/cli
         env:
-          NEW_VERSION_TYPE: ${{ inputs.newversion }}
+          PRERELEASE: ${{ inputs.prerelease }}
         run: |
-          case "$NEW_VERSION_TYPE" in
-            preminor|premajor|prerelease)
-              npm publish --provenance --access public --tag rc
-              ;;
-            *)
-              npm publish --provenance --access public
-              ;;
-          esac
+          if [ "$PRERELEASE" = "true" ]; then
+            npm publish --provenance --access public --tag rc
+          else
+            npm publish --provenance --access public
+          fi
 
       - name: Publish dry run
         if: inputs.environment == 'dry-run'
         working-directory: apps/cli
         env:
-          NEW_VERSION_TYPE: ${{ inputs.newversion }}
+          PRERELEASE: ${{ inputs.prerelease }}
         run: |
-          case "$NEW_VERSION_TYPE" in
-            preminor|premajor|prerelease)
-              npm publish --provenance --access public --dry-run --tag rc
-              ;;
-            *)
-              npm publish --provenance --access public --dry-run
-              ;;
-          esac
+          if [ "$PRERELEASE" = "true" ]; then
+            npm publish --provenance --access public --dry-run --tag rc
+          else
+            npm publish --provenance --access public --dry-run
+          fi
 
       - name: Configure git
         if: inputs.environment != 'dry-run'
@@ -174,16 +172,13 @@ jobs:
           NEW_TAG: ${{ needs.build.outputs.new_tag }}
           PREVIOUS_TAG: ${{ needs.build.outputs.previous_tag }}
           PREVIOUS_STABLE_TAG: ${{ needs.build.outputs.previous_stable_tag }}
-          NEW_VERSION_TYPE: ${{ inputs.newversion }}
+          PRERELEASE: ${{ inputs.prerelease }}
         run: |
-          case "$NEW_VERSION_TYPE" in
-            preminor|premajor|prerelease)
-              gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_TAG" --prerelease
-              ;;
-            *)
-              gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_STABLE_TAG"
-              ;;
-          esac
+          if [ "$PRERELEASE" = "true" ]; then
+            gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_TAG" --prerelease
+          else
+            gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_STABLE_TAG"
+          fi
 
       - name: Preview release notes (dry-run)
         if: inputs.environment == 'dry-run'
@@ -192,18 +187,15 @@ jobs:
           NEW_TAG: ${{ needs.build.outputs.new_tag }}
           PREVIOUS_TAG: ${{ needs.build.outputs.previous_tag }}
           PREVIOUS_STABLE_TAG: ${{ needs.build.outputs.previous_stable_tag }}
-          NEW_VERSION_TYPE: ${{ inputs.newversion }}
+          PRERELEASE: ${{ inputs.prerelease }}
           REPOSITORY: ${{ github.repository }}
           TARGET_COMMITISH: ${{ github.sha }}
         run: |
-          case "$NEW_VERSION_TYPE" in
-            preminor|premajor|prerelease)
-              notes_start_tag="$PREVIOUS_TAG"
-              ;;
-            *)
-              notes_start_tag="$PREVIOUS_STABLE_TAG"
-              ;;
-          esac
+          if [ "$PRERELEASE" = "true" ]; then
+            notes_start_tag="$PREVIOUS_TAG"
+          else
+            notes_start_tag="$PREVIOUS_STABLE_TAG"
+          fi
 
           echo "## Release notes for ${NEW_TAG}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
