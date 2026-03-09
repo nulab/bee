@@ -9,9 +9,9 @@ hero:
   image:
     file: ../../assets/logo.svg
   actions:
-    - text: はじめに
+    - text: ドキュメントを見る
       link: /bee/getting-started/
-      icon: right-arrow
+      icon: document
     - text: GitHub
       link: https://github.com/nulab/bee
       icon: github
@@ -48,6 +48,9 @@ import HeroTilt from "../../components/HeroTilt.astro";
     width: 640px;
     max-width: 100%;
     margin-inline: auto;
+  }
+  .hero .actions a:first-child {
+    font-weight: bold;
   }
 `}</style>
 
