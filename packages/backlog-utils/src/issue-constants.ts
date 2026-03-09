@@ -10,7 +10,7 @@ const IssueStatusId = {
  * Backlog resolution name-to-ID map.
  *
  * Resolution values are fixed in Backlog and cannot be changed by users.
- * @see https://developer.nulab.com/ja/docs/backlog/api/2/get-resolution-list/
+ * @see https://developer.nulab.com/docs/backlog/api/2/get-resolution-list/
  */
 const ResolutionId: Record<string, number> = {
   fixed: 0,
@@ -26,7 +26,7 @@ const RESOLUTION_NAMES = Object.keys(ResolutionId);
  * Backlog priority name-to-ID map.
  *
  * Priority values are fixed in Backlog and cannot be changed by users.
- * @see https://developer.nulab.com/ja/docs/backlog/api/2/get-priority-list/
+ * @see https://developer.nulab.com/docs/backlog/api/2/get-priority-list/
  */
 const PriorityId: Record<string, number> = {
   high: 2,
