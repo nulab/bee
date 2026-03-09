@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import starlightLinksValidator from "starlight-links-validator";
+import { defListHastHandlers, remarkDefinitionList } from "remark-definition-list";
 import { loadCommandSidebar } from "./src/lib/sidebar-commands";
 
 const commandSidebar = await loadCommandSidebar();
@@ -8,6 +9,10 @@ const commandSidebar = await loadCommandSidebar();
 export default defineConfig({
   site: "https://nulab.github.io",
   base: "/bee",
+  markdown: {
+    remarkPlugins: [remarkDefinitionList],
+    remarkRehype: { handlers: { ...defListHastHandlers } },
+  },
   integrations: [
     starlight({
       plugins: [

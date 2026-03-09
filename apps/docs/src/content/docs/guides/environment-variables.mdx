@@ -12,26 +12,23 @@ description: |-
 
 ## 環境変数リファレンス
 
-<dl>
-  <dt><code>BACKLOG_SPACE</code></dt>
-  <dd>デフォルトのスペースホスト名（例: <code>xxx.backlog.com</code>）。設定すると、<code>bee auth login</code> でスペースの入力を省略できます。<code>BACKLOG_API_KEY</code> と併用すると、ログイン不要で bee を利用できます。</dd>
+`BACKLOG_SPACE`
+: デフォルトのスペースホスト名（例: `xxx.backlog.com`）。設定すると、`bee auth login` でスペースの入力を省略できます。`BACKLOG_API_KEY` と併用すると、ログイン不要で bee を利用できます。
 
-  <dt><code>BACKLOG_PROJECT</code></dt>
-  <dd>デフォルトのプロジェクト ID またはプロジェクトキー（例: <code>MY_PROJECT</code>）。設定すると、<code>--project</code> フラグを省略できます。</dd>
+`BACKLOG_PROJECT`
+: デフォルトのプロジェクト ID またはプロジェクトキー（例: `MY_PROJECT`）。設定すると、`--project` フラグを省略できます。
 
-  <dt><code>BACKLOG_REPO</code></dt>
-  <dd>デフォルトのリポジトリ名（例: <code>my-repo</code>）。設定すると、<code>--repo</code> フラグを省略できます。</dd>
+`BACKLOG_REPO`
+: デフォルトのリポジトリ名（例: `my-repo`）。設定すると、`--repo` フラグを省略できます。
 
-  <dt><code>BACKLOG_API_KEY</code></dt>
-  <dd>API キーによる認証に使用します。<code>BACKLOG_SPACE</code> と併用すると、<code>bee auth login</code> を実行しなくても認証済みの状態で bee を利用できます。CI/CD 環境で特に便利です。</dd>
+`BACKLOG_API_KEY`
+: API キーによる認証に使用します。`BACKLOG_SPACE` と併用すると、`bee auth login` を実行しなくても認証済みの状態で bee を利用できます。CI/CD 環境で特に便利です。
 
-  <dt><code>BACKLOG_OAUTH_CLIENT_ID</code></dt>
-  <dd>OAuth 認証で使用するクライアント ID。<code>bee auth login --method oauth</code> 時に <code>--client-id</code> フラグの代わりに使用できます。</dd>
+`BACKLOG_OAUTH_CLIENT_ID`
+: OAuth 認証で使用するクライアント ID。`bee auth login --method oauth` 時に `--client-id` フラグの代わりに使用できます。
 
-  <dt><code>BACKLOG_OAUTH_CLIENT_SECRET</code></dt>
-  <dd>OAuth 認証で使用するクライアントシークレット。<code>bee auth login --method oauth</code> 時に <code>--client-secret</code> フラグの代わりに使用できます。</dd>
-
-</dl>
+`BACKLOG_OAUTH_CLIENT_SECRET`
+: OAuth 認証で使用するクライアントシークレット。`bee auth login --method oauth` 時に `--client-secret` フラグの代わりに使用できます。
 
 ## よく使うパターン
 
