@@ -66,4 +66,50 @@ describe("resolveOptions", () => {
 
     expect(promptRequired).not.toHaveBeenCalled();
   });
+
+  it("resolves multiple RequiredOptions in definition order", async () => {
+    const { promptRequired } = await import("@repo/cli-utils");
+    const callOrder: string[] = [];
+
+    vi.mocked(promptRequired)
+      .mockImplementationOnce(async (label) => {
+        callOrder.push(label as string);
+        return "first-value";
+      })
+      .mockImplementationOnce(async (label) => {
+        callOrder.push(label as string);
+        return "second-value";
+      })
+      .mockImplementationOnce(async (label) => {
+        callOrder.push(label as string);
+        return "third-value";
+      });
+
+    const cmd = new Command("test")
+      .addOption(new RequiredOption("-t, --title <title>", "Title"))
+      .addOption(new RequiredOption("-d, --description <desc>", "Description"))
+      .addOption(new RequiredOption("-p, --priority <priority>", "Priority"))
+      .action(() => {});
+
+    cmd.parse([], { from: "user" });
+    await resolveOptions(cmd);
+
+    expect(callOrder).toEqual(["Title:", "Description:", "Priority:"]);
+    expect(cmd.opts().title).toBe("first-value");
+    expect(cmd.opts().description).toBe("second-value");
+    expect(cmd.opts().priority).toBe("third-value");
+  });
+
+  it("propagates error when promptRequired throws", async () => {
+    const { promptRequired } = await import("@repo/cli-utils");
+    const error = new Error("prompt cancelled");
+    vi.mocked(promptRequired).mockRejectedValueOnce(error);
+
+    const cmd = new Command("test")
+      .addOption(new RequiredOption("-t, --title <title>", "Issue title"))
+      .action(() => {});
+
+    cmd.parse([], { from: "user" });
+    await expect(resolveOptions(cmd)).rejects.toThrow("prompt cancelled");
+  });
 });
