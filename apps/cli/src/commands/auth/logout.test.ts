@@ -1,6 +1,7 @@
 import { loadConfig, removeSpace } from "@repo/config";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { parseCommand } from "@repo/test-utils";
 
 vi.mock("@repo/config", () => ({
   loadConfig: vi.fn(),
@@ -22,8 +23,7 @@ describe("auth logout", () => {
       aliases: {},
     });
 
-    const { default: logout } = await import("./logout");
-    await logout.parseAsync(["--space", "example.backlog.com"], { from: "user" });
+    await parseCommand(() => import("./logout"), ["--space", "example.backlog.com"]);
 
     expect(removeSpace).toHaveBeenCalledWith("example.backlog.com");
     expect(consola.success).toHaveBeenCalledWith("Logged out of example.backlog.com.");
@@ -36,8 +36,7 @@ describe("auth logout", () => {
       aliases: {},
     });
 
-    const { default: logout } = await import("./logout");
-    await logout.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./logout"));
 
     expect(consola.info).toHaveBeenCalledWith("No spaces are currently authenticated.");
     expect(removeSpace).not.toHaveBeenCalled();
@@ -53,9 +52,8 @@ describe("auth logout", () => {
       throw new Error("not found");
     });
 
-    const { default: logout } = await import("./logout");
     await expect(
-      logout.parseAsync(["--space", "nonexistent.backlog.com"], { from: "user" }),
+      parseCommand(() => import("./logout"), ["--space", "nonexistent.backlog.com"]),
     ).rejects.toThrow('Space "nonexistent.backlog.com" is not configured.');
   });
 
@@ -72,8 +70,7 @@ describe("auth logout", () => {
     });
     vi.mocked(removeSpace).mockImplementation(() => {});
 
-    const { default: logout } = await import("./logout");
-    await logout.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./logout"));
 
     expect(removeSpace).toHaveBeenCalledWith("only.backlog.com");
     expect(consola.success).toHaveBeenCalledWith("Logged out of only.backlog.com.");

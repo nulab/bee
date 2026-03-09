@@ -1,11 +1,11 @@
 import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, parseCommand } from "@repo/test-utils";
 
-const mockClient = {
+const mockClient = vi.hoisted(() => ({
   getWiki: vi.fn(),
-};
+}));
 
 vi.mock("@repo/backlog-utils", () => ({
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
@@ -31,8 +31,7 @@ describe("wiki view", () => {
   it("displays wiki page details", async () => {
     mockClient.getWiki.mockResolvedValue(sampleWiki);
 
-    const { default: view } = await import("./view");
-    await view.parseAsync(["123"], { from: "user" });
+    await parseCommand(() => import("./view"), ["123"]);
 
     expect(mockClient.getWiki).toHaveBeenCalledWith(123);
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Home"));
@@ -42,8 +41,7 @@ describe("wiki view", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    const { default: view } = await import("./view");
-    await view.parseAsync(["123", "--web"], { from: "user" });
+    await parseCommand(() => import("./view"), ["123", "--web"]);
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/alias/wiki/123",
@@ -53,20 +51,22 @@ describe("wiki view", () => {
     expect(mockClient.getWiki).not.toHaveBeenCalled();
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getWiki.mockResolvedValue(sampleWiki);
-
-    await expectStdoutContaining(async () => {
-      const { default: view } = await import("./view");
-      await view.parseAsync(["123", "--json"], { from: "user" });
-    }, "Home");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./view"),
+      ["123", "--json"],
+      "Home",
+      () => {
+        mockClient.getWiki.mockResolvedValue(sampleWiki);
+      },
+    ),
+  );
 
   it("handles wiki page with no tags", async () => {
     mockClient.getWiki.mockResolvedValue({ ...sampleWiki, tags: [] });
 
-    const { default: view } = await import("./view");
-    await view.parseAsync(["123"], { from: "user" });
+    await parseCommand(() => import("./view"), ["123"]);
 
     expect(mockClient.getWiki).toHaveBeenCalledWith(123);
   });
