@@ -1,6 +1,6 @@
 import { type RcAuth, type RcSpace } from "./schema";
 
-import { loadConfig, updateConfig } from "./config";
+import { updateConfig } from "./config";
 
 const addSpace = (space: RcSpace): void => {
   updateConfig((config) => {
@@ -56,15 +56,4 @@ const findSpace = (spaces: readonly RcSpace[], host: string): RcSpace | null => 
   return null;
 };
 
-const resolveSpace = (): RcSpace | null => {
-  const config = loadConfig();
-  const host = process.env.BACKLOG_SPACE ?? config.defaultSpace;
-
-  if (!host) {
-    return null;
-  }
-
-  return findSpace(config.spaces, host);
-};
-
-export { addSpace, findSpace, removeSpace, resolveSpace, updateSpaceAuth };
+export { addSpace, findSpace, removeSpace, updateSpaceAuth };
