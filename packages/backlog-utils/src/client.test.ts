@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getClient } from "./client";
 import { Backlog } from "backlog-js";
-import { resolveSpace } from "@repo/config";
+import { findSpace, loadConfig } from "@repo/config";
 
 vi.mock("@repo/config", () => ({
-  resolveSpace: vi.fn(),
+  findSpace: vi.fn(),
+  loadConfig: vi.fn(),
   updateSpaceAuth: vi.fn(),
 }));
 
@@ -27,17 +28,19 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 describe("getClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    delete process.env.BACKLOG_API_KEY;
-    delete process.env.BACKLOG_SPACE;
   });
 
-  it("creates client with API Key authentication", async () => {
-    vi.mocked(resolveSpace).mockReturnValue({
+  it("creates client with API Key authentication when host is provided", async () => {
+    vi.mocked(loadConfig).mockReturnValue({
+      spaces: [],
+      aliases: {},
+    });
+    vi.mocked(findSpace).mockReturnValue({
       host: "example.backlog.com",
       auth: { method: "api-key" as const, apiKey: "test-key" },
     });
 
-    const result = await getClient();
+    const result = await getClient("example.backlog.com");
 
     expect(Backlog).toHaveBeenCalledWith({
       host: "example.backlog.com",
@@ -46,8 +49,12 @@ describe("getClient", () => {
     expect(result.host).toBe("example.backlog.com");
   });
 
-  it("creates client with OAuth authentication", async () => {
-    vi.mocked(resolveSpace).mockReturnValue({
+  it("creates client with OAuth authentication when host is provided", async () => {
+    vi.mocked(loadConfig).mockReturnValue({
+      spaces: [],
+      aliases: {},
+    });
+    vi.mocked(findSpace).mockReturnValue({
       host: "example.backlog.com",
       auth: {
         method: "oauth" as const,
@@ -56,7 +63,7 @@ describe("getClient", () => {
       },
     });
 
-    const result = await getClient();
+    const result = await getClient("example.backlog.com");
 
     expect(Backlog).toHaveBeenCalledWith({
       host: "example.backlog.com",
@@ -65,47 +72,41 @@ describe("getClient", () => {
     expect(result.host).toBe("example.backlog.com");
   });
 
-  it("prioritizes configured space over BACKLOG_API_KEY", async () => {
-    vi.mocked(resolveSpace).mockReturnValue({
-      host: "configured.backlog.com",
-      auth: { method: "api-key" as const, apiKey: "configured-key" },
+  it("uses config.defaultSpace when no host argument is provided", async () => {
+    vi.mocked(loadConfig).mockReturnValue({
+      defaultSpace: "default.backlog.com",
+      spaces: [],
+      aliases: {},
     });
-    process.env.BACKLOG_API_KEY = "env-key";
-    process.env.BACKLOG_SPACE = "configured.backlog.com";
+    vi.mocked(findSpace).mockReturnValue({
+      host: "default.backlog.com",
+      auth: { method: "api-key" as const, apiKey: "default-key" },
+    });
 
     const result = await getClient();
 
-    expect(Backlog).toHaveBeenCalledWith({
-      host: "configured.backlog.com",
-      apiKey: "configured-key",
-    });
-    expect(result.host).toBe("configured.backlog.com");
+    expect(findSpace).toHaveBeenCalledWith([], "default.backlog.com");
+    expect(result.host).toBe("default.backlog.com");
   });
 
-  it("falls back to BACKLOG_API_KEY and BACKLOG_SPACE env vars", async () => {
-    vi.mocked(resolveSpace).mockReturnValue(null);
-    process.env.BACKLOG_API_KEY = "env-api-key";
-    process.env.BACKLOG_SPACE = "env.backlog.com";
-
-    const result = await getClient();
-
-    expect(Backlog).toHaveBeenCalledWith({
-      host: "env.backlog.com",
-      apiKey: "env-api-key",
+  it("throws error when no host argument and no defaultSpace configured", async () => {
+    vi.mocked(loadConfig).mockReturnValue({
+      spaces: [],
+      aliases: {},
     });
-    expect(result.host).toBe("env.backlog.com");
-  });
-
-  it("throws error when BACKLOG_API_KEY set but no BACKLOG_SPACE", async () => {
-    vi.mocked(resolveSpace).mockReturnValue(null);
-    process.env.BACKLOG_API_KEY = "env-api-key";
 
     await expect(async () => getClient()).rejects.toThrow("No space configured");
   });
 
-  it("throws error when no space and no env vars configured", async () => {
-    vi.mocked(resolveSpace).mockReturnValue(null);
+  it("throws error when findSpace returns null for unknown host", async () => {
+    vi.mocked(loadConfig).mockReturnValue({
+      spaces: [],
+      aliases: {},
+    });
+    vi.mocked(findSpace).mockReturnValue(null);
 
-    await expect(async () => getClient()).rejects.toThrow("No space configured");
+    await expect(async () => getClient("unknown.backlog.com")).rejects.toThrow(
+      'Space "unknown.backlog.com" not found',
+    );
   });
 });

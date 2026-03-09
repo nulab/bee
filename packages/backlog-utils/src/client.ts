@@ -2,7 +2,7 @@ import { UserError } from "@repo/cli-utils";
 import { Backlog } from "backlog-js";
 import { refreshAccessToken } from "./oauth";
 import { formatResetTime } from "./rate-limit";
-import { resolveSpace, updateSpaceAuth } from "@repo/config";
+import { findSpace, loadConfig, updateSpaceAuth } from "@repo/config";
 import consola from "consola";
 
 /** The type of the authenticated API client. */
@@ -11,46 +11,48 @@ type BacklogClient = Backlog;
 /**
  * Resolves the active space and creates an authenticated API client.
  *
- * Authentication is resolved in priority order:
- * 1. Configured space (via BACKLOG_SPACE env or defaultSpace in config)
- * 2. BACKLOG_API_KEY + BACKLOG_SPACE environment variables (lowest priority fallback)
+ * When `host` is provided, uses it directly. Otherwise falls back to
+ * `defaultSpace` from the config file.
  *
  * For OAuth authentication, automatically refreshes the access token when it expires (401 error).
  *
+ * @param host - Optional Backlog host (e.g. "example.backlog.com"). Defaults to config's defaultSpace.
  * @returns The authenticated client and host string.
  */
-const getClient = async (): Promise<{
+const getClient = async (
+  host?: string,
+): Promise<{
   client: BacklogClient;
   host: string;
 }> => {
-  const resolved = resolveSpace();
+  const config = loadConfig();
+  const resolvedHost = host ?? config.defaultSpace;
 
-  if (resolved) {
-    if (resolved.auth.method === "api-key") {
-      const client = new Backlog({
-        host: resolved.host,
-        apiKey: resolved.auth.apiKey,
-      });
-      return { client, host: resolved.host };
-    }
+  if (!resolvedHost) {
+    throw new UserError("No space configured. Run `bee auth login` to authenticate.");
+  }
 
-    // OAuth: Create client with automatic token refresh on 401
-    return {
-      client: createOAuthClient(resolved.host, resolved.auth),
+  const resolved = findSpace(config.spaces, resolvedHost);
+
+  if (!resolved) {
+    throw new UserError(
+      `Space "${resolvedHost}" not found. Run \`bee auth login\` to authenticate.`,
+    );
+  }
+
+  if (resolved.auth.method === "api-key") {
+    const client = new Backlog({
       host: resolved.host,
-    };
+      apiKey: resolved.auth.apiKey,
+    });
+    return { client, host: resolved.host };
   }
 
-  // Fallback: BACKLOG_API_KEY + BACKLOG_SPACE environment variables
-  const envApiKey = process.env.BACKLOG_API_KEY;
-  const envHost = process.env.BACKLOG_SPACE;
-
-  if (envApiKey && envHost) {
-    const client = new Backlog({ host: envHost, apiKey: envApiKey });
-    return { client, host: envHost };
-  }
-
-  throw new UserError("No space configured. Run `bee auth login` to authenticate.");
+  // OAuth: Create client with automatic token refresh on 401
+  return {
+    client: createOAuthClient(resolved.host, resolved.auth),
+    host: resolved.host,
+  };
 };
 
 /**
