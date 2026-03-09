@@ -78,15 +78,15 @@ Dry-run mode publishes with `--dry-run` and skips git tag/push, so it's safe to 
 
 ### Input combinations
 
-| newversion | prerelease | Example result | npm tag |
-|---|---|---|---|
-| `minor` | unchecked | `1.0.0` → `1.1.0` | `latest` |
-| `major` | unchecked | `1.0.0` → `2.0.0` | `latest` |
-| `patch` | unchecked | `1.0.1` → `1.0.2` | `latest` |
-| `minor` | checked | `1.0.0` → `1.1.0-rc.0` | `rc` |
-| `major` | checked | `1.0.0` → `2.0.0-rc.0` | `rc` |
-| `minor` | checked | `1.1.0-rc.0` → `1.1.0-rc.1` (already rc: bumps rc number) | `rc` |
-| `minor` | unchecked | `1.1.0-rc.1` → `1.1.0` (promote to stable) | `latest` |
+| newversion | prerelease | Example result                                            | npm tag  |
+| ---------- | ---------- | --------------------------------------------------------- | -------- |
+| `minor`    | unchecked  | `1.0.0` → `1.1.0`                                         | `latest` |
+| `major`    | unchecked  | `1.0.0` → `2.0.0`                                         | `latest` |
+| `patch`    | unchecked  | `1.0.1` → `1.0.2`                                         | `latest` |
+| `minor`    | checked    | `1.0.0` → `1.1.0-rc.0`                                    | `rc`     |
+| `major`    | checked    | `1.0.0` → `2.0.0-rc.0`                                    | `rc`     |
+| `minor`    | checked    | `1.1.0-rc.0` → `1.1.0-rc.1` (already rc: bumps rc number) | `rc`     |
+| `minor`    | unchecked  | `1.1.0-rc.1` → `1.1.0` (promote to stable)                | `latest` |
 
 ## Documentation Site
 
