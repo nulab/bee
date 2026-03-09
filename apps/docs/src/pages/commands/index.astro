@@ -1,0 +1,88 @@
+---
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+import AnchorHeading from "@astrojs/starlight/components/AnchorHeading.astro";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import { loadCommands, loadParentCommands, type CommandEntry } from "../../lib/commands";
+
+const commands = await loadCommands();
+const parentSummaries = await loadParentCommands();
+
+type CommandGroup = {
+  name: string;
+  description?: string;
+  subcommands: CommandEntry[];
+};
+
+const groups = new Map<string, CommandGroup>();
+const topLevel: CommandEntry[] = [];
+
+for (const cmd of commands) {
+  if (cmd.parent) {
+    let group = groups.get(cmd.parent);
+    if (!group) {
+      group = { name: cmd.parent, subcommands: [] };
+      groups.set(cmd.parent, group);
+    }
+    group.subcommands.push(cmd);
+  } else {
+    topLevel.push(cmd);
+  }
+}
+
+// Groups sorted alphabetically
+const groupEntries = [...groups.values()].sort((a, b) => a.name.localeCompare(b.name));
+for (const group of groupEntries) {
+  group.subcommands.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+topLevel.sort((a, b) => a.name.localeCompare(b.name));
+
+const headings = [
+  ...groupEntries.map((group) => ({
+    depth: 2 as const,
+    slug: `bee-${group.name}`,
+    text: `bee ${group.name}`,
+  })),
+  { depth: 2 as const, slug: "utilities", text: "Utilities" },
+];
+---
+
+<StarlightPage
+  frontmatter={{
+    title: "Commands",
+    tableOfContents: true,
+    head: [
+      { tag: "meta", attrs: { name: "description", content: "bee CLI command reference" } },
+    ],
+  }}
+  headings={headings}
+  lang="en"
+>
+  <p>Work with Backlog resources including issues, pull requests, documents, and more from the command line.</p>
+
+  {groupEntries.map((group) => (
+    <>
+      <AnchorHeading level="2" id={`bee-${group.name}`}>
+        {`bee ${group.name}`}
+      </AnchorHeading>
+      {parentSummaries.get(group.name) && (
+        <p>{parentSummaries.get(group.name)}</p>
+      )}
+      {group.subcommands.length > 0 && (
+        <CardGrid>
+          {group.subcommands.map((sub) => (
+            <LinkCard title={sub.title} href={`/bee/commands/${sub.id}/`} description={sub.description} />
+          ))}
+        </CardGrid>
+      )}
+    </>
+  ))}
+
+  <AnchorHeading level="2" id="utilities">Utilities</AnchorHeading>
+  <CardGrid>
+    {topLevel.map((cmd) => (
+      <LinkCard title={cmd.title} href={`/bee/commands/${cmd.id}/`} description={cmd.description} />
+    ))}
+  </CardGrid>
+
+</StarlightPage>

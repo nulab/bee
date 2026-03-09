@@ -1,4 +1,4 @@
-import { readdir } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
@@ -108,11 +108,20 @@ const buildFlagParts = (arg: NormalizedArg): string[] => {
   return parts;
 };
 
+type ParentCommandMap = Map<string, string>;
+
 let cached: Promise<CommandEntry[]> | undefined;
+let cachedParents: Promise<ParentCommandMap> | undefined;
 
 const loadCommands = (): Promise<CommandEntry[]> => {
   cached ??= loadCommandsImpl();
   return cached;
+};
+
+/** Load parent command summaries from index.ts files (e.g. "auth" → "Authenticate bee with Backlog"). */
+const loadParentCommands = (): Promise<ParentCommandMap> => {
+  cachedParents ??= loadParentCommandsImpl();
+  return cachedParents;
 };
 
 const loadCommandsImpl = async (): Promise<CommandEntry[]> => {
@@ -234,5 +243,26 @@ const loadCommandEntry = async (
   }
 };
 
-export { buildFlagParts, buildUsageLine, loadCommands };
+const loadParentCommandsImpl = async (): Promise<ParentCommandMap> => {
+  const result: ParentCommandMap = new Map();
+  const entries = await readdir(CLI_COMMANDS_DIR, { withFileTypes: true });
+  const subdirs = entries.filter((e) => e.isDirectory());
+
+  for (const subdir of subdirs) {
+    const indexPath = resolve(CLI_COMMANDS_DIR, subdir.name, "index.ts");
+    try {
+      const source = await readFile(indexPath, "utf8");
+      const match = source.match(/\.summary\(["'`](.+?)["'`]\)/);
+      if (match) {
+        result.set(subdir.name, match[1]);
+      }
+    } catch {
+      // Skip if index.ts doesn't exist
+    }
+  }
+
+  return result;
+};
+
+export { buildFlagParts, buildUsageLine, loadCommands, loadParentCommands };
 export type { CommandEntry, NormalizedArg };

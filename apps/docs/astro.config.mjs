@@ -119,6 +119,7 @@ export default defineConfig({
             },
           ],
         },
+        { label: "Commands", link: "/commands/" },
         ...commandSidebar,
       ],
     }),
