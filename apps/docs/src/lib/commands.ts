@@ -126,8 +126,8 @@ const loadParentCommands = (): Promise<ParentCommandMap> => {
 
 const loadCommandsImpl = async (): Promise<CommandEntry[]> => {
   const jiti = createJiti(import.meta.url, {
-    moduleCache: false,
-    fsCache: false,
+    moduleCache: true,
+    fsCache: true,
   });
 
   const results: CommandEntry[] = [];
