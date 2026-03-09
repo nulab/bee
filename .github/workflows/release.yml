@@ -49,6 +49,7 @@ jobs:
     outputs:
       new_tag: ${{ steps.bump_version.outputs.new_tag }}
       previous_tag: ${{ steps.get_latest_tag.outputs.latest_tag }}
+      previous_stable_tag: ${{ steps.get_latest_tag.outputs.latest_stable_tag }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -63,6 +64,10 @@ jobs:
         run: |
           latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "latest_tag=${latest_tag}" >> "$GITHUB_OUTPUT"
+
+          latest_stable_tag=$(git tag --list 'v*' --sort=-v:refname | grep -v '-' | head -n 1)
+          latest_stable_tag="${latest_stable_tag:-v0.0.0}"
+          echo "latest_stable_tag=${latest_stable_tag}" >> "$GITHUB_OUTPUT"
 
       - name: Bump version
         id: bump_version
@@ -170,12 +175,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NEW_TAG: ${{ needs.build.outputs.new_tag }}
           PREVIOUS_TAG: ${{ needs.build.outputs.previous_tag }}
+          PREVIOUS_STABLE_TAG: ${{ needs.build.outputs.previous_stable_tag }}
           PRERELEASE: ${{ inputs.prerelease }}
         run: |
           if [ -n "$PRERELEASE" ]; then
             gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_TAG" --prerelease
           else
-            gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_TAG"
+            gh release create "$NEW_TAG" --generate-notes --notes-start-tag "$PREVIOUS_STABLE_TAG"
           fi
 
       - name: Preview release notes (dry-run)
@@ -184,13 +190,21 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NEW_TAG: ${{ needs.build.outputs.new_tag }}
           PREVIOUS_TAG: ${{ needs.build.outputs.previous_tag }}
+          PREVIOUS_STABLE_TAG: ${{ needs.build.outputs.previous_stable_tag }}
+          PRERELEASE: ${{ inputs.prerelease }}
           REPOSITORY: ${{ github.repository }}
           TARGET_COMMITISH: ${{ github.sha }}
         run: |
+          if [ -n "$PRERELEASE" ]; then
+            notes_start_tag="$PREVIOUS_TAG"
+          else
+            notes_start_tag="$PREVIOUS_STABLE_TAG"
+          fi
+
           echo "## Release notes for ${NEW_TAG}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           gh api "repos/${REPOSITORY}/releases/generate-notes" \
             -f tag_name="$NEW_TAG" \
             -f target_commitish="$TARGET_COMMITISH" \
-            -f previous_tag_name="$PREVIOUS_TAG" \
+            -f previous_tag_name="$notes_start_tag" \
             --jq '.body' >> "$GITHUB_STEP_SUMMARY"
