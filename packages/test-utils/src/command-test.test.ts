@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { setupCommandTest } from "./command-test";
+import { parseCommand, setupCommandTest } from "./command-test";
 
 describe("setupCommandTest", () => {
   it("returns mockClient with specified methods as vi.fn()", () => {
@@ -35,5 +35,11 @@ describe("setupCommandTest", () => {
   it("returns host as example.backlog.com", () => {
     const { host } = setupCommandTest({});
     expect(host).toBe("example.backlog.com");
+  });
+});
+
+describe("parseCommand", () => {
+  it("is a function", () => {
+    expect(typeof parseCommand).toBe("function");
   });
 });

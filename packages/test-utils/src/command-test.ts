@@ -49,5 +49,24 @@ const setupCommandTest = (
   return { mockClient, host };
 };
 
-export { setupCommandTest };
+/**
+ * Dynamically imports a command module and calls parseAsync with the given args.
+ * Reduces the repeated 2-line pattern to a single call.
+ *
+ * @example
+ * ```typescript
+ * await parseCommand(() => import("./list"), ["--project", "123"]);
+ * ```
+ */
+const parseCommand = async (
+  importFn: () => Promise<{
+    default: { parseAsync: (args: string[], opts: { from: string }) => Promise<unknown> };
+  }>,
+  args: string[] = [],
+): Promise<void> => {
+  const { default: command } = await importFn();
+  await command.parseAsync(args, { from: "user" });
+};
+
+export { setupCommandTest, parseCommand };
 export type { CommandTestContext, MockClientMethods };

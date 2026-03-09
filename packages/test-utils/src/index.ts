@@ -1,4 +1,4 @@
-export { setupCommandTest } from "./command-test";
+export { parseCommand, setupCommandTest } from "./command-test";
 export type { CommandTestContext, MockClientMethods } from "./command-test";
 export { setupMockClient } from "./mock-client";
 export type { MockClient } from "./mock-client";
