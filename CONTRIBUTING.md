@@ -69,10 +69,11 @@ Releases are triggered manually via the [Release workflow](https://github.com/nu
    - **newversion** — `patch`, `minor`, or `major`
    - **prerelease** — check to release as rc (prerelease)
 3. The workflow will:
-   - Bump the version in `apps/cli/package.json`
+   - Determine the new version from the latest git tag (not from `package.json`)
    - Build the CLI
    - Publish to npm with provenance
-   - Create a git tag and GitHub release with auto-generated notes
+   - Create a git tag and push it (no version commit is pushed to the branch)
+   - Create a GitHub release with auto-generated notes
 
 Dry-run mode publishes with `--dry-run` and skips git tag/push, so it's safe to test.
 
