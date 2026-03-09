@@ -9,50 +9,45 @@ hero:
   image:
     file: ../../assets/logo.svg
   actions:
-    - text: ドキュメントを見る
+    - text: インストール
       link: /bee/getting-started/
-      icon: document
+      icon: rocket
     - text: GitHub
       link: https://github.com/nulab/bee
       icon: github
-      variant: secondary
+      variant: minimal
       attrs:
         target: _blank
 ---
 
-import { Card, Code, Tabs, TabItem } from "@astrojs/starlight/components";
+import { Card, CardGrid } from "@astrojs/starlight/components";
 import HeroTilt from "../../components/HeroTilt.astro";
 
-<div class="install-command">
-  <Card title="インストール" icon="laptop">
-    <p>ワンコマンドですぐに使い始められます。</p>
-    <Tabs>
-      <TabItem label="npm">
-        <Code code="npm install -g @nulab/bee" lang="sh" />
-      </TabItem>
-      <TabItem label="pnpm">
-        <Code code="pnpm add -g @nulab/bee" lang="sh" />
-      </TabItem>
-      <TabItem label="bun">
-        <Code code="bun add -g @nulab/bee" lang="sh" />
-      </TabItem>
-      <TabItem label="nypm">
-        <Code code="npx nypm install -g @nulab/bee" lang="sh" />
-      </TabItem>
-    </Tabs>
-  </Card>
-</div>
+<CardGrid stagger>
+  <Card title="すぐに使える" icon="rocket">
+    [npm でインストール](/bee/getting-started/)したら、
+    `bee login` するだけ。
 
-<style>{`
-  .install-command {
-    width: 640px;
-    max-width: 100%;
-    margin-inline: auto;
-  }
-  .hero .actions a:first-child {
-    font-weight: bold;
-  }
-`}</style>
+    ブラウザを開かなくても課題の確認や作成がターミナルで完結します。
+  </Card>
+  <Card title="安全なマルチスペース対応" icon="setting">
+    API キーと OAuth の両方に対応。
+
+    [複数の Backlog スペースを切り替え](/bee/guides/authentication/)ながら、
+    プロジェクトごとに最適な認証で運用できます。
+  </Card>
+  <Card title="AI エージェントと連携" icon="puzzle">
+    [Agent Skills をインストール](/bee/integrations/ai-agent/)するだけで、
+    Claude Code などの AI エージェントが bee の使い方を自動的に習得。
+
+    簡単な指示だけで、Backlog の課題作成やステータス更新をこなせます。
+  </Card>
+  <Card title="CI/CD に組み込む" icon="github">
+    [GitHub Actions や GitLab CI から](/bee/integrations/ci-cd/) Backlog の課題ステータスを自動更新。
+
+    デプロイと課題管理をシームレスにつなぎます。
+  </Card>
+</CardGrid>
 
 <HeroTilt />
 
