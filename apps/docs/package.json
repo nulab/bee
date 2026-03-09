@@ -12,6 +12,7 @@
     "@astrojs/starlight": "^0.37.6",
     "astro": "^5.5.0",
     "marked": "^17.0.3",
+    "remark-definition-list": "^2.0.0",
     "sharp": "^0.34.5"
   },
   "devDependencies": {
