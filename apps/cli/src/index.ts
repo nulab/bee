@@ -1,9 +1,9 @@
-import consola from "consola";
+import { createConsola } from "consola";
 import { BeeCommand } from "./lib/bee-command";
 import { handleError } from "./lib/error";
 import pkg from "../package.json" with { type: "json" };
 
-consola.options.formatOptions = { date: false };
+globalThis.consola = createConsola({ fancy: false });
 
 const program = new BeeCommand("bee").version(pkg.version).description(pkg.description ?? "");
 
