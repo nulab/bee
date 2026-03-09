@@ -230,6 +230,40 @@ describe("issue create", () => {
     ),
   );
 
+  it("creates an issue with only required fields (no extra fields sent)", async () => {
+    vi.mocked(promptRequired)
+      .mockResolvedValueOnce("100")
+      .mockResolvedValueOnce("Fix bug")
+      .mockResolvedValueOnce("1")
+      .mockResolvedValueOnce("normal");
+    mockClient.postIssue.mockResolvedValue({
+      issueKey: "TEST-1",
+      summary: "Fix bug",
+    });
+
+    await parseCommand(
+      () => import("./create"),
+      ["--project", "100", "--title", "Fix bug", "--type", "1", "--priority", "normal"],
+    );
+
+    const callArgs = mockClient.postIssue.mock.calls[0][0];
+    expect(callArgs).toEqual({
+      projectId: 100,
+      summary: "Fix bug",
+      issueTypeId: 1,
+      priorityId: 3,
+      description: undefined,
+      assigneeId: undefined,
+      parentIssueId: undefined,
+      startDate: undefined,
+      dueDate: undefined,
+      estimatedHours: undefined,
+      actualHours: undefined,
+      notifiedUserId: [],
+      attachmentId: [],
+    });
+  });
+
   it("throws error for unknown priority name", async () => {
     vi.mocked(promptRequired)
       .mockResolvedValueOnce("TEST")

@@ -103,6 +103,32 @@ describe("issue edit", () => {
     ),
   );
 
+  it("sends only specified fields in PATCH payload", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "New title" });
+
+    await parseCommand(() => import("./edit"), ["TEST-1", "--title", "New title"]);
+
+    const [issueKey, payload] = mockClient.patchIssue.mock.calls[0];
+    expect(issueKey).toBe("TEST-1");
+    expect(payload).toEqual({
+      summary: "New title",
+      description: undefined,
+      statusId: undefined,
+      priorityId: undefined,
+      issueTypeId: undefined,
+      assigneeId: undefined,
+      resolutionId: undefined,
+      parentIssueId: undefined,
+      startDate: undefined,
+      dueDate: undefined,
+      estimatedHours: undefined,
+      actualHours: undefined,
+      comment: undefined,
+      notifiedUserId: [],
+      attachmentId: [],
+    });
+  });
+
   it("throws error for unknown priority name", async () => {
     const { default: edit } = await import("./edit");
     await expect(
