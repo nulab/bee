@@ -66,6 +66,26 @@ Command reference pages are **auto-generated** from CLI source code — do NOT c
 
 **When adding or removing CLI commands**, also update the command table in `skills/using-bee/SKILL.md` to keep the Skill in sync with the CLI.
 
+#### Definition lists
+
+The docs site supports Markdown definition list syntax via `remark-definition-list`. Use this instead of raw `<dl>`/`<dt>`/`<dd>` HTML:
+
+```mdx
+<!-- Correct — Markdown definition list -->
+
+用語
+: 説明文
+
+<!-- Wrong — raw HTML -->
+
+<dl>
+  <dt>用語</dt>
+  <dd>説明文</dd>
+</dl>
+```
+
+This also works inside JSX components like `<Card>`.
+
 #### Internal link conventions
 
 All internal links in documentation content (`apps/docs/src/content/docs/`) must use **absolute paths with the base prefix `/bee/` and a trailing slash**:
