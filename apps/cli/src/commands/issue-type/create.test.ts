@@ -39,6 +39,24 @@ describe("issue-type create", () => {
     );
   });
 
+  it("sends exact default payload (no extra fields)", async () => {
+    mockClient.postIssueType.mockResolvedValue({
+      id: 1,
+      name: "Bug",
+      color: "#e30000",
+      projectId: 100,
+    });
+
+    await parseCommand(() => import("./create"), ["-p", "TEST", "-n", "Bug", "--color", "#e30000"]);
+
+    const callArgs = mockClient.postIssueType.mock.calls[0];
+    expect(callArgs[0]).toBe("TEST");
+    expect(callArgs[1]).toEqual({
+      name: "Bug",
+      color: "#e30000",
+    });
+  });
+
   it("prompts for name when not provided", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Prompted Type");
     mockClient.postIssueType.mockResolvedValue({

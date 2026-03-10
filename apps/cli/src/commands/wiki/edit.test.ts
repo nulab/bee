@@ -40,6 +40,20 @@ describe("wiki edit", () => {
     });
   });
 
+  it("sends exact default payload (no extra fields)", async () => {
+    mockClient.patchWiki.mockResolvedValue({ id: 123, name: "Page" });
+
+    await parseCommand(() => import("./edit"), ["123"]);
+
+    const callArgs = mockClient.patchWiki.mock.calls[0];
+    expect(callArgs[0]).toBe(123);
+    expect(callArgs[1]).toEqual({
+      name: undefined,
+      content: undefined,
+      mailNotify: undefined,
+    });
+  });
+
   it("reads body from stdin when piped", async () => {
     vi.mocked(resolveStdinArg).mockResolvedValueOnce("Stdin content");
     mockClient.patchWiki.mockResolvedValue({ id: 123, name: "Page" });

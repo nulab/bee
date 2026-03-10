@@ -37,6 +37,22 @@ describe("wiki create", () => {
     expect(consola.info).toHaveBeenCalledWith("https://example.backlog.com/alias/wiki/1");
   });
 
+  it("sends exact default payload (no extra fields)", async () => {
+    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("My Page");
+    mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
+    mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
+
+    await parseCommand(() => import("./create"), ["-p", "TEST", "-n", "My Page"]);
+
+    const callArgs = mockClient.postWiki.mock.calls[0];
+    expect(callArgs[0]).toEqual({
+      projectId: 100,
+      name: "My Page",
+      content: "",
+      mailNotify: undefined,
+    });
+  });
+
   it("reads body from stdin when piped", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("My Page");
     vi.mocked(resolveStdinArg).mockResolvedValueOnce("Stdin content");

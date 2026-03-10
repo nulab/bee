@@ -34,6 +34,26 @@ describe("status create", () => {
     );
   });
 
+  it("sends exact default payload (no extra fields)", async () => {
+    mockClient.postProjectStatus.mockResolvedValue({
+      id: 1,
+      name: "Open",
+      color: "#e30000",
+    });
+
+    await parseCommand(
+      () => import("./create"),
+      ["-p", "TEST", "-n", "Open", "--color", "#e30000"],
+    );
+
+    const callArgs = mockClient.postProjectStatus.mock.calls[0];
+    expect(callArgs[0]).toBe("TEST");
+    expect(callArgs[1]).toEqual({
+      name: "Open",
+      color: "#e30000",
+    });
+  });
+
   it("prompts for name when not provided", async () => {
     vi.mocked(promptRequired)
       .mockResolvedValueOnce("TEST")
