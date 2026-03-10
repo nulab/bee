@@ -459,3 +459,20 @@ Plan files (implementation plans, design docs, etc.) go in `.claude/plans/`.
 - **PR / Issue titles**: Always in English.
 - **PR / Issue body**: English by default unless otherwise specified.
 - **PR assignee**: Always use `--assignee @me` to assign the PR to the current user.
+
+### PR Labels
+
+PRs must have at least one label for release note categorization (`.github/release.yml`). Apply the most specific label:
+
+| Label           | When to use                                          |
+| --------------- | ---------------------------------------------------- |
+| `breaking`      | Breaking changes (removal, rename, behavioral shift) |
+| `enhancement`   | New features                                         |
+| `bug`           | Bug fixes                                            |
+| `performance`   | Performance improvements                             |
+| `documentation` | Documentation-only changes                           |
+| `dependencies`  | Dependency updates (auto-applied by dependabot)      |
+
+Use `enhancement` only for end-user-facing features — changes that a `bee` CLI user would notice. CI configuration, repo maintenance, developer experience improvements, and internal refactors do not qualify and should be left unlabeled (they appear under "Other Changes").
+
+PRs without these labels appear under "Other Changes" in release notes.
