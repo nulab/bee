@@ -3,6 +3,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/nulab/bee/ci.yml?logo=github&label=CI)](https://github.com/nulab/bee/actions/workflows/ci.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/nulab/bee/codeql.yml?logo=github&label=CodeQL)](https://github.com/nulab/bee/actions/workflows/codeql.yml)
 [![npm version](https://img.shields.io/npm/v/@nulab/bee?logo=npm)](https://www.npmjs.com/package/@nulab/bee)
+[![npm last publish](https://img.shields.io/npm/last-update/@nulab/bee?logo=npm&label=last%20publish)](https://www.npmjs.com/package/@nulab/bee)
 [![node](https://img.shields.io/badge/node-%3E%3D20-brightgreen?logo=nodedotjs)](https://nodejs.org/)
 [![license](https://img.shields.io/github/license/nulab/bee?logo=opensourceinitiative)](LICENSE)
 
