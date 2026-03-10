@@ -1,4 +1,5 @@
-import { type AddressInfo, type Server, type ServerResponse, createServer } from "node:http";
+import { type Server, type ServerResponse, createServer } from "node:http";
+import { type AddressInfo } from "node:net";
 
 /** 5 minutes in milliseconds */
 const CALLBACK_TIMEOUT_MS = 300_000;
