@@ -67,6 +67,24 @@ describe("notification list", () => {
     expect(consola.info).toHaveBeenCalledWith("No notifications found.");
   });
 
+  it("displays dash when issue is null", async () => {
+    mockClient.getNotifications.mockResolvedValue([
+      {
+        id: 102,
+        alreadyRead: true,
+        reason: 2,
+        resourceAlreadyRead: true,
+        issue: null,
+        sender: { name: "Charlie" },
+        created: "2025-01-16T10:00:00Z",
+      },
+    ]);
+
+    await parseCommand(() => import("./list"));
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("-"));
+  });
+
   it("passes limit, min-id, max-id, and order parameters", async () => {
     mockClient.getNotifications.mockResolvedValue([]);
 

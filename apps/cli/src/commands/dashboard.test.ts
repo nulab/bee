@@ -112,4 +112,24 @@ describe("dashboard", () => {
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("No assigned issues"));
   });
+
+  it("handles issues with null status, priority, and dueDate gracefully", async () => {
+    mockClient.getMyself.mockResolvedValue(sampleMyself);
+    mockClient.getNotificationsCount.mockResolvedValue({ count: 0 });
+    mockClient.getIssues.mockResolvedValue([
+      {
+        issueKey: "PROJ-3",
+        summary: "Nullable fields issue",
+        status: null,
+        priority: null,
+        dueDate: null,
+      },
+    ]);
+    mockClient.getProjects.mockResolvedValue([]);
+
+    await parseCommand(() => import("./dashboard"));
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-3"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Nullable fields issue"));
+  });
 });

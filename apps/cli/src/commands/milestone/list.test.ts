@@ -46,12 +46,30 @@ describe("milestone list", () => {
     expect(consola.info).toHaveBeenCalledWith("No milestones found.");
   });
 
-  it("displays archived status", async () => {
+  it("displays archived milestone as Yes and non-archived as No", async () => {
     mockClient.getVersions.mockResolvedValue(sampleMilestones);
 
     await parseCommand(() => import("./list"), ["TEST"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Yes"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("No"));
+  });
+
+  it("handles null startDate and releaseDueDate gracefully", async () => {
+    mockClient.getVersions.mockResolvedValue([
+      {
+        id: 3,
+        name: "v3.0.0",
+        description: "No dates",
+        startDate: null,
+        releaseDueDate: null,
+        archived: false,
+      },
+    ]);
+
+    await parseCommand(() => import("./list"), ["TEST"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("v3.0.0"));
   });
 
   it(

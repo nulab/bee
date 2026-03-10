@@ -110,4 +110,27 @@ describe("issue view", () => {
       },
     ),
   );
+
+  it("handles null createdUser gracefully", async () => {
+    mockClient.getIssue.mockResolvedValue({ ...sampleIssue, createdUser: null });
+
+    await parseCommand(() => import("./view"), ["PROJ-1"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unknown"));
+  });
+
+  it("handles null startDate and dueDate gracefully", async () => {
+    mockClient.getIssue.mockResolvedValue({
+      ...sampleIssue,
+      startDate: null,
+      dueDate: null,
+    });
+
+    await parseCommand(() => import("./view"), ["PROJ-1"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
+    const allCalls = vi.mocked(consola.log).mock.calls.map((c) => String(c[0]));
+    expect(allCalls.every((c) => !c.includes("Start Date"))).toBe(true);
+    expect(allCalls.every((c) => !c.includes("Due Date"))).toBe(true);
+  });
 });

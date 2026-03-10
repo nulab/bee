@@ -29,6 +29,17 @@ describe("watching view", () => {
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unread"));
   });
 
+  it("displays Read status when resourceAlreadyRead is true", async () => {
+    mockClient.getWatchingListItem.mockResolvedValue({
+      ...sampleWatching,
+      resourceAlreadyRead: true,
+    });
+
+    await parseCommand(() => import("./view"), ["1"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Read"));
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

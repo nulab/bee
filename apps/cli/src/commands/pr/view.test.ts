@@ -91,4 +91,27 @@ describe("pr view", () => {
       },
     ),
   );
+
+  it("handles null createdUser gracefully", async () => {
+    mockClient.getPullRequest.mockResolvedValue({ ...samplePullRequest, createdUser: null });
+
+    await parseCommand(() => import("./view"), ["42", "--project", "PROJ", "--repo", "repo"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unknown"));
+  });
+
+  it("handles null mergeAt and closeAt gracefully", async () => {
+    mockClient.getPullRequest.mockResolvedValue({
+      ...samplePullRequest,
+      mergeAt: null,
+      closeAt: null,
+    });
+
+    await parseCommand(() => import("./view"), ["42", "--project", "PROJ", "--repo", "repo"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("#42"));
+    const allCalls = vi.mocked(consola.log).mock.calls.map((c) => String(c[0]));
+    expect(allCalls.every((c) => !c.includes("Merged at"))).toBe(true);
+    expect(allCalls.every((c) => !c.includes("Closed at"))).toBe(true);
+  });
 });

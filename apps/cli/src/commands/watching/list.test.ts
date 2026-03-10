@@ -34,6 +34,21 @@ describe("watching list", () => {
     expect(consola.log).toHaveBeenCalled();
   });
 
+  it("marks unread items with asterisk", async () => {
+    mockClient.getMyself.mockResolvedValue({ id: 100 });
+    mockClient.getWatchingListItems.mockResolvedValue([
+      {
+        id: 1,
+        resourceAlreadyRead: false,
+        issue: { issueKey: "TEST-1", summary: "Fix bug" },
+      },
+    ]);
+
+    await parseCommand(() => import("./list"), []);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("*"));
+  });
+
   it("shows message when no watching items found", async () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getWatchingListItems.mockResolvedValue([]);

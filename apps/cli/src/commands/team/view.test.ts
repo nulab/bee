@@ -54,4 +54,25 @@ describe("team view", () => {
       },
     ),
   );
+
+  it("handles null createdUser gracefully", async () => {
+    mockClient.getTeam.mockResolvedValue({ ...sampleTeam, createdUser: null });
+
+    await parseCommand(() => import("./view"), ["1"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Design Team"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("\u2014"));
+  });
+
+  it("handles member with null userId gracefully", async () => {
+    mockClient.getTeam.mockResolvedValue({
+      ...sampleTeam,
+      members: [{ id: 300, userId: null, name: "Charlie" }],
+    });
+
+    await parseCommand(() => import("./view"), ["1"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Charlie"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("300"));
+  });
 });

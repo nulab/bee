@@ -103,4 +103,27 @@ describe("document view", () => {
       "The --project flag is required when using --web.",
     );
   });
+
+  it("handles null createdUser and updatedUser gracefully", async () => {
+    mockClient.getDocument.mockResolvedValue({
+      ...sampleDocument,
+      createdUser: null,
+      updatedUser: null,
+    });
+
+    await parseCommand(() => import("./view"), ["doc-1"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unknown"));
+  });
+
+  it("handles null emoji gracefully", async () => {
+    mockClient.getDocument.mockResolvedValue({
+      ...sampleDocument,
+      emoji: null,
+    });
+
+    await parseCommand(() => import("./view"), ["doc-1"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Meeting Notes"));
+  });
 });

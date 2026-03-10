@@ -46,6 +46,27 @@ describe("repo list", () => {
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("frontend"));
   });
 
+  it("handles null description and pushedAt gracefully", async () => {
+    mockClient.getGitRepositories.mockResolvedValue([
+      {
+        id: 3,
+        projectId: 100,
+        name: "empty-repo",
+        description: null,
+        httpUrl: "https://example.backlog.com/git/PROJ/empty-repo.git",
+        sshUrl: "git@example.backlog.com:PROJ/empty-repo.git",
+        displayOrder: 2,
+        pushedAt: null,
+        created: "2024-08-01T00:00:00Z",
+        updated: "2024-08-01T00:00:00Z",
+      },
+    ]);
+
+    await parseCommand(() => import("./list"), ["PROJ"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("empty-repo"));
+  });
+
   it("shows message when no repositories found", async () => {
     mockClient.getGitRepositories.mockResolvedValue([]);
 
