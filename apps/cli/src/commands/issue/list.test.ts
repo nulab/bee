@@ -112,6 +112,65 @@ describe("issue list", () => {
     );
   });
 
+  it("passes issue type filter", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--type", "1", "--type", "2"], { from: "user" });
+
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({ issueTypeId: [1, 2] }),
+    );
+  });
+
+  it("passes category, version, and milestone filters", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    const { default: list } = await import("./list");
+    await list.parseAsync(
+      ["--category", "10", "--version", "20", "--milestone", "30", "--milestone", "31"],
+      { from: "user" },
+    );
+
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        categoryId: [10],
+        versionId: [20],
+        milestoneId: [30, 31],
+      }),
+    );
+  });
+
+  it("passes resolution and parent issue filters", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--resolution", "0", "--parent-issue", "100"], { from: "user" });
+
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resolutionId: [0],
+        parentIssueId: [100],
+      }),
+    );
+  });
+
+  it("passes start date range filters", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    const { default: list } = await import("./list");
+    await list.parseAsync(["--start-since", "2026-01-01", "--start-until", "2026-12-31"], {
+      from: "user",
+    });
+
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        startDateSince: "2026-01-01",
+        startDateUntil: "2026-12-31",
+      }),
+    );
+  });
+
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getIssues.mockResolvedValue(sampleIssues);
 
