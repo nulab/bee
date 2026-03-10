@@ -4,6 +4,7 @@ import { updateConfig } from "@repo/config";
 import { Backlog, OAuth2 } from "backlog-js";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { parseCommand } from "@repo/test-utils";
 
 const mockGetMyself = vi.fn();
 const mockGetAuthorizationURL = vi.fn(
@@ -48,8 +49,7 @@ describe("auth login", () => {
         updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
       );
 
-      const { default: login } = await import("./login");
-      await login.parseAsync(["--method", "api-key"], { from: "user" });
+      await parseCommand(() => import("./login"), ["--method", "api-key"]);
 
       expect(Backlog).toHaveBeenCalledWith({ host: "example.backlog.com", apiKey: "test-api-key" });
       expect(mockGetMyself).toHaveBeenCalled();
@@ -81,8 +81,7 @@ describe("auth login", () => {
         }),
       );
 
-      const { default: login } = await import("./login");
-      await login.parseAsync(["--method", "api-key"], { from: "user" });
+      await parseCommand(() => import("./login"), ["--method", "api-key"]);
 
       const result = vi.mocked(updateConfig).mock.results[0]?.value;
       expect(result.spaces).toEqual([
@@ -100,8 +99,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("example.backlog.com")
         .mockResolvedValueOnce("bad-key");
 
-      const { default: login } = await import("./login");
-      await expect(login.parseAsync(["--method", "api-key"], { from: "user" })).rejects.toThrow(
+      await expect(parseCommand(() => import("./login"), ["--method", "api-key"])).rejects.toThrow(
         "Authentication failed. Could not connect to example.backlog.com with the provided API key.",
       );
       expect(updateConfig).not.toHaveBeenCalled();
@@ -110,8 +108,7 @@ describe("auth login", () => {
 
   describe("invalid method", () => {
     it("returns error for invalid method", async () => {
-      const { default: login } = await import("./login");
-      await expect(login.parseAsync(["--method", "invalid"], { from: "user" })).rejects.toThrow(
+      await expect(parseCommand(() => import("./login"), ["--method", "invalid"])).rejects.toThrow(
         'Invalid auth method. Use "api-key" or "oauth".',
       );
     });
@@ -148,10 +145,9 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { default: login } = await import("./login");
-      await login.parseAsync(
+      await parseCommand(
+        () => import("./login"),
         ["--method", "oauth", "--client-id", "my-client-id", "--client-secret", "my-client-secret"],
-        { from: "user" },
       );
 
       expect(startCallbackServer).toHaveBeenCalled();
@@ -208,9 +204,9 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { default: login } = await import("./login");
       await expect(
-        login.parseAsync(
+        parseCommand(
+          () => import("./login"),
           [
             "--method",
             "oauth",
@@ -219,7 +215,6 @@ describe("auth login", () => {
             "--client-secret",
             "my-client-secret",
           ],
-          { from: "user" },
         ),
       ).rejects.toThrow("OAuth authorization failed: OAuth callback timed out after 5 minutes");
       expect(mockStop).toHaveBeenCalled();
@@ -233,9 +228,9 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { default: login } = await import("./login");
       await expect(
-        login.parseAsync(
+        parseCommand(
+          () => import("./login"),
           [
             "--method",
             "oauth",
@@ -244,7 +239,6 @@ describe("auth login", () => {
             "--client-secret",
             "my-client-secret",
           ],
-          { from: "user" },
         ),
       ).rejects.toThrow("Failed to exchange authorization code for tokens.");
     });
@@ -257,9 +251,9 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { default: login } = await import("./login");
       await expect(
-        login.parseAsync(
+        parseCommand(
+          () => import("./login"),
           [
             "--method",
             "oauth",
@@ -268,7 +262,6 @@ describe("auth login", () => {
             "--client-secret",
             "my-client-secret",
           ],
-          { from: "user" },
         ),
       ).rejects.toThrow("Authentication verification failed.");
     });
@@ -298,10 +291,9 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      const { default: login } = await import("./login");
-      await login.parseAsync(
+      await parseCommand(
+        () => import("./login"),
         ["--method", "oauth", "--client-id", "my-client-id", "--client-secret", "my-client-secret"],
-        { from: "user" },
       );
 
       const result = vi.mocked(updateConfig).mock.results[0]?.value;

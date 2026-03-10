@@ -1,21 +1,15 @@
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  deleteDocument: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ deleteDocument: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
   confirmOrExit: vi.fn(),
 }));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("document delete", () => {
@@ -23,8 +17,7 @@ describe("document delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteDocument.mockResolvedValue({ id: "1", title: "My Doc" });
 
-    const { default: deleteDocument } = await import("./delete");
-    await deleteDocument.parseAsync(["12345"], { from: "user" });
+    await parseCommand(() => import("./delete"), ["12345"]);
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete document 12345? This cannot be undone.",
@@ -38,8 +31,7 @@ describe("document delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteDocument.mockResolvedValue({ id: "1", title: "My Doc" });
 
-    const { default: deleteDocument } = await import("./delete");
-    await deleteDocument.parseAsync(["12345", "--yes"], { from: "user" });
+    await parseCommand(() => import("./delete"), ["12345", "--yes"]);
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete document 12345? This cannot be undone.",
@@ -49,20 +41,21 @@ describe("document delete", () => {
 
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
-
-    const { default: deleteDocument } = await import("./delete");
-    await deleteDocument.parseAsync(["12345"], { from: "user" });
+    await parseCommand(() => import("./delete"), ["12345"]);
 
     expect(mockClient.deleteDocument).not.toHaveBeenCalled();
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    vi.mocked(confirmOrExit).mockResolvedValue(true);
-    mockClient.deleteDocument.mockResolvedValue({ id: "1", title: "My Doc" });
-
-    await expectStdoutContaining(async () => {
-      const { default: deleteDocument } = await import("./delete");
-      await deleteDocument.parseAsync(["12345", "--yes", "--json"], { from: "user" });
-    }, "My Doc");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./delete"),
+      ["12345", "--yes", "--json"],
+      "My Doc",
+      () => {
+        vi.mocked(confirmOrExit).mockResolvedValue(true);
+        mockClient.deleteDocument.mockResolvedValue({ id: "1", title: "My Doc" });
+      },
+    ),
+  );
 });

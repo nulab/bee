@@ -129,4 +129,42 @@ describe("outputResult", () => {
 
     expect(writeSpy).toHaveBeenCalledWith('{"id":1,"name":"test"}\n');
   });
+
+  it("handles null data", () => {
+    const format = vi.fn();
+    Object.defineProperty(process.stdout, "isTTY", { value: false, writable: true });
+
+    outputResult(null, { json: "" }, format);
+
+    expect(writeSpy).toHaveBeenCalledWith("null\n");
+  });
+
+  it("handles undefined data", () => {
+    const format = vi.fn();
+    Object.defineProperty(process.stdout, "isTTY", { value: false, writable: true });
+
+    outputResult(undefined, { json: "" }, format);
+
+    expect(writeSpy).toHaveBeenCalled();
+  });
+
+  it("handles --json with non-existent field names", () => {
+    const format = vi.fn();
+    const data = { id: 1 };
+    Object.defineProperty(process.stdout, "isTTY", { value: false, writable: true });
+
+    outputResult(data, { json: "nonexistent" }, format);
+
+    expect(writeSpy).toHaveBeenCalledWith("{}\n");
+  });
+
+  it("handles --json with spaces around field names", () => {
+    const format = vi.fn();
+    const data = { id: 1, name: "test" };
+    Object.defineProperty(process.stdout, "isTTY", { value: false, writable: true });
+
+    outputResult(data, { json: "id , name" }, format);
+
+    expect(writeSpy).toHaveBeenCalledWith('{"id":1,"name":"test"}\n');
+  });
 });

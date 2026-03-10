@@ -1,12 +1,12 @@
 import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, parseCommand } from "@repo/test-utils";
 
-const mockClient = {
+const mockClient = vi.hoisted(() => ({
   getIssue: vi.fn(),
   getIssueComments: vi.fn(),
-};
+}));
 
 vi.mock("@repo/backlog-utils", () => ({
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
@@ -42,8 +42,7 @@ describe("issue view", () => {
   it("displays issue details", async () => {
     mockClient.getIssue.mockResolvedValue(sampleIssue);
 
-    const { default: view } = await import("./view");
-    await view.parseAsync(["PROJ-1"], { from: "user" });
+    await parseCommand(() => import("./view"), ["PROJ-1"]);
 
     expect(mockClient.getIssue).toHaveBeenCalledWith("PROJ-1");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
@@ -57,8 +56,7 @@ describe("issue view", () => {
   it("shows Unassigned for issues without assignee", async () => {
     mockClient.getIssue.mockResolvedValue({ ...sampleIssue, assignee: null });
 
-    const { default: view } = await import("./view");
-    await view.parseAsync(["PROJ-1"], { from: "user" });
+    await parseCommand(() => import("./view"), ["PROJ-1"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unassigned"));
   });
@@ -66,8 +64,7 @@ describe("issue view", () => {
   it("displays description when present", async () => {
     mockClient.getIssue.mockResolvedValue(sampleIssue);
 
-    const { default: view } = await import("./view");
-    await view.parseAsync(["PROJ-1"], { from: "user" });
+    await parseCommand(() => import("./view"), ["PROJ-1"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Description"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("A test description"));
@@ -83,8 +80,7 @@ describe("issue view", () => {
       },
     ]);
 
-    const { default: view } = await import("./view");
-    await view.parseAsync(["PROJ-1", "--comments"], { from: "user" });
+    await parseCommand(() => import("./view"), ["PROJ-1", "--comments"]);
 
     expect(mockClient.getIssueComments).toHaveBeenCalledWith("PROJ-1", { order: "asc" });
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Comments"));
@@ -93,8 +89,7 @@ describe("issue view", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    const { default: view } = await import("./view");
-    await view.parseAsync(["PROJ-1", "--web"], { from: "user" });
+    await parseCommand(() => import("./view"), ["PROJ-1", "--web"]);
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/view/PROJ-1",
@@ -104,12 +99,38 @@ describe("issue view", () => {
     expect(mockClient.getIssue).not.toHaveBeenCalled();
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getIssue.mockResolvedValue(sampleIssue);
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./view"),
+      ["PROJ-1", "--json"],
+      "PROJ-1",
+      () => {
+        mockClient.getIssue.mockResolvedValue(sampleIssue);
+      },
+    ),
+  );
 
-    await expectStdoutContaining(async () => {
-      const { default: view } = await import("./view");
-      await view.parseAsync(["PROJ-1", "--json"], { from: "user" });
-    }, "PROJ-1");
+  it("handles null createdUser gracefully", async () => {
+    mockClient.getIssue.mockResolvedValue({ ...sampleIssue, createdUser: null });
+
+    await parseCommand(() => import("./view"), ["PROJ-1"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unknown"));
+  });
+
+  it("handles null startDate and dueDate gracefully", async () => {
+    mockClient.getIssue.mockResolvedValue({
+      ...sampleIssue,
+      startDate: null,
+      dueDate: null,
+    });
+
+    await parseCommand(() => import("./view"), ["PROJ-1"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
+    const allCalls = vi.mocked(consola.log).mock.calls.map((c) => String(c[0]));
+    expect(allCalls.every((c) => !c.includes("Start Date"))).toBe(true);
+    expect(allCalls.every((c) => !c.includes("Due Date"))).toBe(true);
   });
 });

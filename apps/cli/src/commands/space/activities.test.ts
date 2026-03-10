@@ -81,6 +81,42 @@ describe("space activities", () => {
     );
   });
 
+  it("handles null project gracefully", async () => {
+    mockClient.getSpaceActivities.mockResolvedValue([
+      {
+        id: 1,
+        type: 1,
+        content: { summary: "Some task" },
+        project: null,
+        createdUser: { name: "Test User" },
+        created: "2024-01-15T10:30:00Z",
+      },
+    ]);
+
+    const { default: activities } = await import("./activities");
+    await activities.parseAsync([], { from: "user" });
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Some task"));
+  });
+
+  it("handles null content summary with empty content", async () => {
+    mockClient.getSpaceActivities.mockResolvedValue([
+      {
+        id: 1,
+        type: 1,
+        content: {},
+        project: { name: "Proj" },
+        createdUser: { name: "User" },
+        created: "2024-01-15T10:30:00Z",
+      },
+    ]);
+
+    const { default: activities } = await import("./activities");
+    await activities.parseAsync([], { from: "user" });
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Proj"));
+  });
+
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getSpaceActivities.mockResolvedValue([
       {

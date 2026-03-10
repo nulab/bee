@@ -107,6 +107,35 @@ describe("promptRequired", () => {
     );
     expect(consola.prompt).not.toHaveBeenCalled();
   });
+
+  it("throws UserError instance for empty string existing value", async () => {
+    const { UserError } = await import("./user-error");
+    await expect(promptRequired("Label:", "")).rejects.toBeInstanceOf(UserError);
+  });
+
+  it("returns whitespace-only existing value without prompting", async () => {
+    const result = await promptRequired("Label:", "  ");
+    expect(result).toBe("  ");
+    expect(consola.prompt).not.toHaveBeenCalled();
+  });
+
+  it("strips trailing colon from label in error for empty existing value", async () => {
+    await expect(promptRequired("Project key:", "")).rejects.toThrow("Project key is required.");
+  });
+
+  it("throws UserError instance in non-interactive mode", async () => {
+    Object.defineProperty(process.stdin, "isTTY", { value: undefined, writable: true });
+    const { UserError } = await import("./user-error");
+    await expect(promptRequired("Label:")).rejects.toBeInstanceOf(UserError);
+  });
+
+  it("throws UserError when prompt returns non-string (e.g. symbol from cancellation)", async () => {
+    Object.defineProperty(process.stdin, "isTTY", { value: true, writable: true });
+    vi.mocked(consola.prompt).mockResolvedValue(Symbol("cancel") as never);
+
+    const { UserError } = await import("./user-error");
+    await expect(promptRequired("Label:")).rejects.toBeInstanceOf(UserError);
+  });
 });
 
 describe("confirmOrExit", () => {
