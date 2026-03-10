@@ -94,6 +94,26 @@ describe("document attachments", () => {
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("2.0 MB"));
   });
 
+  it("handles null createdUser gracefully", async () => {
+    mockClient.getDocument.mockResolvedValue({
+      id: "doc-1",
+      attachments: [
+        {
+          id: 1,
+          name: "report.pdf",
+          size: 2_048_576,
+          createdUser: null,
+          created: "2025-01-01T00:00:00Z",
+        },
+      ],
+    });
+
+    const { default: attachments } = await import("./attachments");
+    await attachments.parseAsync(["doc-1"], { from: "user" });
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unknown"));
+  });
+
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getDocument.mockResolvedValue({
       id: "doc-1",

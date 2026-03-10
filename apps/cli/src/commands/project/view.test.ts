@@ -1,11 +1,11 @@
 import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, parseCommand } from "@repo/test-utils";
 
-const mockClient = {
+const mockClient = vi.hoisted(() => ({
   getProject: vi.fn(),
-};
+}));
 
 vi.mock("@repo/backlog-utils", () => ({
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
@@ -40,8 +40,7 @@ describe("project view", () => {
   it("displays project details", async () => {
     mockClient.getProject.mockResolvedValue(sampleProject);
 
-    const { default: view } = await import("./view");
-    await view.parseAsync(["PROJ1"], { from: "user" });
+    await parseCommand(() => import("./view"), ["PROJ1"]);
 
     expect(mockClient.getProject).toHaveBeenCalledWith("PROJ1");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Test Project"));
@@ -53,15 +52,13 @@ describe("project view", () => {
   it("shows Archived status for archived project", async () => {
     mockClient.getProject.mockResolvedValue({ ...sampleProject, archived: true });
 
-    const { default: view } = await import("./view");
-    await view.parseAsync(["PROJ1"], { from: "user" });
+    await parseCommand(() => import("./view"), ["PROJ1"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Archived"));
   });
 
   it("opens browser with --web flag", async () => {
-    const { default: view } = await import("./view");
-    await view.parseAsync(["PROJ1", "--web"], { from: "user" });
+    await parseCommand(() => import("./view"), ["PROJ1", "--web"]);
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/projects/PROJ1",
@@ -71,12 +68,15 @@ describe("project view", () => {
     expect(mockClient.getProject).not.toHaveBeenCalled();
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getProject.mockResolvedValue(sampleProject);
-
-    await expectStdoutContaining(async () => {
-      const { default: view } = await import("./view");
-      await view.parseAsync(["PROJ1", "--json"], { from: "user" });
-    }, "PROJ1");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./view"),
+      ["PROJ1", "--json"],
+      "PROJ1",
+      () => {
+        mockClient.getProject.mockResolvedValue(sampleProject);
+      },
+    ),
+  );
 });

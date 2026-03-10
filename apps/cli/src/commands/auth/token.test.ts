@@ -1,5 +1,6 @@
 import { findSpace, loadConfig } from "@repo/config";
 import { describe, expect, it, vi } from "vitest";
+import { parseCommand } from "@repo/test-utils";
 
 vi.mock("@repo/config", () => ({
   findSpace: vi.fn(),
@@ -20,8 +21,7 @@ describe("auth token", () => {
     const stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     try {
-      const { default: token } = await import("./token");
-      await token.parseAsync([], { from: "user" });
+      await parseCommand(() => import("./token"));
 
       expect(stdoutSpy).toHaveBeenCalledWith("my-api-key");
     } finally {
@@ -51,8 +51,7 @@ describe("auth token", () => {
     const stdoutSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     try {
-      const { default: token } = await import("./token");
-      await token.parseAsync([], { from: "user" });
+      await parseCommand(() => import("./token"));
 
       expect(stdoutSpy).toHaveBeenCalledWith("my-access-token");
     } finally {
@@ -68,8 +67,7 @@ describe("auth token", () => {
     });
     vi.mocked(findSpace).mockReturnValue(null);
 
-    const { default: token } = await import("./token");
-    await expect(token.parseAsync([], { from: "user" })).rejects.toThrow(
+    await expect(parseCommand(() => import("./token"))).rejects.toThrow(
       "No space configured. Run `bee auth login` to authenticate.",
     );
   });

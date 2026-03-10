@@ -1,11 +1,11 @@
 import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, parseCommand } from "@repo/test-utils";
 
-const mockClient = {
+const mockClient = vi.hoisted(() => ({
   getGitRepository: vi.fn(),
-};
+}));
 
 vi.mock("@repo/backlog-utils", () => ({
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
@@ -38,8 +38,7 @@ describe("repo view", () => {
   it("displays repository details", async () => {
     mockClient.getGitRepository.mockResolvedValue(sampleRepo);
 
-    const { default: view } = await import("./view");
-    await view.parseAsync(["api-server", "--project", "PROJ"], { from: "user" });
+    await parseCommand(() => import("./view"), ["api-server", "--project", "PROJ"]);
 
     expect(mockClient.getGitRepository).toHaveBeenCalledWith("PROJ", "api-server");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("api-server"));
@@ -53,8 +52,7 @@ describe("repo view", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    const { default: view } = await import("./view");
-    await view.parseAsync(["api-server", "--project", "PROJ", "--web"], { from: "user" });
+    await parseCommand(() => import("./view"), ["api-server", "--project", "PROJ", "--web"]);
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/git/PROJ/api-server",
@@ -64,12 +62,15 @@ describe("repo view", () => {
     expect(mockClient.getGitRepository).not.toHaveBeenCalled();
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getGitRepository.mockResolvedValue(sampleRepo);
-
-    await expectStdoutContaining(async () => {
-      const { default: view } = await import("./view");
-      await view.parseAsync(["api-server", "--project", "PROJ", "--json"], { from: "user" });
-    }, "api-server");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./view"),
+      ["api-server", "--project", "PROJ", "--json"],
+      "api-server",
+      () => {
+        mockClient.getGitRepository.mockResolvedValue(sampleRepo);
+      },
+    ),
+  );
 });
