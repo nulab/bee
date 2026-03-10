@@ -78,6 +78,8 @@ bee api issues -f 'projectId[]=12345' -f statusId=1 -f statusId=2
 bee api issues -X POST -f projectId=12345 -f summary="New issue" -f issueTypeId=1 -f priorityId=3
 ```
 
+**Pagination** — Commands that accept `--count` return **at most 20 items by default** (not all items). Always check whether the result count equals the limit before assuming you have everything. Use `--count` to change the page size and `--offset` (or `--min-id` / `--max-id`) to fetch subsequent pages.
+
 **`bee browse` for opening pages** — Open Backlog pages in the browser:
 
 ```sh
