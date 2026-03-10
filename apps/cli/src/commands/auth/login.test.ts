@@ -145,10 +145,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      await parseCommand(
-        () => import("./login"),
-        ["--method", "oauth", "--client-id", "my-client-id", "--client-secret", "my-client-secret"],
-      );
+      await parseCommand(() => import("./login"), ["--method", "oauth"]);
 
       expect(startCallbackServer).toHaveBeenCalled();
       expect(OAuth2).toHaveBeenCalledWith({
@@ -205,17 +202,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-secret");
 
       await expect(
-        parseCommand(
-          () => import("./login"),
-          [
-            "--method",
-            "oauth",
-            "--client-id",
-            "my-client-id",
-            "--client-secret",
-            "my-client-secret",
-          ],
-        ),
+        parseCommand(() => import("./login"), ["--method", "oauth"]),
       ).rejects.toThrow("OAuth authorization failed: OAuth callback timed out after 5 minutes");
       expect(mockStop).toHaveBeenCalled();
     });
@@ -229,17 +216,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-secret");
 
       await expect(
-        parseCommand(
-          () => import("./login"),
-          [
-            "--method",
-            "oauth",
-            "--client-id",
-            "my-client-id",
-            "--client-secret",
-            "my-client-secret",
-          ],
-        ),
+        parseCommand(() => import("./login"), ["--method", "oauth"]),
       ).rejects.toThrow("Failed to exchange authorization code for tokens.");
     });
 
@@ -252,17 +229,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-secret");
 
       await expect(
-        parseCommand(
-          () => import("./login"),
-          [
-            "--method",
-            "oauth",
-            "--client-id",
-            "my-client-id",
-            "--client-secret",
-            "my-client-secret",
-          ],
-        ),
+        parseCommand(() => import("./login"), ["--method", "oauth"]),
       ).rejects.toThrow("Authentication verification failed.");
     });
 
@@ -291,10 +258,7 @@ describe("auth login", () => {
         .mockResolvedValueOnce("my-client-id")
         .mockResolvedValueOnce("my-client-secret");
 
-      await parseCommand(
-        () => import("./login"),
-        ["--method", "oauth", "--client-id", "my-client-id", "--client-secret", "my-client-secret"],
-      );
+      await parseCommand(() => import("./login"), ["--method", "oauth"]);
 
       const result = vi.mocked(updateConfig).mock.results[0]?.value;
       expect(result.spaces).toEqual([
