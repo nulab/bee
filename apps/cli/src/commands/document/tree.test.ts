@@ -83,6 +83,27 @@ describe("document tree", () => {
     expect(consola.info).toHaveBeenCalledWith("No documents found.");
   });
 
+  it("falls back to id when name is null", async () => {
+    mockClient.getDocumentTree.mockResolvedValue({
+      projectId: "100",
+      activeTree: {
+        id: "root",
+        children: [
+          {
+            id: "doc-no-name",
+            name: null,
+            children: [],
+          },
+        ],
+      },
+    });
+
+    const { default: tree } = await import("./tree");
+    await tree.parseAsync(["PROJECT"], { from: "user" });
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("doc-no-name"));
+  });
+
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 

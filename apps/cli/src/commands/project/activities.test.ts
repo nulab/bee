@@ -85,6 +85,40 @@ describe("project activities", () => {
     );
   });
 
+  it("handles null createdUser gracefully", async () => {
+    mockClient.getProjectActivities.mockResolvedValue([
+      {
+        id: 1,
+        type: 1,
+        content: { summary: "Some task" },
+        createdUser: null,
+        created: "2024-01-15T10:30:00Z",
+      },
+    ]);
+
+    const { default: activities } = await import("./activities");
+    await activities.parseAsync(["PROJ1"], { from: "user" });
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unknown"));
+  });
+
+  it("handles null content summary with empty content", async () => {
+    mockClient.getProjectActivities.mockResolvedValue([
+      {
+        id: 1,
+        type: 1,
+        content: {},
+        createdUser: { name: "User" },
+        created: "2024-01-15T10:30:00Z",
+      },
+    ]);
+
+    const { default: activities } = await import("./activities");
+    await activities.parseAsync(["PROJ1"], { from: "user" });
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("User"));
+  });
+
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getProjectActivities.mockResolvedValue([
       {

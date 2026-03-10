@@ -39,6 +39,15 @@ describe("user me", () => {
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Normal User"));
   });
 
+  it("handles null lastLoginTime gracefully", async () => {
+    mockClient.getMyself.mockResolvedValue({ ...sampleUser, lastLoginTime: null });
+
+    const { default: me } = await import("./me");
+    await me.parseAsync([], { from: "user" });
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("My Self"));
+  });
+
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getMyself.mockResolvedValue(sampleUser);
 

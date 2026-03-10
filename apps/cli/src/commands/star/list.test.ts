@@ -1,17 +1,12 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
+const { mockClient, host } = setupCommandTest({
   getUserStars: vi.fn(),
-  getMyself: vi.fn(),
-};
+});
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleStars = [
@@ -34,10 +29,8 @@ describe("star list", () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getUserStars.mockResolvedValue(sampleStars);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./list"), []);
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.getUserStars).toHaveBeenCalledWith(100, {});
     expect(consola.log).toHaveBeenCalled();
@@ -46,8 +39,7 @@ describe("star list", () => {
   it("lists stars for a specific user", async () => {
     mockClient.getUserStars.mockResolvedValue(sampleStars);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["200"], { from: "user" });
+    await parseCommand(() => import("./list"), ["200"]);
 
     expect(mockClient.getUserStars).toHaveBeenCalledWith(200, {});
     expect(mockClient.getMyself).not.toHaveBeenCalled();
@@ -57,19 +49,21 @@ describe("star list", () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getUserStars.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./list"), []);
 
     expect(consola.info).toHaveBeenCalledWith("No stars found.");
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getMyself.mockResolvedValue({ id: 100 });
-    mockClient.getUserStars.mockResolvedValue(sampleStars);
-
-    await expectStdoutContaining(async () => {
-      const { default: list } = await import("./list");
-      await list.parseAsync(["--json"], { from: "user" });
-    }, "Sample issue");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./list"),
+      ["--json"],
+      "Sample issue",
+      () => {
+        mockClient.getMyself.mockResolvedValue({ id: 100 });
+        mockClient.getUserStars.mockResolvedValue(sampleStars);
+      },
+    ),
+  );
 });

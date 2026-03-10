@@ -1,15 +1,12 @@
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  patchIssue: vi.fn(),
-  getMyself: vi.fn().mockResolvedValue({ id: 99 }),
-};
+const { mockClient, host } = setupCommandTest({ patchIssue: vi.fn() });
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -18,8 +15,7 @@ describe("issue edit", () => {
   it("updates issue summary", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "New title" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["TEST-1", "--title", "New title"], { from: "user" });
+    await parseCommand(() => import("./edit"), ["TEST-1", "--title", "New title"]);
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
@@ -31,10 +27,10 @@ describe("issue edit", () => {
   it("updates assignee and priority", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["TEST-1", "--assignee", "12345", "--priority", "high"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./edit"),
+      ["TEST-1", "--assignee", "12345", "--priority", "high"],
+    );
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
@@ -45,8 +41,7 @@ describe("issue edit", () => {
   it("resolves @me to current user ID for assignee", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["TEST-1", "--assignee", "@me"], { from: "user" });
+    await parseCommand(() => import("./edit"), ["TEST-1", "--assignee", "@me"]);
 
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
@@ -58,10 +53,10 @@ describe("issue edit", () => {
   it("passes comment with the update", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["TEST-1", "--title", "New title", "--comment", "Updated"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./edit"),
+      ["TEST-1", "--title", "New title", "--comment", "Updated"],
+    );
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
       "TEST-1",
@@ -72,8 +67,8 @@ describe("issue edit", () => {
   it("passes notifiedUserId and attachmentId to API", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(
+    await parseCommand(
+      () => import("./edit"),
       [
         "TEST-1",
         "--title",
@@ -87,7 +82,6 @@ describe("issue edit", () => {
         "--attachment",
         "2",
       ],
-      { from: "user" },
     );
 
     expect(mockClient.patchIssue).toHaveBeenCalledWith(
@@ -99,13 +93,40 @@ describe("issue edit", () => {
     );
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./edit"),
+      ["TEST-1", "--title", "Title", "--json"],
+      "TEST-1",
+      () => mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" }),
+    ),
+  );
 
-    await expectStdoutContaining(async () => {
-      const { default: edit } = await import("./edit");
-      await edit.parseAsync(["TEST-1", "--title", "Title", "--json"], { from: "user" });
-    }, "TEST-1");
+  it("sends only specified fields in PATCH payload", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "New title" });
+
+    await parseCommand(() => import("./edit"), ["TEST-1", "--title", "New title"]);
+
+    const [[issueKey, payload]] = mockClient.patchIssue.mock.calls;
+    expect(issueKey).toBe("TEST-1");
+    expect(payload).toEqual({
+      summary: "New title",
+      description: undefined,
+      statusId: undefined,
+      priorityId: undefined,
+      issueTypeId: undefined,
+      assigneeId: undefined,
+      resolutionId: undefined,
+      parentIssueId: undefined,
+      startDate: undefined,
+      dueDate: undefined,
+      estimatedHours: undefined,
+      actualHours: undefined,
+      comment: undefined,
+      notifiedUserId: [],
+      attachmentId: [],
+    });
   });
 
   it("throws error for unknown priority name", async () => {

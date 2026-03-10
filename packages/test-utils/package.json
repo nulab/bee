@@ -15,6 +15,6 @@
     "@repo/tsconfigs": "workspace:*"
   },
   "peerDependencies": {
-    "vitest": "^3.0.0"
+    "vitest": "^4.0.0"
   }
 }

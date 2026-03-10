@@ -1,18 +1,20 @@
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import {
+  expectStdoutContaining,
+  mockGetClient,
+  parseCommand,
+  setupCommandTest,
+} from "@repo/test-utils";
 
-const mockClient = {
+const { mockClient, host } = setupCommandTest({
   get: vi.fn(),
   post: vi.fn(),
   put: vi.fn(),
   patch: vi.fn(),
   delete: vi.fn(),
-};
+});
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("api", () => {
@@ -20,8 +22,7 @@ describe("api", () => {
     mockClient.get.mockResolvedValue({ id: 1, name: "test" });
 
     await expectStdoutContaining(async () => {
-      const { default: api } = await import("./api");
-      await api.parseAsync(["/users/myself"], { from: "user" });
+      await parseCommand(() => import("./api"), ["/users/myself"]);
 
       expect(mockClient.get).toHaveBeenCalledWith("/users/myself", {});
     }, '"name"');
@@ -32,8 +33,7 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { default: api } = await import("./api");
-    await api.parseAsync(["/projects"], { from: "user" });
+    await parseCommand(() => import("./api"), ["/projects"]);
 
     expect(mockClient.get).toHaveBeenCalledWith("/projects", {});
     writeSpy.mockRestore();
@@ -44,8 +44,7 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { default: api } = await import("./api");
-    await api.parseAsync(["/api/v2/space"], { from: "user" });
+    await parseCommand(() => import("./api"), ["/api/v2/space"]);
 
     expect(mockClient.get).toHaveBeenCalledWith("space", {});
     writeSpy.mockRestore();
@@ -56,8 +55,7 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { default: api } = await import("./api");
-    await api.parseAsync(["/issues", "-X", "POST"], { from: "user" });
+    await parseCommand(() => import("./api"), ["/issues", "-X", "POST"]);
 
     expect(mockClient.post).toHaveBeenCalledWith("/issues", {});
     writeSpy.mockRestore();
@@ -68,8 +66,7 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { default: api } = await import("./api");
-    await api.parseAsync(["/users/myself", "--silent"], { from: "user" });
+    await parseCommand(() => import("./api"), ["/users/myself", "--silent"]);
 
     expect(mockClient.get).toHaveBeenCalled();
     expect(writeSpy).not.toHaveBeenCalled();
@@ -81,8 +78,7 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { default: api } = await import("./api");
-    await api.parseAsync(["/users/myself", "--json", "id,name"], { from: "user" });
+    await parseCommand(() => import("./api"), ["/users/myself", "--json", "id,name"]);
 
     const output = JSON.parse(writeSpy.mock.calls[0][0] as string);
     expect(output).toEqual({ id: 1, name: "Test User" });
@@ -98,8 +94,7 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { default: api } = await import("./api");
-    await api.parseAsync(["/projects", "--json", "id,name"], { from: "user" });
+    await parseCommand(() => import("./api"), ["/projects", "--json", "id,name"]);
 
     const output = JSON.parse(writeSpy.mock.calls[0][0] as string);
     expect(output).toEqual([
@@ -114,8 +109,7 @@ describe("api", () => {
 
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    const { default: api } = await import("./api");
-    await api.parseAsync(["/users/myself", "--json"], { from: "user" });
+    await parseCommand(() => import("./api"), ["/users/myself", "--json"]);
 
     const output = JSON.parse(writeSpy.mock.calls[0][0] as string);
     expect(output).toEqual({ id: 1, name: "test" });

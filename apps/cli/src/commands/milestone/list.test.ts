@@ -1,16 +1,10 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  getVersions: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ getVersions: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleMilestones = [
@@ -36,10 +30,8 @@ describe("milestone list", () => {
   it("displays milestone list in tabular format", async () => {
     mockClient.getVersions.mockResolvedValue(sampleMilestones);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["TEST"], { from: "user" });
+    await parseCommand(() => import("./list"), ["TEST"]);
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getVersions).toHaveBeenCalledWith("TEST");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("v1.0.0"));
@@ -49,27 +41,44 @@ describe("milestone list", () => {
   it("shows message when no milestones found", async () => {
     mockClient.getVersions.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["TEST"], { from: "user" });
+    await parseCommand(() => import("./list"), ["TEST"]);
 
     expect(consola.info).toHaveBeenCalledWith("No milestones found.");
   });
 
-  it("displays archived status", async () => {
+  it("displays archived milestone as Yes and non-archived as No", async () => {
     mockClient.getVersions.mockResolvedValue(sampleMilestones);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["TEST"], { from: "user" });
+    await parseCommand(() => import("./list"), ["TEST"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Yes"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("No"));
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getVersions.mockResolvedValue(sampleMilestones);
+  it("handles null startDate and releaseDueDate gracefully", async () => {
+    mockClient.getVersions.mockResolvedValue([
+      {
+        id: 3,
+        name: "v3.0.0",
+        description: "No dates",
+        startDate: null,
+        releaseDueDate: null,
+        archived: false,
+      },
+    ]);
 
-    await expectStdoutContaining(async () => {
-      const { default: list } = await import("./list");
-      await list.parseAsync(["TEST", "--json"], { from: "user" });
-    }, "v1.0.0");
+    await parseCommand(() => import("./list"), ["TEST"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("v3.0.0"));
   });
+
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./list"),
+      ["TEST", "--json"],
+      "v1.0.0",
+      () => mockClient.getVersions.mockResolvedValue(sampleMilestones),
+    ),
+  );
 });

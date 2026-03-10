@@ -1,6 +1,7 @@
 import { loadConfig, writeConfig } from "@repo/config";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { parseCommand } from "@repo/test-utils";
 
 vi.mock("@repo/config", () => ({
   loadConfig: vi.fn(),
@@ -22,8 +23,7 @@ describe("auth switch", () => {
       aliases: {},
     });
 
-    const { default: switchSpace } = await import("./switch");
-    await switchSpace.parseAsync(["--space", "example.backlog.com"], { from: "user" });
+    await parseCommand(() => import("./switch"), ["--space", "example.backlog.com"]);
 
     expect(writeConfig).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -40,9 +40,8 @@ describe("auth switch", () => {
       aliases: {},
     });
 
-    const { default: switchSpace } = await import("./switch");
     await expect(
-      switchSpace.parseAsync(["--space", "missing.backlog.com"], { from: "user" }),
+      parseCommand(() => import("./switch"), ["--space", "missing.backlog.com"]),
     ).rejects.toThrow();
   });
 
@@ -58,8 +57,7 @@ describe("auth switch", () => {
       aliases: {},
     });
 
-    const { default: switchSpace } = await import("./switch");
-    await switchSpace.parseAsync(["--space", "target.backlog.com"], { from: "user" });
+    await parseCommand(() => import("./switch"), ["--space", "target.backlog.com"]);
 
     expect(writeConfig).toHaveBeenCalledWith(
       expect.objectContaining({

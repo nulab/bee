@@ -1,17 +1,10 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  getUserStarsCount: vi.fn(),
-  getMyself: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ getUserStarsCount: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("star count", () => {
@@ -19,10 +12,8 @@ describe("star count", () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getUserStarsCount.mockResolvedValue({ count: 42 });
 
-    const { default: count } = await import("./count");
-    await count.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./count"), []);
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.getUserStarsCount).toHaveBeenCalledWith(100, {});
     expect(consola.log).toHaveBeenCalledWith("42");
@@ -31,8 +22,7 @@ describe("star count", () => {
   it("counts stars for a specific user", async () => {
     mockClient.getUserStarsCount.mockResolvedValue({ count: 10 });
 
-    const { default: count } = await import("./count");
-    await count.parseAsync(["200"], { from: "user" });
+    await parseCommand(() => import("./count"), ["200"]);
 
     expect(mockClient.getUserStarsCount).toHaveBeenCalledWith(200, {});
     expect(mockClient.getMyself).not.toHaveBeenCalled();
@@ -42,8 +32,7 @@ describe("star count", () => {
     mockClient.getMyself.mockResolvedValue({ id: 100 });
     mockClient.getUserStarsCount.mockResolvedValue({ count: 5 });
 
-    const { default: count } = await import("./count");
-    await count.parseAsync(["--since", "2025-01-01", "--until", "2025-12-31"], { from: "user" });
+    await parseCommand(() => import("./count"), ["--since", "2025-01-01", "--until", "2025-12-31"]);
 
     expect(mockClient.getUserStarsCount).toHaveBeenCalledWith(100, {
       since: "2025-01-01",
@@ -51,13 +40,16 @@ describe("star count", () => {
     });
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getMyself.mockResolvedValue({ id: 100 });
-    mockClient.getUserStarsCount.mockResolvedValue({ count: 42 });
-
-    await expectStdoutContaining(async () => {
-      const { default: count } = await import("./count");
-      await count.parseAsync(["--json"], { from: "user" });
-    }, "42");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./count"),
+      ["--json"],
+      "42",
+      () => {
+        mockClient.getMyself.mockResolvedValue({ id: 100 });
+        mockClient.getUserStarsCount.mockResolvedValue({ count: 42 });
+      },
+    ),
+  );
 });
