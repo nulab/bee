@@ -34,6 +34,14 @@ describe("status edit", () => {
     );
   });
 
+  it("propagates API error", async () => {
+    mockClient.patchProjectStatus.mockRejectedValue(new Error("API error"));
+
+    await expect(
+      parseCommand(() => import("./edit"), ["1", "-p", "TEST", "-n", "New Name"]),
+    ).rejects.toThrow("API error");
+  });
+
   it("sends exact payload when only name is provided", async () => {
     mockClient.patchProjectStatus.mockResolvedValue({ id: 1, name: "New Name", color: "#e30000" });
 

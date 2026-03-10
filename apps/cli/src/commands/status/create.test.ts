@@ -49,6 +49,14 @@ describe("status create", () => {
     expect(promptRequired).toHaveBeenCalledWith("Status name:", undefined);
   });
 
+  it("propagates API error", async () => {
+    mockClient.postProjectStatus.mockRejectedValue(new Error("API error"));
+
+    await expect(
+      parseCommand(() => import("./create"), ["-p", "TEST", "-n", "Open", "--color", "#e30000"]),
+    ).rejects.toThrow("API error");
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

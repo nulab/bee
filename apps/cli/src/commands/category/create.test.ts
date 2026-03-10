@@ -43,6 +43,14 @@ describe("category create", () => {
     expect(mockClient.postCategories).toHaveBeenCalledWith("TEST", { name: "Prompted Category" });
   });
 
+  it("propagates API error", async () => {
+    mockClient.postCategories.mockRejectedValue(new Error("API error"));
+
+    await expect(
+      parseCommand(() => import("./create"), ["-p", "TEST", "-n", "Bug"]),
+    ).rejects.toThrow("API error");
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

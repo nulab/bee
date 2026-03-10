@@ -79,6 +79,15 @@ describe("project create", () => {
     );
   });
 
+  it("propagates API error", async () => {
+    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test");
+    mockClient.postProject.mockRejectedValue(new Error("API error"));
+
+    await expect(
+      parseCommand(() => import("./create"), ["--key", "TEST", "--name", "Test"]),
+    ).rejects.toThrow("API error");
+  });
+
   it("sends exact payload with defaults when only key and name are provided", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test Project");
     mockClient.postProject.mockResolvedValue({

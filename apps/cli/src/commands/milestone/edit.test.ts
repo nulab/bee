@@ -62,6 +62,14 @@ describe("milestone edit", () => {
     );
   });
 
+  it("propagates API error", async () => {
+    mockClient.patchVersions.mockRejectedValue(new Error("API error"));
+
+    await expect(
+      parseCommand(() => import("./edit"), ["1", "-p", "TEST", "-n", "v2.0.0"]),
+    ).rejects.toThrow("API error");
+  });
+
   it("sends exact payload with only required fields (no extra fields)", async () => {
     mockClient.patchVersions.mockResolvedValue({ id: 1, name: "v2.0.0" });
 

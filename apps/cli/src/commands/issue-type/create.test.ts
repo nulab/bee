@@ -53,6 +53,14 @@ describe("issue-type create", () => {
     expect(promptRequired).toHaveBeenCalledWith("Issue type name:", undefined);
   });
 
+  it("propagates API error", async () => {
+    mockClient.postIssueType.mockRejectedValue(new Error("API error"));
+
+    await expect(
+      parseCommand(() => import("./create"), ["-p", "TEST", "-n", "Bug", "--color", "#e30000"]),
+    ).rejects.toThrow("API error");
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

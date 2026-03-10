@@ -33,6 +33,14 @@ describe("category edit", () => {
     expect(promptRequired).toHaveBeenCalledWith("Category name:", undefined);
   });
 
+  it("propagates API error", async () => {
+    mockClient.patchCategories.mockRejectedValue(new Error("API error"));
+
+    await expect(
+      parseCommand(() => import("./edit"), ["1", "-p", "TEST", "-n", "Name"]),
+    ).rejects.toThrow("API error");
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

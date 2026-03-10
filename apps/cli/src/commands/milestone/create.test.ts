@@ -68,6 +68,14 @@ describe("milestone create", () => {
     );
   });
 
+  it("propagates API error", async () => {
+    mockClient.postVersions.mockRejectedValue(new Error("API error"));
+
+    await expect(
+      parseCommand(() => import("./create"), ["-p", "TEST", "-n", "v1.0.0"]),
+    ).rejects.toThrow("API error");
+  });
+
   it("sends exact payload with only required fields (no extra fields)", async () => {
     mockClient.postVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 
