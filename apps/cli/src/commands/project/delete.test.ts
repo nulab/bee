@@ -46,6 +46,15 @@ describe("project delete", () => {
     expect(mockClient.deleteProject).not.toHaveBeenCalled();
   });
 
+  it("propagates API error", async () => {
+    vi.mocked(confirmOrExit).mockResolvedValue(true);
+    mockClient.deleteProject.mockRejectedValue(new Error("Not Found"));
+
+    await expect(parseCommand(() => import("./delete"), ["TEST", "--yes"])).rejects.toThrow(
+      "Not Found",
+    );
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

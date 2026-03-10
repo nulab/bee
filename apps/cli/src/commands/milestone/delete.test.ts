@@ -46,6 +46,15 @@ describe("milestone delete", () => {
     expect(mockClient.deleteVersions).not.toHaveBeenCalled();
   });
 
+  it("propagates API error", async () => {
+    vi.mocked(confirmOrExit).mockResolvedValue(true);
+    mockClient.deleteVersions.mockRejectedValue(new Error("Not Found"));
+
+    await expect(
+      parseCommand(() => import("./delete"), ["1", "-p", "TEST", "--yes"]),
+    ).rejects.toThrow("Not Found");
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

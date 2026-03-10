@@ -55,6 +55,18 @@ describe("status delete", () => {
     expect(mockClient.deleteProjectStatus).not.toHaveBeenCalled();
   });
 
+  it("propagates API error", async () => {
+    vi.mocked(confirmOrExit).mockResolvedValue(true);
+    mockClient.deleteProjectStatus.mockRejectedValue(new Error("Not Found"));
+
+    await expect(
+      parseCommand(
+        () => import("./delete"),
+        ["1", "-p", "TEST", "--substitute-status-id", "2", "--yes"],
+      ),
+    ).rejects.toThrow("Not Found");
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(
