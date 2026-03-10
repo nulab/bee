@@ -66,15 +66,13 @@ const loginWithApiKey = async (hostname: string, opts: { withToken?: boolean }):
 };
 
 const loginWithOAuth = async (hostname: string): Promise<void> => {
-  const clientId = await promptRequired(
-    "OAuth Client ID:",
-    process.env.BACKLOG_OAUTH_CLIENT_ID,
-  );
-
-  const clientSecret = await promptRequired(
-    "OAuth Client Secret:",
-    process.env.BACKLOG_OAUTH_CLIENT_SECRET,
-  );
+  const clientId = process.env.BACKLOG_OAUTH_CLIENT_ID;
+  const clientSecret = process.env.BACKLOG_OAUTH_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    throw new UserError(
+      "BACKLOG_OAUTH_CLIENT_ID and BACKLOG_OAUTH_CLIENT_SECRET must be set as environment variables.",
+    );
+  }
 
   const port = process.env.BACKLOG_OAUTH_PORT ? Number(process.env.BACKLOG_OAUTH_PORT) : undefined;
   if (port !== undefined && (!Number.isInteger(port) || port < 0 || port > 65_535)) {
