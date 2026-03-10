@@ -71,7 +71,26 @@ bee を AI エージェントの Skill として登録する方法です。
    ```
 
    :::note
-   `backlog-notation` はインストールしただけでは自動的に適用されません。Backlog ではプロジェクトごとに Markdown か Backlog 記法を選択できるため、利用するにはプロンプトで明示的に指示するか、プロジェクトの AGENTS.md に記載して有効化してください。
+   `backlog-notation` はインストールしただけでは自動的に適用されません。Backlog ではプロジェクトごとに Markdown か Backlog 記法を選択できるため、利用するには以下のいずれかの方法で有効化してください。
+
+   **方法 1: プロンプトで指示する**
+
+   会話の中で Backlog 記法を使うよう明示的に伝えます。
+
+   ```
+   Backlog 記法で課題の説明文を書いて。backlog-notation スキルを参照して。
+   ```
+
+   **方法 2: プロジェクトの AGENTS.md に記載する**
+
+   Backlog 記法を常に使うプロジェクトでは、AGENTS.md に記載しておくと毎回指示する必要がなくなります。
+
+   ```markdown
+   ## Backlog
+
+   このプロジェクトの Backlog スペースは Backlog 記法を使用しています。
+   Backlog に課題やコメントを書く際は backlog-notation スキルに従ってください。
+   ```
    :::
 
 3. **エージェントから使う**
