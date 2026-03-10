@@ -70,7 +70,7 @@ const list = new BeeCommand("list")
 
       const rows: Row[] = data.map((pr) => [
         { header: "#", value: String(pr.number) },
-        { header: "STATUS", value: pr.status.name },
+        { header: "STATUS", value: pr.status?.name ?? "" },
         { header: "ASSIGNEE", value: pr.assignee?.name ?? "Unassigned" },
         { header: "SUMMARY", value: pr.summary },
       ]);
