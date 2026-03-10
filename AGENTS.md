@@ -66,6 +66,15 @@ Command reference pages are **auto-generated** from CLI source code — do NOT c
 
 **When adding or removing CLI commands**, also update the command table in `skills/using-bee/SKILL.md` to keep the Skill in sync with the CLI.
 
+### Skills (`skills/`)
+
+AI エージェント向けの Skill 定義を格納するディレクトリ。
+
+| Skill              | 用途                                           |
+| ------------------ | ---------------------------------------------- |
+| `using-bee`        | bee CLI の使い方（コマンド、フラグ、パターン） |
+| `backlog-notation` | Backlog 記法（Backlog記法）の構文リファレンス  |
+
 #### Definition lists
 
 The docs site supports Markdown definition list syntax via `remark-definition-list`. Use this instead of raw `<dl>`/`<dt>`/`<dd>` HTML:
