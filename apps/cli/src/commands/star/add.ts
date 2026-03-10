@@ -25,7 +25,7 @@ const add = new BeeCommand("add")
   ])
   .action(async (opts) => {
     const flags = [opts.issue, opts.comment, opts.wiki, opts.prComment].filter(
-      (v) => v !== undefined,
+      (val) => val !== undefined,
     );
 
     if (flags.length === 0) {
