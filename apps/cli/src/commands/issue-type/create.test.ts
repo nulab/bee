@@ -49,9 +49,9 @@ describe("issue-type create", () => {
 
     await parseCommand(() => import("./create"), ["-p", "TEST", "-n", "Bug", "--color", "#e30000"]);
 
-    const callArgs = mockClient.postIssueType.mock.calls[0];
-    expect(callArgs[0]).toBe("TEST");
-    expect(callArgs[1]).toEqual({
+    const [[projectKey, params]] = mockClient.postIssueType.mock.calls;
+    expect(projectKey).toBe("TEST");
+    expect(params).toEqual({
       name: "Bug",
       color: "#e30000",
     });

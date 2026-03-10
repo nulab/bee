@@ -45,9 +45,9 @@ describe("wiki edit", () => {
 
     await parseCommand(() => import("./edit"), ["123"]);
 
-    const callArgs = mockClient.patchWiki.mock.calls[0];
-    expect(callArgs[0]).toBe(123);
-    expect(callArgs[1]).toEqual({
+    const [[wikiId, params]] = mockClient.patchWiki.mock.calls;
+    expect(wikiId).toBe(123);
+    expect(params).toEqual({
       name: undefined,
       content: undefined,
       mailNotify: undefined,

@@ -44,8 +44,8 @@ describe("wiki create", () => {
 
     await parseCommand(() => import("./create"), ["-p", "TEST", "-n", "My Page"]);
 
-    const callArgs = mockClient.postWiki.mock.calls[0];
-    expect(callArgs[0]).toEqual({
+    const [[callArgs]] = mockClient.postWiki.mock.calls;
+    expect(callArgs).toEqual({
       projectId: 100,
       name: "My Page",
       content: "",

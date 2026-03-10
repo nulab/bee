@@ -46,9 +46,9 @@ describe("status create", () => {
       ["-p", "TEST", "-n", "Open", "--color", "#e30000"],
     );
 
-    const callArgs = mockClient.postProjectStatus.mock.calls[0];
-    expect(callArgs[0]).toBe("TEST");
-    expect(callArgs[1]).toEqual({
+    const [[projectKey, params]] = mockClient.postProjectStatus.mock.calls;
+    expect(projectKey).toBe("TEST");
+    expect(params).toEqual({
       name: "Open",
       color: "#e30000",
     });

@@ -78,7 +78,7 @@ describe("document list", () => {
 
     await parseCommand(() => import("./list"), ["-p", "PROJECT"]);
 
-    const callArgs = mockClient.getDocuments.mock.calls[0][0];
+    const [[callArgs]] = mockClient.getDocuments.mock.calls;
     expect(callArgs).toEqual({
       projectId: [100],
       keyword: undefined,

@@ -219,7 +219,7 @@ describe("issue create", () => {
       ["--project", "100", "--title", "Fix bug", "--type", "1", "--priority", "normal"],
     );
 
-    const callArgs = mockClient.postIssue.mock.calls[0][0];
+    const [[callArgs]] = mockClient.postIssue.mock.calls;
     expect(callArgs).toEqual({
       projectId: 100,
       summary: "Fix bug",

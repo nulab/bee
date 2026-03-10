@@ -29,10 +29,10 @@ describe("category edit", () => {
 
     await parseCommand(() => import("./edit"), ["1", "-p", "TEST", "-n", "Name"]);
 
-    const callArgs = mockClient.patchCategories.mock.calls[0];
-    expect(callArgs[0]).toBe("TEST");
-    expect(callArgs[1]).toBe(1);
-    expect(callArgs[2]).toEqual({
+    const [[projectKey, categoryId, params]] = mockClient.patchCategories.mock.calls;
+    expect(projectKey).toBe("TEST");
+    expect(categoryId).toBe(1);
+    expect(params).toEqual({
       name: "Name",
     });
   });

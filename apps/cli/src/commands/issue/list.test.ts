@@ -73,7 +73,7 @@ describe("issue list", () => {
 
     await parseCommand(() => import("./list"), []);
 
-    const callArgs = mockClient.getIssues.mock.calls[0][0];
+    const [[callArgs]] = mockClient.getIssues.mock.calls;
     expect(callArgs).toEqual({
       projectId: [],
       assigneeId: [],

@@ -108,7 +108,7 @@ describe("issue edit", () => {
 
     await parseCommand(() => import("./edit"), ["TEST-1", "--title", "New title"]);
 
-    const [issueKey, payload] = mockClient.patchIssue.mock.calls[0];
+    const [[issueKey, payload]] = mockClient.patchIssue.mock.calls;
     expect(issueKey).toBe("TEST-1");
     expect(payload).toEqual({
       summary: "New title",

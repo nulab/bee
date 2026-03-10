@@ -99,10 +99,10 @@ describe("pr list", () => {
 
     await parseCommand(() => import("./list"), ["--project", "PROJ", "--repo", "repo"]);
 
-    const callArgs = mockClient.getPullRequests.mock.calls[0];
-    expect(callArgs[0]).toBe("PROJ");
-    expect(callArgs[1]).toBe("repo");
-    expect(callArgs[2]).toEqual({
+    const [[projectKey, repoName, params]] = mockClient.getPullRequests.mock.calls;
+    expect(projectKey).toBe("PROJ");
+    expect(repoName).toBe("repo");
+    expect(params).toEqual({
       statusId: undefined,
       assigneeId: undefined,
       issueId: undefined,

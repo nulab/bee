@@ -35,7 +35,7 @@ describe("project list", () => {
 
     await parseCommand(() => import("./list"), []);
 
-    const callArgs = mockClient.getProjects.mock.calls[0][0];
+    const [[callArgs]] = mockClient.getProjects.mock.calls;
     expect(callArgs).toEqual({
       archived: undefined,
       all: undefined,

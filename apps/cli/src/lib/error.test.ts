@@ -15,21 +15,15 @@ vi.mock("consola", () => ({
   LogLevels: { debug: 4 },
 }));
 
-vi.mock("@repo/backlog-utils", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@repo/backlog-utils")>();
-  return {
-    ...actual,
-    handleBacklogApiError: vi.fn(() => false),
-  };
-});
+vi.mock("@repo/backlog-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  handleBacklogApiError: vi.fn(() => false),
+}));
 
-vi.mock("@repo/cli-utils", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@repo/cli-utils")>();
-  return {
-    ...actual,
-    handleValidationError: vi.fn(() => false),
-  };
-});
+vi.mock("@repo/cli-utils", async (importOriginal) => ({
+  ...(await importOriginal()),
+  handleValidationError: vi.fn(() => false),
+}));
 
 let exitSpy: ReturnType<typeof vi.spyOn>;
 
