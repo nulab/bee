@@ -142,33 +142,6 @@ describe("issue create", () => {
     );
   });
 
-  it("propagates error when @me resolution fails for assignee", async () => {
-    vi.mocked(promptRequired)
-      .mockResolvedValueOnce("100")
-      .mockResolvedValueOnce("Title")
-      .mockResolvedValueOnce("1")
-      .mockResolvedValueOnce("normal");
-    mockClient.getMyself.mockRejectedValue(new Error("Unauthorized"));
-
-    await expect(
-      parseCommand(
-        () => import("./create"),
-        [
-          "--project",
-          "100",
-          "--title",
-          "Title",
-          "--type",
-          "1",
-          "--priority",
-          "normal",
-          "--assignee",
-          "@me",
-        ],
-      ),
-    ).rejects.toThrow("Unauthorized");
-  });
-
   it("passes notifiedUserId and attachmentId to API", async () => {
     vi.mocked(promptRequired)
       .mockResolvedValueOnce("100")

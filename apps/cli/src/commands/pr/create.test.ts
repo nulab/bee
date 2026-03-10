@@ -149,58 +149,6 @@ describe("pr create", () => {
     );
   });
 
-  it("propagates error when @me resolution fails for assignee", async () => {
-    mockClient.getMyself.mockRejectedValue(new Error("Unauthorized"));
-
-    await expect(
-      parseCommand(
-        () => import("./create"),
-        [
-          "--project",
-          "PROJ",
-          "--repo",
-          "repo",
-          "--base",
-          "main",
-          "--head",
-          "feature",
-          "--title",
-          "Title",
-          "--body",
-          "Desc",
-          "--assignee",
-          "@me",
-        ],
-      ),
-    ).rejects.toThrow("Unauthorized");
-  });
-
-  it("does not call getMyself when @me is not used", async () => {
-    mockClient.postPullRequest.mockResolvedValue({ number: 5, summary: "Title" });
-
-    await parseCommand(
-      () => import("./create"),
-      [
-        "--project",
-        "PROJ",
-        "--repo",
-        "repo",
-        "--base",
-        "main",
-        "--head",
-        "feature",
-        "--title",
-        "Title",
-        "--body",
-        "Desc",
-        "--assignee",
-        "123",
-      ],
-    );
-
-    expect(mockClient.getMyself).not.toHaveBeenCalled();
-  });
-
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

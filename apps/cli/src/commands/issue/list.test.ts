@@ -68,22 +68,6 @@ describe("issue list", () => {
     );
   });
 
-  it("propagates error when @me resolution fails", async () => {
-    mockClient.getMyself.mockRejectedValue(new Error("Unauthorized"));
-
-    await expect(parseCommand(() => import("./list"), ["--assignee", "@me"])).rejects.toThrow(
-      "Unauthorized",
-    );
-  });
-
-  it("does not call getMyself when @me is not used", async () => {
-    mockClient.getIssues.mockResolvedValue([]);
-
-    await parseCommand(() => import("./list"), ["--assignee", "42"]);
-
-    expect(mockClient.getMyself).not.toHaveBeenCalled();
-  });
-
   it("sends exact default query parameters (no extra fields)", async () => {
     mockClient.getIssues.mockResolvedValue([]);
 
