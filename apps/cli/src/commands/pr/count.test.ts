@@ -52,6 +52,22 @@ describe("pr count", () => {
     ),
   );
 
+  it("resolves @me to current user ID for assignee", async () => {
+    mockClient.getPullRequestsCount.mockResolvedValue({ count: 5 });
+
+    await parseCommand(
+      () => import("./count"),
+      ["--project", "TEST", "--repo", "my-repo", "--assignee", "@me"],
+    );
+
+    expect(mockClient.getMyself).toHaveBeenCalled();
+    expect(mockClient.getPullRequestsCount).toHaveBeenCalledWith(
+      "TEST",
+      "my-repo",
+      expect.objectContaining({ assigneeId: [99] }),
+    );
+  });
+
   it("throws error for unknown status name", async () => {
     await expect(
       parseCommand(

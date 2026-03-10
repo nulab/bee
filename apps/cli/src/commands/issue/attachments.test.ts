@@ -46,6 +46,27 @@ describe("issue attachments", () => {
     expect(consola.info).toHaveBeenCalledWith("No attachments found.");
   });
 
+  it("handles null createdUser gracefully", async () => {
+    mockClient.getIssueAttachments.mockResolvedValue([
+      {
+        id: 1,
+        name: "file.png",
+        size: 1024,
+        createdUser: null,
+        created: "2025-01-01T00:00:00Z",
+      },
+    ]);
+    const { default: attachments } = await import("./attachments");
+    await attachments.parseAsync(["TEST-1"], { from: "user" });
+    expect(printTable).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.arrayContaining([
+          expect.objectContaining({ header: "CREATED BY", value: "Unknown" }),
+        ]),
+      ]),
+    );
+  });
+
   it("outputs JSON when --json flag is set", async () => {
     mockClient.getIssueAttachments.mockResolvedValue([
       {

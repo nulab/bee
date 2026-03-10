@@ -63,6 +63,19 @@ describe("wiki view", () => {
     ),
   );
 
+  it("handles null createdUser and updatedUser gracefully", async () => {
+    mockClient.getWiki.mockResolvedValue({
+      ...sampleWiki,
+      createdUser: null,
+      updatedUser: null,
+    });
+
+    await parseCommand(() => import("./view"), ["123"]);
+
+    expect(mockClient.getWiki).toHaveBeenCalledWith(123);
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Home"));
+  });
+
   it("handles wiki page with no tags", async () => {
     mockClient.getWiki.mockResolvedValue({ ...sampleWiki, tags: [] });
 

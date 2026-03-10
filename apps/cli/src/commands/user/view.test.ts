@@ -43,6 +43,15 @@ describe("user view", () => {
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Administrator"));
   });
 
+  it("handles null lastLoginTime gracefully", async () => {
+    mockClient.getUser.mockResolvedValue({ ...sampleUser, lastLoginTime: null });
+
+    await parseCommand(() => import("./view"), ["12345"]);
+
+    expect(mockClient.getUser).toHaveBeenCalledWith(12_345);
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Test User"));
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(
