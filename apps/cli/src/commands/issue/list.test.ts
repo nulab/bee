@@ -114,6 +114,31 @@ describe("issue list", () => {
     expect(mockClient.getMyself).not.toHaveBeenCalled();
   });
 
+  it("sends exact default query parameters (no extra fields)", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    await parseCommand(() => import("./list"), []);
+
+    const callArgs = mockClient.getIssues.mock.calls[0][0];
+    expect(callArgs).toEqual({
+      projectId: [],
+      assigneeId: [],
+      statusId: [],
+      priorityId: [],
+      keyword: undefined,
+      sort: undefined,
+      order: undefined,
+      count: undefined,
+      offset: undefined,
+      createdSince: undefined,
+      createdUntil: undefined,
+      updatedSince: undefined,
+      updatedUntil: undefined,
+      dueDateSince: undefined,
+      dueDateUntil: undefined,
+    });
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

@@ -109,6 +109,24 @@ describe("pr list", () => {
     );
   });
 
+  it("sends exact default query parameters (no extra fields)", async () => {
+    mockClient.getPullRequests.mockResolvedValue([]);
+
+    await parseCommand(() => import("./list"), ["--project", "PROJ", "--repo", "repo"]);
+
+    const callArgs = mockClient.getPullRequests.mock.calls[0];
+    expect(callArgs[0]).toBe("PROJ");
+    expect(callArgs[1]).toBe("repo");
+    expect(callArgs[2]).toEqual({
+      statusId: undefined,
+      assigneeId: undefined,
+      issueId: undefined,
+      createdUserId: undefined,
+      count: undefined,
+      offset: undefined,
+    });
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

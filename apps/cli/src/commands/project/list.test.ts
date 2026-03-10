@@ -48,6 +48,18 @@ describe("project list", () => {
     expect(mockClient.getProjects).toHaveBeenCalledWith(expect.objectContaining({ all: true }));
   });
 
+  it("sends exact default query parameters (no extra fields)", async () => {
+    mockClient.getProjects.mockResolvedValue([]);
+
+    await parseCommand(() => import("./list"), []);
+
+    const callArgs = mockClient.getProjects.mock.calls[0][0];
+    expect(callArgs).toEqual({
+      archived: undefined,
+      all: undefined,
+    });
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

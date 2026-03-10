@@ -106,6 +106,22 @@ describe("document list", () => {
     );
   });
 
+  it("sends exact default query parameters (no extra fields)", async () => {
+    mockClient.getDocuments.mockResolvedValue([]);
+
+    await parseCommand(() => import("./list"), ["-p", "PROJECT"]);
+
+    const callArgs = mockClient.getDocuments.mock.calls[0][0];
+    expect(callArgs).toEqual({
+      projectId: [100],
+      keyword: undefined,
+      sort: undefined,
+      order: undefined,
+      count: undefined,
+      offset: 0,
+    });
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(
