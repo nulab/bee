@@ -70,12 +70,10 @@ Command reference pages are **auto-generated** from CLI source code — do NOT c
 
 AI エージェント向けの Skill 定義を格納するディレクトリ。
 
-| Skill | 用途 | 自動トリガー |
-|---|---|---|
-| `using-bee` | bee CLI の使い方（コマンド、フラグ、パターン） | Yes — Backlog 関連の会話で自動発動 |
-| `backlog-notation` | Backlog 記法（Backlog記法）の構文リファレンス | No — AGENTS.md やプロンプトで明示的に有効化 |
-
-`backlog-notation` は Backlog 記法を使うプロジェクト向けの構文リファレンスです。Backlog ではプロジェクトごとに Markdown か Backlog 記法を選択できるため、このスキルは自動トリガーされません。Backlog 記法を使うプロジェクトで作業する場合は、プロジェクトの AGENTS.md やプロンプトで明示的に有効化してください。
+| Skill | 用途 |
+|---|---|
+| `using-bee` | bee CLI の使い方（コマンド、フラグ、パターン） |
+| `backlog-notation` | Backlog 記法（Backlog記法）の構文リファレンス |
 
 #### Definition lists
 
