@@ -30,6 +30,7 @@ describe("issue comment", () => {
     expect(mockClient.postIssueComments).toHaveBeenCalledWith("TEST-1", {
       content: "Hello",
       notifiedUserId: [],
+      attachmentId: [],
     });
     expect(consola.success).toHaveBeenCalledWith("Added comment to TEST-1");
   });
@@ -44,6 +45,7 @@ describe("issue comment", () => {
     expect(mockClient.postIssueComments).toHaveBeenCalledWith("TEST-1", {
       content: "Stdin content",
       notifiedUserId: [],
+      attachmentId: [],
     });
   });
 
@@ -58,6 +60,23 @@ describe("issue comment", () => {
     expect(mockClient.postIssueComments).toHaveBeenCalledWith("TEST-1", {
       content: "FYI",
       notifiedUserId: [111, 222],
+      attachmentId: [],
+    });
+  });
+
+  it("adds a comment with attachments", async () => {
+    mockClient.postIssueComments.mockResolvedValue({ id: 4, content: "See attached" });
+
+    const { default: comment } = await import("./comment");
+    await comment.parseAsync(
+      ["TEST-1", "--body", "See attached", "--attachment", "1", "--attachment", "2"],
+      { from: "user" },
+    );
+
+    expect(mockClient.postIssueComments).toHaveBeenCalledWith("TEST-1", {
+      content: "See attached",
+      notifiedUserId: [],
+      attachmentId: [1, 2],
     });
   });
 
