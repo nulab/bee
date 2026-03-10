@@ -64,6 +64,16 @@ bee を AI エージェントの Skill として登録する方法です。
    npx skills add nulab/bee --skill using-bee
    ```
 
+   Backlog 記法（Markdown ではなく Backlog 独自の記法）を使うプロジェクトでは、構文リファレンスのスキルも追加できます。
+
+   ```sh
+   npx skills add nulab/bee --skill backlog-notation
+   ```
+
+   :::note
+   `backlog-notation` はオプションです。Backlog ではプロジェクトごとに Markdown か Backlog 記法を選択できるため、Backlog 記法を使うプロジェクトでのみ追加してください。
+   :::
+
 3. **エージェントから使う**
 
    スキルを登録すると、やりたいことを伝えるだけで bee を使って Backlog を操作してくれます。プロンプトに「Backlog」や課題キーなど、Backlog に関連する単語を含めるとスキルがトリガーされます。
