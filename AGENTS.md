@@ -352,6 +352,30 @@ All list commands use the pattern: `consola.info("No <plural> found.")` (e.g., `
 - **Error path tests must exercise actual branching logic** — test explicit `throw`, `consola.error()`, or early `return` branches in the implementation. Do not write tests that only verify default error propagation (e.g., testing that an `await` without `try/catch` propagates a rejection is testing JavaScript, not the command).
 - **Extract shared mock setup into helper functions** — when multiple tests in the same `describe` need the same mock state, use a named setup function (e.g., `setupOAuthMocks()`).
 
+### What to test vs. what not to test
+
+Following [CLI Guidelines (clig.dev)](https://clig.dev/), command tests should focus on **CLI user experience** and **application-specific logic**, not on verifying that libraries work correctly.
+
+**DO test (application logic):**
+
+- Custom value resolution (`@me` → user ID, issue key → issue ID, status name → status ID)
+- Conditional display logic (`null` → `"Unassigned"`, `archived` → `"Archived"`)
+- API payload construction with correct defaults and field composition
+- Success/error message content and format (correct verb, resource identifier, URL)
+- Output routing (correct `consola` method: `consola.log` for data, `consola.success` for actions, `consola.info` for informational, `consola.error` for errors)
+- Confirmation prompts for destructive actions (`confirmOrExit` is called, `--yes` bypasses it)
+- Null/undefined resilience in API response display (optional chaining for nullable fields)
+
+**DO NOT test (library/framework responsibility):**
+
+- citty/Commander option parsing (e.g., `--keyword "x"` → `keyword: "x"`)
+- `splitArg` / `collect` / `collectNum` array collection behavior
+- Boolean flag parsing (`--archived` → `true`)
+- Simple option forwarding where the handler passes the parsed value to the API unchanged
+- Default error propagation through `await` without `try/catch` (this tests JavaScript, not the command)
+
+**Guiding principle:** If removing the test wouldn't reduce confidence in _your own code_, the test is verifying the library, not the application.
+
 ## Code Conventions (enforced by oxlint)
 
 - **Named exports only** — no default exports (`import/no-default-export`)
