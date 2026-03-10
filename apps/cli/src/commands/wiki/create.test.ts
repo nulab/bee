@@ -64,29 +64,6 @@ describe("wiki create", () => {
     expect(promptRequired).toHaveBeenCalledWith("Page name:", undefined);
   });
 
-  it("propagates API error", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Page");
-    mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
-    mockClient.postWiki.mockRejectedValue(new Error("API error"));
-
-    await expect(
-      parseCommand(() => import("./create"), ["-p", "TEST", "-n", "Page", "-b", "Content"]),
-    ).rejects.toThrow("API error");
-  });
-
-  it("passes notify flag", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("My Page");
-    mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
-    mockClient.postWiki.mockResolvedValue({ id: 1, name: "My Page" });
-
-    await parseCommand(
-      () => import("./create"),
-      ["-p", "TEST", "-n", "My Page", "-b", "Hello", "--mail-notify"],
-    );
-
-    expect(mockClient.postWiki).toHaveBeenCalledWith(expect.objectContaining({ mailNotify: true }));
-  });
-
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

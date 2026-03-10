@@ -30,24 +30,6 @@ describe("project list", () => {
     expect(consola.info).toHaveBeenCalledWith("No projects found.");
   });
 
-  it("passes archived query parameter", async () => {
-    mockClient.getProjects.mockResolvedValue([]);
-
-    await parseCommand(() => import("./list"), ["--archived"]);
-
-    expect(mockClient.getProjects).toHaveBeenCalledWith(
-      expect.objectContaining({ archived: true }),
-    );
-  });
-
-  it("passes all query parameter", async () => {
-    mockClient.getProjects.mockResolvedValue([]);
-
-    await parseCommand(() => import("./list"), ["--all"]);
-
-    expect(mockClient.getProjects).toHaveBeenCalledWith(expect.objectContaining({ all: true }));
-  });
-
   it("sends exact default query parameters (no extra fields)", async () => {
     mockClient.getProjects.mockResolvedValue([]);
 

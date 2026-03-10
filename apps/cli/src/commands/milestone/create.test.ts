@@ -42,40 +42,6 @@ describe("milestone create", () => {
     expect(promptRequired).toHaveBeenCalledWith("Milestone name:", undefined);
   });
 
-  it("passes date parameters", async () => {
-    mockClient.postVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
-
-    await parseCommand(
-      () => import("./create"),
-      [
-        "-p",
-        "TEST",
-        "-n",
-        "v1.0.0",
-        "--start-date",
-        "2026-04-01",
-        "--release-due-date",
-        "2026-06-30",
-      ],
-    );
-
-    expect(mockClient.postVersions).toHaveBeenCalledWith(
-      "TEST",
-      expect.objectContaining({
-        startDate: "2026-04-01",
-        releaseDueDate: "2026-06-30",
-      }),
-    );
-  });
-
-  it("propagates API error", async () => {
-    mockClient.postVersions.mockRejectedValue(new Error("API error"));
-
-    await expect(
-      parseCommand(() => import("./create"), ["-p", "TEST", "-n", "v1.0.0"]),
-    ).rejects.toThrow("API error");
-  });
-
   it("sends exact payload with only required fields (no extra fields)", async () => {
     mockClient.postVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
 

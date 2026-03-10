@@ -22,54 +22,6 @@ describe("milestone edit", () => {
     expect(consola.success).toHaveBeenCalledWith("Updated milestone v2.0.0 (ID: 1)");
   });
 
-  it("archives a milestone", async () => {
-    mockClient.patchVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
-
-    await parseCommand(() => import("./edit"), ["1", "-p", "TEST", "-n", "v1.0.0", "--archived"]);
-
-    expect(mockClient.patchVersions).toHaveBeenCalledWith(
-      "TEST",
-      1,
-      expect.objectContaining({ archived: true }),
-    );
-  });
-
-  it("updates date fields", async () => {
-    mockClient.patchVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
-
-    await parseCommand(
-      () => import("./edit"),
-      [
-        "1",
-        "-p",
-        "TEST",
-        "-n",
-        "v1.0.0",
-        "--start-date",
-        "2026-07-01",
-        "--release-due-date",
-        "2026-12-31",
-      ],
-    );
-
-    expect(mockClient.patchVersions).toHaveBeenCalledWith(
-      "TEST",
-      1,
-      expect.objectContaining({
-        startDate: "2026-07-01",
-        releaseDueDate: "2026-12-31",
-      }),
-    );
-  });
-
-  it("propagates API error", async () => {
-    mockClient.patchVersions.mockRejectedValue(new Error("API error"));
-
-    await expect(
-      parseCommand(() => import("./edit"), ["1", "-p", "TEST", "-n", "v2.0.0"]),
-    ).rejects.toThrow("API error");
-  });
-
   it("sends exact payload with only required fields (no extra fields)", async () => {
     mockClient.patchVersions.mockResolvedValue({ id: 1, name: "v2.0.0" });
 

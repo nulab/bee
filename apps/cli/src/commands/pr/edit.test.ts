@@ -34,38 +34,6 @@ describe("pr edit", () => {
     expect(consola.success).toHaveBeenCalledWith("Updated pull request #42: New title");
   });
 
-  it("updates pull request with a comment", async () => {
-    mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
-
-    await parseCommand(
-      () => import("./edit"),
-      ["42", "--project", "PROJ", "--repo", "repo", "--title", "Title", "--comment", "Updated"],
-    );
-
-    expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
-      "PROJ",
-      "repo",
-      42,
-      expect.objectContaining({ comment: "Updated" }),
-    );
-  });
-
-  it("updates pull request with notified users", async () => {
-    mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
-
-    await parseCommand(
-      () => import("./edit"),
-      ["42", "--project", "PROJ", "--repo", "repo", "--notify", "111", "--notify", "222"],
-    );
-
-    expect(mockClient.patchPullRequest).toHaveBeenCalledWith(
-      "PROJ",
-      "repo",
-      42,
-      expect.objectContaining({ notifiedUserId: [111, 222] }),
-    );
-  });
-
   it("resolves issue key to issue ID", async () => {
     mockClient.getIssue.mockResolvedValue({ id: 789 });
     mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });

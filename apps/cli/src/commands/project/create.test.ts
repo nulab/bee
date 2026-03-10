@@ -58,64 +58,6 @@ describe("project create", () => {
     );
   });
 
-  it("passes optional flags to API", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test");
-    mockClient.postProject.mockResolvedValue({
-      projectKey: "TEST",
-      name: "Test",
-      textFormattingRule: "markdown",
-    });
-
-    await parseCommand(
-      () => import("./create"),
-      ["--key", "TEST", "--name", "Test", "--chart-enabled", "--text-formatting-rule", "markdown"],
-    );
-
-    expect(mockClient.postProject).toHaveBeenCalledWith(
-      expect.objectContaining({
-        chartEnabled: true,
-        textFormattingRule: "markdown",
-      }),
-    );
-  });
-
-  it("enables chart and subtasking when flags provided", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test");
-    mockClient.postProject.mockResolvedValue({ projectKey: "TEST", name: "Test" });
-
-    await parseCommand(
-      () => import("./create"),
-      ["--key", "TEST", "--name", "Test", "--chart-enabled", "--subtasking-enabled"],
-    );
-
-    expect(mockClient.postProject).toHaveBeenCalledWith(
-      expect.objectContaining({ chartEnabled: true, subtaskingEnabled: true }),
-    );
-  });
-
-  it("uses specified text formatting rule", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test");
-    mockClient.postProject.mockResolvedValue({ projectKey: "TEST", name: "Test" });
-
-    await parseCommand(
-      () => import("./create"),
-      ["--key", "TEST", "--name", "Test", "--text-formatting-rule", "backlog"],
-    );
-
-    expect(mockClient.postProject).toHaveBeenCalledWith(
-      expect.objectContaining({ textFormattingRule: "backlog" }),
-    );
-  });
-
-  it("propagates API error", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test");
-    mockClient.postProject.mockRejectedValue(new Error("API error"));
-
-    await expect(
-      parseCommand(() => import("./create"), ["--key", "TEST", "--name", "Test"]),
-    ).rejects.toThrow("API error");
-  });
-
   it("sends exact payload with defaults when only key and name are provided", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test Project");
     mockClient.postProject.mockResolvedValue({

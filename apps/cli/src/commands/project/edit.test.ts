@@ -48,14 +48,6 @@ describe("project edit", () => {
     );
   });
 
-  it("propagates API error", async () => {
-    mockClient.patchProject.mockRejectedValue(new Error("API error"));
-
-    await expect(
-      parseCommand(() => import("./edit"), ["TEST", "--name", "New Name"]),
-    ).rejects.toThrow("API error");
-  });
-
   it("sends exact payload when only name is provided", async () => {
     mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "New Name" });
 

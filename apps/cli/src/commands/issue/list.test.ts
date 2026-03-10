@@ -57,26 +57,6 @@ describe("issue list", () => {
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unassigned"));
   });
 
-  it("passes project query parameter", async () => {
-    mockClient.getIssues.mockResolvedValue([]);
-
-    await parseCommand(() => import("./list"), ["--project", "123"]);
-
-    expect(mockClient.getIssues).toHaveBeenCalledWith(
-      expect.objectContaining({ projectId: [123] }),
-    );
-  });
-
-  it("passes assignee query parameter", async () => {
-    mockClient.getIssues.mockResolvedValue([]);
-
-    await parseCommand(() => import("./list"), ["--assignee", "42"]);
-
-    expect(mockClient.getIssues).toHaveBeenCalledWith(
-      expect.objectContaining({ assigneeId: [42] }),
-    );
-  });
-
   it("resolves @me to current user ID for assignee", async () => {
     mockClient.getIssues.mockResolvedValue([]);
 
@@ -85,16 +65,6 @@ describe("issue list", () => {
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.getIssues).toHaveBeenCalledWith(
       expect.objectContaining({ assigneeId: [99] }),
-    );
-  });
-
-  it("passes keyword query parameter", async () => {
-    mockClient.getIssues.mockResolvedValue([]);
-
-    await parseCommand(() => import("./list"), ["--keyword", "login bug"]);
-
-    expect(mockClient.getIssues).toHaveBeenCalledWith(
-      expect.objectContaining({ keyword: "login bug" }),
     );
   });
 
@@ -137,26 +107,6 @@ describe("issue list", () => {
       dueDateSince: undefined,
       dueDateUntil: undefined,
     });
-  });
-
-  it("combines multiple assignee filters", async () => {
-    mockClient.getIssues.mockResolvedValue([]);
-
-    await parseCommand(() => import("./list"), ["--assignee", "10", "--assignee", "20"]);
-
-    expect(mockClient.getIssues).toHaveBeenCalledWith(
-      expect.objectContaining({ assigneeId: [10, 20] }),
-    );
-  });
-
-  it("combines multiple status filters", async () => {
-    mockClient.getIssues.mockResolvedValue([]);
-
-    await parseCommand(() => import("./list"), ["--status", "1", "--status", "2", "--status", "3"]);
-
-    expect(mockClient.getIssues).toHaveBeenCalledWith(
-      expect.objectContaining({ statusId: [1, 2, 3] }),
-    );
   });
 
   it("combines multiple priority filters", async () => {

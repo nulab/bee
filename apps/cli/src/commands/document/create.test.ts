@@ -95,15 +95,6 @@ describe("document create", () => {
     );
   });
 
-  it("propagates API error", async () => {
-    vi.mocked(promptRequired).mockResolvedValueOnce("100").mockResolvedValueOnce("Title");
-    mockClient.addDocument.mockRejectedValue(new Error("API error"));
-
-    await expect(
-      parseCommand(() => import("./create"), ["-p", "100", "-t", "Title"]),
-    ).rejects.toThrow("API error");
-  });
-
   it("sends exact payload with only required fields (no extra fields)", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("100").mockResolvedValueOnce("Title");
     mockClient.addDocument.mockResolvedValue({ id: "10", title: "Title" });

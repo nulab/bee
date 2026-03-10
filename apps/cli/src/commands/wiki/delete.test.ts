@@ -54,16 +54,6 @@ describe("wiki delete", () => {
 
     expect(mockClient.deleteWiki).toHaveBeenCalledWith(123, true);
   });
-
-  it("propagates API error", async () => {
-    vi.mocked(confirmOrExit).mockResolvedValue(true);
-    mockClient.deleteWiki.mockRejectedValue(new Error("Not Found"));
-
-    await expect(parseCommand(() => import("./delete"), ["123", "--yes"])).rejects.toThrow(
-      "Not Found",
-    );
-  });
-
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

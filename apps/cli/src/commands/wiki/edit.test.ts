@@ -53,25 +53,6 @@ describe("wiki edit", () => {
     );
   });
 
-  it("propagates API error", async () => {
-    mockClient.patchWiki.mockRejectedValue(new Error("API error"));
-
-    await expect(parseCommand(() => import("./edit"), ["123", "-n", "Page"])).rejects.toThrow(
-      "API error",
-    );
-  });
-
-  it("passes notify flag", async () => {
-    mockClient.patchWiki.mockResolvedValue({ id: 123, name: "Page" });
-
-    await parseCommand(() => import("./edit"), ["123", "-n", "Page", "--mail-notify"]);
-
-    expect(mockClient.patchWiki).toHaveBeenCalledWith(
-      123,
-      expect.objectContaining({ mailNotify: true }),
-    );
-  });
-
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

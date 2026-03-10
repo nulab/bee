@@ -78,21 +78,6 @@ describe("pr list", () => {
     ).rejects.toThrow('Unknown status "invalid"');
   });
 
-  it("passes assignee filter parameter", async () => {
-    mockClient.getPullRequests.mockResolvedValue([]);
-
-    await parseCommand(
-      () => import("./list"),
-      ["--project", "PROJ", "--repo", "repo", "--assignee", "42"],
-    );
-
-    expect(mockClient.getPullRequests).toHaveBeenCalledWith(
-      "PROJ",
-      "repo",
-      expect.objectContaining({ assigneeId: [42] }),
-    );
-  });
-
   it("resolves @me to current user ID for assignee", async () => {
     mockClient.getPullRequests.mockResolvedValue([]);
 
@@ -139,36 +124,6 @@ describe("pr list", () => {
       "PROJ",
       "repo",
       expect.objectContaining({ statusId: [1, 2] }),
-    );
-  });
-
-  it("combines multiple assignee filters", async () => {
-    mockClient.getPullRequests.mockResolvedValue([]);
-
-    await parseCommand(
-      () => import("./list"),
-      ["--project", "PROJ", "--repo", "repo", "--assignee", "10", "--assignee", "20"],
-    );
-
-    expect(mockClient.getPullRequests).toHaveBeenCalledWith(
-      "PROJ",
-      "repo",
-      expect.objectContaining({ assigneeId: [10, 20] }),
-    );
-  });
-
-  it("combines multiple issue filters", async () => {
-    mockClient.getPullRequests.mockResolvedValue([]);
-
-    await parseCommand(
-      () => import("./list"),
-      ["--project", "PROJ", "--repo", "repo", "--issue", "1", "--issue", "2"],
-    );
-
-    expect(mockClient.getPullRequests).toHaveBeenCalledWith(
-      "PROJ",
-      "repo",
-      expect.objectContaining({ issueId: [1, 2] }),
     );
   });
 

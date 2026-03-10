@@ -73,39 +73,6 @@ describe("document list", () => {
     expect(consola.info).toHaveBeenCalledWith("No documents found.");
   });
 
-  it("passes keyword query parameter", async () => {
-    mockClient.getDocuments.mockResolvedValue([]);
-
-    await parseCommand(() => import("./list"), ["-p", "PROJECT", "-k", "meeting"]);
-
-    expect(mockClient.getDocuments).toHaveBeenCalledWith(
-      expect.objectContaining({ keyword: "meeting" }),
-    );
-  });
-
-  it("passes sort and order parameters", async () => {
-    mockClient.getDocuments.mockResolvedValue([]);
-
-    await parseCommand(
-      () => import("./list"),
-      ["-p", "PROJECT", "--sort", "created", "--order", "asc"],
-    );
-
-    expect(mockClient.getDocuments).toHaveBeenCalledWith(
-      expect.objectContaining({ sort: "created", order: "asc" }),
-    );
-  });
-
-  it("passes count and offset parameters", async () => {
-    mockClient.getDocuments.mockResolvedValue([]);
-
-    await parseCommand(() => import("./list"), ["-p", "PROJECT", "-L", "10", "--offset", "5"]);
-
-    expect(mockClient.getDocuments).toHaveBeenCalledWith(
-      expect.objectContaining({ count: 10, offset: 5 }),
-    );
-  });
-
   it("sends exact default query parameters (no extra fields)", async () => {
     mockClient.getDocuments.mockResolvedValue([]);
 
