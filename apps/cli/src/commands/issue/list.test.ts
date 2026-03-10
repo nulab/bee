@@ -79,6 +79,12 @@ describe("issue list", () => {
       assigneeId: [],
       statusId: [],
       priorityId: [],
+      issueTypeId: [],
+      categoryId: [],
+      versionId: [],
+      milestoneId: [],
+      resolutionId: [],
+      parentIssueId: [],
       keyword: undefined,
       sort: undefined,
       order: undefined,
@@ -88,6 +94,8 @@ describe("issue list", () => {
       createdUntil: undefined,
       updatedSince: undefined,
       updatedUntil: undefined,
+      startDateSince: undefined,
+      startDateUntil: undefined,
       dueDateSince: undefined,
       dueDateUntil: undefined,
     });
@@ -100,6 +108,62 @@ describe("issue list", () => {
 
     expect(mockClient.getIssues).toHaveBeenCalledWith(
       expect.objectContaining({ priorityId: [2, 4] }),
+    );
+  });
+
+  it("passes issue type filter", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    await parseCommand(() => import("./list"), ["--type", "1", "--type", "2"]);
+
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({ issueTypeId: [1, 2] }),
+    );
+  });
+
+  it("passes category, version, and milestone filters", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    await parseCommand(
+      () => import("./list"),
+      ["--category", "10", "--version", "20", "--milestone", "30", "--milestone", "31"],
+    );
+
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        categoryId: [10],
+        versionId: [20],
+        milestoneId: [30, 31],
+      }),
+    );
+  });
+
+  it("passes resolution and parent issue filters", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    await parseCommand(() => import("./list"), ["--resolution", "0", "--parent-issue", "100"]);
+
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resolutionId: [0],
+        parentIssueId: [100],
+      }),
+    );
+  });
+
+  it("passes start date range filters", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    await parseCommand(
+      () => import("./list"),
+      ["--start-since", "2026-01-01", "--start-until", "2026-12-31"],
+    );
+
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        startDateSince: "2026-01-01",
+        startDateUntil: "2026-12-31",
+      }),
     );
   });
 

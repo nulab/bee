@@ -35,11 +35,19 @@ const list = new BeeCommand("list")
   .addOption(opt.assigneeList())
   .option("-S, --status <id>", "Status ID (repeatable)", collectNum, [] satisfies number[])
   .option("-P, --priority <name>", "Priority name (repeatable)", collect, [] satisfies string[])
+  .option("-T, --type <id>", "Issue type ID (repeatable)", collectNum, [] satisfies number[])
+  .option("--category <id>", "Category ID (repeatable)", collectNum, [] satisfies number[])
+  .option("--version <id>", "Version ID (repeatable)", collectNum, [] satisfies number[])
+  .option("--milestone <id>", "Milestone ID (repeatable)", collectNum, [] satisfies number[])
+  .option("--resolution <id>", "Resolution ID (repeatable)", collectNum, [] satisfies number[])
+  .option("--parent-issue <id>", "Parent issue ID (repeatable)", collectNum, [] satisfies number[])
   .addOption(opt.keyword())
   .option("--created-since <date>", "Show issues created on or after this date")
   .option("--created-until <date>", "Show issues created on or before this date")
   .option("--updated-since <date>", "Show issues updated on or after this date")
   .option("--updated-until <date>", "Show issues updated on or before this date")
+  .option("--start-since <date>", "Show issues starting on or after this date")
+  .option("--start-until <date>", "Show issues starting on or before this date")
   .option("--due-since <date>", "Show issues due on or after this date")
   .option("--due-until <date>", "Show issues due on or before this date")
   .option("--sort <field>", "Sort field")
@@ -75,12 +83,24 @@ const list = new BeeCommand("list")
     );
     const statusId: number[] = opts.status;
     const priorityId = opts.priority.length > 0 ? resolvePriorityIds(opts.priority) : [];
+    const issueTypeId: number[] = opts.type;
+    const categoryId: number[] = opts.category;
+    const versionId: number[] = opts.version;
+    const milestoneId: number[] = opts.milestone;
+    const resolutionId: number[] = opts.resolution;
+    const parentIssueId: number[] = opts.parentIssue;
 
     const issues = await client.getIssues({
       projectId,
       assigneeId,
       statusId,
       priorityId,
+      issueTypeId,
+      categoryId,
+      versionId,
+      milestoneId,
+      resolutionId,
+      parentIssueId,
       keyword: opts.keyword,
       sort: opts.sort,
       order: opts.order,
@@ -90,6 +110,8 @@ const list = new BeeCommand("list")
       createdUntil: opts.createdUntil,
       updatedSince: opts.updatedSince,
       updatedUntil: opts.updatedUntil,
+      startDateSince: opts.startSince,
+      startDateUntil: opts.startUntil,
       dueDateSince: opts.dueSince,
       dueDateUntil: opts.dueUntil,
     });
