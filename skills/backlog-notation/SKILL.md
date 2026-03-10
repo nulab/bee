@@ -9,28 +9,28 @@ Backlog notation (Backlog記法) syntax reference. This is **not Markdown** — 
 
 ## Quick Reference
 
-| Feature | Syntax |
-|---|---|
-| Heading | `* H1` / `** H2` / `*** H3` / `**** H4` |
-| Bold | `''text''` |
-| Italic | `'''text'''` |
-| Strikethrough | `%%text%%` |
-| Color | `&color(red) { text }` |
-| Color + background | `&color(#fff, #333) { text }` |
-| Bullet list | `- item` (nest with `--`) |
-| Numbered list | `+ item` (nest with `++`) |
-| Checklist | `- [ ] todo` / `- [x] done` (issue descriptions only) |
-| Link | `[[https://example.com]]` |
-| Labeled link | `[[label>https://example.com]]` |
-| Issue link | `PROJECT-123` (auto-linked) |
-| Quote | `> text` or `{quote}...{/quote}` |
-| Code block | `{code}...{/code}` |
-| Code (lang) | `{code:java}...{/code}` |
-| Image | `#image(URL or filename)` |
-| Thumbnail | `#thumbnail(URL or filename)` (< 200KB) |
-| Table of contents | `#contents` |
-| Line break | `&br;` |
-| Escape | `\` before special characters |
+| Feature            | Syntax                                                |
+| ------------------ | ----------------------------------------------------- |
+| Heading            | `* H1` / `** H2` / `*** H3` / `**** H4`               |
+| Bold               | `''text''`                                            |
+| Italic             | `'''text'''`                                          |
+| Strikethrough      | `%%text%%`                                            |
+| Color              | `&color(red) { text }`                                |
+| Color + background | `&color(#fff, #333) { text }`                         |
+| Bullet list        | `- item` (nest with `--`)                             |
+| Numbered list      | `+ item` (nest with `++`)                             |
+| Checklist          | `- [ ] todo` / `- [x] done` (issue descriptions only) |
+| Link               | `[[https://example.com]]`                             |
+| Labeled link       | `[[label>https://example.com]]`                       |
+| Issue link         | `PROJECT-123` (auto-linked)                           |
+| Quote              | `> text` or `{quote}...{/quote}`                      |
+| Code block         | `{code}...{/code}`                                    |
+| Code (lang)        | `{code:java}...{/code}`                               |
+| Image              | `#image(URL or filename)`                             |
+| Thumbnail          | `#thumbnail(URL or filename)` (< 200KB)               |
+| Table of contents  | `#contents`                                           |
+| Line break         | `&br;`                                                |
+| Escape             | `\` before special characters                         |
 
 ## Tables
 
@@ -44,18 +44,18 @@ Separate cells with `|`. End a row with `h` for a header row. Prefix a cell with
 
 ## Markdown → Backlog Notation Conversion
 
-| Markdown | Backlog Notation |
-|---|---|
-| `# H1` | `* H1` |
-| `**bold**` | `''bold''` |
-| `*italic*` | `'''italic'''` |
-| `~~strike~~` | `%%strike%%` |
-| `1. item` | `+ item` |
-| `` ``` `` | `{code}` / `{/code}` |
-| `[text](url)` | `[[text>url]]` |
-| `![alt](url)` | `#image(url)` |
-| `\|---\|` separator | `\|h` at end of row |
-| N/A | `&color(red) { text }` |
+| Markdown            | Backlog Notation       |
+| ------------------- | ---------------------- |
+| `# H1`              | `* H1`                 |
+| `**bold**`          | `''bold''`             |
+| `*italic*`          | `'''italic'''`         |
+| `~~strike~~`        | `%%strike%%`           |
+| `1. item`           | `+ item`               |
+| ` ``` `             | `{code}` / `{/code}`   |
+| `[text](url)`       | `[[text>url]]`         |
+| `![alt](url)`       | `#image(url)`          |
+| `\|---\|` separator | `\|h` at end of row    |
+| N/A                 | `&color(red) { text }` |
 
 ## Gotchas
 

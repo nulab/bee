@@ -70,10 +70,10 @@ Command reference pages are **auto-generated** from CLI source code — do NOT c
 
 AI エージェント向けの Skill 定義を格納するディレクトリ。
 
-| Skill | 用途 |
-|---|---|
-| `using-bee` | bee CLI の使い方（コマンド、フラグ、パターン） |
-| `backlog-notation` | Backlog 記法（Backlog記法）の構文リファレンス |
+| Skill              | 用途                                           |
+| ------------------ | ---------------------------------------------- |
+| `using-bee`        | bee CLI の使い方（コマンド、フラグ、パターン） |
+| `backlog-notation` | Backlog 記法（Backlog記法）の構文リファレンス  |
 
 #### Definition lists
 
