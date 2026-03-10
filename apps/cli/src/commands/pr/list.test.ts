@@ -127,6 +127,66 @@ describe("pr list", () => {
     });
   });
 
+  it("combines multiple status filters", async () => {
+    mockClient.getPullRequests.mockResolvedValue([]);
+
+    await parseCommand(
+      () => import("./list"),
+      ["--project", "PROJ", "--repo", "repo", "--status", "open", "--status", "closed"],
+    );
+
+    expect(mockClient.getPullRequests).toHaveBeenCalledWith(
+      "PROJ",
+      "repo",
+      expect.objectContaining({ statusId: [1, 2] }),
+    );
+  });
+
+  it("combines multiple assignee filters", async () => {
+    mockClient.getPullRequests.mockResolvedValue([]);
+
+    await parseCommand(
+      () => import("./list"),
+      ["--project", "PROJ", "--repo", "repo", "--assignee", "10", "--assignee", "20"],
+    );
+
+    expect(mockClient.getPullRequests).toHaveBeenCalledWith(
+      "PROJ",
+      "repo",
+      expect.objectContaining({ assigneeId: [10, 20] }),
+    );
+  });
+
+  it("combines multiple issue filters", async () => {
+    mockClient.getPullRequests.mockResolvedValue([]);
+
+    await parseCommand(
+      () => import("./list"),
+      ["--project", "PROJ", "--repo", "repo", "--issue", "1", "--issue", "2"],
+    );
+
+    expect(mockClient.getPullRequests).toHaveBeenCalledWith(
+      "PROJ",
+      "repo",
+      expect.objectContaining({ issueId: [1, 2] }),
+    );
+  });
+
+  it("handles pull request with null status gracefully", async () => {
+    mockClient.getPullRequests.mockResolvedValue([
+      {
+        number: 1,
+        summary: "PR with no status",
+        status: null,
+        assignee: { name: "Alice" },
+      },
+    ]);
+
+    await parseCommand(() => import("./list"), ["--project", "PROJ", "--repo", "repo"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PR with no status"));
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

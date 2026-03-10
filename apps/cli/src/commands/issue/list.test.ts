@@ -139,6 +139,70 @@ describe("issue list", () => {
     });
   });
 
+  it("combines multiple assignee filters", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    await parseCommand(() => import("./list"), ["--assignee", "10", "--assignee", "20"]);
+
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({ assigneeId: [10, 20] }),
+    );
+  });
+
+  it("combines multiple status filters", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    await parseCommand(() => import("./list"), ["--status", "1", "--status", "2", "--status", "3"]);
+
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({ statusId: [1, 2, 3] }),
+    );
+  });
+
+  it("combines multiple priority filters", async () => {
+    mockClient.getIssues.mockResolvedValue([]);
+
+    await parseCommand(() => import("./list"), ["--priority", "high", "--priority", "low"]);
+
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({ priorityId: [2, 4] }),
+    );
+  });
+
+  it("handles issue with null priority gracefully", async () => {
+    mockClient.getIssues.mockResolvedValue([
+      {
+        issueKey: "PROJ-1",
+        summary: "Issue with no priority",
+        status: { name: "Open" },
+        issueType: { name: "Bug" },
+        priority: null,
+        assignee: { name: "Alice" },
+      },
+    ]);
+
+    await parseCommand(() => import("./list"), []);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
+  });
+
+  it("handles issue with null issueType gracefully", async () => {
+    mockClient.getIssues.mockResolvedValue([
+      {
+        issueKey: "PROJ-1",
+        summary: "Issue with no type",
+        status: { name: "Open" },
+        issueType: null,
+        priority: { name: "Normal" },
+        assignee: null,
+      },
+    ]);
+
+    await parseCommand(() => import("./list"), []);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-1"));
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

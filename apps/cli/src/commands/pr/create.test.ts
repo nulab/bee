@@ -86,7 +86,7 @@ describe("pr create", () => {
     );
   });
 
-  it("creates a pull request with related issue", async () => {
+  it("uses numeric issue ID directly without resolution", async () => {
     mockClient.postPullRequest.mockResolvedValue({ number: 3, summary: "Title" });
 
     await parseCommand(
@@ -109,6 +109,7 @@ describe("pr create", () => {
       ],
     );
 
+    expect(mockClient.getIssue).not.toHaveBeenCalled();
     expect(mockClient.postPullRequest).toHaveBeenCalledWith(
       "PROJ",
       "repo",
@@ -198,6 +199,70 @@ describe("pr create", () => {
     );
 
     expect(mockClient.getMyself).not.toHaveBeenCalled();
+  });
+
+  it("passes multiple notify user IDs", async () => {
+    mockClient.postPullRequest.mockResolvedValue({ number: 5, summary: "Title" });
+
+    await parseCommand(
+      () => import("./create"),
+      [
+        "--project",
+        "PROJ",
+        "--repo",
+        "repo",
+        "--base",
+        "main",
+        "--head",
+        "feature",
+        "--title",
+        "Title",
+        "--body",
+        "Desc",
+        "--notify",
+        "111",
+        "--notify",
+        "222",
+      ],
+    );
+
+    expect(mockClient.postPullRequest).toHaveBeenCalledWith(
+      "PROJ",
+      "repo",
+      expect.objectContaining({ notifiedUserId: [111, 222] }),
+    );
+  });
+
+  it("passes multiple attachment IDs", async () => {
+    mockClient.postPullRequest.mockResolvedValue({ number: 5, summary: "Title" });
+
+    await parseCommand(
+      () => import("./create"),
+      [
+        "--project",
+        "PROJ",
+        "--repo",
+        "repo",
+        "--base",
+        "main",
+        "--head",
+        "feature",
+        "--title",
+        "Title",
+        "--body",
+        "Desc",
+        "--attachment",
+        "1",
+        "--attachment",
+        "2",
+      ],
+    );
+
+    expect(mockClient.postPullRequest).toHaveBeenCalledWith(
+      "PROJ",
+      "repo",
+      expect.objectContaining({ attachmentId: [1, 2] }),
+    );
   });
 
   it(

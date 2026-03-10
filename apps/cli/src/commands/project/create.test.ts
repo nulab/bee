@@ -79,6 +79,34 @@ describe("project create", () => {
     );
   });
 
+  it("enables chart and subtasking when flags provided", async () => {
+    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test");
+    mockClient.postProject.mockResolvedValue({ projectKey: "TEST", name: "Test" });
+
+    await parseCommand(
+      () => import("./create"),
+      ["--key", "TEST", "--name", "Test", "--chart-enabled", "--subtasking-enabled"],
+    );
+
+    expect(mockClient.postProject).toHaveBeenCalledWith(
+      expect.objectContaining({ chartEnabled: true, subtaskingEnabled: true }),
+    );
+  });
+
+  it("uses specified text formatting rule", async () => {
+    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test");
+    mockClient.postProject.mockResolvedValue({ projectKey: "TEST", name: "Test" });
+
+    await parseCommand(
+      () => import("./create"),
+      ["--key", "TEST", "--name", "Test", "--text-formatting-rule", "backlog"],
+    );
+
+    expect(mockClient.postProject).toHaveBeenCalledWith(
+      expect.objectContaining({ textFormattingRule: "backlog" }),
+    );
+  });
+
   it("propagates API error", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test");
     mockClient.postProject.mockRejectedValue(new Error("API error"));

@@ -122,6 +122,30 @@ describe("document list", () => {
     });
   });
 
+  it("handles document with null emoji gracefully", async () => {
+    mockClient.getDocuments.mockResolvedValue([
+      {
+        id: "doc-1",
+        projectId: 100,
+        title: "No Emoji Doc",
+        plain: "Content",
+        json: "{}",
+        statusId: 1,
+        emoji: null,
+        attachments: [],
+        tags: [],
+        createdUser: { name: "Alice" },
+        created: "2025-01-01T00:00:00Z",
+        updatedUser: { name: "Bob" },
+        updated: "2025-01-02T00:00:00Z",
+      },
+    ]);
+
+    await parseCommand(() => import("./list"), ["-p", "PROJECT"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("No Emoji Doc"));
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

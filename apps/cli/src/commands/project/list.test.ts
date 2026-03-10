@@ -60,6 +60,26 @@ describe("project list", () => {
     });
   });
 
+  it("displays Active for non-archived projects", async () => {
+    mockClient.getProjects.mockResolvedValue([
+      { projectKey: "PROJ1", name: "Active Project", archived: false },
+    ]);
+
+    await parseCommand(() => import("./list"));
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Active"));
+  });
+
+  it("displays Archived for archived projects", async () => {
+    mockClient.getProjects.mockResolvedValue([
+      { projectKey: "PROJ1", name: "Old Project", archived: true },
+    ]);
+
+    await parseCommand(() => import("./list"));
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Archived"));
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(
