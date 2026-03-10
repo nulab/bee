@@ -49,4 +49,34 @@ describe("splitArg", () => {
   it("returns empty array for empty string input", () => {
     expect(splitArg("", v.string())).toEqual([]);
   });
+
+  it("returns empty array for whitespace-only input", () => {
+    expect(splitArg("   ", v.string())).toEqual([]);
+  });
+
+  it("returns empty array for only commas", () => {
+    expect(splitArg(",,,", v.string())).toEqual([]);
+  });
+
+  it("handles consecutive commas in the middle", () => {
+    const schema = v.picklist(["open", "closed"]);
+    expect(splitArg("open,,closed", schema)).toEqual(["open", "closed"]);
+  });
+
+  it("trims whitespace around picklist values", () => {
+    const schema = v.picklist(["open", "closed"]);
+    expect(splitArg(" open , closed ", schema)).toEqual(["open", "closed"]);
+  });
+
+  it("handles leading and trailing commas", () => {
+    expect(splitArg(",a,b,", v.string())).toEqual(["a", "b"]);
+  });
+
+  it("handles single whitespace-padded value", () => {
+    expect(splitArg("  hello  ", v.string())).toEqual(["hello"]);
+  });
+
+  it("drops NaN for number schema", () => {
+    expect(splitArg("NaN", v.number())).toEqual([]);
+  });
 });

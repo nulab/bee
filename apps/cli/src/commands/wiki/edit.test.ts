@@ -1,15 +1,11 @@
 import { resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  patchWiki: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ patchWiki: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
@@ -22,8 +18,7 @@ describe("wiki edit", () => {
   it("updates wiki page name", async () => {
     mockClient.patchWiki.mockResolvedValue({ id: 123, name: "New Name" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["123", "-n", "New Name"], { from: "user" });
+    await parseCommand(() => import("./edit"), ["123", "-n", "New Name"]);
 
     expect(mockClient.patchWiki).toHaveBeenCalledWith(123, {
       name: "New Name",
@@ -36,8 +31,7 @@ describe("wiki edit", () => {
   it("updates wiki page body", async () => {
     mockClient.patchWiki.mockResolvedValue({ id: 123, name: "Page" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["123", "-b", "New content"], { from: "user" });
+    await parseCommand(() => import("./edit"), ["123", "-b", "New content"]);
 
     expect(mockClient.patchWiki).toHaveBeenCalledWith(123, {
       name: undefined,
@@ -46,12 +40,25 @@ describe("wiki edit", () => {
     });
   });
 
+  it("sends exact default payload (no extra fields)", async () => {
+    mockClient.patchWiki.mockResolvedValue({ id: 123, name: "Page" });
+
+    await parseCommand(() => import("./edit"), ["123"]);
+
+    const [[wikiId, params]] = mockClient.patchWiki.mock.calls;
+    expect(wikiId).toBe(123);
+    expect(params).toEqual({
+      name: undefined,
+      content: undefined,
+      mailNotify: undefined,
+    });
+  });
+
   it("reads body from stdin when piped", async () => {
     vi.mocked(resolveStdinArg).mockResolvedValueOnce("Stdin content");
     mockClient.patchWiki.mockResolvedValue({ id: 123, name: "Page" });
 
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["123", "-b", ""], { from: "user" });
+    await parseCommand(() => import("./edit"), ["123", "-b", ""]);
 
     expect(resolveStdinArg).toHaveBeenCalledWith("");
     expect(mockClient.patchWiki).toHaveBeenCalledWith(
@@ -60,24 +67,13 @@ describe("wiki edit", () => {
     );
   });
 
-  it("passes notify flag", async () => {
-    mockClient.patchWiki.mockResolvedValue({ id: 123, name: "Page" });
-
-    const { default: edit } = await import("./edit");
-    await edit.parseAsync(["123", "-n", "Page", "--mail-notify"], { from: "user" });
-
-    expect(mockClient.patchWiki).toHaveBeenCalledWith(
-      123,
-      expect.objectContaining({ mailNotify: true }),
-    );
-  });
-
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.patchWiki.mockResolvedValue({ id: 123, name: "Page" });
-
-    await expectStdoutContaining(async () => {
-      const { default: edit } = await import("./edit");
-      await edit.parseAsync(["123", "-n", "Page", "--json"], { from: "user" });
-    }, "Page");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./edit"),
+      ["123", "-n", "Page", "--json"],
+      "Page",
+      () => mockClient.patchWiki.mockResolvedValue({ id: 123, name: "Page" }),
+    ),
+  );
 });

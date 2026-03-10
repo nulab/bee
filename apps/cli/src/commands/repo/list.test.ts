@@ -1,16 +1,10 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  getGitRepositories: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ getGitRepositories: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleRepos = [
@@ -44,31 +38,50 @@ describe("repo list", () => {
   it("displays repository list in tabular format", async () => {
     mockClient.getGitRepositories.mockResolvedValue(sampleRepos);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["PROJ"], { from: "user" });
+    await parseCommand(() => import("./list"), ["PROJ"]);
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getGitRepositories).toHaveBeenCalledWith("PROJ");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("NAME"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("api-server"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("frontend"));
   });
 
+  it("handles null description and pushedAt gracefully", async () => {
+    mockClient.getGitRepositories.mockResolvedValue([
+      {
+        id: 3,
+        projectId: 100,
+        name: "empty-repo",
+        description: null,
+        httpUrl: "https://example.backlog.com/git/PROJ/empty-repo.git",
+        sshUrl: "git@example.backlog.com:PROJ/empty-repo.git",
+        displayOrder: 2,
+        pushedAt: null,
+        created: "2024-08-01T00:00:00Z",
+        updated: "2024-08-01T00:00:00Z",
+      },
+    ]);
+
+    await parseCommand(() => import("./list"), ["PROJ"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("empty-repo"));
+  });
+
   it("shows message when no repositories found", async () => {
     mockClient.getGitRepositories.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["PROJ"], { from: "user" });
+    await parseCommand(() => import("./list"), ["PROJ"]);
 
     expect(consola.info).toHaveBeenCalledWith("No repositories found.");
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getGitRepositories.mockResolvedValue(sampleRepos);
-
-    await expectStdoutContaining(async () => {
-      const { default: list } = await import("./list");
-      await list.parseAsync(["PROJ", "--json"], { from: "user" });
-    }, "api-server");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./list"),
+      ["PROJ", "--json"],
+      "api-server",
+      () => mockClient.getGitRepositories.mockResolvedValue(sampleRepos),
+    ),
+  );
 });

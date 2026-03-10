@@ -124,9 +124,9 @@ const list = new BeeCommand("list")
 
       const rows: Row[] = data.map((issue) => [
         { header: "KEY", value: issue.issueKey },
-        { header: "STATUS", value: issue.status.name },
-        { header: "TYPE", value: issue.issueType.name },
-        { header: "PRIORITY", value: issue.priority.name },
+        { header: "STATUS", value: issue.status?.name ?? "" },
+        { header: "TYPE", value: issue.issueType?.name ?? "" },
+        { header: "PRIORITY", value: issue.priority?.name ?? "" },
         { header: "ASSIGNEE", value: issue.assignee?.name ?? "Unassigned" },
         { header: "SUMMARY", value: issue.summary },
       ]);

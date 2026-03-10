@@ -1,16 +1,10 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  getWikisCount: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ getWikisCount: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
@@ -22,20 +16,21 @@ describe("wiki count", () => {
   it("displays wiki page count", async () => {
     mockClient.getWikisCount.mockResolvedValue({ count: 42 });
 
-    const { default: count } = await import("./count");
-    await count.parseAsync(["TEST"], { from: "user" });
+    await parseCommand(() => import("./count"), ["TEST"]);
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWikisCount).toHaveBeenCalledWith("TEST");
     expect(consola.log).toHaveBeenCalledWith("42");
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getWikisCount.mockResolvedValue({ count: 42 });
-
-    await expectStdoutContaining(async () => {
-      const { default: count } = await import("./count");
-      await count.parseAsync(["TEST", "--json"], { from: "user" });
-    }, "42");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./count"),
+      ["TEST", "--json"],
+      "42",
+      () => {
+        mockClient.getWikisCount.mockResolvedValue({ count: 42 });
+      },
+    ),
+  );
 });

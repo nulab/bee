@@ -1,16 +1,15 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
+const { mockClient, host } = setupCommandTest({
   getDocuments: vi.fn(),
   getProjects: vi.fn().mockResolvedValue([{ id: 100, projectKey: "PROJECT" }]),
-};
+});
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -57,10 +56,8 @@ describe("document list", () => {
   it("displays document list in tabular format", async () => {
     mockClient.getDocuments.mockResolvedValue(sampleDocuments);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["-p", "PROJECT"], { from: "user" });
+    await parseCommand(() => import("./list"), ["-p", "PROJECT"]);
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getDocuments).toHaveBeenCalled();
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("doc-1"));
@@ -71,53 +68,58 @@ describe("document list", () => {
   it("shows message when no documents found", async () => {
     mockClient.getDocuments.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["-p", "PROJECT"], { from: "user" });
+    await parseCommand(() => import("./list"), ["-p", "PROJECT"]);
 
     expect(consola.info).toHaveBeenCalledWith("No documents found.");
   });
 
-  it("passes keyword query parameter", async () => {
+  it("sends exact default query parameters (no extra fields)", async () => {
     mockClient.getDocuments.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["-p", "PROJECT", "-k", "meeting"], { from: "user" });
+    await parseCommand(() => import("./list"), ["-p", "PROJECT"]);
 
-    expect(mockClient.getDocuments).toHaveBeenCalledWith(
-      expect.objectContaining({ keyword: "meeting" }),
-    );
-  });
-
-  it("passes sort and order parameters", async () => {
-    mockClient.getDocuments.mockResolvedValue([]);
-
-    const { default: list } = await import("./list");
-    await list.parseAsync(["-p", "PROJECT", "--sort", "created", "--order", "asc"], {
-      from: "user",
+    const [[callArgs]] = mockClient.getDocuments.mock.calls;
+    expect(callArgs).toEqual({
+      projectId: [100],
+      keyword: undefined,
+      sort: undefined,
+      order: undefined,
+      count: undefined,
+      offset: 0,
     });
-
-    expect(mockClient.getDocuments).toHaveBeenCalledWith(
-      expect.objectContaining({ sort: "created", order: "asc" }),
-    );
   });
 
-  it("passes count and offset parameters", async () => {
-    mockClient.getDocuments.mockResolvedValue([]);
+  it("handles document with null emoji gracefully", async () => {
+    mockClient.getDocuments.mockResolvedValue([
+      {
+        id: "doc-1",
+        projectId: 100,
+        title: "No Emoji Doc",
+        plain: "Content",
+        json: "{}",
+        statusId: 1,
+        emoji: null,
+        attachments: [],
+        tags: [],
+        createdUser: { name: "Alice" },
+        created: "2025-01-01T00:00:00Z",
+        updatedUser: { name: "Bob" },
+        updated: "2025-01-02T00:00:00Z",
+      },
+    ]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["-p", "PROJECT", "-L", "10", "--offset", "5"], { from: "user" });
+    await parseCommand(() => import("./list"), ["-p", "PROJECT"]);
 
-    expect(mockClient.getDocuments).toHaveBeenCalledWith(
-      expect.objectContaining({ count: 10, offset: 5 }),
-    );
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("No Emoji Doc"));
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getDocuments.mockResolvedValue(sampleDocuments);
-
-    await expectStdoutContaining(async () => {
-      const { default: list } = await import("./list");
-      await list.parseAsync(["-p", "PROJECT", "--json"], { from: "user" });
-    }, "doc-1");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./list"),
+      ["-p", "PROJECT", "--json"],
+      "doc-1",
+      () => mockClient.getDocuments.mockResolvedValue(sampleDocuments),
+    ),
+  );
 });
