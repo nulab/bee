@@ -1,11 +1,11 @@
 ---
-name: writing-backlog-notation
-description: Writes and converts text using Backlog notation (Backlog記法), the native markup syntax for Nulab Backlog issues, wikis, pull requests, and comments. Activated when a Backlog project uses Backlog記法 instead of Markdown. Not applicable to Markdown-formatted Backlog projects.
+name: backlog-notation
+description: Reference for Backlog notation (Backlog記法), the native markup syntax for Nulab Backlog. Provides syntax rules for headings, lists, tables, text styling, links, code blocks, and other formatting elements. Use this when writing or converting text in Backlog記法.
 ---
 
-# writing-backlog-notation
+# backlog-notation
 
-Backlog notation is **not Markdown**. If the project uses Markdown, use standard Markdown instead.
+Backlog notation (Backlog記法) syntax reference. This is **not Markdown** — do not mix the two syntaxes.
 
 ## Quick Reference
 
