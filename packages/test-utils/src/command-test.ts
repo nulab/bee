@@ -58,9 +58,8 @@ const mockGetClient = (mockClient: MockClientMethods, host = MOCK_HOST) => ({
  * ```
  */
 const parseCommand = async (
-  importFn: () => Promise<{
-    default: { parseAsync: (args: string[], opts: { from: string }) => Promise<unknown> };
-  }>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  importFn: () => Promise<{ default: { parseAsync: (...args: any[]) => Promise<any> } }>,
   args: string[] = [],
 ): Promise<void> => {
   const { default: command } = await importFn();

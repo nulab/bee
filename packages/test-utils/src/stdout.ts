@@ -31,14 +31,17 @@ export const expectStdoutContaining = async (
 export const itOutputsJson =
   (
     importCommand: () => Promise<{
-      default: { parseAsync: (args: string[], opts: { from: string }) => Promise<void> };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      default: { parseAsync: (...args: any[]) => Promise<any> };
     }>,
     args: string[],
     expectedSubstring: string,
-    setup?: () => void | Promise<void>,
+    setup?: () => unknown,
   ): (() => Promise<void>) =>
   async () => {
-    if (setup) await setup();
+    if (setup) {
+      await setup();
+    }
     await expectStdoutContaining(async () => {
       const { default: command } = await importCommand();
       await command.parseAsync(args, { from: "user" });
