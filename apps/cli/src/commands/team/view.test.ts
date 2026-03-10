@@ -1,16 +1,10 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  getTeam: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ getTeam: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleTeam = {
@@ -30,10 +24,8 @@ describe("team view", () => {
   it("displays team details", async () => {
     mockClient.getTeam.mockResolvedValue(sampleTeam);
 
-    const { default: view } = await import("./view");
-    await view.parseAsync(["1"], { from: "user" });
+    await parseCommand(() => import("./view"), ["1"]);
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getTeam).toHaveBeenCalledWith(1);
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Design Team"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Admin"));
@@ -45,19 +37,42 @@ describe("team view", () => {
   it("displays team with no members", async () => {
     mockClient.getTeam.mockResolvedValue({ ...sampleTeam, members: [] });
 
-    const { default: view } = await import("./view");
-    await view.parseAsync(["1"], { from: "user" });
+    await parseCommand(() => import("./view"), ["1"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Design Team"));
     expect(consola.log).not.toHaveBeenCalledWith(expect.stringContaining("Members:"));
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getTeam.mockResolvedValue(sampleTeam);
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./view"),
+      ["1", "--json"],
+      "Design Team",
+      () => {
+        mockClient.getTeam.mockResolvedValue(sampleTeam);
+      },
+    ),
+  );
 
-    await expectStdoutContaining(async () => {
-      const { default: view } = await import("./view");
-      await view.parseAsync(["1", "--json"], { from: "user" });
-    }, "Design Team");
+  it("handles null createdUser gracefully", async () => {
+    mockClient.getTeam.mockResolvedValue({ ...sampleTeam, createdUser: null });
+
+    await parseCommand(() => import("./view"), ["1"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Design Team"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("\u2014"));
+  });
+
+  it("handles member with null userId gracefully", async () => {
+    mockClient.getTeam.mockResolvedValue({
+      ...sampleTeam,
+      members: [{ id: 300, userId: null, name: "Charlie" }],
+    });
+
+    await parseCommand(() => import("./view"), ["1"]);
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Charlie"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("300"));
   });
 });

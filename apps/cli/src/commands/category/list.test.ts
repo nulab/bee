@@ -1,16 +1,10 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  getCategories: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ getCategories: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleCategories = [
@@ -21,11 +15,8 @@ const sampleCategories = [
 describe("category list", () => {
   it("displays category list in tabular format", async () => {
     mockClient.getCategories.mockResolvedValue(sampleCategories);
+    await parseCommand(() => import("./list"), ["TEST"]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["TEST"], { from: "user" });
-
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getCategories).toHaveBeenCalledWith("TEST");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Bug"));
@@ -34,19 +25,20 @@ describe("category list", () => {
 
   it("shows message when no categories found", async () => {
     mockClient.getCategories.mockResolvedValue([]);
-
-    const { default: list } = await import("./list");
-    await list.parseAsync(["TEST"], { from: "user" });
+    await parseCommand(() => import("./list"), ["TEST"]);
 
     expect(consola.info).toHaveBeenCalledWith("No categories found.");
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getCategories.mockResolvedValue(sampleCategories);
-
-    await expectStdoutContaining(async () => {
-      const { default: list } = await import("./list");
-      await list.parseAsync(["TEST", "--json"], { from: "user" });
-    }, "Bug");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./list"),
+      ["TEST", "--json"],
+      "Bug",
+      () => {
+        mockClient.getCategories.mockResolvedValue(sampleCategories);
+      },
+    ),
+  );
 });

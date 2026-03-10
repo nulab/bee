@@ -65,6 +65,30 @@ describe("issue close", () => {
     );
   });
 
+  it("falls back to numeric resolution ID when given a number string", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
+
+    const { default: close } = await import("./close");
+    await close.parseAsync(["TEST-1", "--resolution", "4"], { from: "user" });
+
+    expect(mockClient.patchIssue).toHaveBeenCalledWith(
+      "TEST-1",
+      expect.objectContaining({ resolutionId: 4 }),
+    );
+  });
+
+  it("sends NaN resolution ID when given an unknown resolution name", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
+
+    const { default: close } = await import("./close");
+    await close.parseAsync(["TEST-1", "--resolution", "typo"], { from: "user" });
+
+    expect(mockClient.patchIssue).toHaveBeenCalledWith(
+      "TEST-1",
+      expect.objectContaining({ resolutionId: Number.NaN }),
+    );
+  });
+
   it("outputs JSON when --json flag is set", async () => {
     mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
 

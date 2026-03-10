@@ -21,6 +21,7 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
   .argument("<issue>", "Issue ID or issue key")
   .option("-b, --body <text>", "Comment body")
   .addOption(opt.notify())
+  .addOption(opt.attachment())
   .option("--list", "List comments on the issue")
   .option("--edit-last", "Edit your most recent comment")
   .option("--delete-last", "Delete your most recent comment")
@@ -129,10 +130,12 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
       return;
     }
     const notifiedUserId = opts.notify ?? [];
+    const attachmentId = opts.attachment ?? [];
 
     const result = await client.postIssueComments(issue, {
       content,
       notifiedUserId,
+      attachmentId,
     });
 
     outputResult(result, opts as { json?: string }, () => {

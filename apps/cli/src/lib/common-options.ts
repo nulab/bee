@@ -24,6 +24,12 @@ const notify = () =>
   new Option("--notify <id>", "User IDs to notify (repeatable)").argParser(collectNum).default([]);
 const attachment = () =>
   new Option("--attachment <id>", "Attachment IDs (repeatable)").argParser(collectNum).default([]);
+const category = () =>
+  new Option("--category <id>", "Category IDs (repeatable)").argParser(collectNum).default([]);
+const version = () =>
+  new Option("--version <id>", "Version IDs (repeatable)").argParser(collectNum).default([]);
+const milestone = () =>
+  new Option("--milestone <id>", "Milestone IDs (repeatable)").argParser(collectNum).default([]);
 const comment = () => new Option("-c, --comment <text>", "Comment to add with the update");
 const web = (resource: string) => new Option("-w, --web", `Open the ${resource} in the browser`);
 const noBrowser = () =>
@@ -52,6 +58,9 @@ export {
   issue,
   notify,
   attachment,
+  category,
+  version,
+  milestone,
   comment,
   web,
   noBrowser,

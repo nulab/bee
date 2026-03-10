@@ -1,7 +1,6 @@
-import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { expectStdoutContaining, parseCommand } from "@repo/test-utils";
 
 const mockClient = {
   getMyself: vi.fn(),
@@ -58,8 +57,7 @@ describe("dashboard", () => {
     mockClient.getIssues.mockResolvedValue(sampleIssues);
     mockClient.getProjects.mockResolvedValue(sampleProjects);
 
-    const { default: dashboard } = await import("./dashboard");
-    await dashboard.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./dashboard"));
 
     expect(mockClient.getMyself).toHaveBeenCalled();
     expect(mockClient.getNotificationsCount).toHaveBeenCalledWith({
@@ -81,8 +79,9 @@ describe("dashboard", () => {
   });
 
   it("opens browser with --web flag", async () => {
-    const { default: dashboard } = await import("./dashboard");
-    await dashboard.parseAsync(["--web"], { from: "user" });
+    const { openOrPrintUrl } = await import("@repo/backlog-utils");
+
+    await parseCommand(() => import("./dashboard"), ["--web"]);
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/dashboard",
@@ -99,8 +98,7 @@ describe("dashboard", () => {
     mockClient.getProjects.mockResolvedValue(sampleProjects);
 
     await expectStdoutContaining(async () => {
-      const { default: dashboard } = await import("./dashboard");
-      await dashboard.parseAsync(["--json"], { from: "user" });
+      await parseCommand(() => import("./dashboard"), ["--json"]);
     }, "Test User");
   });
 
@@ -110,9 +108,28 @@ describe("dashboard", () => {
     mockClient.getIssues.mockResolvedValue([]);
     mockClient.getProjects.mockResolvedValue([]);
 
-    const { default: dashboard } = await import("./dashboard");
-    await dashboard.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./dashboard"));
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("No assigned issues"));
+  });
+
+  it("handles issues with null status, priority, and dueDate gracefully", async () => {
+    mockClient.getMyself.mockResolvedValue(sampleMyself);
+    mockClient.getNotificationsCount.mockResolvedValue({ count: 0 });
+    mockClient.getIssues.mockResolvedValue([
+      {
+        issueKey: "PROJ-3",
+        summary: "Nullable fields issue",
+        status: null,
+        priority: null,
+        dueDate: null,
+      },
+    ]);
+    mockClient.getProjects.mockResolvedValue([]);
+
+    await parseCommand(() => import("./dashboard"));
+
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("PROJ-3"));
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Nullable fields issue"));
   });
 });

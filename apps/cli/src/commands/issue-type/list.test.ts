@@ -1,16 +1,10 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  getIssueTypes: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ getIssueTypes: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleIssueTypes = [
@@ -22,10 +16,8 @@ describe("issue-type list", () => {
   it("displays issue type list in tabular format", async () => {
     mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["TEST"], { from: "user" });
+    await parseCommand(() => import("./list"), ["TEST"]);
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getIssueTypes).toHaveBeenCalledWith("TEST");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Bug"));
@@ -35,8 +27,7 @@ describe("issue-type list", () => {
   it("shows message when no issue types found", async () => {
     mockClient.getIssueTypes.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["TEST"], { from: "user" });
+    await parseCommand(() => import("./list"), ["TEST"]);
 
     expect(consola.info).toHaveBeenCalledWith("No issue types found.");
   });
@@ -44,18 +35,18 @@ describe("issue-type list", () => {
   it("displays color column", async () => {
     mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["TEST"], { from: "user" });
+    await parseCommand(() => import("./list"), ["TEST"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("#e30000"));
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes);
-
-    await expectStdoutContaining(async () => {
-      const { default: list } = await import("./list");
-      await list.parseAsync(["TEST", "--json"], { from: "user" });
-    }, "Bug");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./list"),
+      ["TEST", "--json"],
+      "Bug",
+      () => mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes),
+    ),
+  );
 });

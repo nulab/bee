@@ -1,24 +1,21 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
+const { mockClient, host } = setupCommandTest({
   postIssue: vi.fn(),
-  getMyself: vi.fn(),
   getProjects: vi.fn().mockResolvedValue([{ id: 100, projectKey: "PROJECT" }]),
-};
+});
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
+  ...mockGetClient(mockClient, host),
 }));
-
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
-  promptRequired: vi.fn(),
+  promptRequired: vi.fn((_label: string, val?: string) => Promise.resolve(val)),
 }));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("issue create", () => {
@@ -33,10 +30,9 @@ describe("issue create", () => {
       summary: "Fix bug",
     });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(
+    await parseCommand(
+      () => import("./create"),
       ["--project", "100", "--title", "Fix bug", "--type", "1", "--priority", "normal"],
-      { from: "user" },
     );
 
     expect(mockClient.postIssue).toHaveBeenCalledWith(
@@ -62,8 +58,7 @@ describe("issue create", () => {
       summary: "Title",
     });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./create"), []);
 
     expect(promptRequired).toHaveBeenCalledWith("Project:", undefined);
     expect(promptRequired).toHaveBeenCalledWith("Summary:", undefined);
@@ -84,8 +79,8 @@ describe("issue create", () => {
       summary: "Title",
     });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(
+    await parseCommand(
+      () => import("./create"),
       [
         "--project",
         "100",
@@ -102,7 +97,6 @@ describe("issue create", () => {
         "--due-date",
         "2025-12-31",
       ],
-      { from: "user" },
     );
 
     expect(mockClient.postIssue).toHaveBeenCalledWith(
@@ -126,8 +120,8 @@ describe("issue create", () => {
       summary: "Title",
     });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(
+    await parseCommand(
+      () => import("./create"),
       [
         "--project",
         "100",
@@ -140,7 +134,6 @@ describe("issue create", () => {
         "--assignee",
         "@me",
       ],
-      { from: "user" },
     );
 
     expect(mockClient.getMyself).toHaveBeenCalled();
@@ -160,8 +153,8 @@ describe("issue create", () => {
       summary: "Title",
     });
 
-    const { default: create } = await import("./create");
-    await create.parseAsync(
+    await parseCommand(
+      () => import("./create"),
       [
         "--project",
         "100",
@@ -180,7 +173,6 @@ describe("issue create", () => {
         "--attachment",
         "2",
       ],
-      { from: "user" },
     );
 
     expect(mockClient.postIssue).toHaveBeenCalledWith(
@@ -191,24 +183,105 @@ describe("issue create", () => {
     );
   });
 
-  it("outputs JSON when --json flag is set", async () => {
+  it("passes categoryId, versionId, and milestoneId to API", async () => {
     vi.mocked(promptRequired)
       .mockResolvedValueOnce("100")
       .mockResolvedValueOnce("Title")
       .mockResolvedValueOnce("1")
       .mockResolvedValueOnce("normal");
     mockClient.postIssue.mockResolvedValue({
-      issueKey: "TEST-4",
+      issueKey: "TEST-7",
       summary: "Title",
     });
 
-    await expectStdoutContaining(async () => {
-      const { default: create } = await import("./create");
-      await create.parseAsync(
-        ["--project", "100", "--title", "Title", "--type", "1", "--priority", "normal", "--json"],
-        { from: "user" },
-      );
-    }, "TEST-4");
+    await parseCommand(
+      () => import("./create"),
+      [
+        "--project",
+        "100",
+        "--title",
+        "Title",
+        "--type",
+        "1",
+        "--priority",
+        "normal",
+        "--category",
+        "10",
+        "--category",
+        "20",
+        "--version",
+        "30",
+        "--milestone",
+        "40",
+        "--milestone",
+        "50",
+      ],
+    );
+
+    expect(mockClient.postIssue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        categoryId: [10, 20],
+        versionId: [30],
+        milestoneId: [40, 50],
+      }),
+    );
+  });
+
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./create"),
+      ["--project", "100", "--title", "Title", "--type", "1", "--priority", "normal", "--json"],
+      "TEST-4",
+      () => {
+        vi.mocked(promptRequired)
+          .mockResolvedValueOnce("100")
+          .mockResolvedValueOnce("Title")
+          .mockResolvedValueOnce("1")
+          .mockResolvedValueOnce("normal");
+        mockClient.postIssue.mockResolvedValue({
+          issueKey: "TEST-4",
+          summary: "Title",
+        });
+      },
+    ),
+  );
+
+  it("creates an issue with only required fields (no extra fields sent)", async () => {
+    vi.mocked(promptRequired)
+      .mockResolvedValueOnce("100")
+      .mockResolvedValueOnce("Fix bug")
+      .mockResolvedValueOnce("1")
+      .mockResolvedValueOnce("normal");
+    mockClient.postIssue.mockResolvedValue({
+      issueKey: "TEST-1",
+      summary: "Fix bug",
+    });
+
+    await parseCommand(
+      () => import("./create"),
+      ["--project", "100", "--title", "Fix bug", "--type", "1", "--priority", "normal"],
+    );
+
+    const [[callArgs]] = mockClient.postIssue.mock.calls;
+    expect(callArgs).toEqual({
+      projectId: 100,
+      summary: "Fix bug",
+      issueTypeId: 1,
+      priorityId: 3,
+      description: undefined,
+      assigneeId: undefined,
+      categoryId: [],
+      versionId: [],
+      milestoneId: [],
+      parentIssueId: undefined,
+      startDate: undefined,
+      dueDate: undefined,
+      estimatedHours: undefined,
+      actualHours: undefined,
+      notifiedUserId: [],
+      attachmentId: [],
+    });
   });
 
   it("throws error for unknown priority name", async () => {
@@ -218,11 +291,11 @@ describe("issue create", () => {
       .mockResolvedValueOnce("1")
       .mockResolvedValueOnce("invalid");
 
-    const { default: create } = await import("./create");
     await expect(
-      create.parseAsync(["--project", "TEST", "--title", "test", "--priority", "invalid"], {
-        from: "user",
-      }),
+      parseCommand(
+        () => import("./create"),
+        ["--project", "TEST", "--title", "test", "--priority", "invalid"],
+      ),
     ).rejects.toThrow('Unknown priority "invalid". Valid values: high, normal, low');
   });
 });

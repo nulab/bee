@@ -23,6 +23,9 @@ const create = new BeeCommand("create")
   .option("-P, --priority <name>", "Priority")
   .option("-d, --description <text>", "Issue description")
   .addOption(opt.assignee())
+  .addOption(opt.category())
+  .addOption(opt.version())
+  .addOption(opt.milestone())
   .option("--parent-issue <id>", "Parent issue ID")
   .option("--start-date <date>", "Start date")
   .option("--due-date <date>", "Due date")
@@ -68,6 +71,9 @@ const create = new BeeCommand("create")
 
     const [projectId] = await resolveProjectIds(client, [project]);
     const assigneeId = opts.assignee ? await resolveUserId(client, opts.assignee) : undefined;
+    const categoryId = opts.category ?? [];
+    const versionId = opts.version ?? [];
+    const milestoneId = opts.milestone ?? [];
     const notifiedUserId = opts.notify ?? [];
     const attachmentId = opts.attachment ?? [];
 
@@ -78,6 +84,9 @@ const create = new BeeCommand("create")
       priorityId,
       description: opts.description,
       assigneeId,
+      categoryId,
+      versionId,
+      milestoneId,
       parentIssueId: opts.parentIssue ? Number(opts.parentIssue) : undefined,
       startDate: opts.startDate,
       dueDate: opts.dueDate,

@@ -1,6 +1,7 @@
 import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
+import { parseCommand } from "@repo/test-utils";
 
 vi.mock("@repo/backlog-utils", () => ({
   getClient: vi.fn(() => Promise.resolve({ client: {}, host: "example.backlog.com" })),
@@ -23,8 +24,7 @@ const { resolveUrl: mockResolveUrl } = vi.mocked(await import("./browse-url"));
 
 describe("browse", () => {
   it("opens resolved URL in browser", async () => {
-    const { default: browse } = await import("./browse");
-    await browse.parseAsync([], { from: "user" });
+    await parseCommand(() => import("./browse"));
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/mock-url",
@@ -34,8 +34,7 @@ describe("browse", () => {
   });
 
   it("prints URL without opening browser with --no-browser", async () => {
-    const { default: browse } = await import("./browse");
-    await browse.parseAsync(["--no-browser"], { from: "user" });
+    await parseCommand(() => import("./browse"), ["--no-browser"]);
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/mock-url",
@@ -57,8 +56,7 @@ describe("browse", () => {
     getLatestCommit.mockResolvedValueOnce("deadbeef");
     getRepoRelativePath.mockResolvedValueOnce("src/");
 
-    const { default: browse } = await import("./browse");
-    await browse.parseAsync(["main.ts"], { from: "user" });
+    await parseCommand(() => import("./browse"), ["main.ts"]);
 
     expect(mockResolveUrl).toHaveBeenCalledWith(
       "example.backlog.com",

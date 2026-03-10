@@ -1,16 +1,10 @@
-import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  getWikis: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ getWikis: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
@@ -25,10 +19,8 @@ describe("wiki list", () => {
       { id: 2, name: "Setup Guide", updated: "2025-01-02T00:00:00Z" },
     ]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["TEST"], { from: "user" });
+    await parseCommand(() => import("./list"), ["TEST"]);
 
-    expect(getClient).toHaveBeenCalled();
     expect(mockClient.getWikis).toHaveBeenCalledWith({
       projectIdOrKey: "TEST",
       keyword: undefined,
@@ -41,8 +33,7 @@ describe("wiki list", () => {
   it("shows message when no wiki pages found", async () => {
     mockClient.getWikis.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["TEST"], { from: "user" });
+    await parseCommand(() => import("./list"), ["TEST"]);
 
     expect(consola.info).toHaveBeenCalledWith("No wiki pages found.");
   });
@@ -50,8 +41,7 @@ describe("wiki list", () => {
   it("passes keyword parameter", async () => {
     mockClient.getWikis.mockResolvedValue([]);
 
-    const { default: list } = await import("./list");
-    await list.parseAsync(["TEST", "--keyword", "setup"], { from: "user" });
+    await parseCommand(() => import("./list"), ["TEST", "--keyword", "setup"]);
 
     expect(mockClient.getWikis).toHaveBeenCalledWith({
       projectIdOrKey: "TEST",
@@ -59,14 +49,17 @@ describe("wiki list", () => {
     });
   });
 
-  it("outputs JSON when --json flag is set", async () => {
-    mockClient.getWikis.mockResolvedValue([
-      { id: 1, name: "Home", updated: "2025-01-01T00:00:00Z" },
-    ]);
-
-    await expectStdoutContaining(async () => {
-      const { default: list } = await import("./list");
-      await list.parseAsync(["TEST", "--json"], { from: "user" });
-    }, "Home");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./list"),
+      ["TEST", "--json"],
+      "Home",
+      () => {
+        mockClient.getWikis.mockResolvedValue([
+          { id: 1, name: "Home", updated: "2025-01-01T00:00:00Z" },
+        ]);
+      },
+    ),
+  );
 });

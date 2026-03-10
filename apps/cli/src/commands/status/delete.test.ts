@@ -1,21 +1,15 @@
 import { confirmOrExit } from "@repo/cli-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
-import { expectStdoutContaining } from "@repo/test-utils";
+import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const mockClient = {
-  deleteProjectStatus: vi.fn(),
-};
+const { mockClient, host } = setupCommandTest({ deleteProjectStatus: vi.fn() });
 
-vi.mock("@repo/backlog-utils", () => ({
-  getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
-}));
-
+vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("@repo/cli-utils", async (importOriginal) => ({
   ...(await importOriginal()),
   confirmOrExit: vi.fn(),
 }));
-
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("status delete", () => {
@@ -23,10 +17,10 @@ describe("status delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteProjectStatus.mockResolvedValue({ id: 1, name: "Open", color: "#e30000" });
 
-    const { default: deleteStatus } = await import("./delete");
-    await deleteStatus.parseAsync(["1", "-p", "TEST", "--substitute-status-id", "2"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./delete"),
+      ["1", "-p", "TEST", "--substitute-status-id", "2"],
+    );
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete status 1? This cannot be undone.",
@@ -40,10 +34,10 @@ describe("status delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteProjectStatus.mockResolvedValue({ id: 1, name: "Open", color: "#e30000" });
 
-    const { default: deleteStatus } = await import("./delete");
-    await deleteStatus.parseAsync(["1", "-p", "TEST", "--substitute-status-id", "2", "--yes"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./delete"),
+      ["1", "-p", "TEST", "--substitute-status-id", "2", "--yes"],
+    );
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete status 1? This cannot be undone.",
@@ -53,25 +47,23 @@ describe("status delete", () => {
 
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
-
-    const { default: deleteStatus } = await import("./delete");
-    await deleteStatus.parseAsync(["1", "-p", "TEST", "--substitute-status-id", "2"], {
-      from: "user",
-    });
+    await parseCommand(
+      () => import("./delete"),
+      ["1", "-p", "TEST", "--substitute-status-id", "2"],
+    );
 
     expect(mockClient.deleteProjectStatus).not.toHaveBeenCalled();
   });
-
-  it("outputs JSON when --json flag is set", async () => {
-    vi.mocked(confirmOrExit).mockResolvedValue(true);
-    mockClient.deleteProjectStatus.mockResolvedValue({ id: 1, name: "Open", color: "#e30000" });
-
-    await expectStdoutContaining(async () => {
-      const { default: deleteStatus } = await import("./delete");
-      await deleteStatus.parseAsync(
-        ["1", "-p", "TEST", "--substitute-status-id", "2", "--yes", "--json"],
-        { from: "user" },
-      );
-    }, "Open");
-  });
+  it(
+    "outputs JSON when --json flag is set",
+    itOutputsJson(
+      () => import("./delete"),
+      ["1", "-p", "TEST", "--substitute-status-id", "2", "--yes", "--json"],
+      "Open",
+      () => {
+        vi.mocked(confirmOrExit).mockResolvedValue(true);
+        mockClient.deleteProjectStatus.mockResolvedValue({ id: 1, name: "Open", color: "#e30000" });
+      },
+    ),
+  );
 });
