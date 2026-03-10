@@ -14,6 +14,9 @@ const edit = new BeeCommand("edit")
   .option("-P, --priority <name>", `Change priority`)
   .option("-T, --type <id>", "New issue type ID")
   .option("--assignee <id>", "New assignee user ID. Use @me for yourself.")
+  .addOption(opt.category())
+  .addOption(opt.version())
+  .addOption(opt.milestone())
   .option("--resolution <id>", "Resolution ID")
   .option("--parent-issue <id>", "New parent issue ID")
   .option("--start-date <date>", "New start date")
@@ -43,6 +46,9 @@ const edit = new BeeCommand("edit")
   .action(async (issue, opts) => {
     const { client } = await getClient(opts.space);
 
+    const categoryId = opts.category ?? [];
+    const versionId = opts.version ?? [];
+    const milestoneId = opts.milestone ?? [];
     const notifiedUserId = opts.notify ?? [];
     const attachmentId = opts.attachment ?? [];
 
@@ -63,6 +69,9 @@ const edit = new BeeCommand("edit")
       priorityId,
       issueTypeId: opts.type ? Number(opts.type) : undefined,
       assigneeId: opts.assignee ? await resolveUserId(client, opts.assignee) : undefined,
+      categoryId,
+      versionId,
+      milestoneId,
       resolutionId: opts.resolution ? Number(opts.resolution) : undefined,
       parentIssueId: opts.parentIssue ? Number(opts.parentIssue) : undefined,
       startDate: opts.startDate,
