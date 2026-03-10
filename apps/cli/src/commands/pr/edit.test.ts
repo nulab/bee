@@ -102,6 +102,28 @@ describe("pr edit", () => {
     );
   });
 
+  it("propagates error when @me resolution fails for assignee", async () => {
+    mockClient.getMyself.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(
+      parseCommand(
+        () => import("./edit"),
+        ["42", "--project", "PROJ", "--repo", "repo", "--assignee", "@me"],
+      ),
+    ).rejects.toThrow("Unauthorized");
+  });
+
+  it("does not call getMyself when @me is not used", async () => {
+    mockClient.patchPullRequest.mockResolvedValue({ number: 42, summary: "Title" });
+
+    await parseCommand(
+      () => import("./edit"),
+      ["42", "--project", "PROJ", "--repo", "repo", "--assignee", "123"],
+    );
+
+    expect(mockClient.getMyself).not.toHaveBeenCalled();
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(
