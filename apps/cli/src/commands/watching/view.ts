@@ -1,7 +1,6 @@
 import { getClient } from "@repo/backlog-utils";
-import { formatDate, outputResult, printDefinitionList, vInteger } from "@repo/cli-utils";
+import { formatDate, outputResult, parseArg, printDefinitionList, vInteger } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -19,7 +18,7 @@ const view = new BeeCommand("view")
   .action(async (watching, opts) => {
     const { client } = await getClient(opts.space);
 
-    const watchingData = await client.getWatchingListItem(v.parse(vInteger, watching));
+    const watchingData = await client.getWatchingListItem(parseArg(vInteger, watching, "watching"));
 
     outputResult(watchingData, opts, (data) => {
       consola.log("");

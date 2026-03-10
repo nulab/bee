@@ -1,7 +1,6 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputResult, vInteger } from "@repo/cli-utils";
+import { confirmOrExit, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { resolveOptions } from "../../lib/required-option";
@@ -44,9 +43,17 @@ const deleteIssueType = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const result = await client.deleteIssueType(opts.project, v.parse(vInteger, issueType), {
-      substituteIssueTypeId: v.parse(vInteger, opts.substituteIssueTypeId),
-    });
+    const result = await client.deleteIssueType(
+      opts.project,
+      parseArg(vInteger, issueType, "issueType"),
+      {
+        substituteIssueTypeId: parseArg(
+          vInteger,
+          opts.substituteIssueTypeId,
+          "--substitute-issue-type-id",
+        ),
+      },
+    );
 
     outputResult(result, opts, (data) => {
       consola.success(`Deleted issue type ${data.name} (ID: ${data.id})`);

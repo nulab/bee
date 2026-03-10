@@ -3,6 +3,7 @@ import {
   type Row,
   formatDate,
   outputResult,
+  parseArg,
   printTable,
   splitArg,
   vInteger,
@@ -44,8 +45,8 @@ const list = new BeeCommand("list")
       keyword: opts.keyword,
       sort: opts.sort,
       order: opts.order,
-      count: v.parse(v.optional(vInteger), opts.count),
-      offset: v.parse(v.optional(vInteger), opts.offset) ?? 0,
+      count: parseArg(v.optional(vInteger), opts.count, "--count"),
+      offset: parseArg(v.optional(vInteger), opts.offset, "--offset") ?? 0,
     });
 
     const json = opts.json === true ? "" : opts.json;

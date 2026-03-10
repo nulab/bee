@@ -1,7 +1,6 @@
 import { getClient, openOrPrintUrl, pullRequestUrl } from "@repo/backlog-utils";
-import { formatDate, outputResult, printDefinitionList, vInteger } from "@repo/cli-utils";
+import { formatDate, outputResult, parseArg, printDefinitionList, vInteger } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT, ENV_REPO } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { resolveOptions } from "../../lib/required-option";
@@ -29,7 +28,7 @@ const view = new BeeCommand("view")
     await resolveOptions(cmd);
     const { client, host } = await getClient(opts.space);
 
-    const prNumber = v.parse(vInteger, number);
+    const prNumber = parseArg(vInteger, number, "number");
 
     if (opts.web || opts.browser === false) {
       const url = pullRequestUrl(host, opts.project, opts.repo, prNumber);

@@ -1,5 +1,5 @@
 import { PRIORITY_NAMES, PriorityId, getClient, resolveUserId } from "@repo/backlog-utils";
-import { outputResult, vFiniteNumber, vInteger } from "@repo/cli-utils";
+import { outputResult, parseArg, vFiniteNumber, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
@@ -66,19 +66,19 @@ const edit = new BeeCommand("edit")
     const issueData = await client.patchIssue(issue, {
       summary: opts.title,
       description: opts.description,
-      statusId: v.parse(v.optional(vInteger), opts.status),
+      statusId: parseArg(v.optional(vInteger), opts.status, "--status"),
       priorityId,
-      issueTypeId: v.parse(v.optional(vInteger), opts.type),
+      issueTypeId: parseArg(v.optional(vInteger), opts.type, "--type"),
       assigneeId: opts.assignee ? await resolveUserId(client, opts.assignee) : undefined,
       categoryId,
       versionId,
       milestoneId,
-      resolutionId: v.parse(v.optional(vInteger), opts.resolution),
-      parentIssueId: v.parse(v.optional(vInteger), opts.parentIssue),
+      resolutionId: parseArg(v.optional(vInteger), opts.resolution, "--resolution"),
+      parentIssueId: parseArg(v.optional(vInteger), opts.parentIssue, "--parent-issue"),
       startDate: opts.startDate,
       dueDate: opts.dueDate,
-      estimatedHours: v.parse(v.optional(vFiniteNumber), opts.estimatedHours),
-      actualHours: v.parse(v.optional(vFiniteNumber), opts.actualHours),
+      estimatedHours: parseArg(v.optional(vFiniteNumber), opts.estimatedHours, "--estimated-hours"),
+      actualHours: parseArg(v.optional(vFiniteNumber), opts.actualHours, "--actual-hours"),
       comment: opts.comment,
       notifiedUserId,
       attachmentId,

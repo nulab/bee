@@ -1,7 +1,6 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputResult, printDefinitionList, vInteger } from "@repo/cli-utils";
+import { outputResult, parseArg, printDefinitionList, vInteger } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -19,7 +18,7 @@ const view = new BeeCommand("view")
   .action(async (team, opts) => {
     const { client } = await getClient(opts.space);
 
-    const t = await client.getTeam(v.parse(vInteger, team));
+    const t = await client.getTeam(parseArg(vInteger, team, "team"));
 
     outputResult(t, opts, (data) => {
       consola.log("");

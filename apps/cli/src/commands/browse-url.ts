@@ -9,8 +9,7 @@ import {
   projectUrl,
   repositoryUrl,
 } from "@repo/backlog-utils";
-import { vInteger } from "@repo/cli-utils";
-import * as v from "valibot";
+import { parseArg, vInteger } from "@repo/cli-utils";
 
 const ISSUE_KEY_PATTERN = /^[A-Z][A-Z0-9_]+-\d+$/;
 const ISSUE_NUMBER_PATTERN = /^\d+$/;
@@ -173,7 +172,7 @@ const resolveFileUrl = (host: string, args: BrowseArgs, git: GitInfo): ResolveRe
   // Parse line number from target (e.g. src/main.ts:42)
   const lineMatch = args.target.match(FILE_LINE_PATTERN);
   const filePath = lineMatch ? lineMatch[1] : args.target;
-  const line = lineMatch ? v.parse(vInteger, lineMatch[2]) : undefined;
+  const line = lineMatch ? parseArg(vInteger, lineMatch[2], "line") : undefined;
 
   // Resolve repo-relative path
   const fullPath = git.repoRelativePath ? `${git.repoRelativePath}${filePath}` : filePath;

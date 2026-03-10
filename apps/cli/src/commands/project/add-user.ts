@@ -1,7 +1,6 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputResult, vInteger } from "@repo/cli-utils";
+import { outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { RequiredOption, resolveOptions } from "../../lib/required-option";
@@ -23,7 +22,7 @@ const addUser = new BeeCommand("add-user")
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
 
-    const userId = v.parse(vInteger, opts.userId);
+    const userId = parseArg(vInteger, opts.userId, "--user-id");
 
     const { client } = await getClient(opts.space);
 

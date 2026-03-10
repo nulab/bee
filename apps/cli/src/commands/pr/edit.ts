@@ -1,5 +1,5 @@
 import { getClient, resolveUserId } from "@repo/backlog-utils";
-import { outputResult, vInteger } from "@repo/cli-utils";
+import { outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT, ENV_REPO } from "../../lib/bee-command";
@@ -39,7 +39,7 @@ const edit = new BeeCommand("edit")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const prNumber = v.parse(vInteger, number);
+    const prNumber = parseArg(vInteger, number, "number");
     const notifiedUserId = opts.notify ?? [];
 
     let issueId: number | undefined;

@@ -1,7 +1,6 @@
 import { getClient, openOrPrintUrl, wikiUrl } from "@repo/backlog-utils";
-import { formatDate, outputResult, printDefinitionList, vInteger } from "@repo/cli-utils";
+import { formatDate, outputResult, parseArg, printDefinitionList, vInteger } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -23,12 +22,12 @@ const view = new BeeCommand("view")
     const { client, host } = await getClient(opts.space);
 
     if (opts.web || opts.browser === false) {
-      const url = wikiUrl(host, v.parse(vInteger, wiki));
+      const url = wikiUrl(host, parseArg(vInteger, wiki, "wiki"));
       await openOrPrintUrl(url, opts.browser === false, consola);
       return;
     }
 
-    const wikiData = await client.getWiki(v.parse(vInteger, wiki));
+    const wikiData = await client.getWiki(parseArg(vInteger, wiki, "wiki"));
 
     outputResult(wikiData, opts, (data) => {
       consola.log("");

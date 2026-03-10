@@ -1,4 +1,5 @@
 import * as v from "valibot";
+import { UserError } from "./user-error";
 
 /**
  * Schema that transforms a string to a validated finite number.
@@ -12,4 +13,23 @@ const vFiniteNumber = v.pipe(v.string(), v.transform(Number), v.number(), v.fini
  */
 const vInteger = v.pipe(v.string(), v.transform(Number), v.number(), v.integer());
 
-export { vFiniteNumber, vInteger };
+/**
+ * Parse a CLI argument with a valibot schema, throwing a UserError on failure.
+ *
+ * Unlike bare `v.parse()`, this converts ValiError into a UserError so the
+ * global error handler shows a friendly message instead of
+ * "API response validation failed."
+ */
+const parseArg = <S extends v.GenericSchema>(
+  schema: S,
+  value: v.InferInput<S>,
+  label: string,
+): v.InferOutput<S> => {
+  const result = v.safeParse(schema, value);
+  if (result.success) {
+    return result.output;
+  }
+  throw new UserError(`Invalid value for "${label}": "${value}"`);
+};
+
+export { vFiniteNumber, vInteger, parseArg };

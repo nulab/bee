@@ -1,7 +1,6 @@
 import { getClient } from "@repo/backlog-utils";
-import { vInteger } from "@repo/cli-utils";
+import { parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -17,7 +16,7 @@ const read = new BeeCommand("read")
   .action(async (id, opts) => {
     const { client } = await getClient(opts.space);
 
-    await client.markAsReadNotification(v.parse(vInteger, id));
+    await client.markAsReadNotification(parseArg(vInteger, id, "id"));
 
     consola.success(`Marked notification ${id} as read.`);
   });

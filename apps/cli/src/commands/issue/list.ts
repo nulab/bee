@@ -5,7 +5,7 @@ import {
   resolveProjectIds,
   resolveUserId,
 } from "@repo/backlog-utils";
-import { type Row, outputResult, printTable, vInteger } from "@repo/cli-utils";
+import { type Row, outputResult, parseArg, printTable, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import * as v from "valibot";
 import { Option } from "commander";
@@ -105,8 +105,8 @@ const list = new BeeCommand("list")
       keyword: opts.keyword,
       sort: opts.sort,
       order: opts.order,
-      count: v.parse(v.optional(vInteger), opts.count),
-      offset: v.parse(v.optional(vInteger), opts.offset),
+      count: parseArg(v.optional(vInteger), opts.count, "--count"),
+      offset: parseArg(v.optional(vInteger), opts.offset, "--offset"),
       createdSince: opts.createdSince,
       createdUntil: opts.createdUntil,
       updatedSince: opts.updatedSince,

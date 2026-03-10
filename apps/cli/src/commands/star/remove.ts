@@ -1,7 +1,6 @@
 import { getClient } from "@repo/backlog-utils";
-import { vInteger } from "@repo/cli-utils";
+import { parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -14,7 +13,7 @@ const remove = new BeeCommand("remove")
   .examples([{ description: "Remove a star", command: "bee star remove 12345" }])
   .action(async (star, opts) => {
     const { client } = await getClient(opts.space);
-    await client.removeStar(v.parse(vInteger, star));
+    await client.removeStar(parseArg(vInteger, star, "star"));
     consola.success(`Removed star ${star}.`);
   });
 

@@ -1,5 +1,5 @@
 import { PR_STATUS_NAMES, PrStatusName, getClient, resolveUserId } from "@repo/backlog-utils";
-import { type Row, outputResult, printTable, vInteger } from "@repo/cli-utils";
+import { type Row, outputResult, parseArg, printTable, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT, ENV_REPO } from "../../lib/bee-command";
@@ -58,8 +58,8 @@ const list = new BeeCommand("list")
       assigneeId: assigneeId.length > 0 ? assigneeId : undefined,
       issueId: issueId.length > 0 ? issueId : undefined,
       createdUserId: createdUserId.length > 0 ? createdUserId : undefined,
-      count: v.parse(v.optional(vInteger), opts.count),
-      offset: v.parse(v.optional(vInteger), opts.offset),
+      count: parseArg(v.optional(vInteger), opts.count, "--count"),
+      offset: parseArg(v.optional(vInteger), opts.offset, "--offset"),
     });
 
     const json = opts.json === true ? "" : opts.json;

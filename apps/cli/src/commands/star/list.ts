@@ -1,7 +1,13 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, formatDate, outputResult, printTable, vInteger } from "@repo/cli-utils";
+import {
+  type Row,
+  formatDate,
+  outputResult,
+  parseArg,
+  printTable,
+  vInteger,
+} from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -22,7 +28,7 @@ const list = new BeeCommand("list")
 
     let userId: number;
     if (user) {
-      userId = v.parse(vInteger, user);
+      userId = parseArg(vInteger, user, "user");
     } else {
       const myself = await client.getMyself();
       userId = myself.id;

@@ -1,7 +1,6 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputResult, promptRequired, vInteger } from "@repo/cli-utils";
+import { outputResult, parseArg, promptRequired, vInteger } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { resolveOptions } from "../../lib/required-option";
@@ -27,9 +26,13 @@ const edit = new BeeCommand("edit")
 
     const name = await promptRequired("Category name:", opts.name);
 
-    const result = await client.patchCategories(opts.project, v.parse(vInteger, category), {
-      name,
-    });
+    const result = await client.patchCategories(
+      opts.project,
+      parseArg(vInteger, category, "category"),
+      {
+        name,
+      },
+    );
 
     outputResult(result, opts, (data) => {
       consola.success(`Updated category ${data.name} (ID: ${data.id})`);

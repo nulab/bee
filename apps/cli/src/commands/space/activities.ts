@@ -1,5 +1,12 @@
 import { ACTIVITY_LABELS, getClient } from "@repo/backlog-utils";
-import { type Row, formatDate, outputResult, printTable, vInteger } from "@repo/cli-utils";
+import {
+  type Row,
+  formatDate,
+  outputResult,
+  parseArg,
+  printTable,
+  vInteger,
+} from "@repo/cli-utils";
 import consola from "consola";
 import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
@@ -76,10 +83,10 @@ https://developer.nulab.com/docs/backlog/api/2/get-recent-updates/#response-desc
 
     const activityList = await client.getSpaceActivities({
       activityTypeId,
-      count: v.parse(v.optional(vInteger), opts.count),
+      count: parseArg(v.optional(vInteger), opts.count, "--count"),
       order: opts.order,
-      minId: v.parse(v.optional(vInteger), opts.minId),
-      maxId: v.parse(v.optional(vInteger), opts.maxId),
+      minId: parseArg(v.optional(vInteger), opts.minId, "--min-id"),
+      maxId: parseArg(v.optional(vInteger), opts.maxId, "--max-id"),
     });
 
     outputResult(activityList, opts, (data) => {

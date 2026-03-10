@@ -1,7 +1,6 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputResult, vInteger } from "@repo/cli-utils";
+import { confirmOrExit, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
-import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -37,7 +36,7 @@ const deleteWatching = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const result = await client.deletehWatchingListItem(v.parse(vInteger, watching));
+    const result = await client.deletehWatchingListItem(parseArg(vInteger, watching, "watching"));
 
     outputResult(result, opts, (data) => {
       consola.success(`Deleted watching ${data.id}.`);
