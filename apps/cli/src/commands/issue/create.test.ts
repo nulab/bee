@@ -183,6 +183,50 @@ describe("issue create", () => {
     );
   });
 
+  it("passes categoryId, versionId, and milestoneId to API", async () => {
+    vi.mocked(promptRequired)
+      .mockResolvedValueOnce("100")
+      .mockResolvedValueOnce("Title")
+      .mockResolvedValueOnce("1")
+      .mockResolvedValueOnce("normal");
+    mockClient.postIssue.mockResolvedValue({
+      issueKey: "TEST-7",
+      summary: "Title",
+    });
+
+    await parseCommand(
+      () => import("./create"),
+      [
+        "--project",
+        "100",
+        "--title",
+        "Title",
+        "--type",
+        "1",
+        "--priority",
+        "normal",
+        "--category",
+        "10",
+        "--category",
+        "20",
+        "--version",
+        "30",
+        "--milestone",
+        "40",
+        "--milestone",
+        "50",
+      ],
+    );
+
+    expect(mockClient.postIssue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        categoryId: [10, 20],
+        versionId: [30],
+        milestoneId: [40, 50],
+      }),
+    );
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(
@@ -227,6 +271,9 @@ describe("issue create", () => {
       priorityId: 3,
       description: undefined,
       assigneeId: undefined,
+      categoryId: [],
+      versionId: [],
+      milestoneId: [],
       parentIssueId: undefined,
       startDate: undefined,
       dueDate: undefined,

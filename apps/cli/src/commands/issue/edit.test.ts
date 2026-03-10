@@ -93,6 +93,38 @@ describe("issue edit", () => {
     );
   });
 
+  it("passes categoryId, versionId, and milestoneId to API", async () => {
+    mockClient.patchIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Title" });
+
+    await parseCommand(
+      () => import("./edit"),
+      [
+        "TEST-1",
+        "--title",
+        "Title",
+        "--category",
+        "10",
+        "--category",
+        "20",
+        "--version",
+        "30",
+        "--milestone",
+        "40",
+        "--milestone",
+        "50",
+      ],
+    );
+
+    expect(mockClient.patchIssue).toHaveBeenCalledWith(
+      "TEST-1",
+      expect.objectContaining({
+        categoryId: [10, 20],
+        versionId: [30],
+        milestoneId: [40, 50],
+      }),
+    );
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(
@@ -117,6 +149,9 @@ describe("issue edit", () => {
       priorityId: undefined,
       issueTypeId: undefined,
       assigneeId: undefined,
+      categoryId: [],
+      versionId: [],
+      milestoneId: [],
       resolutionId: undefined,
       parentIssueId: undefined,
       startDate: undefined,
