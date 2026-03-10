@@ -1,4 +1,5 @@
 import * as v from "valibot";
+import consola from "consola";
 import { UserError } from "./user-error";
 
 /**
@@ -29,7 +30,12 @@ const parseArg = <S extends v.GenericSchema>(
   if (result.success) {
     return result.output;
   }
-  throw new UserError(`Invalid value for "${label}": "${value}"`);
+  const reason = result.issues[0]?.message;
+  const message = reason
+    ? `Invalid value for "${label}": "${value}" — ${reason}`
+    : `Invalid value for "${label}": "${value}"`;
+  consola.debug("parseArg validation issues:", result.issues);
+  throw new UserError(message);
 };
 
 export { vFiniteNumber, vInteger, parseArg };
