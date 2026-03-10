@@ -34,6 +34,14 @@ export default defineConfig({
       },
       head: [
         {
+          tag: "link",
+          attrs: { rel: "icon", href: "/bee/favicon.ico", sizes: "48x48" },
+        },
+        {
+          tag: "link",
+          attrs: { rel: "icon", href: "/bee/favicon.svg", type: "image/svg+xml" },
+        },
+        {
           tag: "meta",
           attrs: { property: "og:image", content: "https://nulab.github.io/bee/og-image.png" },
         },
