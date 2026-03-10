@@ -1,5 +1,5 @@
 import { ROLE_LABELS, getClient } from "@repo/backlog-utils";
-import { formatDate, outputResult, printDefinitionList } from "@repo/cli-utils";
+import { formatDate, outputResult, parseArg, printDefinitionList, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -18,7 +18,7 @@ const view = new BeeCommand("view")
   .action(async (user, opts) => {
     const { client } = await getClient(opts.space);
 
-    const userData = await client.getUser(Number(user));
+    const userData = await client.getUser(parseArg(vInteger, user, "user"));
 
     outputResult(userData, opts, (data) => {
       consola.log("");

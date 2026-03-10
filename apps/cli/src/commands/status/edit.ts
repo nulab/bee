@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputResult } from "@repo/cli-utils";
+import { outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -32,10 +32,14 @@ const edit = new BeeCommand("edit")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const result = await client.patchProjectStatus(opts.project, Number(status), {
-      name: opts.name,
-      color: opts.color as never,
-    });
+    const result = await client.patchProjectStatus(
+      opts.project,
+      parseArg(vInteger, status, "status"),
+      {
+        name: opts.name,
+        color: opts.color as never,
+      },
+    );
 
     outputResult(result, opts, (data) => {
       consola.success(`Updated status ${data.name} (ID: ${data.id})`);

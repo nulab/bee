@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
-import { formatDate, outputResult } from "@repo/cli-utils";
+import { formatDate, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT, ENV_REPO } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { resolveOptions } from "../../lib/required-option";
@@ -29,13 +30,13 @@ const comments = new BeeCommand("comments")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const prNumber = Number(number);
+    const prNumber = parseArg(vInteger, number, "number");
 
     const prComments = await client.getPullRequestComments(opts.project, opts.repo, prNumber, {
-      minId: opts.minId ? Number(opts.minId) : undefined,
-      maxId: opts.maxId ? Number(opts.maxId) : undefined,
+      minId: parseArg(v.optional(vInteger), opts.minId, "--min-id"),
+      maxId: parseArg(v.optional(vInteger), opts.maxId, "--max-id"),
       order: opts.order ?? "asc",
-      count: opts.count ? Number(opts.count) : undefined,
+      count: parseArg(v.optional(vInteger), opts.count, "--count"),
     });
 
     const json = opts.json === true ? "" : opts.json;

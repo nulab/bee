@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputResult } from "@repo/cli-utils";
+import { confirmOrExit, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -42,8 +42,8 @@ const deleteStatus = new BeeCommand("delete")
 
     const result = await client.deleteProjectStatus(
       opts.project,
-      Number(status),
-      Number(opts.substituteStatusId),
+      parseArg(vInteger, status, "status"),
+      parseArg(vInteger, opts.substituteStatusId, "--substitute-status-id"),
     );
 
     outputResult(result, opts, (data) => {

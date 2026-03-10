@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputResult, resolveStdinArg } from "@repo/cli-utils";
+import { outputResult, parseArg, resolveStdinArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -35,7 +35,7 @@ const edit = new BeeCommand("edit")
 
     const content = await resolveStdinArg(opts.body);
 
-    const wikiData = await client.patchWiki(Number(wiki), {
+    const wikiData = await client.patchWiki(parseArg(vInteger, wiki, "wiki"), {
       name: opts.name,
       content,
       mailNotify: opts.mailNotify,

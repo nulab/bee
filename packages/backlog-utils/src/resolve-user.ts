@@ -1,3 +1,4 @@
+import { parseArg, vInteger } from "@repo/cli-utils";
 import { type Backlog } from "backlog-js";
 
 /**
@@ -10,5 +11,5 @@ export const resolveUserId = async (client: Backlog, value: string): Promise<num
     const me = await client.getMyself();
     return me.id;
   }
-  return Number(value);
+  return parseArg(vInteger, value, "user");
 };

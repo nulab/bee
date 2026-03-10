@@ -376,6 +376,42 @@ Following [CLI Guidelines (clig.dev)](https://clig.dev/), command tests should f
 
 **Guiding principle:** If removing the test wouldn't reduce confidence in _your own code_, the test is verifying the library, not the application.
 
+## Type Casting: use valibot instead of `Number()` / `parseInt()`
+
+Bare `Number(value)` silently returns `NaN` for invalid input, which propagates through arithmetic and API calls without error. `parseInt` has similar issues (trailing garbage, radix confusion). **Always use valibot schemas for string-to-number conversion** so that invalid input is caught immediately.
+
+`@repo/cli-utils` exports two reusable schemas:
+
+| Schema          | Validates                | Example output |
+| --------------- | ------------------------ | -------------- |
+| `vFiniteNumber` | Finite number (no NaN/∞) | `3.14`         |
+| `vInteger`      | Integer (no NaN/∞/frac)  | `42`           |
+
+In CLI command handlers, use `parseArg` (which wraps `v.safeParse` and throws
+a `UserError` with a friendly message on failure) instead of bare `v.parse`:
+
+```ts
+import * as v from "valibot";
+import { parseArg, vInteger, vFiniteNumber } from "@repo/cli-utils";
+
+// Required value — label appears in the error message
+const id = parseArg(vInteger, opts.id, "--id");
+
+// Optional value (returns undefined when input is undefined)
+const count = parseArg(v.optional(vInteger), opts.count, "--count");
+
+// In collectNum-style parsers
+const collectNum = (val: string, prev: number[]): number[] => [
+  ...prev,
+  parseArg(vInteger, val, "value"),
+];
+```
+
+Use bare `v.parse` / `v.safeParse` only in non-CLI contexts (e.g., API response
+validation, internal library code) where a `ValiError` is the appropriate error type.
+
+`String()` for display purposes (e.g., `String(id)` in table rows) is safe because it never produces an unexpected type, so it does not need replacement.
+
 ## Code Conventions (enforced by oxlint)
 
 - **Named exports only** — no default exports (`import/no-default-export`)

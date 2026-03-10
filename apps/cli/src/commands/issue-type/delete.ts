@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputResult } from "@repo/cli-utils";
+import { confirmOrExit, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -43,9 +43,17 @@ const deleteIssueType = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const result = await client.deleteIssueType(opts.project, Number(issueType), {
-      substituteIssueTypeId: Number(opts.substituteIssueTypeId),
-    });
+    const result = await client.deleteIssueType(
+      opts.project,
+      parseArg(vInteger, issueType, "issueType"),
+      {
+        substituteIssueTypeId: parseArg(
+          vInteger,
+          opts.substituteIssueTypeId,
+          "--substitute-issue-type-id",
+        ),
+      },
+    );
 
     outputResult(result, opts, (data) => {
       consola.success(`Deleted issue type ${data.name} (ID: ${data.id})`);

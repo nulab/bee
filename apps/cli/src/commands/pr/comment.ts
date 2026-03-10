@@ -1,5 +1,13 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, formatDate, outputResult, printTable, resolveStdinArg } from "@repo/cli-utils";
+import {
+  type Row,
+  formatDate,
+  outputResult,
+  parseArg,
+  printTable,
+  resolveStdinArg,
+  vInteger,
+} from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT, ENV_REPO } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -40,7 +48,7 @@ Use \`--list\` or \`--edit-last\` for other comment operations.`,
   .action(async (number, opts, cmd) => {
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
-    const prNumber = Number(number);
+    const prNumber = parseArg(vInteger, number, "number");
 
     const json = opts.json === true ? "" : opts.json;
 

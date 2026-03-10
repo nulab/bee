@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { UserError } from "@repo/cli-utils";
+import { UserError, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -24,7 +24,7 @@ const add = new BeeCommand("add")
   ])
   .action(async (opts) => {
     const flags = [opts.issue, opts.comment, opts.wiki, opts.prComment].filter(
-      (v) => v !== undefined,
+      (val) => val !== undefined,
     );
 
     if (flags.length === 0) {
@@ -43,19 +43,21 @@ const add = new BeeCommand("add")
 
     if (opts.issue) {
       const issue = /^\d+$/.test(opts.issue)
-        ? { id: Number(opts.issue) }
+        ? { id: parseArg(vInteger, opts.issue, "--issue") }
         : await client.getIssue(opts.issue);
       const issueId = issue.id;
       await client.postStar({ issueId });
       consola.success(`Starred issue ${opts.issue}.`);
     } else if (opts.comment) {
-      await client.postStar({ commentId: Number(opts.comment) });
+      await client.postStar({ commentId: parseArg(vInteger, opts.comment, "--comment") });
       consola.success(`Starred comment ${opts.comment}.`);
     } else if (opts.wiki) {
-      await client.postStar({ wikiId: Number(opts.wiki) });
+      await client.postStar({ wikiId: parseArg(vInteger, opts.wiki, "--wiki") });
       consola.success(`Starred wiki ${opts.wiki}.`);
     } else if (opts.prComment) {
-      await client.postStar({ pullRequestCommentId: Number(opts.prComment) });
+      await client.postStar({
+        pullRequestCommentId: parseArg(vInteger, opts.prComment, "--pr-comment"),
+      });
       consola.success(`Starred pull request comment ${opts.prComment}.`);
     }
   });

@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputResult } from "@repo/cli-utils";
+import { confirmOrExit, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -37,7 +37,10 @@ const deleteMilestone = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const result = await client.deleteVersions(opts.project, Number(milestone));
+    const result = await client.deleteVersions(
+      opts.project,
+      parseArg(vInteger, milestone, "milestone"),
+    );
 
     outputResult(result, opts, (data) => {
       consola.success(`Deleted milestone ${data.name} (ID: ${data.id})`);

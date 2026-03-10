@@ -1,5 +1,5 @@
 import { IssueStatusId, ResolutionId, getClient } from "@repo/backlog-utils";
-import { outputResult } from "@repo/cli-utils";
+import { outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -31,7 +31,7 @@ const close = new BeeCommand("close")
     const { client } = await getClient(opts.space);
 
     const resolutionId = opts.resolution
-      ? (ResolutionId[opts.resolution] ?? Number(opts.resolution))
+      ? (ResolutionId[opts.resolution] ?? parseArg(vInteger, opts.resolution, "--resolution"))
       : ResolutionId.fixed;
 
     const notifiedUserId = opts.notify ?? [];

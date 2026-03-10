@@ -1,6 +1,14 @@
 import { ACTIVITY_LABELS, getClient } from "@repo/backlog-utils";
-import { type Row, formatDate, outputResult, printTable } from "@repo/cli-utils";
+import {
+  type Row,
+  formatDate,
+  outputResult,
+  parseArg,
+  printTable,
+  vInteger,
+} from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { collectNum } from "../../lib/common-options";
@@ -75,7 +83,7 @@ https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#respo
 
     const activityList = await client.getProjectActivities(project, {
       activityTypeId,
-      count: opts.count ? Number(opts.count) : undefined,
+      count: parseArg(v.optional(vInteger), opts.count, "--count"),
       order: opts.order,
     });
 

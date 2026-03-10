@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputResult } from "@repo/cli-utils";
+import { outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -27,7 +27,7 @@ const count = new BeeCommand("count")
 
     let userId: number;
     if (user) {
-      userId = Number(user);
+      userId = parseArg(vInteger, user, "user");
     } else {
       const myself = await client.getMyself();
       userId = myself.id;
