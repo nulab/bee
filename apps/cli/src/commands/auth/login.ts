@@ -15,15 +15,11 @@ Use \`--method oauth\` for OAuth authentication via the browser.`,
   )
   .option("-m, --method <method>", "The authentication method to use", "api-key")
   .option("--with-token", "Read token from standard input")
-  .option("--client-id <id>", "The OAuth Client ID to use when authenticating with Backlog")
-  .option(
-    "--client-secret <secret>",
-    "The OAuth Client Secret to use when authenticating with Backlog",
-  )
   .envVars([
     ["BACKLOG_SPACE", "Default space hostname"],
     ["BACKLOG_OAUTH_CLIENT_ID", "OAuth Client ID"],
     ["BACKLOG_OAUTH_CLIENT_SECRET", "OAuth Client Secret"],
+    ["BACKLOG_OAUTH_PORT", "OAuth callback port (default: 5033)"],
   ])
   .examples([
     { description: "Start interactive setup", command: "bee auth login" },
@@ -44,7 +40,7 @@ Use \`--method oauth\` for OAuth authentication via the browser.`,
       placeholder: "xxx.backlog.com",
     });
 
-    await (method === "api-key" ? loginWithApiKey(hostname, opts) : loginWithOAuth(hostname, opts));
+    await (method === "api-key" ? loginWithApiKey(hostname, opts) : loginWithOAuth(hostname));
   });
 
 const loginWithApiKey = async (hostname: string, opts: { withToken?: boolean }): Promise<void> => {
@@ -69,21 +65,22 @@ const loginWithApiKey = async (hostname: string, opts: { withToken?: boolean }):
   consola.success(`Logged in to ${hostname} as ${user.name} (${user.userId})`);
 };
 
-const loginWithOAuth = async (
-  hostname: string,
-  opts: { clientId?: string; clientSecret?: string },
-): Promise<void> => {
+const loginWithOAuth = async (hostname: string): Promise<void> => {
   const clientId = await promptRequired(
     "OAuth Client ID:",
-    opts.clientId ?? process.env.BACKLOG_OAUTH_CLIENT_ID,
+    process.env.BACKLOG_OAUTH_CLIENT_ID,
   );
 
   const clientSecret = await promptRequired(
     "OAuth Client Secret:",
-    opts.clientSecret ?? process.env.BACKLOG_OAUTH_CLIENT_SECRET,
+    process.env.BACKLOG_OAUTH_CLIENT_SECRET,
   );
 
-  const callbackServer = startCallbackServer();
+  const port = process.env.BACKLOG_OAUTH_PORT ? Number(process.env.BACKLOG_OAUTH_PORT) : undefined;
+  if (port !== undefined && (!Number.isInteger(port) || port < 0 || port > 65_535)) {
+    throw new UserError("BACKLOG_OAUTH_PORT must be an integer between 0 and 65535.");
+  }
+  const callbackServer = startCallbackServer(port);
   const redirectUri = `http://localhost:${callbackServer.port}/callback`;
   const state = crypto.randomUUID();
 
