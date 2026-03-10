@@ -1,8 +1,9 @@
 import { type Server, type ServerResponse, createServer } from "node:http";
+import { type AddressInfo } from "node:net";
 
 /** 5 minutes in milliseconds */
 const CALLBACK_TIMEOUT_MS = 300_000;
-const CALLBACK_PORT = 5033;
+const DEFAULT_CALLBACK_PORT = 5033;
 
 const SUCCESS_HTML = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Authentication Successful</title></head>
@@ -37,14 +38,15 @@ const respondHtml = (res: ServerResponse, html: string, statusCode = 200): void 
 /**
  * Starts a local HTTP server to receive the OAuth callback.
  *
- * Listens on port 5033 (Nulab's stock code).
+ * Listens on the given port (defaults to 5033, Nulab's stock code).
+ * Pass `0` to let the OS pick an available port.
  */
-const startCallbackServer = (): CallbackServer => {
+const startCallbackServer = (port: number = DEFAULT_CALLBACK_PORT): CallbackServer => {
   let resolveCode: ((result: CallbackResult) => void) | null = null;
   let rejectCode: ((error: Error) => void) | null = null;
 
   const server: Server = createServer((req, res) => {
-    const url = new URL(req.url ?? "/", `http://localhost:${CALLBACK_PORT}`);
+    const url = new URL(req.url ?? "/", `http://localhost:${actualPort}`);
 
     if (url.pathname !== "/callback") {
       res.writeHead(404);
@@ -72,10 +74,11 @@ const startCallbackServer = (): CallbackServer => {
     respondHtml(res, SUCCESS_HTML);
   });
 
-  server.listen(CALLBACK_PORT);
+  server.listen(port);
+  const actualPort = (server.address() as AddressInfo).port;
 
   return {
-    port: CALLBACK_PORT,
+    port: actualPort,
     waitForCallback(expectedState: string): Promise<string> {
       return new Promise<string>((resolve, reject) => {
         const timeout = setTimeout(() => {

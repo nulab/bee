@@ -3,7 +3,7 @@ import { promptRequired } from "@repo/cli-utils";
 import { updateConfig } from "@repo/config";
 import { Backlog, OAuth2 } from "backlog-js";
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseCommand } from "@repo/test-utils";
 
 const mockGetMyself = vi.fn();
@@ -116,6 +116,9 @@ describe("auth login", () => {
 
   describe("oauth", () => {
     const setupOAuthMocks = () => {
+      process.env.BACKLOG_OAUTH_CLIENT_ID = "my-client-id";
+      process.env.BACKLOG_OAUTH_CLIENT_SECRET = "my-client-secret";
+
       mockGetMyself.mockResolvedValue({ name: "OAuth User", userId: "oauthuser" });
       vi.mocked(updateConfig).mockImplementation((updater) =>
         updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
@@ -138,17 +141,24 @@ describe("auth login", () => {
       return { mockStop, mockWaitForCallback };
     };
 
+    afterEach(() => {
+      delete process.env.BACKLOG_OAUTH_CLIENT_ID;
+      delete process.env.BACKLOG_OAUTH_CLIENT_SECRET;
+    });
+
+    it("throws error when OAuth env vars are missing", async () => {
+      vi.mocked(promptRequired).mockResolvedValueOnce("example.backlog.com");
+
+      await expect(parseCommand(() => import("./login"), ["--method", "oauth"])).rejects.toThrow(
+        "BACKLOG_OAUTH_CLIENT_ID and BACKLOG_OAUTH_CLIENT_SECRET must be set as environment variables.",
+      );
+    });
+
     it("authenticates new space via OAuth flow", async () => {
       setupOAuthMocks();
-      vi.mocked(promptRequired)
-        .mockResolvedValueOnce("example.backlog.com")
-        .mockResolvedValueOnce("my-client-id")
-        .mockResolvedValueOnce("my-client-secret");
+      vi.mocked(promptRequired).mockResolvedValueOnce("example.backlog.com");
 
-      await parseCommand(
-        () => import("./login"),
-        ["--method", "oauth", "--client-id", "my-client-id", "--client-secret", "my-client-secret"],
-      );
+      await parseCommand(() => import("./login"), ["--method", "oauth"]);
 
       expect(startCallbackServer).toHaveBeenCalled();
       expect(OAuth2).toHaveBeenCalledWith({
@@ -191,6 +201,8 @@ describe("auth login", () => {
     });
 
     it("throws error when error occurs during callback", async () => {
+      process.env.BACKLOG_OAUTH_CLIENT_ID = "my-client-id";
+      process.env.BACKLOG_OAUTH_CLIENT_SECRET = "my-client-secret";
       const mockStop = vi.fn();
       vi.mocked(startCallbackServer).mockReturnValue({
         port: 5033,
@@ -199,71 +211,32 @@ describe("auth login", () => {
           .mockRejectedValue(new Error("OAuth callback timed out after 5 minutes")),
         stop: mockStop,
       });
-      vi.mocked(promptRequired)
-        .mockResolvedValueOnce("example.backlog.com")
-        .mockResolvedValueOnce("my-client-id")
-        .mockResolvedValueOnce("my-client-secret");
+      vi.mocked(promptRequired).mockResolvedValueOnce("example.backlog.com");
 
-      await expect(
-        parseCommand(
-          () => import("./login"),
-          [
-            "--method",
-            "oauth",
-            "--client-id",
-            "my-client-id",
-            "--client-secret",
-            "my-client-secret",
-          ],
-        ),
-      ).rejects.toThrow("OAuth authorization failed: OAuth callback timed out after 5 minutes");
+      await expect(parseCommand(() => import("./login"), ["--method", "oauth"])).rejects.toThrow(
+        "OAuth authorization failed: OAuth callback timed out after 5 minutes",
+      );
       expect(mockStop).toHaveBeenCalled();
     });
 
     it("throws error when token exchange fails", async () => {
       setupOAuthMocks();
       vi.mocked(exchangeAuthorizationCode).mockRejectedValue(new Error("invalid_grant"));
-      vi.mocked(promptRequired)
-        .mockResolvedValueOnce("example.backlog.com")
-        .mockResolvedValueOnce("my-client-id")
-        .mockResolvedValueOnce("my-client-secret");
+      vi.mocked(promptRequired).mockResolvedValueOnce("example.backlog.com");
 
-      await expect(
-        parseCommand(
-          () => import("./login"),
-          [
-            "--method",
-            "oauth",
-            "--client-id",
-            "my-client-id",
-            "--client-secret",
-            "my-client-secret",
-          ],
-        ),
-      ).rejects.toThrow("Failed to exchange authorization code for tokens.");
+      await expect(parseCommand(() => import("./login"), ["--method", "oauth"])).rejects.toThrow(
+        "Failed to exchange authorization code for tokens.",
+      );
     });
 
     it("throws error when token verification fails", async () => {
       setupOAuthMocks();
       mockGetMyself.mockRejectedValue(new Error("Unauthorized"));
-      vi.mocked(promptRequired)
-        .mockResolvedValueOnce("example.backlog.com")
-        .mockResolvedValueOnce("my-client-id")
-        .mockResolvedValueOnce("my-client-secret");
+      vi.mocked(promptRequired).mockResolvedValueOnce("example.backlog.com");
 
-      await expect(
-        parseCommand(
-          () => import("./login"),
-          [
-            "--method",
-            "oauth",
-            "--client-id",
-            "my-client-id",
-            "--client-secret",
-            "my-client-secret",
-          ],
-        ),
-      ).rejects.toThrow("Authentication verification failed.");
+      await expect(parseCommand(() => import("./login"), ["--method", "oauth"])).rejects.toThrow(
+        "Authentication verification failed.",
+      );
     });
 
     it("updates OAuth credentials for existing space", async () => {
@@ -286,15 +259,9 @@ describe("auth login", () => {
           aliases: {},
         }),
       );
-      vi.mocked(promptRequired)
-        .mockResolvedValueOnce("example.backlog.com")
-        .mockResolvedValueOnce("my-client-id")
-        .mockResolvedValueOnce("my-client-secret");
+      vi.mocked(promptRequired).mockResolvedValueOnce("example.backlog.com");
 
-      await parseCommand(
-        () => import("./login"),
-        ["--method", "oauth", "--client-id", "my-client-id", "--client-secret", "my-client-secret"],
-      );
+      await parseCommand(() => import("./login"), ["--method", "oauth"]);
 
       const result = vi.mocked(updateConfig).mock.results[0]?.value;
       expect(result.spaces).toEqual([

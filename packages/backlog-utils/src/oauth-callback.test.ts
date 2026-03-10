@@ -1,8 +1,6 @@
 import { type CallbackServer, startCallbackServer } from "./oauth-callback";
 import { afterEach, describe, expect, it } from "vitest";
 
-const BASE_URL = "http://localhost:5033";
-
 describe("startCallbackServer", () => {
   let server: CallbackServer;
 
@@ -11,7 +9,7 @@ describe("startCallbackServer", () => {
   });
 
   it("returns an object with port, waitForCallback, stop", () => {
-    server = startCallbackServer();
+    server = startCallbackServer(0);
     expect(server).toHaveProperty("port");
     expect(server).toHaveProperty("waitForCallback");
     expect(server).toHaveProperty("stop");
@@ -20,16 +18,23 @@ describe("startCallbackServer", () => {
     expect(typeof server.stop).toBe("function");
   });
 
-  it("uses port 5033", () => {
+  it("defaults to port 5033", () => {
     server = startCallbackServer();
     expect(server.port).toBe(5033);
   });
 
+  it("assigns a random port when 0 is passed", () => {
+    server = startCallbackServer(0);
+    expect(server.port).toBeGreaterThan(0);
+  });
+
   it("resolves with authorization code on valid callback", async () => {
-    server = startCallbackServer();
+    server = startCallbackServer(0);
     const promise = server.waitForCallback("test-state");
 
-    const res = await fetch(`${BASE_URL}/callback?code=auth-code-123&state=test-state`);
+    const res = await fetch(
+      `http://localhost:${server.port}/callback?code=auth-code-123&state=test-state`,
+    );
     expect(res.status).toBe(200);
     const html = await res.text();
     expect(html).toContain("Authentication Successful");
@@ -39,23 +44,21 @@ describe("startCallbackServer", () => {
   });
 
   it("rejects with CSRF error on state mismatch", async () => {
-    server = startCallbackServer();
+    server = startCallbackServer(0);
     const promise = server.waitForCallback("expected-state");
-    // Prevent unhandled rejection warning
     promise.catch(() => {});
 
-    await fetch(`${BASE_URL}/callback?code=auth-code-123&state=wrong-state`);
+    await fetch(`http://localhost:${server.port}/callback?code=auth-code-123&state=wrong-state`);
 
     await expect(promise).rejects.toThrow("OAuth state mismatch — possible CSRF attack");
   });
 
   it("rejects with OAuth error when error query param is present", async () => {
-    server = startCallbackServer();
+    server = startCallbackServer(0);
     const promise = server.waitForCallback("test-state");
-    // Prevent unhandled rejection warning
     promise.catch(() => {});
 
-    const res = await fetch(`${BASE_URL}/callback?error=access_denied`);
+    const res = await fetch(`http://localhost:${server.port}/callback?error=access_denied`);
     expect(res.status).toBe(200);
     const html = await res.text();
     expect(html).toContain("Authentication Failed");
@@ -64,12 +67,11 @@ describe("startCallbackServer", () => {
   });
 
   it("rejects when code or state is missing", async () => {
-    server = startCallbackServer();
+    server = startCallbackServer(0);
     const promise = server.waitForCallback("test-state");
-    // Prevent unhandled rejection warning
     promise.catch(() => {});
 
-    const res = await fetch(`${BASE_URL}/callback?code=auth-code-123`);
+    const res = await fetch(`http://localhost:${server.port}/callback?code=auth-code-123`);
     expect(res.status).toBe(200);
     const html = await res.text();
     expect(html).toContain("Authentication Failed");
@@ -78,16 +80,17 @@ describe("startCallbackServer", () => {
   });
 
   it("returns 404 for non-callback paths", async () => {
-    server = startCallbackServer();
+    server = startCallbackServer(0);
 
-    const res = await fetch(`${BASE_URL}/other-path`);
+    const res = await fetch(`http://localhost:${server.port}/other-path`);
     expect(res.status).toBe(404);
   });
 
   it("stops the server when stop is called", async () => {
-    server = startCallbackServer();
+    server = startCallbackServer(0);
+    const { port } = server;
     server.stop();
 
-    await expect(fetch(`${BASE_URL}/callback?code=abc&state=xyz`)).rejects.toThrow();
+    await expect(fetch(`http://localhost:${port}/callback?code=abc&state=xyz`)).rejects.toThrow();
   });
 });

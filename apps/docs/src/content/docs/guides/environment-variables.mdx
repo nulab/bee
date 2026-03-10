@@ -25,10 +25,13 @@ description: |-
 : API キーによる認証に使用します。`BACKLOG_SPACE` と併用すると、`bee auth login` を実行しなくても認証済みの状態で bee を利用できます。CI/CD 環境で特に便利です。
 
 `BACKLOG_OAUTH_CLIENT_ID`
-: OAuth 認証で使用するクライアント ID。`bee auth login --method oauth` 時に `--client-id` フラグの代わりに使用できます。
+: OAuth 認証で使用するクライアント ID。`bee auth login --method oauth` で必須です。
 
 `BACKLOG_OAUTH_CLIENT_SECRET`
-: OAuth 認証で使用するクライアントシークレット。`bee auth login --method oauth` 時に `--client-secret` フラグの代わりに使用できます。
+: OAuth 認証で使用するクライアントシークレット。`bee auth login --method oauth` で必須です。
+
+`BACKLOG_OAUTH_PORT`
+: OAuth 認証で使用するコールバックサーバーのポート番号。デフォルトは `5033`。別のアプリケーションとポートが競合する場合に変更できます。
 
 ## よく使うパターン
 
