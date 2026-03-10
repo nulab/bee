@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputResult } from "@repo/cli-utils";
+import { confirmOrExit, outputResult, vInteger } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -35,7 +36,7 @@ const deleteWiki = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const wikiData = await client.deleteWiki(Number(wiki), opts.mailNotify ?? false);
+    const wikiData = await client.deleteWiki(v.parse(vInteger, wiki), opts.mailNotify ?? false);
 
     outputResult(wikiData, opts, (data) => {
       consola.success(`Deleted wiki page ${data.id}: ${data.name}`);

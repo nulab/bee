@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
-import { UserError, outputResult } from "@repo/cli-utils";
+import { outputResult, vInteger } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { RequiredOption, resolveOptions } from "../../lib/required-option";
@@ -22,10 +23,7 @@ const removeUser = new BeeCommand("remove-user")
   .action(async (opts, cmd) => {
     await resolveOptions(cmd);
 
-    const userId = Number(opts.userId);
-    if (Number.isNaN(userId)) {
-      throw new UserError("User ID must be a number.");
-    }
+    const userId = v.parse(vInteger, opts.userId);
 
     const { client } = await getClient(opts.space);
 

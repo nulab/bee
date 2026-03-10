@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, formatDate, outputResult, printTable } from "@repo/cli-utils";
+import { type Row, formatDate, outputResult, printTable, vInteger } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -18,7 +19,7 @@ const attachments = new BeeCommand("attachments")
   .action(async (wiki, opts) => {
     const { client } = await getClient(opts.space);
 
-    const files = await client.getWikisAttachments(Number(wiki));
+    const files = await client.getWikisAttachments(v.parse(vInteger, wiki));
 
     outputResult(files, opts, (data) => {
       if (data.length === 0) {

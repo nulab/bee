@@ -5,8 +5,9 @@ import {
   resolveProjectIds,
   resolveUserId,
 } from "@repo/backlog-utils";
-import { type Row, outputResult, printTable } from "@repo/cli-utils";
+import { type Row, outputResult, printTable, vInteger } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { Option } from "commander";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -104,8 +105,8 @@ const list = new BeeCommand("list")
       keyword: opts.keyword,
       sort: opts.sort,
       order: opts.order,
-      count: opts.count ? Number(opts.count) : undefined,
-      offset: opts.offset ? Number(opts.offset) : undefined,
+      count: v.parse(v.optional(vInteger), opts.count),
+      offset: v.parse(v.optional(vInteger), opts.offset),
       createdSince: opts.createdSince,
       createdUntil: opts.createdUntil,
       updatedSince: opts.updatedSince,

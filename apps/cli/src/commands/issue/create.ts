@@ -6,8 +6,9 @@ import {
   resolveProjectIds,
   resolveUserId,
 } from "@repo/backlog-utils";
-import { outputResult, promptRequired } from "@repo/cli-utils";
+import { outputResult, promptRequired, vFiniteNumber, vInteger } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { Option } from "commander";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -80,18 +81,18 @@ const create = new BeeCommand("create")
     const issue = await client.postIssue({
       projectId,
       summary: title,
-      issueTypeId: Number(issueTypeId),
+      issueTypeId: v.parse(vInteger, issueTypeId),
       priorityId,
       description: opts.description,
       assigneeId,
       categoryId,
       versionId,
       milestoneId,
-      parentIssueId: opts.parentIssue ? Number(opts.parentIssue) : undefined,
+      parentIssueId: v.parse(v.optional(vInteger), opts.parentIssue),
       startDate: opts.startDate,
       dueDate: opts.dueDate,
-      estimatedHours: opts.estimatedHours ? Number(opts.estimatedHours) : undefined,
-      actualHours: opts.actualHours ? Number(opts.actualHours) : undefined,
+      estimatedHours: v.parse(v.optional(vFiniteNumber), opts.estimatedHours),
+      actualHours: v.parse(v.optional(vFiniteNumber), opts.actualHours),
       notifiedUserId,
       attachmentId,
     });

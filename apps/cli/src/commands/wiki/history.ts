@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, formatDate, outputResult, printTable } from "@repo/cli-utils";
+import { type Row, formatDate, outputResult, printTable, vInteger } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -26,10 +27,10 @@ const history = new BeeCommand("history")
   .action(async (wiki, opts) => {
     const { client } = await getClient(opts.space);
 
-    const histories = await client.getWikisHistory(Number(wiki), {
-      minId: opts.minId ? Number(opts.minId) : undefined,
-      maxId: opts.maxId ? Number(opts.maxId) : undefined,
-      count: opts.count ? Number(opts.count) : undefined,
+    const histories = await client.getWikisHistory(v.parse(vInteger, wiki), {
+      minId: v.parse(v.optional(vInteger), opts.minId),
+      maxId: v.parse(v.optional(vInteger), opts.maxId),
+      count: v.parse(v.optional(vInteger), opts.count),
       order: opts.order,
     });
 

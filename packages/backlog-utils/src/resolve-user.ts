@@ -1,4 +1,6 @@
+import { vInteger } from "@repo/cli-utils";
 import { type Backlog } from "backlog-js";
+import * as v from "valibot";
 
 /**
  * Resolve a user identifier to a numeric user ID.
@@ -10,5 +12,5 @@ export const resolveUserId = async (client: Backlog, value: string): Promise<num
     const me = await client.getMyself();
     return me.id;
   }
-  return Number(value);
+  return v.parse(vInteger, value);
 };

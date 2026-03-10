@@ -1,8 +1,10 @@
+import { vInteger } from "@repo/cli-utils";
 import { Option } from "commander";
+import * as v from "valibot";
 import { RequiredOption } from "./required-option";
 
 const collect = (val: string, prev: string[]): string[] => [...prev, val];
-const collectNum = (val: string, prev: number[]): number[] => [...prev, Number(val)];
+const collectNum = (val: string, prev: number[]): number[] => [...prev, v.parse(vInteger, val)];
 
 const project = () =>
   new RequiredOption("-p, --project <id>", "Project ID or project key").env("BACKLOG_PROJECT");

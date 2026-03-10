@@ -1,5 +1,5 @@
 import { getClient } from "@repo/backlog-utils";
-import { type Row, outputResult, printTable } from "@repo/cli-utils";
+import { type Row, outputResult, printTable, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
@@ -23,8 +23,8 @@ const list = new BeeCommand("list")
     const { client } = await getClient(opts.space);
 
     const order = v.parse(v.optional(v.picklist(["asc", "desc"])), opts.order);
-    const offset = v.parse(v.optional(v.pipe(v.string(), v.transform(Number))), opts.offset);
-    const count = v.parse(v.optional(v.pipe(v.string(), v.transform(Number))), opts.count);
+    const offset = v.parse(v.optional(vInteger), opts.offset);
+    const count = v.parse(v.optional(vInteger), opts.count);
 
     const teams = await client.getTeams({ order, offset, count });
 

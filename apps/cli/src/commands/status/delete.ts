@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
-import { confirmOrExit, outputResult } from "@repo/cli-utils";
+import { confirmOrExit, outputResult, vInteger } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { resolveOptions } from "../../lib/required-option";
@@ -42,8 +43,8 @@ const deleteStatus = new BeeCommand("delete")
 
     const result = await client.deleteProjectStatus(
       opts.project,
-      Number(status),
-      Number(opts.substituteStatusId),
+      v.parse(vInteger, status),
+      v.parse(vInteger, opts.substituteStatusId),
     );
 
     outputResult(result, opts, (data) => {

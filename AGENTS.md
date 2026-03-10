@@ -376,6 +376,33 @@ Following [CLI Guidelines (clig.dev)](https://clig.dev/), command tests should f
 
 **Guiding principle:** If removing the test wouldn't reduce confidence in _your own code_, the test is verifying the library, not the application.
 
+## Type Casting: use valibot instead of `Number()` / `parseInt()`
+
+Bare `Number(value)` silently returns `NaN` for invalid input, which propagates through arithmetic and API calls without error. `parseInt` has similar issues (trailing garbage, radix confusion). **Always use valibot schemas for string-to-number conversion** so that invalid input is caught immediately.
+
+`@repo/cli-utils` exports two reusable schemas:
+
+| Schema          | Validates                | Example output |
+| --------------- | ------------------------ | -------------- |
+| `vFiniteNumber` | Finite number (no NaN/∞) | `3.14`         |
+| `vInteger`      | Integer (no NaN/∞/frac)  | `42`           |
+
+```ts
+import * as v from "valibot";
+import { vInteger, vFiniteNumber } from "@repo/cli-utils";
+
+// Required value
+const id = v.parse(vInteger, opts.id);
+
+// Optional value (returns undefined when input is undefined)
+const count = v.parse(v.optional(vInteger), opts.count);
+
+// In collectNum-style parsers
+const collectNum = (val: string, prev: number[]): number[] => [...prev, v.parse(vInteger, val)];
+```
+
+`String()` for display purposes (e.g., `String(id)` in table rows) is safe because it never produces an unexpected type, so it does not need replacement.
+
 ## Code Conventions (enforced by oxlint)
 
 - **Named exports only** — no default exports (`import/no-default-export`)

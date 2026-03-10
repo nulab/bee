@@ -1,6 +1,7 @@
 import { PRIORITY_NAMES, PriorityId, getClient, resolveUserId } from "@repo/backlog-utils";
-import { outputResult } from "@repo/cli-utils";
+import { outputResult, vFiniteNumber, vInteger } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -65,19 +66,19 @@ const edit = new BeeCommand("edit")
     const issueData = await client.patchIssue(issue, {
       summary: opts.title,
       description: opts.description,
-      statusId: opts.status ? Number(opts.status) : undefined,
+      statusId: v.parse(v.optional(vInteger), opts.status),
       priorityId,
-      issueTypeId: opts.type ? Number(opts.type) : undefined,
+      issueTypeId: v.parse(v.optional(vInteger), opts.type),
       assigneeId: opts.assignee ? await resolveUserId(client, opts.assignee) : undefined,
       categoryId,
       versionId,
       milestoneId,
-      resolutionId: opts.resolution ? Number(opts.resolution) : undefined,
-      parentIssueId: opts.parentIssue ? Number(opts.parentIssue) : undefined,
+      resolutionId: v.parse(v.optional(vInteger), opts.resolution),
+      parentIssueId: v.parse(v.optional(vInteger), opts.parentIssue),
       startDate: opts.startDate,
       dueDate: opts.dueDate,
-      estimatedHours: opts.estimatedHours ? Number(opts.estimatedHours) : undefined,
-      actualHours: opts.actualHours ? Number(opts.actualHours) : undefined,
+      estimatedHours: v.parse(v.optional(vFiniteNumber), opts.estimatedHours),
+      actualHours: v.parse(v.optional(vFiniteNumber), opts.actualHours),
       comment: opts.comment,
       notifiedUserId,
       attachmentId,

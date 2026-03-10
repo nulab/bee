@@ -1,5 +1,6 @@
 import { type BacklogClient, getClient } from "@repo/backlog-utils";
-import { UserError, outputResult } from "@repo/cli-utils";
+import { UserError, outputResult, vFiniteNumber } from "@repo/cli-utils";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../lib/bee-command";
 import * as opt from "../lib/common-options";
 import { collect } from "../lib/common-options";
@@ -137,9 +138,11 @@ const inferType = (value: string): ParamValue => {
   if (value === "false") {
     return false;
   }
-  const num = Number(value);
-  if (value !== "" && !Number.isNaN(num)) {
-    return num;
+  if (value !== "") {
+    const result = v.safeParse(vFiniteNumber, value);
+    if (result.success) {
+      return result.output;
+    }
   }
   return value;
 };

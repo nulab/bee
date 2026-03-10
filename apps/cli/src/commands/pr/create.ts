@@ -1,6 +1,7 @@
 import { getClient, pullRequestUrl, resolveUserId } from "@repo/backlog-utils";
-import { outputResult, promptRequired } from "@repo/cli-utils";
+import { outputResult, promptRequired, vInteger } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT, ENV_REPO } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { resolveOptions } from "../../lib/required-option";
@@ -53,11 +54,12 @@ const create = new BeeCommand("create")
 
     let issueId: number | undefined;
     if (opts.issue) {
-      if (Number.isNaN(Number(opts.issue))) {
+      const parsed = v.safeParse(vInteger, opts.issue);
+      if (parsed.success) {
+        issueId = parsed.output;
+      } else {
         const issue = await client.getIssue(opts.issue);
         issueId = issue.id;
-      } else {
-        issueId = Number(opts.issue);
       }
     }
 

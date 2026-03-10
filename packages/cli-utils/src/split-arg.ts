@@ -1,4 +1,5 @@
 import { type BaseIssue, type BaseSchema, type InferOutput, safeParse } from "valibot";
+import { vFiniteNumber } from "./valibot-utils";
 
 const splitArg = <TSchema extends BaseSchema<unknown, unknown, BaseIssue<unknown>>>(
   input: string | undefined,
@@ -21,11 +22,11 @@ const splitArg = <TSchema extends BaseSchema<unknown, unknown, BaseIssue<unknown
       continue;
     }
 
-    const num = Number(part);
-    if (!Number.isNaN(num)) {
-      const numResult = safeParse(schema, num);
-      if (numResult.success) {
-        results.push(numResult.output);
+    const numResult = safeParse(vFiniteNumber, part);
+    if (numResult.success) {
+      const schemaResult = safeParse(schema, numResult.output);
+      if (schemaResult.success) {
+        results.push(schemaResult.output);
       }
     }
   }

@@ -1,5 +1,12 @@
 import { getClient, resolveProjectIds } from "@repo/backlog-utils";
-import { type Row, formatDate, outputResult, printTable, splitArg } from "@repo/cli-utils";
+import {
+  type Row,
+  formatDate,
+  outputResult,
+  printTable,
+  splitArg,
+  vInteger,
+} from "@repo/cli-utils";
 import consola from "consola";
 import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
@@ -37,8 +44,8 @@ const list = new BeeCommand("list")
       keyword: opts.keyword,
       sort: opts.sort,
       order: opts.order,
-      count: opts.count ? Number(opts.count) : undefined,
-      offset: opts.offset ? Number(opts.offset) : 0,
+      count: v.parse(v.optional(vInteger), opts.count),
+      offset: v.parse(v.optional(vInteger), opts.offset) ?? 0,
     });
 
     const json = opts.json === true ? "" : opts.json;

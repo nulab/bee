@@ -1,5 +1,6 @@
-import { UserError } from "@repo/cli-utils";
+import { UserError, vFiniteNumber } from "@repo/cli-utils";
 import { Backlog } from "backlog-js";
+import * as v from "valibot";
 import { refreshAccessToken } from "./oauth";
 import { formatResetTime } from "./rate-limit";
 import { findSpace, loadConfig, updateSpaceAuth } from "@repo/config";
@@ -177,8 +178,9 @@ const isBacklogRateLimitError = (error: unknown): error is Error & { _response: 
 const handleRateLimitError = (error: unknown): void => {
   if (isBacklogRateLimitError(error)) {
     const resetEpoch = error._response.headers.get("X-RateLimit-Reset");
-    const resetMessage = resetEpoch
-      ? `Rate limit resets at ${formatResetTime(Number(resetEpoch))}.`
+    const resetTime = resetEpoch ? v.safeParse(vFiniteNumber, resetEpoch) : undefined;
+    const resetMessage = resetTime?.success
+      ? `Rate limit resets at ${formatResetTime(resetTime.output)}.`
       : "Please wait and try again later.";
     throw new UserError(`API rate limit exceeded. ${resetMessage}`);
   }

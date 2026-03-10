@@ -1,6 +1,7 @@
 import { getClient } from "@repo/backlog-utils";
-import { outputResult } from "@repo/cli-utils";
+import { outputResult, vInteger } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { resolveOptions } from "../../lib/required-option";
@@ -36,7 +37,7 @@ const edit = new BeeCommand("edit")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const result = await client.patchVersions(opts.project, Number(milestone), {
+    const result = await client.patchVersions(opts.project, v.parse(vInteger, milestone), {
       name: opts.name,
       description: opts.description,
       startDate: opts.startDate,

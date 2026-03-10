@@ -1,4 +1,6 @@
+import { vInteger } from "@repo/cli-utils";
 import { type Backlog } from "backlog-js";
+import * as v from "valibot";
 
 export const resolveProjectIds = async (client: Backlog, values: string[]): Promise<number[]> => {
   if (values.length === 0) {
@@ -8,10 +10,10 @@ export const resolveProjectIds = async (client: Backlog, values: string[]): Prom
   const projects = await client.getProjects();
 
   return values.map((value) => {
-    const asNumber = Number(value);
+    const numResult = v.safeParse(vInteger, value);
 
-    if (!Number.isNaN(asNumber)) {
-      const byId = projects.find((p) => p.id === asNumber);
+    if (numResult.success) {
+      const byId = projects.find((p) => p.id === numResult.output);
       if (byId) {
         return byId.id;
       }

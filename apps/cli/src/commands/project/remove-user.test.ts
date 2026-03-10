@@ -33,7 +33,7 @@ describe("project remove-user", () => {
 
     await expect(
       removeUser.parseAsync(["--project", "TEST", "--user-id", "abc"], { from: "user" }),
-    ).rejects.toThrow("User ID must be a number.");
+    ).rejects.toThrow();
   });
 
   it("outputs JSON when --json flag is set", async () => {
