@@ -78,6 +78,17 @@ bee api issues -f 'projectId[]=12345' -f statusId=1 -f statusId=2
 bee api issues -X POST -f projectId=12345 -f summary="New issue" -f issueTypeId=1 -f priorityId=3
 ```
 
+**Pagination** — Many list commands return **at most 20 items by default**. Receiving 20 results does NOT mean you have fetched everything — there may be more pages. Use `--count` and `--offset` to paginate:
+
+```sh
+bee issue list -p PROJECT --count 100              # up to 100 items
+bee issue list -p PROJECT --count 100 --offset 100 # next 100 items
+```
+
+Some commands use cursor-based pagination (`--min-id` / `--max-id`) instead of `--offset`. Check `bee <command> --help` for the available pagination flags.
+
+To reliably get **all** items, loop with increasing `--offset` (or advancing `--min-id` / `--max-id`) until the returned array is empty or shorter than `--count`.
+
 **`bee browse` for opening pages** — Open Backlog pages in the browser:
 
 ```sh
