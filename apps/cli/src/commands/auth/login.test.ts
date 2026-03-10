@@ -149,9 +149,7 @@ describe("auth login", () => {
     it("throws error when OAuth env vars are missing", async () => {
       vi.mocked(promptRequired).mockResolvedValueOnce("example.backlog.com");
 
-      await expect(
-        parseCommand(() => import("./login"), ["--method", "oauth"]),
-      ).rejects.toThrow(
+      await expect(parseCommand(() => import("./login"), ["--method", "oauth"])).rejects.toThrow(
         "BACKLOG_OAUTH_CLIENT_ID and BACKLOG_OAUTH_CLIENT_SECRET must be set as environment variables.",
       );
     });
@@ -215,9 +213,9 @@ describe("auth login", () => {
       });
       vi.mocked(promptRequired).mockResolvedValueOnce("example.backlog.com");
 
-      await expect(
-        parseCommand(() => import("./login"), ["--method", "oauth"]),
-      ).rejects.toThrow("OAuth authorization failed: OAuth callback timed out after 5 minutes");
+      await expect(parseCommand(() => import("./login"), ["--method", "oauth"])).rejects.toThrow(
+        "OAuth authorization failed: OAuth callback timed out after 5 minutes",
+      );
       expect(mockStop).toHaveBeenCalled();
     });
 
@@ -226,9 +224,9 @@ describe("auth login", () => {
       vi.mocked(exchangeAuthorizationCode).mockRejectedValue(new Error("invalid_grant"));
       vi.mocked(promptRequired).mockResolvedValueOnce("example.backlog.com");
 
-      await expect(
-        parseCommand(() => import("./login"), ["--method", "oauth"]),
-      ).rejects.toThrow("Failed to exchange authorization code for tokens.");
+      await expect(parseCommand(() => import("./login"), ["--method", "oauth"])).rejects.toThrow(
+        "Failed to exchange authorization code for tokens.",
+      );
     });
 
     it("throws error when token verification fails", async () => {
@@ -236,9 +234,9 @@ describe("auth login", () => {
       mockGetMyself.mockRejectedValue(new Error("Unauthorized"));
       vi.mocked(promptRequired).mockResolvedValueOnce("example.backlog.com");
 
-      await expect(
-        parseCommand(() => import("./login"), ["--method", "oauth"]),
-      ).rejects.toThrow("Authentication verification failed.");
+      await expect(parseCommand(() => import("./login"), ["--method", "oauth"])).rejects.toThrow(
+        "Authentication verification failed.",
+      );
     });
 
     it("updates OAuth credentials for existing space", async () => {
