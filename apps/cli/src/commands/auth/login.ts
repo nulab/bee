@@ -4,6 +4,7 @@ import { type RcAuth, updateConfig } from "@repo/config";
 import { Backlog, OAuth2 } from "backlog-js";
 import consola from "consola";
 import { BeeCommand } from "../../lib/bee-command";
+import * as opt from "../../lib/common-options";
 
 const login = new BeeCommand("login")
   .summary("Authenticate with a Backlog space")
@@ -13,10 +14,10 @@ const login = new BeeCommand("login")
 Use \`--with-token\` to pass an API key on standard input.
 Use \`--method oauth\` for OAuth authentication via the browser.`,
   )
+  .addOption(opt.space())
   .option("-m, --method <method>", "The authentication method to use", "api-key")
   .option("--with-token", "Read token from standard input")
   .envVars([
-    ["BACKLOG_SPACE", "Default space hostname"],
     ["BACKLOG_OAUTH_CLIENT_ID", "OAuth Client ID"],
     ["BACKLOG_OAUTH_CLIENT_SECRET", "OAuth Client Secret"],
     ["BACKLOG_OAUTH_PORT", "OAuth callback port (default: 5033)"],
@@ -36,7 +37,7 @@ Use \`--method oauth\` for OAuth authentication via the browser.`,
       throw new UserError('Invalid auth method. Use "api-key" or "oauth".');
     }
 
-    const hostname = await promptRequired("Backlog space hostname:", process.env.BACKLOG_SPACE, {
+    const hostname = await promptRequired("Backlog space hostname:", opts.space, {
       placeholder: "xxx.backlog.com",
     });
 
