@@ -57,8 +57,12 @@ OAuth を使うと、API キーを直接扱わずに認証できます。
 3. 「新しいアプリケーションを登録」をクリックします
 4. 以下を入力して登録します
    - **名前**: 任意（例: `bee`）
-   - **リダイレクト URI**: `http://localhost:5033/callback`（`BACKLOG_OAUTH_PORT` で変更可能）
+   - **リダイレクト URI**: `http://localhost:5033/callback`
 5. 登録後に表示される **Client ID** と **Client Secret** をメモします
+
+:::tip
+ポート `5033` が他のアプリケーションと競合する場合は、環境変数 `BACKLOG_OAUTH_PORT` で変更できます。リダイレクト URI も合わせて変更してください。
+:::
 
 ### ログイン
 
