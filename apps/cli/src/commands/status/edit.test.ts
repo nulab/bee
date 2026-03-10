@@ -34,6 +34,17 @@ describe("status edit", () => {
     );
   });
 
+  it("sends exact payload when only name is provided", async () => {
+    mockClient.patchProjectStatus.mockResolvedValue({ id: 1, name: "New Name", color: "#e30000" });
+
+    await parseCommand(() => import("./edit"), ["1", "-p", "TEST", "-n", "New Name"]);
+
+    expect(mockClient.patchProjectStatus).toHaveBeenCalledWith("TEST", 1, {
+      name: "New Name",
+      color: undefined,
+    });
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

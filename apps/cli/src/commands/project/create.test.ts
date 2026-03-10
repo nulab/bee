@@ -79,6 +79,26 @@ describe("project create", () => {
     );
   });
 
+  it("sends exact payload with defaults when only key and name are provided", async () => {
+    vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("Test Project");
+    mockClient.postProject.mockResolvedValue({
+      projectKey: "TEST",
+      name: "Test Project",
+      textFormattingRule: "markdown",
+    });
+
+    await parseCommand(() => import("./create"), ["--key", "TEST", "--name", "Test Project"]);
+
+    expect(mockClient.postProject).toHaveBeenCalledWith({
+      key: "TEST",
+      name: "Test Project",
+      chartEnabled: false,
+      subtaskingEnabled: false,
+      projectLeaderCanEditProjectLeader: undefined,
+      textFormattingRule: "markdown",
+    });
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

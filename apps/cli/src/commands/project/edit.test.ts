@@ -48,6 +48,22 @@ describe("project edit", () => {
     );
   });
 
+  it("sends exact payload when only name is provided", async () => {
+    mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "New Name" });
+
+    await parseCommand(() => import("./edit"), ["TEST", "--name", "New Name"]);
+
+    expect(mockClient.patchProject).toHaveBeenCalledWith("TEST", {
+      name: "New Name",
+      key: undefined,
+      chartEnabled: undefined,
+      subtaskingEnabled: undefined,
+      projectLeaderCanEditProjectLeader: undefined,
+      textFormattingRule: undefined,
+      archived: undefined,
+    });
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

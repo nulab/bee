@@ -62,6 +62,20 @@ describe("milestone edit", () => {
     );
   });
 
+  it("sends exact payload with only required fields (no extra fields)", async () => {
+    mockClient.patchVersions.mockResolvedValue({ id: 1, name: "v2.0.0" });
+
+    await parseCommand(() => import("./edit"), ["1", "-p", "TEST", "-n", "v2.0.0"]);
+
+    expect(mockClient.patchVersions).toHaveBeenCalledWith("TEST", 1, {
+      name: "v2.0.0",
+      description: undefined,
+      startDate: undefined,
+      releaseDueDate: undefined,
+      archived: undefined,
+    });
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

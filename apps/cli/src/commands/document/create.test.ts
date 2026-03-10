@@ -95,6 +95,22 @@ describe("document create", () => {
     );
   });
 
+  it("sends exact payload with only required fields (no extra fields)", async () => {
+    vi.mocked(promptRequired).mockResolvedValueOnce("100").mockResolvedValueOnce("Title");
+    mockClient.addDocument.mockResolvedValue({ id: "10", title: "Title" });
+
+    await parseCommand(() => import("./create"), ["-p", "100", "-t", "Title"]);
+
+    expect(mockClient.addDocument).toHaveBeenCalledWith({
+      projectId: 100,
+      title: "Title",
+      content: undefined,
+      emoji: undefined,
+      parentId: undefined,
+      addLast: undefined,
+    });
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(

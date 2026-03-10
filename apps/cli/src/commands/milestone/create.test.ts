@@ -68,6 +68,19 @@ describe("milestone create", () => {
     );
   });
 
+  it("sends exact payload with only required fields (no extra fields)", async () => {
+    mockClient.postVersions.mockResolvedValue({ id: 1, name: "v1.0.0" });
+
+    await parseCommand(() => import("./create"), ["-p", "TEST", "-n", "v1.0.0"]);
+
+    expect(mockClient.postVersions).toHaveBeenCalledWith("TEST", {
+      name: "v1.0.0",
+      description: undefined,
+      startDate: undefined,
+      releaseDueDate: undefined,
+    });
+  });
+
   it(
     "outputs JSON when --json flag is set",
     itOutputsJson(
