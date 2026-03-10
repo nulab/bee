@@ -72,7 +72,7 @@ bee auth login --method oauth
 
 ブラウザが開き、Backlog の認証画面が表示されます。承認するとトークンが自動的に取得されます。
 
-OAuth クライアント ID とシークレットは環境変数で指定できます。対話プロンプトでも入力できます。
+事前に環境変数 `BACKLOG_OAUTH_CLIENT_ID` と `BACKLOG_OAUTH_CLIENT_SECRET` を設定してください。
 
 ```sh
 export BACKLOG_OAUTH_CLIENT_ID=YOUR_ID
