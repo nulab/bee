@@ -1,5 +1,5 @@
 import { UserError } from "@repo/cli-utils";
-import { loadConfig, removeSpace } from "@repo/config";
+import { loadConfig, removeAllSpaces, removeSpace } from "@repo/config";
 import consola from "consola";
 import { BeeCommand } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -10,15 +10,35 @@ const logout = new BeeCommand("logout")
     `Removes stored credentials locally. Does not revoke API keys or OAuth tokens on the server.`,
   )
   .addOption(opt.space())
+  .option("--all", "Log out of all spaces")
   .examples([
     { description: "Select space via prompt", command: "bee auth logout" },
     {
       description: "Log out of a specific space",
       command: "bee auth logout -s xxx.backlog.com",
     },
+    {
+      description: "Log out of all spaces",
+      command: "bee auth logout --all",
+    },
   ])
   .action(async (opts) => {
+    if (opts.all && opts.space) {
+      throw new UserError("Cannot use --all with --space.");
+    }
+
     const config = loadConfig();
+
+    if (opts.all) {
+      if (config.spaces.length === 0) {
+        consola.info("No spaces are currently authenticated.");
+        return;
+      }
+
+      removeAllSpaces();
+      consola.success(`Logged out of ${config.spaces.length} space(s).`);
+      return;
+    }
 
     let hostname = opts.space;
     if (!hostname) {

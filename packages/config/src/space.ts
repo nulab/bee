@@ -22,6 +22,14 @@ const removeSpace = (host: string): void => {
   });
 };
 
+const removeAllSpaces = (): void => {
+  updateConfig((config) => ({
+    ...config,
+    spaces: [],
+    defaultSpace: undefined,
+  }));
+};
+
 const updateSpaceAuth = (host: string, auth: RcAuth): void => {
   updateConfig((config) => {
     const index = config.spaces.findIndex((space) => space.host === host);
@@ -56,4 +64,4 @@ const findSpace = (spaces: readonly RcSpace[], host: string): RcSpace | null => 
   return null;
 };
 
-export { addSpace, findSpace, removeSpace, updateSpaceAuth };
+export { addSpace, findSpace, removeAllSpaces, removeSpace, updateSpaceAuth };

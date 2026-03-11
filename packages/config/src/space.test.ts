@@ -5,7 +5,8 @@ vi.mock("./config", () => ({
 }));
 
 const { updateConfig } = await import("./config");
-const { addSpace, findSpace, removeSpace, updateSpaceAuth } = await import("./space");
+const { addSpace, findSpace, removeAllSpaces, removeSpace, updateSpaceAuth } =
+  await import("./space");
 
 const mockUpdateConfig = vi.mocked(updateConfig);
 
@@ -89,6 +90,30 @@ describe("removeSpace", () => {
     expect(() => removeSpace("missing.backlog.com")).toThrow(
       'Space with host "missing.backlog.com" not found',
     );
+  });
+});
+
+describe("removeAllSpaces", () => {
+  it("removes all spaces and clears defaultSpace", () => {
+    const space1 = makeSpace("one.backlog.com");
+    const space2 = makeSpace("two.backlog.com");
+    setupUpdateConfig(makeConfig([space1, space2], "one.backlog.com"));
+
+    removeAllSpaces();
+
+    const result = mockUpdateConfig.mock.results[0]?.value;
+    expect(result.spaces).toEqual([]);
+    expect(result.defaultSpace).toBeUndefined();
+  });
+
+  it("works when no spaces exist", () => {
+    setupUpdateConfig(makeConfig([]));
+
+    removeAllSpaces();
+
+    const result = mockUpdateConfig.mock.results[0]?.value;
+    expect(result.spaces).toEqual([]);
+    expect(result.defaultSpace).toBeUndefined();
   });
 });
 

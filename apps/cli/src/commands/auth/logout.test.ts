@@ -1,4 +1,4 @@
-import { loadConfig, removeSpace } from "@repo/config";
+import { loadConfig, removeAllSpaces, removeSpace } from "@repo/config";
 import consola from "consola";
 import { describe, expect, it, vi } from "vitest";
 import { parseCommand } from "@repo/test-utils";
@@ -6,6 +6,7 @@ import { parseCommand } from "@repo/test-utils";
 vi.mock("@repo/config", () => ({
   loadConfig: vi.fn(),
   removeSpace: vi.fn(),
+  removeAllSpaces: vi.fn(),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
@@ -74,5 +75,59 @@ describe("auth logout", () => {
 
     expect(removeSpace).toHaveBeenCalledWith("only.backlog.com");
     expect(consola.success).toHaveBeenCalledWith("Logged out of only.backlog.com.");
+  });
+
+  describe("--all", () => {
+    it("logs out of all spaces", async () => {
+      vi.mocked(loadConfig).mockReturnValue({
+        spaces: [
+          {
+            host: "one.backlog.com",
+            auth: { method: "api-key" as const, apiKey: "key1" },
+          },
+          {
+            host: "two.backlog.com",
+            auth: { method: "api-key" as const, apiKey: "key2" },
+          },
+        ],
+        defaultSpace: "one.backlog.com",
+        aliases: {},
+      });
+
+      await parseCommand(() => import("./logout"), ["--all"]);
+
+      expect(removeAllSpaces).toHaveBeenCalled();
+      expect(consola.success).toHaveBeenCalledWith("Logged out of 2 space(s).");
+    });
+
+    it("shows message when no spaces are configured with --all", async () => {
+      vi.mocked(loadConfig).mockReturnValue({
+        spaces: [],
+        defaultSpace: undefined,
+        aliases: {},
+      });
+
+      await parseCommand(() => import("./logout"), ["--all"]);
+
+      expect(removeAllSpaces).not.toHaveBeenCalled();
+      expect(consola.info).toHaveBeenCalledWith("No spaces are currently authenticated.");
+    });
+
+    it("throws error when --all is used with --space", async () => {
+      vi.mocked(loadConfig).mockReturnValue({
+        spaces: [
+          {
+            host: "example.backlog.com",
+            auth: { method: "api-key" as const, apiKey: "key" },
+          },
+        ],
+        defaultSpace: undefined,
+        aliases: {},
+      });
+
+      await expect(
+        parseCommand(() => import("./logout"), ["--all", "--space", "example.backlog.com"]),
+      ).rejects.toThrow("Cannot use --all with --space.");
+    });
   });
 });
