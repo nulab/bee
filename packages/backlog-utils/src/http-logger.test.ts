@@ -34,7 +34,13 @@ describe("createLoggingInterceptor", () => {
     const wrappedDispatch = interceptor(mockDispatch);
 
     const opts = { method: "GET", origin: "https://example.backlog.com", path: "/api/v2/issues" };
-    const handler = { onHeaders: vi.fn(), onError: vi.fn() };
+    const handler = {
+      onRequestStart: vi.fn(),
+      onResponseStart: vi.fn(),
+      onResponseData: vi.fn(),
+      onResponseEnd: vi.fn(),
+      onResponseError: vi.fn(),
+    };
 
     wrappedDispatch(opts as never, handler as never);
 
@@ -44,24 +50,28 @@ describe("createLoggingInterceptor", () => {
     expect(mockDispatch).toHaveBeenCalled();
   });
 
-  it("calls consola.debug with response log when onHeaders is called", async () => {
+  it("calls consola.debug with response log when onResponseStart is called", async () => {
     const { createLoggingInterceptor } = await import("./http-logger");
     const interceptor = createLoggingInterceptor();
 
-    const mockDispatch = vi.fn().mockImplementation((_opts, handler) => {
-      // Simulate response by calling onHeaders on the wrapped handler
-      handler.onHeaders(200, [], () => {}, "OK");
+    const mockDispatch = vi.fn().mockImplementation((_opts, wrappedHandler) => {
+      wrappedHandler.onResponseStart({}, 200, {}, "OK");
       return true;
     });
 
     const wrappedDispatch = interceptor(mockDispatch);
     const opts = { method: "POST", origin: "https://example.backlog.com", path: "/api/v2/issues" };
-    const originalOnHeaders = vi.fn();
-    const handler = { onHeaders: originalOnHeaders, onError: vi.fn() };
+    const originalOnResponseStart = vi.fn();
+    const handler = {
+      onRequestStart: vi.fn(),
+      onResponseStart: originalOnResponseStart,
+      onResponseData: vi.fn(),
+      onResponseEnd: vi.fn(),
+      onResponseError: vi.fn(),
+    };
 
     wrappedDispatch(opts as never, handler as never);
 
-    // Should have logged request start and response
     expect(consola.debug).toHaveBeenCalledWith(
       "[backlog] → POST https://example.backlog.com/api/v2/issues",
     );
@@ -70,16 +80,16 @@ describe("createLoggingInterceptor", () => {
         /\[backlog\] ← 200 POST https:\/\/example\.backlog\.com\/api\/v2\/issues \(\d+ms\)/,
       ),
     );
-    // Original handler's onHeaders should also be called
-    expect(originalOnHeaders).toHaveBeenCalledWith(200, [], expect.any(Function), "OK");
+    expect(originalOnResponseStart).toHaveBeenCalledWith({}, 200, {}, "OK");
   });
 
-  it("calls consola.debug with error log when onError is called", async () => {
+  it("calls consola.debug with error log when onResponseError is called", async () => {
     const { createLoggingInterceptor } = await import("./http-logger");
     const interceptor = createLoggingInterceptor();
 
-    const mockDispatch = vi.fn().mockImplementation((_opts, handler) => {
-      handler.onError(new Error("connection refused"));
+    const testError = new Error("connection refused");
+    const mockDispatch = vi.fn().mockImplementation((_opts, wrappedHandler) => {
+      wrappedHandler.onResponseError({}, testError);
       return true;
     });
 
@@ -89,8 +99,14 @@ describe("createLoggingInterceptor", () => {
       origin: "https://example.backlog.com",
       path: "/api/v2/issues/1",
     };
-    const originalOnError = vi.fn();
-    const handler = { onHeaders: vi.fn(), onError: originalOnError };
+    const originalOnResponseError = vi.fn();
+    const handler = {
+      onRequestStart: vi.fn(),
+      onResponseStart: vi.fn(),
+      onResponseData: vi.fn(),
+      onResponseEnd: vi.fn(),
+      onResponseError: originalOnResponseError,
+    };
 
     wrappedDispatch(opts as never, handler as never);
 
@@ -99,8 +115,7 @@ describe("createLoggingInterceptor", () => {
         /\[backlog\] ✗ DELETE https:\/\/example\.backlog\.com\/api\/v2\/issues\/1 \(\d+ms\)/,
       ),
     );
-    // Original handler's onError should also be called
-    expect(originalOnError).toHaveBeenCalledWith(expect.any(Error));
+    expect(originalOnResponseError).toHaveBeenCalledWith({}, testError);
   });
 });
 
