@@ -46,7 +46,6 @@ jobs:
       pull-requests: write
 
   build:
-    needs: ci
     runs-on: ubuntu-latest
     outputs:
       new_tag: ${{ steps.bump_version.outputs.new_tag }}
@@ -107,7 +106,7 @@ jobs:
             apps/cli/package.json
 
   publish:
-    needs: build
+    needs: [ci, build]
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment }}
