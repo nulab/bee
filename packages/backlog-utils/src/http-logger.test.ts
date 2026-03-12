@@ -14,6 +14,15 @@ vi.mock("undici", () => {
   };
 });
 
+const newHandler = () => ({
+  onRequestStart: vi.fn(),
+  onResponseStart: vi.fn(),
+  onResponseData: vi.fn(),
+  onResponseEnd: vi.fn(),
+  onResponseError: vi.fn(),
+  onRequestUpgrade: vi.fn(),
+});
+
 describe("createLoggingInterceptor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -26,7 +35,27 @@ describe("createLoggingInterceptor", () => {
     expect(typeof interceptor).toBe("function");
   });
 
-  it("calls consola.debug with request start log when dispatch is called", async () => {
+  it("logs API host on the first request only", async () => {
+    const { createLoggingInterceptor } = await import("./http-logger");
+    const interceptor = createLoggingInterceptor();
+
+    const mockDispatch = vi.fn().mockReturnValue(true);
+    const wrappedDispatch = interceptor(mockDispatch);
+
+    const opts1 = { method: "GET", origin: "https://example.backlog.com", path: "/api/v2/space" };
+    const opts2 = { method: "GET", origin: "https://example.backlog.com", path: "/api/v2/users" };
+
+    wrappedDispatch(opts1 as never, newHandler() as never);
+    wrappedDispatch(opts2 as never, newHandler() as never);
+
+    const hostCalls = vi
+      .mocked(consola.debug)
+      .mock.calls.filter((call) => typeof call[0] === "string" && call[0].startsWith("API host:"));
+    expect(hostCalls).toHaveLength(1);
+    expect(hostCalls[0]![0]).toBe("API host: https://example.backlog.com");
+  });
+
+  it("logs request start with method and path", async () => {
     const { createLoggingInterceptor } = await import("./http-logger");
     const interceptor = createLoggingInterceptor();
 
@@ -34,50 +63,12 @@ describe("createLoggingInterceptor", () => {
     const wrappedDispatch = interceptor(mockDispatch);
 
     const opts = { method: "GET", origin: "https://example.backlog.com", path: "/api/v2/issues" };
-    const handler = {
-      onRequestStart: vi.fn(),
-      onResponseStart: vi.fn(),
-      onResponseData: vi.fn(),
-      onResponseEnd: vi.fn(),
-      onResponseError: vi.fn(),
-    };
+    wrappedDispatch(opts as never, newHandler() as never);
 
-    wrappedDispatch(opts as never, handler as never);
-
-    expect(consola.debug).toHaveBeenCalledWith(
-      "[backlog] → GET https://example.backlog.com/api/v2/issues",
-    );
-    expect(mockDispatch).toHaveBeenCalled();
+    expect(consola.debug).toHaveBeenCalledWith("→ GET /api/v2/issues");
   });
 
-  it("masks apiKey query parameter in logs", async () => {
-    const { createLoggingInterceptor } = await import("./http-logger");
-    const interceptor = createLoggingInterceptor();
-
-    const mockDispatch = vi.fn().mockReturnValue(true);
-    const wrappedDispatch = interceptor(mockDispatch);
-
-    const opts = {
-      method: "GET",
-      origin: "https://example.backlog.com",
-      path: "/api/v2/issues?apiKey=secret123&projectId%5B%5D=1",
-    };
-    const handler = {
-      onRequestStart: vi.fn(),
-      onResponseStart: vi.fn(),
-      onResponseData: vi.fn(),
-      onResponseEnd: vi.fn(),
-      onResponseError: vi.fn(),
-    };
-
-    wrappedDispatch(opts as never, handler as never);
-
-    expect(consola.debug).toHaveBeenCalledWith(
-      "[backlog] → GET https://example.backlog.com/api/v2/issues?apiKey=***&projectId%5B%5D=1",
-    );
-  });
-
-  it("calls consola.debug with response log when onResponseStart is called", async () => {
+  it("logs response with status code and duration", async () => {
     const { createLoggingInterceptor } = await import("./http-logger");
     const interceptor = createLoggingInterceptor();
 
@@ -88,29 +79,17 @@ describe("createLoggingInterceptor", () => {
 
     const wrappedDispatch = interceptor(mockDispatch);
     const opts = { method: "POST", origin: "https://example.backlog.com", path: "/api/v2/issues" };
-    const originalOnResponseStart = vi.fn();
-    const handler = {
-      onRequestStart: vi.fn(),
-      onResponseStart: originalOnResponseStart,
-      onResponseData: vi.fn(),
-      onResponseEnd: vi.fn(),
-      onResponseError: vi.fn(),
-    };
+    const handler = newHandler();
 
     wrappedDispatch(opts as never, handler as never);
 
     expect(consola.debug).toHaveBeenCalledWith(
-      "[backlog] → POST https://example.backlog.com/api/v2/issues",
+      expect.stringMatching(/← 200 POST \/api\/v2\/issues \(\d+ms\)/),
     );
-    expect(consola.debug).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /\[backlog\] ← 200 POST https:\/\/example\.backlog\.com\/api\/v2\/issues \(\d+ms\)/,
-      ),
-    );
-    expect(originalOnResponseStart).toHaveBeenCalledWith({}, 200, {}, "OK");
+    expect(handler.onResponseStart).toHaveBeenCalledWith({}, 200, {}, "OK");
   });
 
-  it("calls consola.debug with error log when onResponseError is called", async () => {
+  it("logs error with duration", async () => {
     const { createLoggingInterceptor } = await import("./http-logger");
     const interceptor = createLoggingInterceptor();
 
@@ -126,23 +105,31 @@ describe("createLoggingInterceptor", () => {
       origin: "https://example.backlog.com",
       path: "/api/v2/issues/1",
     };
-    const originalOnResponseError = vi.fn();
-    const handler = {
-      onRequestStart: vi.fn(),
-      onResponseStart: vi.fn(),
-      onResponseData: vi.fn(),
-      onResponseEnd: vi.fn(),
-      onResponseError: originalOnResponseError,
-    };
+    const handler = newHandler();
 
     wrappedDispatch(opts as never, handler as never);
 
     expect(consola.debug).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /\[backlog\] ✗ DELETE https:\/\/example\.backlog\.com\/api\/v2\/issues\/1 \(\d+ms\)/,
-      ),
+      expect.stringMatching(/✗ DELETE \/api\/v2\/issues\/1 \(\d+ms\)/),
     );
-    expect(originalOnResponseError).toHaveBeenCalledWith({}, testError);
+    expect(handler.onResponseError).toHaveBeenCalledWith({}, testError);
+  });
+
+  it("masks apiKey and decodes percent-encoded query parameters", async () => {
+    const { createLoggingInterceptor } = await import("./http-logger");
+    const interceptor = createLoggingInterceptor();
+
+    const mockDispatch = vi.fn().mockReturnValue(true);
+    const wrappedDispatch = interceptor(mockDispatch);
+
+    const opts = {
+      method: "GET",
+      origin: "https://example.backlog.com",
+      path: "/api/v2/issues?apiKey=secret123&projectId%5B%5D=1",
+    };
+    wrappedDispatch(opts as never, newHandler() as never);
+
+    expect(consola.debug).toHaveBeenCalledWith("→ GET /api/v2/issues?apiKey=***&projectId[]=1");
   });
 });
 
