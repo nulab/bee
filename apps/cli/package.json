@@ -37,12 +37,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "backlog-js": "^0.16.0",
-    "commander": "^14.0.3",
-    "consola": "^3.4.2",
-    "is-unicode-supported": "^2.1.0",
-    "open": "^11.0.0",
-    "valibot": "^1.2.0"
+    "backlog-js": "catalog:",
+    "commander": "catalog:",
+    "consola": "catalog:",
+    "is-unicode-supported": "catalog:",
+    "open": "catalog:",
+    "valibot": "catalog:"
   },
   "devDependencies": {
     "@repo/backlog-utils": "workspace:*",
@@ -50,9 +50,9 @@
     "@repo/config": "workspace:*",
     "@repo/test-utils": "workspace:*",
     "@repo/tsconfigs": "workspace:*",
-    "tsx": "^4.19.0",
-    "unbuild": "^3.5.0",
-    "vitest": "^4.0.18"
+    "tsx": "catalog:",
+    "unbuild": "catalog:",
+    "vitest": "catalog:"
   },
   "engines": {
     "node": ">=20.18"

@@ -10,13 +10,13 @@
   },
   "dependencies": {
     "@repo/cli-utils": "workspace:*",
-    "consola": "^3.4.2",
-    "rc9": "^3.0.0",
-    "valibot": "^1.0.0"
+    "consola": "catalog:",
+    "rc9": "catalog:",
+    "valibot": "catalog:"
   },
   "devDependencies": {
     "@repo/test-utils": "workspace:*",
     "@repo/tsconfigs": "workspace:*",
-    "vitest": "^4.0.18"
+    "vitest": "catalog:"
   }
 }

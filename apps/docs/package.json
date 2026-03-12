@@ -9,15 +9,15 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.37.6",
-    "astro": "^5.5.0",
-    "marked": "^17.0.3",
-    "remark-definition-list": "^2.0.0",
-    "sharp": "^0.34.5"
+    "@astrojs/starlight": "catalog:",
+    "astro": "catalog:",
+    "marked": "catalog:",
+    "remark-definition-list": "catalog:",
+    "sharp": "catalog:"
   },
   "devDependencies": {
-    "commander": "^14.0.3",
-    "jiti": "^2.6.1",
-    "starlight-links-validator": "^0.19.2"
+    "commander": "catalog:",
+    "jiti": "catalog:",
+    "starlight-links-validator": "catalog:"
   }
 }
