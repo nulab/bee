@@ -9,13 +9,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "consola": "^3.4.2",
-    "string-width": "^8.2.0",
-    "valibot": "^1.2.0"
+    "consola": "catalog:",
+    "string-width": "catalog:",
+    "valibot": "catalog:"
   },
   "devDependencies": {
     "@repo/test-utils": "workspace:*",
     "@repo/tsconfigs": "workspace:*",
-    "vitest": "^4.0.18"
+    "vitest": "catalog:"
   }
 }

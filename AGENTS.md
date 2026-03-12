@@ -437,7 +437,7 @@ validation, internal library code) where a `ValiError` is the appropriate error 
 ## Tooling
 
 - **Runtime**: Node.js 24 (managed by mise)
-- **Package manager**: pnpm (corepack-enabled)
+- **Package manager**: pnpm (corepack-enabled). External dependency versions are managed via [pnpm catalog](https://pnpm.io/catalogs) in `pnpm-workspace.yaml`. When adding dependencies, use `pnpm add --save-catalog <pkg>` (or `pnpm add --save-catalog -D <pkg>` for devDependencies) — this automatically adds the version to the catalog in `pnpm-workspace.yaml` and writes `"catalog:"` in `package.json`. Do not write version ranges directly in `package.json`.
 - **Linter**: oxlint (with plugins: import, typescript, unicorn)
 - **Formatter**: oxfmt
 - **Type checker**: `tsc --noEmit` per package (via Turborepo)
