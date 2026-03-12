@@ -4,7 +4,7 @@ description: |-
   bee CLI の認証方法。Backlog への API キー・OAuth 認証の設定手順、使い分け、複数スペースの切り替えに対応。
 ---
 
-import { Card, LinkCard, CardGrid } from "@astrojs/starlight/components";
+import { Card, LinkCard, CardGrid, Tabs, TabItem } from "@astrojs/starlight/components";
 
 bee は 2 つの認証方式をサポートしています。
 
@@ -115,6 +115,62 @@ bee auth switch
 ```sh
 bee auth status
 ```
+
+## 認証情報の外部管理
+
+パスワードマネージャーや OS のクレデンシャルストアを使うと、環境変数経由で認証情報を渡せます。この方法では `~/.beerc` に認証情報が保存されません。
+
+<Tabs>
+  <TabItem label="1Password">
+    [1Password CLI](https://developer.1password.com/docs/cli/) (`op`) を使う場合:
+
+    ```sh
+    BACKLOG_API_KEY=$(op read "op://vault/backlog/api-key") \
+      BACKLOG_SPACE=xxx.backlog.com \
+      bee issue list --project MY_PROJECT
+    ```
+
+    シェルの設定ファイルにエイリアスを登録しておくと便利です。
+
+    ```sh
+    alias bee='BACKLOG_API_KEY=$(op read "op://vault/backlog/api-key") BACKLOG_SPACE=xxx.backlog.com bee'
+    ```
+  </TabItem>
+  <TabItem label="Bitwarden">
+    [Bitwarden CLI](https://bitwarden.com/help/cli/) (`bw`) を使う場合:
+
+    ```sh
+    BACKLOG_API_KEY=$(bw get password backlog-api-key) \
+      BACKLOG_SPACE=xxx.backlog.com \
+      bee issue list --project MY_PROJECT
+    ```
+
+    シェルの設定ファイルにエイリアスを登録しておくと便利です。
+
+    ```sh
+    alias bee='BACKLOG_API_KEY=$(bw get password backlog-api-key) BACKLOG_SPACE=xxx.backlog.com bee'
+    ```
+  </TabItem>
+  <TabItem label="macOS Keychain">
+    macOS の Keychain に保存した認証情報を使う場合:
+
+    ```sh
+    # 事前に Keychain に保存
+    security add-generic-password -s "bee" -a "api-key" -w "your-api-key"
+
+    # 呼び出し
+    BACKLOG_API_KEY=$(security find-generic-password -s "bee" -a "api-key" -w) \
+      BACKLOG_SPACE=xxx.backlog.com \
+      bee issue list --project MY_PROJECT
+    ```
+
+    シェルの設定ファイルにエイリアスを登録しておくと便利です。
+
+    ```sh
+    alias bee='BACKLOG_API_KEY=$(security find-generic-password -s "bee" -a "api-key" -w) BACKLOG_SPACE=xxx.backlog.com bee'
+    ```
+  </TabItem>
+</Tabs>
 
 ## 関連コマンド
 

@@ -1,3 +1,6 @@
+import { chmodSync } from "node:fs";
+import { resolve } from "node:path";
+import { homedir } from "node:os";
 import { UserError } from "@repo/cli-utils";
 import * as v from "valibot";
 import { readUser, writeUser } from "rc9";
@@ -17,8 +20,12 @@ const loadConfig = (): Rc => {
   return result.output;
 };
 
+const configFilePath = (): string =>
+  resolve(process.env.XDG_CONFIG_HOME || homedir(), CONFIG_FILE_NAME);
+
 const writeConfig = (config: Rc): void => {
   writeUser(config, CONFIG_FILE_NAME);
+  chmodSync(configFilePath(), 0o600);
 };
 
 const updateConfig = (updater: (config: Rc) => Rc): Rc => {

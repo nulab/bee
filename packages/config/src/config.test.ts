@@ -1,5 +1,10 @@
+import { chmodSync } from "node:fs";
 import { readUser, writeUser } from "rc9";
 import { describe, expect, it, vi } from "vitest";
+
+vi.mock("node:fs", () => ({
+  chmodSync: vi.fn(),
+}));
 
 vi.mock("rc9", () => ({
   readUser: vi.fn(),
@@ -11,6 +16,7 @@ const { loadConfig, updateConfig, writeConfig } = await import("./config");
 
 const mockReadUser = vi.mocked(readUser);
 const mockWriteUser = vi.mocked(writeUser);
+const mockChmodSync = vi.mocked(chmodSync);
 
 describe("loadConfig", () => {
   it("returns validated config when rc file is valid", () => {
@@ -66,6 +72,12 @@ describe("writeConfig", () => {
     writeConfig(sampleConfig);
 
     expect(mockWriteUser).toHaveBeenCalledWith(sampleConfig, ".beerc");
+  });
+
+  it("sets file permission to 0600 after writing", () => {
+    writeConfig(sampleConfig);
+
+    expect(mockChmodSync).toHaveBeenCalledWith(expect.stringContaining(".beerc"), 0o600);
   });
 });
 
