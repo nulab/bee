@@ -19,6 +19,7 @@
   "devDependencies": {
     "@repo/test-utils": "workspace:*",
     "@repo/tsconfigs": "workspace:*",
+    "undici": "^7.22.0",
     "vitest": "^4.0.18"
   }
 }
