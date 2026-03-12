@@ -50,6 +50,33 @@ describe("createLoggingInterceptor", () => {
     expect(mockDispatch).toHaveBeenCalled();
   });
 
+  it("masks apiKey query parameter in logs", async () => {
+    const { createLoggingInterceptor } = await import("./http-logger");
+    const interceptor = createLoggingInterceptor();
+
+    const mockDispatch = vi.fn().mockReturnValue(true);
+    const wrappedDispatch = interceptor(mockDispatch);
+
+    const opts = {
+      method: "GET",
+      origin: "https://example.backlog.com",
+      path: "/api/v2/issues?apiKey=secret123&projectId%5B%5D=1",
+    };
+    const handler = {
+      onRequestStart: vi.fn(),
+      onResponseStart: vi.fn(),
+      onResponseData: vi.fn(),
+      onResponseEnd: vi.fn(),
+      onResponseError: vi.fn(),
+    };
+
+    wrappedDispatch(opts as never, handler as never);
+
+    expect(consola.debug).toHaveBeenCalledWith(
+      "[backlog] → GET https://example.backlog.com/api/v2/issues?apiKey=***&projectId%5B%5D=1",
+    );
+  });
+
   it("calls consola.debug with response log when onResponseStart is called", async () => {
     const { createLoggingInterceptor } = await import("./http-logger");
     const interceptor = createLoggingInterceptor();

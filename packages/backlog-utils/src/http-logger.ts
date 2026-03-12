@@ -3,6 +3,10 @@ import { Agent, type Dispatcher, setGlobalDispatcher } from "undici";
 
 type Interceptor = (dispatch: Dispatcher["dispatch"]) => Dispatcher["dispatch"];
 
+/** Masks sensitive query parameters (e.g. apiKey) from a URL path. */
+const maskSensitiveParams = (url: string): string =>
+  url.replaceAll(/([?&])(apiKey)=[^&]*/gi, "$1$2=***");
+
 /**
  * Creates an undici interceptor that logs HTTP request start/end via consola.debug.
  *
@@ -11,7 +15,7 @@ type Interceptor = (dispatch: Dispatcher["dispatch"]) => Dispatcher["dispatch"];
  */
 const createLoggingInterceptor = (): Interceptor => (dispatch) => (opts, handler) => {
   const method = opts.method ?? "UNKNOWN";
-  const url = `${opts.origin ?? ""}${opts.path ?? ""}`;
+  const url = maskSensitiveParams(`${opts.origin ?? ""}${opts.path ?? ""}`);
   const start = performance.now();
 
   consola.debug(`[backlog] → ${method} ${url}`);
