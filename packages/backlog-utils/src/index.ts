@@ -46,3 +46,4 @@ export {
   getRepoRelativePath,
   parseBacklogRemoteUrl,
 } from "./git-context";
+export { installHttpLogger } from "./http-logger";
