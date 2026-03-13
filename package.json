@@ -28,10 +28,12 @@
   "packageManager": "pnpm@10.30.3",
   "pnpm": {
     "onlyBuiltDependencies": [
-      "esbuild",
       "lefthook",
       "sharp",
       "turbo"
-    ]
+    ],
+    "overrides": {
+      "vite": "^8.0.0"
+    }
   }
 }
