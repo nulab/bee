@@ -7,5 +7,6 @@ pre-commit:
       stage_fixed: true
     oxfmt:
       glob: "*.{js,ts,jsx,tsx,json,css,html,yaml,yml,md}"
+      exclude: "pnpm-lock.yaml"
       run: npx oxfmt {staged_files}
       stage_fixed: true
