@@ -51,17 +51,6 @@ This table may not reflect the latest version. Run `bee --help` and `bee <comman
 For the full command reference (all flags, arguments, examples, and environment variables), fetch:
 https://nulab.github.io/bee/llms-full.txt
 
-## Flag Names
-
-bee uses `--title` and `--body` as flag names. These differ from the Backlog API field names — do not confuse them:
-
-| bee flag  | Backlog API field                                          |
-| --------- | ---------------------------------------------------------- |
-| `--title` | `summary` (issues, PRs) — do **not** use `--summary`       |
-| `--body`  | `description` (issues, PRs) or `content` (comments, wikis) |
-
-Always use `--title` and `--body`, not `--summary`, `--description`, or `--content`.
-
 ## Non-Interactive Environments
 
 bee cannot prompt interactively in non-TTY environments (CI/CD, piped commands, AI agents). **Always pass all required arguments via flags**, and add `--yes` for destructive operations.
@@ -122,3 +111,4 @@ When `--json` is used, errors are output as JSON to stderr, making them easy to 
 - Use `--json` for all data retrieval so you can parse and process the results.
 - Combine multiple bee calls to build reports, batch-update issues, or automate workflows.
 - When creating or editing resources interactively, bee prompts for required fields. Use flags to skip prompts in automated workflows.
+- bee uses `--title` and `--body` — not Backlog API names like `--summary`, `--description`, or `--content`.
