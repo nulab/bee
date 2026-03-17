@@ -17,7 +17,7 @@ describe("project delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteProject.mockResolvedValue({ projectKey: "TEST", name: "Test Project" });
 
-    await parseCommand(() => import("./delete"), ["TEST"]);
+    await parseCommand(() => import("./delete"), ["-p", "TEST"]);
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete project TEST? This cannot be undone.",
@@ -31,7 +31,7 @@ describe("project delete", () => {
     vi.mocked(confirmOrExit).mockResolvedValue(true);
     mockClient.deleteProject.mockResolvedValue({ projectKey: "TEST", name: "Test Project" });
 
-    await parseCommand(() => import("./delete"), ["TEST", "--yes"]);
+    await parseCommand(() => import("./delete"), ["-p", "TEST", "--yes"]);
 
     expect(confirmOrExit).toHaveBeenCalledWith(
       "Are you sure you want to delete project TEST? This cannot be undone.",
@@ -41,7 +41,7 @@ describe("project delete", () => {
 
   it("cancels when user declines confirmation", async () => {
     vi.mocked(confirmOrExit).mockResolvedValue(false);
-    await parseCommand(() => import("./delete"), ["TEST"]);
+    await parseCommand(() => import("./delete"), ["-p", "TEST"]);
 
     expect(mockClient.deleteProject).not.toHaveBeenCalled();
   });
@@ -49,7 +49,7 @@ describe("project delete", () => {
     "outputs JSON when --json flag is set",
     itOutputsJson(
       () => import("./delete"),
-      ["TEST", "--yes", "--json"],
+      ["-p", "TEST", "--yes", "--json"],
       "TEST",
       () => {
         vi.mocked(confirmOrExit).mockResolvedValue(true);

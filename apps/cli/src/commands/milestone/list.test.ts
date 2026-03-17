@@ -30,7 +30,7 @@ describe("milestone list", () => {
   it("displays milestone list in tabular format", async () => {
     mockClient.getVersions.mockResolvedValue(sampleMilestones);
 
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(mockClient.getVersions).toHaveBeenCalledWith("TEST");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
@@ -41,7 +41,7 @@ describe("milestone list", () => {
   it("shows message when no milestones found", async () => {
     mockClient.getVersions.mockResolvedValue([]);
 
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(consola.info).toHaveBeenCalledWith("No milestones found.");
   });
@@ -49,7 +49,7 @@ describe("milestone list", () => {
   it("displays archived milestone as Yes and non-archived as No", async () => {
     mockClient.getVersions.mockResolvedValue(sampleMilestones);
 
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Yes"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("No"));
@@ -67,7 +67,7 @@ describe("milestone list", () => {
       },
     ]);
 
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("v3.0.0"));
   });
@@ -76,7 +76,7 @@ describe("milestone list", () => {
     "outputs JSON when --json flag is set",
     itOutputsJson(
       () => import("./list"),
-      ["TEST", "--json"],
+      ["-p", "TEST", "--json"],
       "v1.0.0",
       () => mockClient.getVersions.mockResolvedValue(sampleMilestones),
     ),

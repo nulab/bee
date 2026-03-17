@@ -12,6 +12,7 @@ import * as v from "valibot";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { collectNum } from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
 const getActivitySummary = (activity: {
   type: number;
@@ -48,7 +49,7 @@ const activities = new BeeCommand("activities")
 For activity type IDs, see:  
 https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#response-description`,
   )
-  .argument("<project>", "Project ID or project key")
+  .addOption(opt.project())
   .option(
     "--activity-type <id>",
     "Filter by activity type IDs (repeatable)",
@@ -61,27 +62,28 @@ https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#respo
   .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
-    { description: "List recent activities", command: "bee project activities PROJECT_KEY" },
+    { description: "List recent activities", command: "bee project activities -p PROJECT_KEY" },
     {
       description: "Show only issue-related activities",
       command:
-        "bee project activities PROJECT_KEY --activity-type 1 --activity-type 2 --activity-type 3",
+        "bee project activities -p PROJECT_KEY --activity-type 1 --activity-type 2 --activity-type 3",
     },
     {
       description: "Show last 50 activities",
-      command: "bee project activities PROJECT_KEY --count 50",
+      command: "bee project activities -p PROJECT_KEY --count 50",
     },
     {
       description: "Output as JSON",
-      command: "bee project activities PROJECT_KEY --json",
+      command: "bee project activities -p PROJECT_KEY --json",
     },
   ])
-  .action(async (project, opts) => {
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
     const activityTypeId: number[] = opts.activityType;
 
-    const activityList = await client.getProjectActivities(project, {
+    const activityList = await client.getProjectActivities(opts.project, {
       activityTypeId,
       count: parseArg(v.optional(vInteger), opts.count, "--count"),
       order: opts.order,

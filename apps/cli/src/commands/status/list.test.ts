@@ -16,7 +16,7 @@ describe("status list", () => {
   it("displays status list in tabular format", async () => {
     mockClient.getProjectStatuses.mockResolvedValue(sampleStatuses);
 
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(mockClient.getProjectStatuses).toHaveBeenCalledWith("TEST");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
@@ -27,7 +27,7 @@ describe("status list", () => {
   it("shows message when no statuses found", async () => {
     mockClient.getProjectStatuses.mockResolvedValue([]);
 
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(consola.info).toHaveBeenCalledWith("No statuses found.");
   });
@@ -35,7 +35,7 @@ describe("status list", () => {
   it("displays color column", async () => {
     mockClient.getProjectStatuses.mockResolvedValue(sampleStatuses);
 
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("#e30000"));
   });
@@ -44,7 +44,7 @@ describe("status list", () => {
     "outputs JSON when --json flag is set",
     itOutputsJson(
       () => import("./list"),
-      ["TEST", "--json"],
+      ["-p", "TEST", "--json"],
       "Open",
       () => {
         mockClient.getProjectStatuses.mockResolvedValue(sampleStatuses);

@@ -16,7 +16,7 @@ describe("wiki count", () => {
   it("displays wiki page count", async () => {
     mockClient.getWikisCount.mockResolvedValue({ count: 42 });
 
-    await parseCommand(() => import("./count"), ["TEST"]);
+    await parseCommand(() => import("./count"), ["-p", "TEST"]);
 
     expect(mockClient.getWikisCount).toHaveBeenCalledWith("TEST");
     expect(consola.log).toHaveBeenCalledWith("42");
@@ -26,7 +26,7 @@ describe("wiki count", () => {
     "outputs JSON when --json flag is set",
     itOutputsJson(
       () => import("./count"),
-      ["TEST", "--json"],
+      ["-p", "TEST", "--json"],
       "42",
       () => {
         mockClient.getWikisCount.mockResolvedValue({ count: 42 });

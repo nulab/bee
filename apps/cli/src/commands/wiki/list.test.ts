@@ -19,7 +19,7 @@ describe("wiki list", () => {
       { id: 2, name: "Setup Guide", updated: "2025-01-02T00:00:00Z" },
     ]);
 
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(mockClient.getWikis).toHaveBeenCalledWith({
       projectIdOrKey: "TEST",
@@ -33,7 +33,7 @@ describe("wiki list", () => {
   it("shows message when no wiki pages found", async () => {
     mockClient.getWikis.mockResolvedValue([]);
 
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(consola.info).toHaveBeenCalledWith("No wiki pages found.");
   });
@@ -41,7 +41,7 @@ describe("wiki list", () => {
   it("passes keyword parameter", async () => {
     mockClient.getWikis.mockResolvedValue([]);
 
-    await parseCommand(() => import("./list"), ["TEST", "--keyword", "setup"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST", "--keyword", "setup"]);
 
     expect(mockClient.getWikis).toHaveBeenCalledWith({
       projectIdOrKey: "TEST",
@@ -53,7 +53,7 @@ describe("wiki list", () => {
     "outputs JSON when --json flag is set",
     itOutputsJson(
       () => import("./list"),
-      ["TEST", "--json"],
+      ["-p", "TEST", "--json"],
       "Home",
       () => {
         mockClient.getWikis.mockResolvedValue([

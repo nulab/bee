@@ -4,6 +4,7 @@ import { type Entity } from "backlog-js";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
 const renderNode = (
   node: Entity.Document.DocumentTreeNode,
@@ -36,18 +37,19 @@ const renderTree = (children: Entity.Document.DocumentTreeNode[]): string[] => {
 const tree = new BeeCommand("tree")
   .summary("Display document tree")
   .description(`Shows the hierarchical structure of documents with tree-style indentation.`)
-  .argument("[project]", "Project ID or project key", process.env.BACKLOG_PROJECT)
+  .addOption(opt.project())
   .addOption(opt.json())
   .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
-    { description: "Show document tree", command: "bee document tree PROJECT" },
-    { description: "Output as JSON", command: "bee document tree PROJECT --json" },
+    { description: "Show document tree", command: "bee document tree -p PROJECT" },
+    { description: "Output as JSON", command: "bee document tree -p PROJECT --json" },
   ])
-  .action(async (project, opts) => {
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const docTree = await client.getDocumentTree(project);
+    const docTree = await client.getDocumentTree(opts.project);
 
     outputResult(docTree, opts, (data) => {
       if (!data.activeTree || data.activeTree.children.length === 0) {

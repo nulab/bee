@@ -3,28 +3,30 @@ import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
 const list = new BeeCommand("list")
   .summary("List wiki pages")
   .description(`Use \`--keyword\` to filter pages by name or content.`)
-  .argument("<project>", "Project ID or project key")
+  .addOption(opt.project())
   .addOption(opt.keyword())
   .addOption(opt.json())
   .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
-    { description: "List all wiki pages in a project", command: "bee wiki list PROJECT" },
+    { description: "List all wiki pages in a project", command: "bee wiki list -p PROJECT" },
     {
       description: "Search wiki pages by keyword",
-      command: 'bee wiki list PROJECT --keyword "setup"',
+      command: 'bee wiki list -p PROJECT --keyword "setup"',
     },
-    { description: "Output as JSON", command: "bee wiki list PROJECT --json" },
+    { description: "Output as JSON", command: "bee wiki list -p PROJECT --json" },
   ])
-  .action(async (project, opts) => {
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
     const wikis = await client.getWikis({
-      projectIdOrKey: project,
+      projectIdOrKey: opts.project,
       keyword: opts.keyword,
     });
 

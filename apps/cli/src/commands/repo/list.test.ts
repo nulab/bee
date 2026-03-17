@@ -38,7 +38,7 @@ describe("repo list", () => {
   it("displays repository list in tabular format", async () => {
     mockClient.getGitRepositories.mockResolvedValue(sampleRepos);
 
-    await parseCommand(() => import("./list"), ["PROJ"]);
+    await parseCommand(() => import("./list"), ["-p", "PROJ"]);
 
     expect(mockClient.getGitRepositories).toHaveBeenCalledWith("PROJ");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("NAME"));
@@ -62,7 +62,7 @@ describe("repo list", () => {
       },
     ]);
 
-    await parseCommand(() => import("./list"), ["PROJ"]);
+    await parseCommand(() => import("./list"), ["-p", "PROJ"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("empty-repo"));
   });
@@ -70,7 +70,7 @@ describe("repo list", () => {
   it("shows message when no repositories found", async () => {
     mockClient.getGitRepositories.mockResolvedValue([]);
 
-    await parseCommand(() => import("./list"), ["PROJ"]);
+    await parseCommand(() => import("./list"), ["-p", "PROJ"]);
 
     expect(consola.info).toHaveBeenCalledWith("No repositories found.");
   });
@@ -79,7 +79,7 @@ describe("repo list", () => {
     "outputs JSON when --json flag is set",
     itOutputsJson(
       () => import("./list"),
-      ["PROJ", "--json"],
+      ["-p", "PROJ", "--json"],
       "api-server",
       () => mockClient.getGitRepositories.mockResolvedValue(sampleRepos),
     ),

@@ -17,7 +17,7 @@ describe("project edit", () => {
   it("updates project name", async () => {
     mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "New Name" });
 
-    await parseCommand(() => import("./edit"), ["TEST", "--name", "New Name"]);
+    await parseCommand(() => import("./edit"), ["-p", "TEST", "--name", "New Name"]);
 
     expect(mockClient.patchProject).toHaveBeenCalledWith(
       "TEST",
@@ -29,7 +29,7 @@ describe("project edit", () => {
   it("updates project archived status", async () => {
     mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "Test" });
 
-    await parseCommand(() => import("./edit"), ["TEST", "--archived"]);
+    await parseCommand(() => import("./edit"), ["-p", "TEST", "--archived"]);
 
     expect(mockClient.patchProject).toHaveBeenCalledWith(
       "TEST",
@@ -40,7 +40,10 @@ describe("project edit", () => {
   it("passes text formatting rule", async () => {
     mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "Test" });
 
-    await parseCommand(() => import("./edit"), ["TEST", "--text-formatting-rule", "markdown"]);
+    await parseCommand(
+      () => import("./edit"),
+      ["-p", "TEST", "--text-formatting-rule", "markdown"],
+    );
 
     expect(mockClient.patchProject).toHaveBeenCalledWith(
       "TEST",
@@ -51,7 +54,7 @@ describe("project edit", () => {
   it("sends exact payload when only name is provided", async () => {
     mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "New Name" });
 
-    await parseCommand(() => import("./edit"), ["TEST", "--name", "New Name"]);
+    await parseCommand(() => import("./edit"), ["-p", "TEST", "--name", "New Name"]);
 
     expect(mockClient.patchProject).toHaveBeenCalledWith("TEST", {
       name: "New Name",
@@ -68,7 +71,7 @@ describe("project edit", () => {
     "outputs JSON when --json flag is set",
     itOutputsJson(
       () => import("./edit"),
-      ["TEST", "--name", "Test", "--json"],
+      ["-p", "TEST", "--name", "Test", "--json"],
       "TEST",
       () => mockClient.patchProject.mockResolvedValue({ projectKey: "TEST", name: "Test" }),
     ),

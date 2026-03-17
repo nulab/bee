@@ -3,24 +3,26 @@ import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
 const list = new BeeCommand("list")
   .summary("List milestones")
   .description(
     `Milestones (versions) track release schedules and group issues by development cycle.`,
   )
-  .argument("[project]", "Project ID or project key")
+  .addOption(opt.project())
   .addOption(opt.json())
   .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
-    { description: "List all milestones", command: "bee milestone list PROJECT" },
-    { description: "Output as JSON", command: "bee milestone list PROJECT --json" },
+    { description: "List all milestones", command: "bee milestone list -p PROJECT" },
+    { description: "Output as JSON", command: "bee milestone list -p PROJECT --json" },
   ])
-  .action(async (project, opts) => {
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const milestones = await client.getVersions(project);
+    const milestones = await client.getVersions(opts.project);
 
     outputResult(milestones, opts, (data) => {
       if (data.length === 0) {
