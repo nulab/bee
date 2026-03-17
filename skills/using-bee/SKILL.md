@@ -111,3 +111,4 @@ When `--json` is used, errors are output as JSON to stderr, making them easy to 
 - Use `--json` for all data retrieval so you can parse and process the results.
 - Combine multiple bee calls to build reports, batch-update issues, or automate workflows.
 - When creating or editing resources interactively, bee prompts for required fields. Use flags to skip prompts in automated workflows.
+- bee uses `--title` and `--body` — not Backlog API names like `--summary`, `--description`, or `--content`.
