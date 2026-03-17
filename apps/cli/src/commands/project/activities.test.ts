@@ -38,7 +38,7 @@ describe("project activities", () => {
     ]);
 
     const { default: activities } = await import("./activities");
-    await activities.parseAsync(["PROJ1"], { from: "user" });
+    await activities.parseAsync(["-p", "PROJ1"], { from: "user" });
 
     expect(mockClient.getProjectActivities).toHaveBeenCalledWith("PROJ1", expect.any(Object));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("2024-01-15"));
@@ -51,7 +51,7 @@ describe("project activities", () => {
     mockClient.getProjectActivities.mockResolvedValue([]);
 
     const { default: activities } = await import("./activities");
-    await activities.parseAsync(["PROJ1"], { from: "user" });
+    await activities.parseAsync(["-p", "PROJ1"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No activities found.");
   });
@@ -61,7 +61,7 @@ describe("project activities", () => {
 
     const { default: activities } = await import("./activities");
     await activities.parseAsync(
-      ["PROJ1", "--activity-type", "1", "--activity-type", "2", "--activity-type", "3"],
+      ["-p", "PROJ1", "--activity-type", "1", "--activity-type", "2", "--activity-type", "3"],
       { from: "user" },
     );
 
@@ -77,7 +77,7 @@ describe("project activities", () => {
     mockClient.getProjectActivities.mockResolvedValue([]);
 
     const { default: activities } = await import("./activities");
-    await activities.parseAsync(["PROJ1", "--count", "50"], { from: "user" });
+    await activities.parseAsync(["-p", "PROJ1", "--count", "50"], { from: "user" });
 
     expect(mockClient.getProjectActivities).toHaveBeenCalledWith(
       "PROJ1",
@@ -97,7 +97,7 @@ describe("project activities", () => {
     ]);
 
     const { default: activities } = await import("./activities");
-    await activities.parseAsync(["PROJ1"], { from: "user" });
+    await activities.parseAsync(["-p", "PROJ1"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unknown"));
   });
@@ -114,7 +114,7 @@ describe("project activities", () => {
     ]);
 
     const { default: activities } = await import("./activities");
-    await activities.parseAsync(["PROJ1"], { from: "user" });
+    await activities.parseAsync(["-p", "PROJ1"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("User"));
   });
@@ -132,7 +132,7 @@ describe("project activities", () => {
 
     await expectStdoutContaining(async () => {
       const { default: activities } = await import("./activities");
-      await activities.parseAsync(["PROJ1", "--json"], { from: "user" });
+      await activities.parseAsync(["-p", "PROJ1", "--json"], { from: "user" });
     }, "Test");
   });
 });

@@ -3,22 +3,24 @@ import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
+import { resolveOptions } from "../../lib/required-option";
 
 const tags = new BeeCommand("tags")
   .summary("List wiki tags")
   .description(`Tags are labels attached to wiki pages for organization.`)
-  .argument("<project>", "Project ID or project key")
+  .addOption(opt.project())
   .addOption(opt.json())
   .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])
   .examples([
-    { description: "List wiki tags", command: "bee wiki tags PROJECT" },
-    { description: "Output as JSON", command: "bee wiki tags PROJECT --json" },
+    { description: "List wiki tags", command: "bee wiki tags -p PROJECT" },
+    { description: "Output as JSON", command: "bee wiki tags -p PROJECT --json" },
   ])
-  .action(async (project, opts) => {
+  .action(async (opts, cmd) => {
+    await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const result = await client.getWikisTags(project);
+    const result = await client.getWikisTags(opts.project);
 
     const json = opts.json === true ? "" : opts.json;
     outputResult(result, { json }, (data) => {

@@ -40,7 +40,7 @@ describe("project view", () => {
   it("displays project details", async () => {
     mockClient.getProject.mockResolvedValue(sampleProject);
 
-    await parseCommand(() => import("./view"), ["PROJ1"]);
+    await parseCommand(() => import("./view"), ["-p", "PROJ1"]);
 
     expect(mockClient.getProject).toHaveBeenCalledWith("PROJ1");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Test Project"));
@@ -52,13 +52,13 @@ describe("project view", () => {
   it("shows Archived status for archived project", async () => {
     mockClient.getProject.mockResolvedValue({ ...sampleProject, archived: true });
 
-    await parseCommand(() => import("./view"), ["PROJ1"]);
+    await parseCommand(() => import("./view"), ["-p", "PROJ1"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Archived"));
   });
 
   it("opens browser with --web flag", async () => {
-    await parseCommand(() => import("./view"), ["PROJ1", "--web"]);
+    await parseCommand(() => import("./view"), ["-p", "PROJ1", "--web"]);
 
     expect(openOrPrintUrl).toHaveBeenCalledWith(
       "https://example.backlog.com/projects/PROJ1",
@@ -72,7 +72,7 @@ describe("project view", () => {
     "outputs JSON when --json flag is set",
     itOutputsJson(
       () => import("./view"),
-      ["PROJ1", "--json"],
+      ["-p", "PROJ1", "--json"],
       "PROJ1",
       () => {
         mockClient.getProject.mockResolvedValue(sampleProject);

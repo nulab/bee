@@ -15,7 +15,7 @@ const sampleCategories = [
 describe("category list", () => {
   it("displays category list in tabular format", async () => {
     mockClient.getCategories.mockResolvedValue(sampleCategories);
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(mockClient.getCategories).toHaveBeenCalledWith("TEST");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
@@ -25,7 +25,7 @@ describe("category list", () => {
 
   it("shows message when no categories found", async () => {
     mockClient.getCategories.mockResolvedValue([]);
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(consola.info).toHaveBeenCalledWith("No categories found.");
   });
@@ -34,7 +34,7 @@ describe("category list", () => {
     "outputs JSON when --json flag is set",
     itOutputsJson(
       () => import("./list"),
-      ["TEST", "--json"],
+      ["-p", "TEST", "--json"],
       "Bug",
       () => {
         mockClient.getCategories.mockResolvedValue(sampleCategories);

@@ -16,7 +16,7 @@ describe("issue-type list", () => {
   it("displays issue type list in tabular format", async () => {
     mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes);
 
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(mockClient.getIssueTypes).toHaveBeenCalledWith("TEST");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("ID"));
@@ -27,7 +27,7 @@ describe("issue-type list", () => {
   it("shows message when no issue types found", async () => {
     mockClient.getIssueTypes.mockResolvedValue([]);
 
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(consola.info).toHaveBeenCalledWith("No issue types found.");
   });
@@ -35,7 +35,7 @@ describe("issue-type list", () => {
   it("displays color column", async () => {
     mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes);
 
-    await parseCommand(() => import("./list"), ["TEST"]);
+    await parseCommand(() => import("./list"), ["-p", "TEST"]);
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("#e30000"));
   });
@@ -44,7 +44,7 @@ describe("issue-type list", () => {
     "outputs JSON when --json flag is set",
     itOutputsJson(
       () => import("./list"),
-      ["TEST", "--json"],
+      ["-p", "TEST", "--json"],
       "Bug",
       () => mockClient.getIssueTypes.mockResolvedValue(sampleIssueTypes),
     ),

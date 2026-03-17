@@ -39,7 +39,7 @@ permissions: {}
 env:
   BACKLOG_API_KEY: ${{ secrets.BACKLOG_API_KEY }}
   BACKLOG_SPACE: ${{ secrets.BACKLOG_SPACE }}
-  # 「処理中」ステータスの ID（bee status list <PROJECT> で確認）
+  # 「処理中」ステータスの ID（bee status list -p <PROJECT> で確認）
   STATUS_IN_PROGRESS: "2"
 
 jobs:
@@ -125,7 +125,7 @@ jobs:
 ## カスタマイズ
 
 ステータス ID を確認するには
-: `bee status list <PROJECT>` でプロジェクトのステータス一覧と ID を確認できます。`STATUS_IN_PROGRESS` の値をプロジェクトに合わせて変更してください。
+: `bee status list -p <PROJECT>` でプロジェクトのステータス一覧と ID を確認できます。`STATUS_IN_PROGRESS` の値をプロジェクトに合わせて変更してください。
 
 ステータス変更が不要
 : `bee issue edit` の行と `STATUS_IN_PROGRESS` 環境変数を削除すれば、リンクのコメントだけになります。
@@ -134,7 +134,7 @@ jobs:
 : 「Close linked issues」ステップを削除してください。
 
 クローズではなく別のステータスにしたい
-: `bee issue close` を `bee issue edit --status <ステータスID>` に変更してください。ステータス ID は `bee status list <PROJECT>` で確認できます。
+: `bee issue close` を `bee issue edit --status <ステータスID>` に変更してください。ステータス ID は `bee status list -p <PROJECT>` で確認できます。
 
 `edited` イベントが不要
 : トリガーの `types` から `edited` を削除し、「Comment PR link on newly added issues」ステップを削除してください。

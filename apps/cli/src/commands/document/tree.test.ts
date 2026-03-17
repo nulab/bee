@@ -43,7 +43,7 @@ describe("document tree", () => {
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 
     const { default: tree } = await import("./tree");
-    await tree.parseAsync(["PROJECT"], { from: "user" });
+    await tree.parseAsync(["-p", "PROJECT"], { from: "user" });
 
     expect(mockClient.getDocumentTree).toHaveBeenCalledWith("PROJECT");
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Getting Started"));
@@ -55,7 +55,7 @@ describe("document tree", () => {
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 
     const { default: tree } = await import("./tree");
-    await tree.parseAsync(["PROJECT"], { from: "user" });
+    await tree.parseAsync(["-p", "PROJECT"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("\ud83d\ude80"));
   });
@@ -67,7 +67,7 @@ describe("document tree", () => {
     });
 
     const { default: tree } = await import("./tree");
-    await tree.parseAsync(["PROJECT"], { from: "user" });
+    await tree.parseAsync(["-p", "PROJECT"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No documents found.");
   });
@@ -78,7 +78,7 @@ describe("document tree", () => {
     });
 
     const { default: tree } = await import("./tree");
-    await tree.parseAsync(["PROJECT"], { from: "user" });
+    await tree.parseAsync(["-p", "PROJECT"], { from: "user" });
 
     expect(consola.info).toHaveBeenCalledWith("No documents found.");
   });
@@ -99,7 +99,7 @@ describe("document tree", () => {
     });
 
     const { default: tree } = await import("./tree");
-    await tree.parseAsync(["PROJECT"], { from: "user" });
+    await tree.parseAsync(["-p", "PROJECT"], { from: "user" });
 
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("doc-no-name"));
   });
@@ -109,7 +109,7 @@ describe("document tree", () => {
 
     await expectStdoutContaining(async () => {
       const { default: tree } = await import("./tree");
-      await tree.parseAsync(["PROJECT", "--json"], { from: "user" });
+      await tree.parseAsync(["-p", "PROJECT", "--json"], { from: "user" });
     }, "doc-1");
   });
 
@@ -117,7 +117,7 @@ describe("document tree", () => {
     mockClient.getDocumentTree.mockResolvedValue(sampleTree);
 
     const { default: tree } = await import("./tree");
-    await tree.parseAsync(["PROJECT"], { from: "user" });
+    await tree.parseAsync(["-p", "PROJECT"], { from: "user" });
 
     // First child uses ├── connector
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("\u251c\u2500\u2500"));
