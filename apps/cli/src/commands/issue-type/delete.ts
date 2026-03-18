@@ -16,7 +16,6 @@ const deleteIssueType = new BeeCommand("delete")
     "--substitute-issue-type-id <value>",
     "Replacement issue type ID for affected issues",
   )
-  .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())
   .addOption(opt.space())
   .envVars([...ENV_AUTH, ENV_PROJECT])

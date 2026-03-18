@@ -7,6 +7,11 @@ class BeeCommand extends Command {
   readonly beeExamples: Example[] = [];
   readonly beeEnvVars: [string, string][] = [];
 
+  constructor(name?: string) {
+    super(name);
+    this.option("-y, --yes", "Skip confirmation prompt");
+  }
+
   helpInformation(): string {
     return super.helpInformation() + this._renderExamples() + this._renderEnvVars();
   }
