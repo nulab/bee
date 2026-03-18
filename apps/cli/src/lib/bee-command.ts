@@ -7,9 +7,10 @@ class BeeCommand extends Command {
   readonly beeExamples: Example[] = [];
   readonly beeEnvVars: [string, string][] = [];
 
-  constructor(name?: string) {
-    super(name);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  action(fn: (...args: any[]) => void | Promise<void>): this {
     this.option("-y, --yes", "Skip confirmation prompt");
+    return super.action(fn);
   }
 
   helpInformation(): string {
