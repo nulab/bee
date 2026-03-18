@@ -3,10 +3,10 @@ packages:
   - "packages/*"
 
 catalog:
-  "@astrojs/starlight": ^0.37.6
+  "@astrojs/starlight": ^0.37.7
   "@tsconfig/node-lts": ^24.0.0
   "@tsconfig/node-ts": ^23.6.4
-  "@types/node": ^25.3.3
+  "@types/node": ^25.2.3
   "@vitest/coverage-v8": ^4.0.18
   astro: ^5.5.0
   backlog-js: ^0.16.0
@@ -14,8 +14,8 @@ catalog:
   consola: ^3.4.2
   is-unicode-supported: ^2.1.0
   jiti: ^2.6.1
-  lefthook: ^2.1.2
-  marked: ^17.0.3
+  lefthook: ^2.1.3
+  marked: ^17.0.4
   open: ^11.0.0
   oxfmt: ^0.36.0
   oxlint: ^1.51.0
@@ -24,10 +24,10 @@ catalog:
   remark-definition-list: ^2.0.0
   sharp: ^0.34.5
   starlight-links-validator: ^0.19.2
-  string-width: ^8.2.0
+  string-width: ^8.1.1
   tsx: ^4.19.0
-  turbo: ^2.8.13
-  typescript: 6.0.0-dev.20260301
+  turbo: ^2.8.14
+  typescript: 6.0.0-dev.20260308
   unbuild: ^3.5.0
   undici: ^7.22.0
   valibot: ^1.2.0
