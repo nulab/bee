@@ -10,7 +10,6 @@ const deleteWatching = new BeeCommand("delete")
     `Removes the issue from your watching list. You will no longer receive update notifications.`,
   )
   .argument("<watching>", "Watching ID")
-  .option("-y, --yes", "Skip confirmation prompt")
   .addOption(opt.json())
   .addOption(opt.space())
   .envVars([...ENV_AUTH])

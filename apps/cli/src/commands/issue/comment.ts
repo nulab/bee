@@ -25,7 +25,6 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
   .option("--list", "List comments on the issue")
   .option("--edit-last", "Edit your most recent comment")
   .option("--delete-last", "Delete your most recent comment")
-  .option("--yes", "Skip confirmation prompt for delete")
   .addOption(opt.json())
   .addOption(opt.space())
   .envVars([...ENV_AUTH])
