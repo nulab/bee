@@ -52,16 +52,10 @@ This table may not reflect the latest version. Run `bee --help` and `bee <comman
 
 For detailed command reference (all flags, arguments, examples, and environment variables), use `bee <command> <subcommand> --help`.
 
-When you need to fetch documentation programmatically (e.g., guides, recipes), use the GitHub API instead of `github.io` URLs to avoid potential access restrictions:
+When you need to fetch documentation programmatically (e.g., guides, recipes), use `raw.githubusercontent.com` instead of `github.io` URLs to avoid potential access restrictions:
 
-```sh
-# Fetch a doc page via GitHub API (returns raw Markdown)
-gh api repos/nulab/bee/contents/apps/docs/src/content/docs/guides/authentication.mdx \
-  -H "Accept: application/vnd.github.raw+json"
-
-# List available doc pages
-gh api repos/nulab/bee/contents/apps/docs/src/content/docs --jq '.[].name'
-```
+- `https://raw.githubusercontent.com/nulab/bee/main/apps/docs/src/content/docs/guides/authentication.mdx`
+- `https://raw.githubusercontent.com/nulab/bee/main/apps/docs/src/content/docs/recipes/useful-prompts.mdx`
 
 Source docs are located at `apps/docs/src/content/docs/` in the repository.
 
