@@ -23,6 +23,21 @@ bee のドキュメントサイトでは、LLM がコマンドの使い方を効
 - [`/getting-started.md`](/bee/getting-started.md)
 - [`/commands/issue/list.md`](/bee/commands/issue/list.md)
 
+### GitHub API 経由でのドキュメント取得
+
+`github.io` の URL にアクセスできない環境（一部の AI エージェントなど）では、GitHub API 経由でドキュメントのソースファイルを直接取得できます。
+
+```sh
+# ガイドページを取得（raw Markdown）
+gh api repos/nulab/bee/contents/apps/docs/src/content/docs/guides/authentication.mdx \
+  -H "Accept: application/vnd.github.raw+json"
+
+# ドキュメント一覧を取得
+gh api repos/nulab/bee/contents/apps/docs/src/content/docs --jq '.[].name'
+```
+
+ドキュメントのソースは `apps/docs/src/content/docs/` に `.mdx` 形式で格納されています。コマンドリファレンスは CLI ソースコードからビルド時に自動生成されるため、コマンドの詳細は `bee <command> --help` を使用してください。
+
 ## どちらを使うべきか
 
 <Card title="bee + Skills" icon="seti:shell">
