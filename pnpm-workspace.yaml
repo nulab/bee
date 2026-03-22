@@ -3,12 +3,12 @@ packages:
   - "packages/*"
 
 catalog:
-  "@astrojs/starlight": ^0.37.7
+  "@astrojs/starlight": ^0.38.1
   "@tsconfig/node-lts": ^24.0.0
   "@tsconfig/node-ts": ^23.6.4
   "@types/node": ^25.2.3
-  "@vitest/coverage-v8": ^4.0.18
-  astro: ^5.5.0
+  "@vitest/coverage-v8": ^4.1.0
+  astro: ^5.18.1
   backlog-js: ^0.16.0
   commander: ^14.0.3
   consola: ^3.4.2
@@ -17,18 +17,18 @@ catalog:
   lefthook: ^2.1.3
   marked: ^17.0.4
   open: ^11.0.0
-  oxfmt: ^0.36.0
-  oxlint: ^1.51.0
+  oxfmt: ^0.40.0
+  oxlint: ^1.55.0
   oxlint-tsgolint: ^0.16.0
   rc9: ^3.0.0
   remark-definition-list: ^2.0.0
   sharp: ^0.34.5
-  starlight-links-validator: ^0.19.2
-  string-width: ^8.1.1
+  starlight-links-validator: ^0.20.1
+  string-width: ^8.2.0
   tsx: ^4.19.0
   turbo: ^2.8.14
-  typescript: 6.0.0-dev.20260308
+  typescript: 6.0.0-dev.20260315
   unbuild: ^3.5.0
-  undici: ^7.22.0
+  undici: ^7.24.3
   valibot: ^1.2.0
-  vitest: ^4.0.18
+  vitest: ^4.1.0
