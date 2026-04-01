@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { describe, expect, it, vi } from "vitest";
 import {
   expectStdoutContaining,
@@ -16,6 +17,9 @@ const { mockClient, host } = setupCommandTest({
 
 vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
+vi.mock("node:fs/promises", () => ({
+  readFile: vi.fn(),
+}));
 
 describe("api", () => {
   it("makes GET request by default", async () => {
@@ -113,6 +117,49 @@ describe("api", () => {
 
     const output = JSON.parse(writeSpy.mock.calls[0][0] as string);
     expect(output).toEqual({ id: 1, name: "test" });
+    writeSpy.mockRestore();
+  });
+
+  it("reads -f value from file with @path (like gh -F)", async () => {
+    vi.mocked(readFile).mockResolvedValue("line1\nline2\nline3");
+    mockClient.patch.mockResolvedValue({ id: 1 });
+
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await parseCommand(
+      () => import("./api"),
+      ["/issues/TEST-1", "-X", "PATCH", "-f", "description=@/tmp/desc.txt"],
+    );
+
+    expect(readFile).toHaveBeenCalledWith("/tmp/desc.txt", "utf8");
+    expect(mockClient.patch).toHaveBeenCalledWith("/issues/TEST-1", {
+      description: "line1\nline2\nline3",
+    });
+    writeSpy.mockRestore();
+  });
+
+  it("applies type inference to file content in -f", async () => {
+    vi.mocked(readFile).mockResolvedValue("42");
+    mockClient.get.mockResolvedValue({});
+
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await parseCommand(() => import("./api"), ["/issues", "-f", "count=@/tmp/num.txt"]);
+
+    expect(mockClient.get).toHaveBeenCalledWith("/issues", { count: 42 });
+    writeSpy.mockRestore();
+  });
+
+  it("sends -F value with @ literally (no file reference)", async () => {
+    mockClient.post.mockResolvedValue({ id: 1 });
+
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await parseCommand(() => import("./api"), ["/issues", "-X", "POST", "-F", "email=@user"]);
+
+    expect(mockClient.post).toHaveBeenCalledWith("/issues", {
+      email: "@user",
+    });
     writeSpy.mockRestore();
   });
 });
