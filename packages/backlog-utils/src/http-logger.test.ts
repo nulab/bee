@@ -10,6 +10,7 @@ vi.mock("undici", () => {
   });
   return {
     Agent: MockAgent,
+    EnvHttpProxyAgent: MockAgent,
     setGlobalDispatcher: vi.fn(),
   };
 });
@@ -138,14 +139,14 @@ describe("installHttpLogger", () => {
     vi.clearAllMocks();
   });
 
-  it("calls setGlobalDispatcher with a composed agent", async () => {
-    const { Agent, setGlobalDispatcher } = await import("undici");
+  it("calls setGlobalDispatcher with a composed EnvHttpProxyAgent", async () => {
+    const { EnvHttpProxyAgent, setGlobalDispatcher } = await import("undici");
     const { installHttpLogger } = await import("./http-logger");
 
     installHttpLogger();
 
-    expect(Agent).toHaveBeenCalled();
-    expect(vi.mocked(Agent).prototype.compose).toHaveBeenCalled();
+    expect(EnvHttpProxyAgent).toHaveBeenCalled();
+    expect(vi.mocked(EnvHttpProxyAgent).prototype.compose).toHaveBeenCalled();
     expect(setGlobalDispatcher).toHaveBeenCalled();
   });
 });
