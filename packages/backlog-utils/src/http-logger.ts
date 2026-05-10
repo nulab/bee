@@ -1,5 +1,5 @@
 import consola from "consola";
-import { EnvHttpProxyAgent, type Dispatcher, setGlobalDispatcher } from "undici";
+import { type Dispatcher } from "undici";
 
 type Interceptor = (dispatch: Dispatcher["dispatch"]) => Dispatcher["dispatch"];
 
@@ -65,14 +65,4 @@ const createLoggingInterceptor = (): Interceptor => {
   };
 };
 
-/** Installs the logging interceptor as the global fetch dispatcher.
- *
- * Respects the standard HTTP proxy environment variables:
- *   HTTPS_PROXY / https_proxy, HTTP_PROXY / http_proxy,
- *   NO_PROXY / no_proxy (comma-separated list of hosts to bypass).
- */
-const installHttpLogger = (): void => {
-  setGlobalDispatcher(new EnvHttpProxyAgent().compose(createLoggingInterceptor()));
-};
-
-export { createLoggingInterceptor, installHttpLogger };
+export { createLoggingInterceptor };
