@@ -1,6 +1,7 @@
 import { documentUrl, getClient, openOrPrintUrl } from "@repo/backlog-utils";
 import { UserError, formatDate, outputResult, printDefinitionList } from "@repo/cli-utils";
 import consola from "consola";
+import { Option } from "commander";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -8,7 +9,11 @@ const view = new BeeCommand("view")
   .summary("View a document")
   .description(`Use \`--web\` to open in the browser (\`--project\` is required for \`--web\`).`)
   .argument("<document>", "Document ID")
-  .option("-p, --project <id>", "Project ID or project key (required for --web)")
+  .addOption(
+    new Option("-p, --project <id>", "Project ID or project key (required for --web)").env(
+      "BACKLOG_PROJECT",
+    ),
+  )
   .addOption(opt.web("document"))
   .addOption(opt.noBrowser())
   .addOption(opt.json())
