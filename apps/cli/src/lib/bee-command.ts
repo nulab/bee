@@ -55,7 +55,14 @@ class BeeCommand extends Command {
     const fromOptions: [string, string][] = this.options
       .filter((opt) => opt.envVar)
       .map((opt) => [opt.envVar!, opt.description ?? ""]);
-    const vars = [...fromOptions, ...this.beeEnvVars];
+    const seen = new Set<string>();
+    const vars = [...fromOptions, ...this.beeEnvVars].filter(([name]) => {
+      if (seen.has(name)) {
+        return false;
+      }
+      seen.add(name);
+      return true;
+    });
     if (vars.length === 0) {
       return "";
     }
