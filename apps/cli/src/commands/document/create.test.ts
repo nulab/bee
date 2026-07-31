@@ -1,6 +1,6 @@
 import { promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
 const { mockClient, host } = setupCommandTest({
@@ -20,6 +20,22 @@ vi.mock("@repo/cli-utils", async (importOriginal) => ({
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("document create", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("reads project from the BACKLOG_PROJECT environment variable", async () => {
+    vi.stubEnv("BACKLOG_PROJECT", "PROJECT");
+    mockClient.addDocument.mockResolvedValue({ id: "6", title: "Title" });
+
+    await parseCommand(() => import("./create"), ["-t", "Title"]);
+
+    expect(promptRequired).toHaveBeenCalledWith("Project:", "PROJECT");
+    expect(mockClient.addDocument).toHaveBeenCalledWith(
+      expect.objectContaining({ projectId: 100 }),
+    );
+  });
+
   it("creates a document with provided fields", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("100").mockResolvedValueOnce("Meeting Notes");
     mockClient.addDocument.mockResolvedValue({

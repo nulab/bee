@@ -1,6 +1,7 @@
 import { documentUrl, getClient, resolveProjectIds } from "@repo/backlog-utils";
 import { outputResult, promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
+import { Option } from "commander";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -9,7 +10,7 @@ const create = new BeeCommand("create")
   .description(
     `Omitted required fields will be prompted interactively. When input is piped, it is used as the body automatically.`,
   )
-  .option("-p, --project <id>", "Project ID or project key")
+  .addOption(new Option("-p, --project <id>", "Project ID or project key").env("BACKLOG_PROJECT"))
   .option("-t, --title <text>", "Document title")
   .option("-b, --body <text>", "Document body content")
   .option("--emoji <emoji>", "Emoji for the document")
