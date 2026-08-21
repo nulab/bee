@@ -32,13 +32,74 @@ vi.mock("@repo/cli-utils", async (importOriginal) => ({
   readStdin: vi.fn(),
 }));
 
-vi.mock("@repo/config", () => ({
+vi.mock("@repo/config", async (importOriginal) => ({
+  ...(await importOriginal()),
   updateConfig: vi.fn(),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("auth login", () => {
+  describe("hostname", () => {
+    it("authenticates against a self-hosted domain", async () => {
+      mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });
+      vi.mocked(promptRequired)
+        .mockResolvedValueOnce("backlog.example.internal")
+        .mockResolvedValueOnce("test-api-key");
+      vi.mocked(updateConfig).mockImplementation((updater) =>
+        updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
+      );
+
+      await parseCommand(() => import("./login"), ["--method", "api-key"]);
+
+      expect(Backlog).toHaveBeenCalledWith({
+        host: "backlog.example.internal",
+        apiKey: "test-api-key",
+      });
+      const result = vi.mocked(updateConfig).mock.results[0]?.value;
+      expect(result.spaces).toEqual([
+        {
+          host: "backlog.example.internal",
+          auth: { method: "api-key", apiKey: "test-api-key" },
+        },
+      ]);
+    });
+
+    it("normalizes an uppercase hostname to lowercase", async () => {
+      mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });
+      vi.mocked(promptRequired)
+        .mockResolvedValueOnce("Example.Backlog.COM")
+        .mockResolvedValueOnce("test-api-key");
+      vi.mocked(updateConfig).mockImplementation((updater) =>
+        updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
+      );
+
+      await parseCommand(() => import("./login"), ["--method", "api-key"]);
+
+      expect(Backlog).toHaveBeenCalledWith({
+        host: "example.backlog.com",
+        apiKey: "test-api-key",
+      });
+    });
+
+    // A hostname carrying userinfo or a path would move the request origin, and
+    // with it the API key, to another server.
+    it.each([
+      "example.backlog.com@evil.com",
+      "https://example.backlog.com",
+      "backlog.example.internal/backlog",
+    ])("rejects %s without contacting the server", async (hostname) => {
+      vi.mocked(promptRequired).mockResolvedValueOnce(hostname);
+
+      await expect(parseCommand(() => import("./login"), ["--method", "api-key"])).rejects.toThrow(
+        "is not a valid hostname",
+      );
+
+      expect(Backlog).not.toHaveBeenCalled();
+      expect(updateConfig).not.toHaveBeenCalled();
+    });
+  });
+
   describe("api-key", () => {
     it("authenticates new space with API key", async () => {
       mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });

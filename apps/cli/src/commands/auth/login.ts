@@ -1,8 +1,9 @@
 import { exchangeAuthorizationCode, openUrl, startCallbackServer } from "@repo/backlog-utils";
 import { UserError, promptRequired, readStdin } from "@repo/cli-utils";
-import { type RcAuth, updateConfig } from "@repo/config";
+import { type RcAuth, RcHostSchema, updateConfig } from "@repo/config";
 import { Backlog, OAuth2 } from "backlog-js";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -37,12 +38,30 @@ Use \`--method oauth\` for OAuth authentication via the browser.`,
       throw new UserError('Invalid auth method. Use "api-key" or "oauth".');
     }
 
-    const hostname = await promptRequired("Backlog space hostname:", opts.space, {
-      placeholder: "xxx.backlog.com",
-    });
+    const hostname = parseHostname(
+      await promptRequired("Backlog space hostname:", opts.space, {
+        placeholder: "xxx.backlog.com",
+      }),
+    );
 
     await (method === "api-key" ? loginWithApiKey(hostname, opts) : loginWithOAuth(hostname));
   });
+
+/**
+ * Rejects a hostname before it reaches the network, so an unusable value fails
+ * with an actionable message instead of a connection or schema error later on.
+ */
+const parseHostname = (input: string): string => {
+  const result = v.safeParse(RcHostSchema, input.trim());
+
+  if (!result.success) {
+    throw new UserError(
+      `"${input}" is not a valid hostname. Pass the space's bare hostname, without a scheme or path (e.g. xxx.backlog.com).`,
+    );
+  }
+
+  return result.output;
+};
 
 const loginWithApiKey = async (hostname: string, opts: { withToken?: boolean }): Promise<void> => {
   if (!opts.withToken) {

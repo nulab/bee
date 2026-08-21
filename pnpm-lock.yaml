@@ -88,8 +88,8 @@ catalogs:
       specifier: ^7.22.0
       version: 7.22.0
     valibot:
-      specifier: ^1.2.0
-      version: 1.2.0
+      specifier: ^1.4.2
+      version: 1.4.2
     vitest:
       specifier: ^4.0.18
       version: 4.0.18
@@ -145,7 +145,7 @@ importers:
         version: 11.0.0
       valibot:
         specifier: 'catalog:'
-        version: 1.2.0(typescript@6.0.0-dev.20260308)
+        version: 1.4.2(typescript@6.0.0-dev.20260308)
     devDependencies:
       '@repo/backlog-utils':
         specifier: workspace:*
@@ -222,7 +222,7 @@ importers:
         version: 7.22.0
       valibot:
         specifier: 'catalog:'
-        version: 1.2.0(typescript@5.9.3)
+        version: 1.4.2(typescript@5.9.3)
     devDependencies:
       '@repo/test-utils':
         specifier: workspace:*
@@ -244,7 +244,7 @@ importers:
         version: 8.2.0
       valibot:
         specifier: 'catalog:'
-        version: 1.2.0(typescript@5.9.3)
+        version: 1.4.2(typescript@5.9.3)
     devDependencies:
       '@repo/test-utils':
         specifier: workspace:*
@@ -269,7 +269,7 @@ importers:
         version: 3.0.0
       valibot:
         specifier: 'catalog:'
-        version: 1.2.0(typescript@5.9.3)
+        version: 1.4.2(typescript@5.9.3)
     devDependencies:
       '@repo/test-utils':
         specifier: workspace:*
@@ -3360,8 +3360,8 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  valibot@1.2.0:
-    resolution: {integrity: sha512-mm1rxUsmOxzrwnX5arGS+U4T25RdvpPjPN4yR0u9pUBov9+zGVtO84tif1eY4r6zWxVxu3KzIyknJy3rxfRZZg==}
+  valibot@1.4.2:
+    resolution: {integrity: sha512-gjdCvJ6d3RyHAneqxMYMW9QMCwYMb3jpOO0IyHZV1bnRHFBHrX3VkIILt5XYR0WhwHiH7Mty8ovuPZ/O3gamrg==}
     peerDependencies:
       typescript: '>=5'
     peerDependenciesMeta:
@@ -7006,11 +7006,11 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  valibot@1.2.0(typescript@5.9.3):
+  valibot@1.4.2(typescript@5.9.3):
     optionalDependencies:
       typescript: 5.9.3
 
-  valibot@1.2.0(typescript@6.0.0-dev.20260308):
+  valibot@1.4.2(typescript@6.0.0-dev.20260308):
     optionalDependencies:
       typescript: 6.0.0-dev.20260308
 
