@@ -2,6 +2,12 @@ packages:
   - "apps/*"
   - "packages/*"
 
+onlyBuiltDependencies:
+  - esbuild
+  - lefthook
+  - sharp
+  - turbo
+
 catalog:
   "@astrojs/starlight": ^0.37.7
   "@tsconfig/node-lts": ^24.0.0
