@@ -33,6 +33,12 @@ description: |-
 `BACKLOG_OAUTH_PORT`
 : OAuth 認証で使用するコールバックサーバーのポート番号。デフォルトは `5033`。別のアプリケーションとポートが競合する場合に変更できます。
 
+`HTTPS_PROXY` / `HTTP_PROXY`
+: アウトバウンドの HTTPS / HTTP リクエストを指定したプロキシ経由でルーティングします（例: `http://proxy.corp.example.com:8080`）。社内プロキシ環境や制限されたネットワークでの利用に必要です。
+
+`NO_PROXY`
+: プロキシをバイパスするホストをカンマ区切りで指定します（例: `internal.example.com,localhost`）。サブドメイン（`.example.com`）、ポート指定（`example.com:8080`）、ワイルドカード（`*`）にも対応しています。
+
 ## よく使うパターン
 
 ### プロジェクトの固定

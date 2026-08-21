@@ -1,6 +1,6 @@
 import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseCommand } from "@repo/test-utils";
 
 vi.mock("@repo/backlog-utils", () => ({
@@ -23,6 +23,22 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 const { resolveUrl: mockResolveUrl } = vi.mocked(await import("./browse-url"));
 
 describe("browse", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("reads project from the BACKLOG_PROJECT environment variable", async () => {
+    vi.stubEnv("BACKLOG_PROJECT", "ENVPROJ");
+
+    await parseCommand(() => import("./browse"), ["--issues"]);
+
+    expect(mockResolveUrl).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ project: "ENVPROJ" }),
+      expect.anything(),
+    );
+  });
+
   it("opens resolved URL in browser", async () => {
     await parseCommand(() => import("./browse"));
 

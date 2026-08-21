@@ -12,12 +12,13 @@ type BacklogClient = Backlog;
 /**
  * Resolves the active space and creates an authenticated API client.
  *
- * When `host` is provided, uses it directly. Otherwise falls back to
- * `defaultSpace` from the config file.
+ * Host resolution order: the `host` argument, `BACKLOG_SPACE`, then `defaultSpace`
+ * from the config file. Credentials come from the config file, falling back to
+ * `BACKLOG_API_KEY` when the resolved host has no entry there.
  *
  * For OAuth authentication, automatically refreshes the access token when it expires (401 error).
  *
- * @param host - Optional Backlog host (e.g. "example.backlog.com"). Defaults to config's defaultSpace.
+ * @param host - Optional Backlog host (e.g. "example.backlog.com").
  * @returns The authenticated client and host string.
  */
 const getClient = async (
@@ -27,7 +28,9 @@ const getClient = async (
   host: string;
 }> => {
   const config = loadConfig();
-  const resolvedHost = host ?? config.defaultSpace;
+  const envApiKey = process.env.BACKLOG_API_KEY;
+  const envSpace = process.env.BACKLOG_SPACE;
+  const resolvedHost = host ?? envSpace ?? config.defaultSpace;
 
   if (!resolvedHost) {
     throw new UserError("No space configured. Run `bee auth login` to authenticate.");
@@ -36,6 +39,11 @@ const getClient = async (
   const resolved = findSpace(config.spaces, resolvedHost);
 
   if (!resolved) {
+    if (envApiKey) {
+      const client = new Backlog({ host: resolvedHost, apiKey: envApiKey });
+      return { client, host: resolvedHost };
+    }
+
     throw new UserError(
       `Space "${resolvedHost}" not found. Run \`bee auth login\` to authenticate.`,
     );

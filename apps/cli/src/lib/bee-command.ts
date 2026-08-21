@@ -55,7 +55,14 @@ class BeeCommand extends Command {
     const fromOptions: [string, string][] = this.options
       .filter((opt) => opt.envVar)
       .map((opt) => [opt.envVar!, opt.description ?? ""]);
-    const vars = [...fromOptions, ...this.beeEnvVars];
+    const seen = new Set<string>();
+    const vars = [...fromOptions, ...this.beeEnvVars].filter(([name]) => {
+      if (seen.has(name)) {
+        return false;
+      }
+      seen.add(name);
+      return true;
+    });
     if (vars.length === 0) {
       return "";
     }
@@ -65,7 +72,10 @@ class BeeCommand extends Command {
   }
 }
 
-const ENV_AUTH: [string, string][] = [["BACKLOG_API_KEY", "Authenticate with an API key"]];
+const ENV_AUTH: [string, string][] = [
+  ["BACKLOG_API_KEY", "Authenticate with an API key"],
+  ["BACKLOG_SPACE", "Space hostname"],
+];
 const ENV_PROJECT: [string, string] = ["BACKLOG_PROJECT", "Default project ID or project key"];
 const ENV_REPO: [string, string] = ["BACKLOG_REPO", "Default repository name"];
 

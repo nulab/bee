@@ -7,7 +7,7 @@ import * as opt from "../../lib/common-options";
 const create = new BeeCommand("create")
   .summary("Create a wiki page")
   .description(`When input is piped, it is used as the body automatically.`)
-  .option("-p, --project <id>", "Project ID or project key")
+  .addOption(opt.projectOptional())
   .option("-n, --name <name>", "Wiki page name")
   .option("-b, --body <text>", "Wiki page content")
   .option("--mail-notify", "Send notification email")

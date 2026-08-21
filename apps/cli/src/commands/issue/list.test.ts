@@ -1,8 +1,11 @@
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
-const { mockClient, host } = setupCommandTest({ getIssues: vi.fn() });
+const { mockClient, host } = setupCommandTest({
+  getIssues: vi.fn(),
+  getProjects: vi.fn().mockResolvedValue([{ id: 100, projectKey: "ENVPROJ" }]),
+});
 
 vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
@@ -30,6 +33,21 @@ const sampleIssues = [
 ];
 
 describe("issue list", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("reads project from the BACKLOG_PROJECT environment variable", async () => {
+    vi.stubEnv("BACKLOG_PROJECT", "ENVPROJ");
+    mockClient.getIssues.mockResolvedValue(sampleIssues);
+
+    await parseCommand(() => import("./list"), []);
+
+    expect(mockClient.getIssues).toHaveBeenCalledWith(
+      expect.objectContaining({ projectId: [100] }),
+    );
+  });
+
   it("displays issue list in tabular format", async () => {
     mockClient.getIssues.mockResolvedValue(sampleIssues);
 

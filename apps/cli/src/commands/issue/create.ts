@@ -9,7 +9,6 @@ import {
 import { outputResult, parseArg, promptRequired, vFiniteNumber, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import * as v from "valibot";
-import { Option } from "commander";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -18,7 +17,7 @@ const create = new BeeCommand("create")
   .description(
     `Omitted required fields will be prompted interactively. Priority accepts a name: \`high\`, \`normal\`, or \`low\`.`,
   )
-  .addOption(new Option("-p, --project <id>", "Project ID or project key").env("BACKLOG_PROJECT"))
+  .addOption(opt.projectOptional())
   .option("-t, --title <text>", "Issue title")
   .option("-T, --type <id>", "Issue type ID")
   .option("-P, --priority <name>", "Priority")

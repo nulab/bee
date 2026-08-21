@@ -3,17 +3,6 @@ import consola from "consola";
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
-vi.mock("undici", () => {
-  const MockAgent = vi.fn();
-  MockAgent.prototype.compose = vi.fn(function (this: unknown) {
-    return this;
-  });
-  return {
-    Agent: MockAgent,
-    setGlobalDispatcher: vi.fn(),
-  };
-});
-
 const newHandler = () => ({
   onRequestStart: vi.fn(),
   onResponseStart: vi.fn(),
@@ -130,22 +119,5 @@ describe("createLoggingInterceptor", () => {
     wrappedDispatch(opts as never, newHandler() as never);
 
     expect(consola.debug).toHaveBeenCalledWith("→ GET /api/v2/issues?apiKey=***&projectId[]=1");
-  });
-});
-
-describe("installHttpLogger", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("calls setGlobalDispatcher with a composed agent", async () => {
-    const { Agent, setGlobalDispatcher } = await import("undici");
-    const { installHttpLogger } = await import("./http-logger");
-
-    installHttpLogger();
-
-    expect(Agent).toHaveBeenCalled();
-    expect(vi.mocked(Agent).prototype.compose).toHaveBeenCalled();
-    expect(setGlobalDispatcher).toHaveBeenCalled();
   });
 });

@@ -41,6 +41,14 @@ describe("BeeCommand", () => {
       expect(help).toContain("BACKLOG_PROJECT");
       expect(help).toContain("BACKLOG_API_KEY");
     });
+
+    it("lists an env var only once when declared on both an option and envVars", () => {
+      const cmd = new BeeCommand("test")
+        .addOption(new Option("-p, --project <id>", "Project ID").env("BACKLOG_PROJECT"))
+        .envVars([["BACKLOG_PROJECT", "Default project ID or project key"]]);
+      const [, envSection] = cmd.helpInformation().split("ENVIRONMENT VARIABLES");
+      expect(envSection.match(/BACKLOG_PROJECT/g)).toHaveLength(1);
+    });
   });
 
   describe("addCommands", () => {

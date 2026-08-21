@@ -19,7 +19,7 @@ bee auth login
 対話形式でスペースのホスト名（例: `xxx.backlog.com`）と API キーの入力を求められます。API キーは Backlog の **個人設定 > API** から発行できます。
 
 :::tip
-`BACKLOG_API_KEY` と `BACKLOG_SPACE` 環境変数を設定しておけば、`bee auth login` を実行しなくても認証済みの状態で bee を使えます。
+`BACKLOG_API_KEY` と `BACKLOG_SPACE` 環境変数を設定しておけば、`bee auth login` を実行しなくても認証済みの状態で bee を使えます。`~/.beerc` に該当スペースの設定がある場合はそちらの認証情報が優先されるため、認証情報をディスクに残したくない CI や sandbox 環境に向いています。
 :::
 
 ```sh
