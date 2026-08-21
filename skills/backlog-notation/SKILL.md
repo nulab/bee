@@ -1,6 +1,6 @@
 ---
 name: backlog-notation
-description: Syntax reference for Backlog notation (Backlog記法), one of the two text formatting rules a Nulab Backlog project can be set to — the other, and the default for new projects, is Markdown. Applies only to projects whose textFormattingRule is `backlog`; it is not a Backlog-wide standard and does not apply to Markdown projects. Covers headings, lists, tables, text styling, links, code blocks, and other formatting elements.
+description: Syntax reference for Backlog notation (Backlog記法). Use when writing or editing formatted text on Nulab Backlog — issue descriptions, comments, wiki pages, pull requests — in a project set to Backlog notation, when converting Markdown to Backlog notation, or when unsure which of the two rules a Backlog project uses (this skill shows how to check). Each Backlog project uses one of two text formatting rules: Markdown (the default for new projects) or Backlog notation — this is not a Backlog-wide standard. Do not apply it to projects set to Markdown, or to Markdown files outside Backlog. Covers headings, lists, tables, text styling, links, code blocks, and other formatting elements.
 ---
 
 # backlog-notation
@@ -11,13 +11,15 @@ Backlog notation (Backlog記法) syntax reference.
 
 Every Backlog project is set to one text formatting rule: **Markdown** (the default for new projects) or **Backlog notation**. This reference covers Backlog notation only. It is not a Backlog-wide standard, and it does not apply to Markdown projects — in those, write plain Markdown and ignore everything below.
 
-Check the target project's setting before formatting anything:
+Backlog renders text strictly by the project's rule: Backlog notation posted to a Markdown project (or vice versa) is not converted — it shows up as literal characters like `''bold''` or `**bold**`. So check the target project's setting before formatting anything:
 
 ```sh
 bee project view -p PROJECT_KEY --json textFormattingRule
 # {"textFormattingRule":"backlog"}   -> use this reference
 # {"textFormattingRule":"markdown"}  -> use Markdown instead
 ```
+
+If you cannot run bee (e.g. this skill is installed without it), fetch `/api/v2/projects/PROJECT_KEY` from the Backlog API and read `textFormattingRule`, or ask the user which rule the project uses.
 
 Backlog notation is **not Markdown** — never mix the two syntaxes in one text.
 
@@ -70,6 +72,38 @@ Separate cells with `|`. End a row with `h` for a header row. Prefix a cell with
 | `![alt](url)`       | `#image(url)`          |
 | `\|---\|` separator | `\|h` at end of row    |
 | N/A                 | `&color(red) { text }` |
+
+## Complete Example
+
+A realistic issue description combining the elements above:
+
+```
+* 障害報告: 画像アップロードが失敗する
+
+** 概要
+''2026-08-21 14:00'' 頃から、5MB 以上のファイルで失敗する。%%当初はネットワーク起因と推測%% → サーバ側の設定と判明。
+
+** 再現手順
++ 課題画面を開く
++ 5MB 以上の画像を添付する
++ &color(red) { エラー「upload failed」が表示される }
+
+** 環境
+|項目|値|h
+|~ブラウザ|Chrome 128|
+|~プラン|スタンダード|
+
+** 対応
+- [x] 原因調査
+- [ ] nginx の client_max_body_size を修正
+- [ ] BUG-101 の再発防止策に反映
+
+{code:shell}
+curl -F "file=@large.png" https://xxx.backlog.com/api/v2/...
+{/code}
+
+詳細は [[運用wiki>https://xxx.backlog.com/wiki/PROJ/ops]] を参照。
+```
 
 ## Gotchas
 
