@@ -15,7 +15,7 @@ const api = new BeeCommand("api")
   .description(
     `The endpoint is a Backlog API path (e.g. \`users/myself\`). A leading \`/api/v2/\` prefix is stripped automatically.
 
-\`-f\` infers types (number, boolean, string); \`-F\` always sends strings. Repeated keys become arrays. Append \`[]\` for a single-element array (e.g. \`-f projectId[]=12345\`).
+\`-f\` infers types (number, boolean, string); \`-F\` always sends strings. A value is only inferred as a number when the number prints back identically, so \`1.0\`, \`0042\` and \`0x10\` stay strings. Repeated keys become arrays. Append \`[]\` for a single-element array (e.g. \`-f projectId[]=12345\`).
 
 If a \`-f\` value starts with \`@\`, the rest of the value is interpreted as a filename to read the value from. Pass \`-\` to read from standard input (e.g. \`-f 'key=@-'\`). File and stdin content is always sent as a string, without type inference.
 
@@ -178,6 +178,14 @@ const buildParams = async (fields: string[], rawFields: string[]): Promise<Param
 
 /**
  * Infer type from a string value.
+ *
+ * A value is only treated as a number when it survives the round trip through
+ * one — `String(Number(value)) === value`. Everything `Number()` accepts is a
+ * wider set than the spellings it can reproduce, and the difference is sent
+ * over the wire: `1.0` became `1`, `0042` became `42`, `0x10` became `16`, and
+ * an id past 2^53 lost digits, all without an error. Since the API takes
+ * form-encoded params, an inferred number is stringified again anyway, so
+ * declining to infer here costs nothing and keeps the value intact.
  */
 const inferType = (value: string): ParamValue => {
   if (value === "true") {
@@ -188,7 +196,7 @@ const inferType = (value: string): ParamValue => {
   }
   if (value !== "") {
     const result = v.safeParse(vFiniteNumber, value);
-    if (result.success) {
+    if (result.success && String(result.output) === value) {
       return result.output;
     }
   }
