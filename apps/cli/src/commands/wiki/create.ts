@@ -1,13 +1,14 @@
 import { getClient, resolveProjectIds, wikiUrl } from "@repo/backlog-utils";
 import { outputResult, promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
+import { Option } from "commander";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
 const create = new BeeCommand("create")
   .summary("Create a wiki page")
   .description(`When input is piped, it is used as the body automatically.`)
-  .option("-p, --project <id>", "Project ID or project key")
+  .addOption(new Option("-p, --project <id>", "Project ID or project key").env("BACKLOG_PROJECT"))
   .option("-n, --name <name>", "Wiki page name")
   .option("-b, --body <text>", "Wiki page content")
   .option("--mail-notify", "Send notification email")
