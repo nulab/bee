@@ -17,7 +17,7 @@ const api = new BeeCommand("api")
 
 \`-f\` infers types (number, boolean, string); \`-F\` always sends strings. Repeated keys become arrays. Append \`[]\` for a single-element array (e.g. \`-f projectId[]=12345\`).
 
-The \`-f\` flag has magic type conversion based on the format of the value: if the value starts with \`@\`, the rest of the value is interpreted as a filename to read the value from. Pass \`-\` to read from standard input (e.g. \`-f 'key=@-'\`).
+If a \`-f\` value starts with \`@\`, the rest of the value is interpreted as a filename to read the value from. Pass \`-\` to read from standard input (e.g. \`-f 'key=@-'\`). File and stdin content is always sent as a string, without type inference.
 
 For GET, fields are query parameters. For POST/PUT/PATCH/DELETE, fields are the request body.`,
   )
@@ -99,20 +99,13 @@ const normalizeEndpoint = (endpoint: string): string => {
 };
 
 /**
- * Resolve a field value that may reference a file or stdin.
- *
- * Following the gh CLI convention for the magic `-f`/`--field` flag:
- * - `@path` reads the file at `path`
- * - `@-` reads from stdin (raw, without trimming)
- * - anything else is returned as-is
+ * Read a field value from a file (`@path`) or stdin (`@-`) reference.
+ * The content is sent as-is: no trimming, and no type inference — gh's
+ * magicFieldValue does the same. Inferring here would coerce content that
+ * only looks numeric: a file holding just a newline became `0`, because
+ * Number("\n") is 0.
  */
-const resolveFieldValue = async (value: string): Promise<string> => {
-  if (!value.startsWith("@")) {
-    return value;
-  }
-
-  const ref = value.slice(1);
-
+const readFieldValue = async (ref: string): Promise<string> => {
   if (ref === "-") {
     return text(process.stdin);
   }
@@ -139,8 +132,8 @@ const resolveFieldValue = async (value: string): Promise<string> => {
 
 /**
  * Build params object from --field and --raw-field values.
- * --field infers types and supports @file references (like gh's -F).
- * --raw-field always uses literal strings (like gh's -f).
+ * --field infers types (number, boolean, string) and supports @file references.
+ * --raw-field always uses literal strings.
  * When the same key appears multiple times, values are collected into an array.
  */
 const buildParams = async (fields: string[], rawFields: string[]): Promise<Params> => {
@@ -166,8 +159,10 @@ const buildParams = async (fields: string[], rawFields: string[]): Promise<Param
       throw new UserError(`Invalid field format: "${pair}". Expected key=value.`);
     }
     const rawValue = pair.slice(eqIndex + 1);
-    const resolved = await resolveFieldValue(rawValue);
-    addParam(pair.slice(0, eqIndex), inferType(resolved));
+    const value = rawValue.startsWith("@")
+      ? await readFieldValue(rawValue.slice(1))
+      : inferType(rawValue);
+    addParam(pair.slice(0, eqIndex), value);
   }
 
   for (const pair of rawFields) {
