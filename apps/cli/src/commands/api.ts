@@ -126,7 +126,7 @@ const resolveFieldValue = async (value: string): Promise<string> => {
   try {
     return await readFile(ref, "utf8");
   } catch (error) {
-    const code = (error as NodeJS.ErrnoException).code;
+    const { code } = error as NodeJS.ErrnoException;
     if (code === "ENOENT") {
       throw new UserError(`File not found: ${ref}`);
     }
