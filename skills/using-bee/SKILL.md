@@ -78,6 +78,19 @@ bee api issues -f 'projectId[]=12345' -f statusId=1 -f statusId=2
 bee api issues -X POST -f projectId=12345 -f summary="New issue" -f issueTypeId=1 -f priorityId=3
 ```
 
+`-f` (typed) and `-F` (raw string) follow the same convention as `gh api`:
+
+| Flag | Types                          | `@file` support                      | Use case                                           |
+| ---- | ------------------------------ | ------------------------------------ | -------------------------------------------------- |
+| `-f` | Infers number, boolean, string | `@path` reads file, `@-` reads stdin | Typed values or file/stdin content                 |
+| `-F` | Always string                  | No (literal)                         | Literal strings including values starting with `@` |
+
+```sh
+bee api issues/KEY -X PATCH -f 'description=@desc.md'          # read from file
+echo 'content' | bee api issues/KEY/comments -X POST -f 'body=@-'  # read from stdin
+bee api issues -X POST -F 'email=@user'                        # literal "@user"
+```
+
 **Pagination** — Commands that accept `--count` return **at most 20 items by default** (not all items). Always check whether the result count equals the limit before assuming you have everything. Use `--count` to change the page size and `--offset` (or `--min-id` / `--max-id`) to fetch subsequent pages.
 
 **`bee browse` for opening pages** — Open Backlog pages in the browser:
