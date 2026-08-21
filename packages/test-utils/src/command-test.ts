@@ -1,11 +1,17 @@
 import { type Mock, vi } from "vitest";
 
-type MockClientMethods = Record<string, Mock>;
+// Since Vitest 4.1, a bare `vi.fn()` is typed `Mock<Procedure | Constructable>`,
+// which has no call signature and is not assignable to `Mock`. Inputs accept
+// that shape as-is; the returned client narrows to a callable Mock so tests
+// can invoke and configure client methods directly.
+type MockClientMethods = Record<string, ReturnType<typeof vi.fn>>;
+
+type CallableMock = Mock<(...args: unknown[]) => unknown>;
 
 type CommandTestContext = {
-  mockClient: MockClientMethods & {
-    getMyself: Mock;
-    getProjects: Mock;
+  mockClient: Record<string, CallableMock> & {
+    getMyself: CallableMock;
+    getProjects: CallableMock;
   };
   host: string;
 };
@@ -35,7 +41,7 @@ const setupCommandTest = (clientMethods: MockClientMethods): CommandTestContext 
     getMyself: defaultMyself,
     getProjects: defaultProjects,
     ...clientMethods,
-  };
+  } as CommandTestContext["mockClient"];
 
   return { mockClient, host: MOCK_HOST };
 };

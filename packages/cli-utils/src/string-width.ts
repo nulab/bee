@@ -26,4 +26,5 @@ const widthTruncate = (str: string, maxWidth: number): string => {
   return `${result}…`;
 };
 
-export { stringWidth, widthPadEnd, widthTruncate };
+export { default as stringWidth } from "string-width";
+export { widthPadEnd, widthTruncate };

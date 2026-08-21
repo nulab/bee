@@ -25,13 +25,5 @@
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
-  "packageManager": "pnpm@10.30.3",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "lefthook",
-      "sharp",
-      "turbo"
-    ]
-  }
+  "packageManager": "pnpm@10.30.3"
 }

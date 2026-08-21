@@ -1,11 +1,12 @@
 import { readFile, readdir } from "node:fs/promises";
 import { basename, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { createJiti } from "jiti";
 import { type Command, type Option } from "commander";
 
-const __dirname = fileURLToPath(new URL(".", import.meta.url));
-const CLI_COMMANDS_DIR = resolve(__dirname, "../../../cli/src/commands");
+// Resolved from cwd (the apps/docs package root when run via astro dev/build),
+// not import.meta.url: Astro bundles this module into dist/.prerender/chunks
+// during prerendering, so file-relative paths break at build time.
+const CLI_COMMANDS_DIR = resolve(process.cwd(), "../cli/src/commands");
 
 type CommandEntry = {
   id: string;

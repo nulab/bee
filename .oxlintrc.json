@@ -28,6 +28,13 @@
     "vars-on-top": "off",
     "init-declarations": "off",
     "no-inline-comments": "off",
+    "one-var": "off",
+    "prefer-named-capture-group": "off",
+    "no-underscore-dangle": "off",
+    // Tests mock constructors with `vi.fn(function () {...})`; arrows are not constructible
+    "prefer-arrow-callback": "off",
+    // Nested matchers (expect.arrayContaining) and valibot schemas exceed the limit by design
+    "unicorn/max-nested-calls": "off",
     // CLI tool uses Node.js modules (prefer-node-protocol handles the node: prefix)
     "import/no-nodejs-modules": "off",
 

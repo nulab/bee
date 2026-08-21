@@ -1,6 +1,7 @@
 export { formatBacklogError, handleBacklogApiError, isBacklogErrorResponse } from "./api-error";
 export type { BacklogErrorResponse } from "./api-error";
 export { ACTIVITY_LABELS } from "./activity-labels";
+export { getActivitySummary } from "./activity-summary";
 export {
   IssueStatusId,
   PRIORITY_NAMES,
