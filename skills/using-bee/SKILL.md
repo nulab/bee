@@ -82,8 +82,10 @@ bee api issues -X POST -f projectId=12345 -f summary="New issue" -f issueTypeId=
 
 | Flag | Types                          | `@file` support                      | Use case                                           |
 | ---- | ------------------------------ | ------------------------------------ | -------------------------------------------------- |
-| `-f` | Infers number, boolean, string | `@path` reads file, `@-` reads stdin | Typed values or file/stdin content                 |
+| `-f` | Infers number, boolean, string | `@path` reads file, `@-` reads stdin | Typed values, or content read from a file / stdin  |
 | `-F` | Always string                  | No (literal)                         | Literal strings including values starting with `@` |
+
+File and stdin content is always sent as a string, as-is — no type inference and no trimming (same as `gh api`).
 
 ```sh
 bee api issues/KEY -X PATCH -f 'description=@desc.md'          # read from file

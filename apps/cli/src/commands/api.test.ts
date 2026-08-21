@@ -120,7 +120,7 @@ describe("api", () => {
     writeSpy.mockRestore();
   });
 
-  it("reads -f value from file with @path (like gh -F)", async () => {
+  it("reads -f value from the file named after @", async () => {
     vi.mocked(readFile).mockResolvedValue("line1\nline2\nline3");
     mockClient.patch.mockResolvedValue({ id: 1 });
 
@@ -138,7 +138,7 @@ describe("api", () => {
     writeSpy.mockRestore();
   });
 
-  it("applies type inference to file content in -f", async () => {
+  it("sends numeric file content as a string, not a number", async () => {
     vi.mocked(readFile).mockResolvedValue("42");
     mockClient.get.mockResolvedValue({});
 
@@ -146,7 +146,45 @@ describe("api", () => {
 
     await parseCommand(() => import("./api"), ["/issues", "-f", "count=@/tmp/num.txt"]);
 
-    expect(mockClient.get).toHaveBeenCalledWith("/issues", { count: 42 });
+    expect(mockClient.get).toHaveBeenCalledWith("/issues", { count: "42" });
+    writeSpy.mockRestore();
+  });
+
+  it("keeps a whitespace-only file as whitespace instead of 0", async () => {
+    vi.mocked(readFile).mockResolvedValue("\n");
+    mockClient.patch.mockResolvedValue({ id: 1 });
+
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await parseCommand(
+      () => import("./api"),
+      ["/issues/TEST-1", "-X", "PATCH", "-f", "description=@/tmp/blank.txt"],
+    );
+
+    expect(mockClient.patch).toHaveBeenCalledWith("/issues/TEST-1", { description: "\n" });
+    writeSpy.mockRestore();
+  });
+
+  it("sends file content that reads as a boolean as a string", async () => {
+    vi.mocked(readFile).mockResolvedValue("true");
+    mockClient.get.mockResolvedValue({});
+
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await parseCommand(() => import("./api"), ["/issues", "-f", "flag=@/tmp/bool.txt"]);
+
+    expect(mockClient.get).toHaveBeenCalledWith("/issues", { flag: "true" });
+    writeSpy.mockRestore();
+  });
+
+  it("still infers types for values given inline", async () => {
+    mockClient.get.mockResolvedValue({});
+
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await parseCommand(() => import("./api"), ["/issues", "-f", "count=42", "-f", "archived=true"]);
+
+    expect(mockClient.get).toHaveBeenCalledWith("/issues", { count: 42, archived: true });
     writeSpy.mockRestore();
   });
 
