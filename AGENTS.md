@@ -75,6 +75,8 @@ AI エージェント向けの Skill 定義を格納するディレクトリ。
 | `using-bee`        | bee CLI の使い方（コマンド、フラグ、パターン） |
 | `backlog-notation` | Backlog 記法（Backlog記法）の構文リファレンス  |
 
+`backlog-notation` は `disable-model-invocation: true` を指定しており、`/backlog-notation` で明示的に呼び出したときだけ適用される（Markdown を使う Backlog プロジェクトで誤ってトリガーされるのを防ぐため）。
+
 #### Definition lists
 
 The docs site supports Markdown definition list syntax via `remark-definition-list`. Use this instead of raw `<dl>`/`<dt>`/`<dd>` HTML:

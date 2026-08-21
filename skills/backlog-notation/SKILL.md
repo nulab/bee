@@ -1,6 +1,7 @@
 ---
 name: backlog-notation
 description: Syntax reference for Backlog notation (Backlog記法), the native markup syntax for Nulab Backlog. Covers headings, lists, tables, text styling, links, code blocks, and other formatting elements.
+disable-model-invocation: true
 ---
 
 # backlog-notation
