@@ -1,6 +1,6 @@
 import { promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
 const { mockClient, host } = setupCommandTest({
@@ -20,6 +20,21 @@ vi.mock("@repo/cli-utils", async (importOriginal) => ({
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("wiki create", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("reads project from the BACKLOG_PROJECT environment variable", async () => {
+    vi.stubEnv("BACKLOG_PROJECT", "TEST");
+    mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);
+    mockClient.postWiki.mockResolvedValue({ id: 3, name: "My Page" });
+
+    await parseCommand(() => import("./create"), ["-n", "My Page", "-b", "Hello"]);
+
+    expect(promptRequired).toHaveBeenCalledWith("Project:", "TEST");
+    expect(mockClient.postWiki).toHaveBeenCalledWith(expect.objectContaining({ projectId: 100 }));
+  });
+
   it("creates a wiki page with provided arguments", async () => {
     vi.mocked(promptRequired).mockResolvedValueOnce("TEST").mockResolvedValueOnce("My Page");
     mockClient.getProjects.mockResolvedValue([{ id: 100, projectKey: "TEST" }]);

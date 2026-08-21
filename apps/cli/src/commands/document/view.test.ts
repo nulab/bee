@@ -1,6 +1,6 @@
 import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { itOutputsJson, parseCommand } from "@repo/test-utils";
 
 const mockClient = vi.hoisted(() => ({
@@ -36,6 +36,10 @@ const sampleDocument = {
 };
 
 describe("document view", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("displays document details", async () => {
     mockClient.getDocument.mockResolvedValue(sampleDocument);
 
@@ -74,6 +78,18 @@ describe("document view", () => {
       consola,
     );
     expect(mockClient.getDocument).not.toHaveBeenCalled();
+  });
+
+  it("reads project from the BACKLOG_PROJECT environment variable for --web", async () => {
+    vi.stubEnv("BACKLOG_PROJECT", "ENVPROJ");
+
+    await parseCommand(() => import("./view"), ["doc-1", "--web"]);
+
+    expect(openOrPrintUrl).toHaveBeenCalledWith(
+      "https://example.backlog.com/document/ENVPROJ/doc-1",
+      false,
+      consola,
+    );
   });
 
   it(
