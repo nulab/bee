@@ -168,9 +168,7 @@ export const commandUsage: CommandUsage = {
 export const myCommand = withUsage(
   defineCommand({
     meta: { name: "bar", description: "Short one-liner" },
-    args: {
-      /* ... */
-    },
+    args: {/* ... */},
     async run({ args }) {
       /* ... */
     },

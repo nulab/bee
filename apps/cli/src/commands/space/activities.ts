@@ -1,4 +1,4 @@
-import { ACTIVITY_LABELS, getClient } from "@repo/backlog-utils";
+import { ACTIVITY_LABELS, getActivitySummary, getClient } from "@repo/backlog-utils";
 import {
   type Row,
   formatDate,
@@ -12,33 +12,6 @@ import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { collectNum } from "../../lib/common-options";
-
-const getActivitySummary = (activity: {
-  type: number;
-  content: {
-    summary?: string | null;
-    key_id?: number | null;
-    deletedStatus?: { name?: string | null } | null;
-    link?: { key_id?: number; title?: string }[] | null;
-  };
-}): string => {
-  if (activity.type === 34 && activity.content.deletedStatus?.name) {
-    return activity.content.deletedStatus.name;
-  }
-  if (activity.content.summary) {
-    return activity.content.summary;
-  }
-  if (activity.content.link && activity.content.link.length > 0) {
-    return activity.content.link
-      .map((item) => (item.key_id ? `#${item.key_id}` : (item.title ?? "")))
-      .filter(Boolean)
-      .join(", ");
-  }
-  if (activity.content.key_id) {
-    return `#${activity.content.key_id}`;
-  }
-  return "";
-};
 
 const activities = new BeeCommand("activities")
   .summary("List space activities")
