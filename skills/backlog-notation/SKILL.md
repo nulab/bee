@@ -1,7 +1,6 @@
 ---
 name: backlog-notation
 description: Syntax reference for Backlog notation (Backlog記法), one of the two text formatting rules a Nulab Backlog project can be set to — the other, and the default for new projects, is Markdown. Applies only to projects whose textFormattingRule is `backlog`; it is not a Backlog-wide standard and does not apply to Markdown projects. Covers headings, lists, tables, text styling, links, code blocks, and other formatting elements.
-disable-model-invocation: true
 ---
 
 # backlog-notation

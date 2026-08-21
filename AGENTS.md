@@ -75,7 +75,7 @@ AI エージェント向けの Skill 定義を格納するディレクトリ。
 | `using-bee`        | bee CLI の使い方（コマンド、フラグ、パターン） |
 | `backlog-notation` | Backlog 記法（Backlog記法）の構文リファレンス  |
 
-`backlog-notation` は `disable-model-invocation: true` を指定しており、`/backlog-notation` で明示的に呼び出したときだけ適用される（Markdown を使う Backlog プロジェクトで誤ってトリガーされるのを防ぐため）。
+Backlog はプロジェクトごとに Markdown（新規プロジェクトの既定）か Backlog 記法かを選択する。`backlog-notation` が Markdown のプロジェクトで誤ってトリガーされないよう、description と本文冒頭で「Backlog 記法に設定されたプロジェクト限定」であることを明示している — 文言を変更するときはこの前提を崩さないこと。フロントマターは Agent Skills 標準のフィールド（`name` / `description`）だけに保ち、Claude Code 固有の拡張フィールドは使わない（Claude Code 以外のエージェントや claude.ai へのアップロードでも使えるようにするため）。
 
 #### Definition lists
 
