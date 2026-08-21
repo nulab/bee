@@ -188,6 +188,39 @@ describe("api", () => {
     writeSpy.mockRestore();
   });
 
+  it("infers negative and fractional numbers", async () => {
+    mockClient.get.mockResolvedValue({});
+
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await parseCommand(() => import("./api"), ["/issues", "-f", "a=-7", "-f", "b=0.5"]);
+
+    expect(mockClient.get).toHaveBeenCalledWith("/issues", { a: -7, b: 0.5 });
+    writeSpy.mockRestore();
+  });
+
+  it.each([
+    ["1.0", "a version number keeps its minor part"],
+    ["0042", "a leading zero is not dropped"],
+    ["0120117117", "a phone number keeps its leading zero"],
+    ["+5", "an explicit plus sign is preserved"],
+    ["-0", "negative zero is not flattened"],
+    [".5", "a bare decimal point is preserved"],
+    ["5.", "a trailing decimal point is preserved"],
+    ["0x10", "hex notation is not converted to decimal"],
+    ["1e3", "exponent notation is not expanded"],
+    ["12345678901234567890", "an id past 2^53 keeps every digit"],
+  ])("keeps %j as a string so %s", async (value) => {
+    mockClient.post.mockResolvedValue({ id: 1 });
+
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await parseCommand(() => import("./api"), ["/issues", "-X", "POST", "-f", `summary=${value}`]);
+
+    expect(mockClient.post).toHaveBeenCalledWith("/issues", { summary: value });
+    writeSpy.mockRestore();
+  });
+
   it("sends -F value with @ literally (no file reference)", async () => {
     mockClient.post.mockResolvedValue({ id: 1 });
 

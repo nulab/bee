@@ -87,6 +87,8 @@ bee api issues -X POST -f projectId=12345 -f summary="New issue" -f issueTypeId=
 
 File and stdin content is always sent as a string, as-is — no type inference and no trimming (same as `gh api`).
 
+`-f` only infers a number when the value prints back identically, so `1.0`, `0042`, `0x10`, `1e3` and ids past 2^53 stay strings. Use `-F` when you want a value left alone regardless.
+
 ```sh
 bee api issues/KEY -X PATCH -f 'description=@desc.md'          # read from file
 echo 'content' | bee api issues/KEY/comments -X POST -f 'body=@-'  # read from stdin
