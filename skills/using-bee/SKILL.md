@@ -70,6 +70,14 @@ bee issue list -p PROJECT --json id,summary,status   # specific fields
 bee issue list -p PROJECT -a @me
 ```
 
+**Text formatting rule** — Backlog projects render text as either Markdown (the default for new projects) or Backlog notation (Backlog記法), per project. The wrong syntax is not converted — it shows up as literal characters. When writing issue descriptions, comments, wiki pages, or PR descriptions, follow the rule the user or project instructions (AGENTS.md, CLAUDE.md) state — no need to verify a stated rule. Only when it is not stated anywhere, check it once before posting:
+
+```sh
+bee project view -p PROJECT_KEY --json textFormattingRule
+```
+
+If it is `markdown`, write Markdown. If it is `backlog`, follow the `backlog-notation` skill for the syntax (or fetch https://raw.githubusercontent.com/nulab/bee/main/skills/backlog-notation/SKILL.md if the skill is not installed).
+
 **`bee api` for uncovered endpoints** — Access any Backlog API endpoint directly:
 
 ```sh

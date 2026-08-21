@@ -70,8 +70,13 @@ bee を AI エージェントの Skill として登録する方法です。
    npx skills add nulab/bee --skill backlog-notation
    ```
 
-   Backlog ではプロジェクトごとに Markdown か Backlog 記法を選択できるため、`backlog-notation` はインストールしただけでは自動的に適用されません。
-   使いたいときにプロンプトで `/backlog-notation PROJECT-123 の説明文をリファクタリングの内容に合わせて更新して` のように明示的に指示するか、Backlog 記法を常に使うプロジェクトであれば AGENTS.md に以下のように記載しておくと毎回指示する必要がなくなります。
+   Backlog ではプロジェクトごとに Markdown（新規プロジェクトの既定）か Backlog 記法かを選択できます。`backlog-notation` はスキル自身に「Backlog 記法に設定されたプロジェクトにだけ適用される」ことを明記してあるため、Markdown のプロジェクトでは適用されません。プロジェクトの設定は次のコマンドで確認できます。
+
+   ```sh
+   bee project view -p PROJECT_KEY --json textFormattingRule
+   ```
+
+   使いたいときはプロンプトで `/backlog-notation PROJECT-123 の説明文をリファクタリングの内容に合わせて更新して` のように明示的に指示するか、Backlog 記法を常に使うプロジェクトであれば AGENTS.md に以下のように記載しておくと毎回指示する必要がなくなります。
 
    ```markdown
    ## Backlog
