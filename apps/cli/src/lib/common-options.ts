@@ -10,6 +10,8 @@ const collectNum = (val: string, prev: number[]): number[] => [
 
 const project = () =>
   new RequiredOption("-p, --project <id>", "Project ID or project key").env("BACKLOG_PROJECT");
+const projectOptional = (description = "Project ID or project key") =>
+  new Option("-p, --project <id>", description).env("BACKLOG_PROJECT");
 const repo = () =>
   new RequiredOption("-R, --repo <name>", "Repository name or ID").env("BACKLOG_REPO");
 const count = () => new Option("-L, --count <n>", "Number of results (default: 20)");
@@ -50,6 +52,7 @@ export {
   collectNum,
   space,
   project,
+  projectOptional,
   repo,
   count,
   offset,
