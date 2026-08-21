@@ -97,19 +97,51 @@ describe("RcSpaceSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects invalid host domain", () => {
+  it("accepts a backlogtool.com host", () => {
     const result = v.safeParse(RcSpaceSchema, {
-      host: "example.invalid.com",
+      host: "example.backlogtool.com",
       auth: validAuth,
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
-  it("rejects host with uppercase letters", () => {
+  it.each(["backlog.example.internal", "backlog.example.co.jp"])(
+    "accepts the self-hosted domain %s",
+    (host) => {
+      const result = v.safeParse(RcSpaceSchema, { host, auth: validAuth });
+      expect(result.success).toBe(true);
+    },
+  );
+
+  it("normalizes an uppercase host to lowercase", () => {
     const result = v.safeParse(RcSpaceSchema, {
-      host: "Example.backlog.com",
+      host: "Example.Backlog.COM",
       auth: validAuth,
     });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.output.host).toBe("example.backlog.com");
+    }
+  });
+
+  // A host is interpolated into `https://${host}`, so anything that can shift the
+  // resulting origin would send the stored credentials to another server.
+  it.each([
+    ["userinfo that redirects the origin", "example.backlog.com@evil.com"],
+    ["a path that redirects the origin", "evil.com/#@example.backlog.com"],
+    ["a query that redirects the origin", "evil.com?x=.backlog.com"],
+    ["a scheme", "https://example.backlog.com"],
+    ["a trailing slash", "example.backlog.com/"],
+    ["a path prefix", "backlog.example.internal/backlog"],
+    ["a port", "example.backlog.com:8969"],
+    ["a space", "exa mple.backlog.com"],
+    ["no dot", "backlog"],
+    // Not attacks, but shapes a self-hosted user may reasonably try. They are
+    // unsupported today rather than deliberately forbidden.
+    ["an IP address", "192.168.1.1"],
+    ["a trailing dot", "example.backlog.com."],
+  ])("rejects a host with %s", (_description, host) => {
+    const result = v.safeParse(RcSpaceSchema, { host, auth: validAuth });
     expect(result.success).toBe(false);
   });
 
@@ -127,6 +159,18 @@ describe("RcSchema", () => {
       expect(result.output.spaces).toEqual([]);
       expect(result.output.aliases).toEqual({});
       expect(result.output.defaultSpace).toBeUndefined();
+    }
+  });
+
+  it("normalizes defaultSpace to lowercase so it matches the stored host", () => {
+    const result = v.safeParse(RcSchema, {
+      defaultSpace: "Example.Backlog.COM",
+      spaces: [{ host: "Example.Backlog.COM", auth: { method: "api-key", apiKey: "key" } }],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.output.defaultSpace).toBe("example.backlog.com");
+      expect(result.output.spaces[0]?.host).toBe("example.backlog.com");
     }
   });
 

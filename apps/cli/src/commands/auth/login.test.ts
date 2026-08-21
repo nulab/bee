@@ -32,13 +32,51 @@ vi.mock("@repo/cli-utils", async (importOriginal) => ({
   readStdin: vi.fn(),
 }));
 
-vi.mock("@repo/config", () => ({
+vi.mock("@repo/config", async (importOriginal) => ({
+  ...(await importOriginal()),
   updateConfig: vi.fn(),
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("auth login", () => {
+  describe("hostname", () => {
+    it("authenticates with the normalized hostname", async () => {
+      mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });
+      vi.mocked(promptRequired)
+        .mockResolvedValueOnce("Backlog.Example.INTERNAL")
+        .mockResolvedValueOnce("test-api-key");
+      vi.mocked(updateConfig).mockImplementation((updater) =>
+        updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
+      );
+
+      await parseCommand(() => import("./login"), ["--method", "api-key"]);
+
+      expect(Backlog).toHaveBeenCalledWith({
+        host: "backlog.example.internal",
+        apiKey: "test-api-key",
+      });
+      const result = vi.mocked(updateConfig).mock.results[0]?.value;
+      expect(result.spaces).toEqual([
+        {
+          host: "backlog.example.internal",
+          auth: { method: "api-key", apiKey: "test-api-key" },
+        },
+      ]);
+    });
+
+    it("rejects an unusable hostname before contacting the server", async () => {
+      vi.mocked(promptRequired).mockResolvedValueOnce("example.backlog.com@evil.com");
+
+      await expect(parseCommand(() => import("./login"), ["--method", "api-key"])).rejects.toThrow(
+        "is not a valid hostname",
+      );
+
+      expect(Backlog).not.toHaveBeenCalled();
+      expect(updateConfig).not.toHaveBeenCalled();
+    });
+  });
+
   describe("api-key", () => {
     it("authenticates new space with API key", async () => {
       mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });

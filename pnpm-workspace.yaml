@@ -30,5 +30,5 @@ catalog:
   typescript: 6.0.0-dev.20260308
   unbuild: ^3.5.0
   undici: ^7.22.0
-  valibot: ^1.2.0
+  valibot: ^1.4.2
   vitest: ^4.0.18

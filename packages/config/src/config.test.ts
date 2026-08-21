@@ -79,6 +79,21 @@ describe("writeConfig", () => {
 
     expect(mockChmodSync).toHaveBeenCalledWith(expect.stringContaining(".beerc"), 0o600);
   });
+
+  it("rejects an invalid host instead of persisting it", () => {
+    const config = {
+      ...sampleConfig,
+      spaces: [
+        {
+          host: "example.backlog.com@evil.com",
+          auth: { method: "api-key" as const, apiKey: "abc123" },
+        },
+      ],
+    };
+
+    expect(() => writeConfig(config)).toThrow("Configuration Error");
+    expect(mockWriteUser).not.toHaveBeenCalled();
+  });
 });
 
 describe("updateConfig", () => {

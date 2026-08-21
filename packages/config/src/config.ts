@@ -8,8 +8,7 @@ import { type Rc, RcSchema } from "./schema";
 
 const CONFIG_FILE_NAME = ".beerc";
 
-const loadConfig = (): Rc => {
-  const raw = readUser(CONFIG_FILE_NAME);
+const parseConfig = (raw: unknown): Rc => {
   const result = v.safeParse(RcSchema, raw);
 
   if (!result.success) {
@@ -20,11 +19,18 @@ const loadConfig = (): Rc => {
   return result.output;
 };
 
+const loadConfig = (): Rc => parseConfig(readUser(CONFIG_FILE_NAME));
+
 const configFilePath = (): string =>
   resolve(process.env.XDG_CONFIG_HOME || homedir(), CONFIG_FILE_NAME);
 
+/**
+ * Validates before writing rather than trusting the caller, so an invalid host
+ * cannot be persisted by a command that writes the rc file directly (such as
+ * `bee auth login`) only to break every later read.
+ */
 const writeConfig = (config: Rc): void => {
-  writeUser(config, CONFIG_FILE_NAME);
+  writeUser(parseConfig(config), CONFIG_FILE_NAME);
   chmodSync(configFilePath(), 0o600);
 };
 
