@@ -8,7 +8,6 @@ import {
 import { type Row, outputResult, parseArg, printTable, vInteger } from "@repo/cli-utils";
 import consola from "consola";
 import * as v from "valibot";
-import { Option } from "commander";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { collect, collectNum } from "../../lib/common-options";
@@ -27,12 +26,7 @@ const list = new BeeCommand("list")
   .description(
     `By default, sorted by last updated date in descending order. Multiple project keys can be comma-separated.`,
   )
-  .addOption(
-    new Option(
-      "-p, --project <id>",
-      "Project ID or project key (comma-separated for multiple)",
-    ).env("BACKLOG_PROJECT"),
-  )
+  .addOption(opt.projectOptional("Project ID or project key (comma-separated for multiple)"))
   .addOption(opt.assigneeList())
   .option("-S, --status <id>", "Status ID (repeatable)", collectNum, [] satisfies number[])
   .option("-P, --priority <name>", "Priority name (repeatable)", collect, [] satisfies string[])

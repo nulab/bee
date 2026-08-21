@@ -7,7 +7,6 @@ import {
 } from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
-import { Option } from "commander";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 import { collect, collectNum } from "../../lib/common-options";
@@ -24,12 +23,7 @@ const resolvePriorityIds = (priorities: string[]): number[] =>
 const count = new BeeCommand("count")
   .summary("Count issues")
   .description(`Accepts the same filter flags as \`bee issue list\`.`)
-  .addOption(
-    new Option(
-      "-p, --project <id>",
-      "Project ID or project key (comma-separated for multiple)",
-    ).env("BACKLOG_PROJECT"),
-  )
+  .addOption(opt.projectOptional("Project ID or project key (comma-separated for multiple)"))
   .addOption(opt.assigneeList())
   .option("-S, --status <id>", "Status ID (repeatable)", collectNum, [] satisfies number[])
   .option("-P, --priority <name>", "Priority name (repeatable)", collect, [] satisfies string[])

@@ -20,7 +20,7 @@ const browse = new BeeCommand("browse")
 Accepts an issue key (\`PROJECT-123\`), bare number (\`123\`, project inferred from Git remote), file path (\`src/main.ts\`), or path with line (\`src/main.ts:42\`). Paths ending with \`/\` open the directory tree. Use \`--project\` with section flags (e.g. \`--issues\`, \`--board\`) for project pages.`,
   )
   .argument("[target]", "Issue key, issue number, file path, or project key")
-  .addOption(opt.project().makeOptionMandatory(false).default(undefined))
+  .addOption(opt.projectOptional())
   .option("-b, --branch <name>", "View file at a specific branch")
   .option("-c, --commit", "View file at the latest commit")
   .addOption(opt.noBrowser())
