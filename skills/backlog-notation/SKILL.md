@@ -11,15 +11,18 @@ Backlog notation (Backlog記法) syntax reference.
 
 Every Backlog project is set to one text formatting rule: **Markdown** (the default for new projects) or **Backlog notation**. This reference covers Backlog notation only. It is not a Backlog-wide standard, and it does not apply to Markdown projects — in those, write plain Markdown and ignore everything below.
 
-Backlog renders text strictly by the project's rule: Backlog notation posted to a Markdown project (or vice versa) is not converted — it shows up as literal characters like `''bold''` or `**bold**`. So check the target project's setting before formatting anything:
+Backlog renders text strictly by the project's rule: Backlog notation posted to a Markdown project (or vice versa) is not converted — it shows up as literal characters like `''bold''` or `**bold**`. Determine the rule like this:
 
-```sh
-bee project view -p PROJECT_KEY --json textFormattingRule
-# {"textFormattingRule":"backlog"}   -> use this reference
-# {"textFormattingRule":"markdown"}  -> use Markdown instead
-```
+1. **The user or project instructions (AGENTS.md, CLAUDE.md) already state the rule** — the usual case. Follow what is stated; do not spend an API call re-verifying it.
+2. **The rule is not stated anywhere** — check it once before posting:
 
-If you cannot run bee (e.g. this skill is installed without it), fetch `/api/v2/projects/PROJECT_KEY` from the Backlog API and read `textFormattingRule`, or ask the user which rule the project uses.
+   ```sh
+   bee project view -p PROJECT_KEY --json textFormattingRule
+   # {"textFormattingRule":"backlog"}   -> use this reference
+   # {"textFormattingRule":"markdown"}  -> use Markdown instead
+   ```
+
+   If you cannot run bee (e.g. this skill is installed without it), fetch `/api/v2/projects/PROJECT_KEY` from the Backlog API and read `textFormattingRule`, or ask the user.
 
 Backlog notation is **not Markdown** — never mix the two syntaxes in one text.
 
