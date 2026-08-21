@@ -1,12 +1,26 @@
 ---
 name: backlog-notation
-description: Syntax reference for Backlog notation (Backlog記法), the native markup syntax for Nulab Backlog. Covers headings, lists, tables, text styling, links, code blocks, and other formatting elements.
+description: Syntax reference for Backlog notation (Backlog記法), one of the two text formatting rules a Nulab Backlog project can be set to — the other, and the default for new projects, is Markdown. Applies only to projects whose textFormattingRule is `backlog`; it is not a Backlog-wide standard and does not apply to Markdown projects. Covers headings, lists, tables, text styling, links, code blocks, and other formatting elements.
 disable-model-invocation: true
 ---
 
 # backlog-notation
 
-Backlog notation (Backlog記法) syntax reference. This is **not Markdown** — do not mix the two syntaxes.
+Backlog notation (Backlog記法) syntax reference.
+
+## When this applies
+
+Every Backlog project is set to one text formatting rule: **Markdown** (the default for new projects) or **Backlog notation**. This reference covers Backlog notation only. It is not a Backlog-wide standard, and it does not apply to Markdown projects — in those, write plain Markdown and ignore everything below.
+
+Check the target project's setting before formatting anything:
+
+```sh
+bee project view -p PROJECT_KEY --json textFormattingRule
+# {"textFormattingRule":"backlog"}   -> use this reference
+# {"textFormattingRule":"markdown"}  -> use Markdown instead
+```
+
+Backlog notation is **not Markdown** — never mix the two syntaxes in one text.
 
 ## Quick Reference
 
