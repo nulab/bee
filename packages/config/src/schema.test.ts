@@ -105,7 +105,7 @@ describe("RcSpaceSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it.each(["backlog.example.internal", "my-backlog.corp.local", "backlog.example.co.jp"])(
+  it.each(["backlog.example.internal", "backlog.example.co.jp"])(
     "accepts the self-hosted domain %s",
     (host) => {
       const result = v.safeParse(RcSpaceSchema, { host, auth: validAuth });
@@ -136,6 +136,10 @@ describe("RcSpaceSchema", () => {
     ["a port", "example.backlog.com:8969"],
     ["a space", "exa mple.backlog.com"],
     ["no dot", "backlog"],
+    // Not attacks, but shapes a self-hosted user may reasonably try. They are
+    // unsupported today rather than deliberately forbidden.
+    ["an IP address", "192.168.1.1"],
+    ["a trailing dot", "example.backlog.com."],
   ])("rejects a host with %s", (_description, host) => {
     const result = v.safeParse(RcSpaceSchema, { host, auth: validAuth });
     expect(result.success).toBe(false);

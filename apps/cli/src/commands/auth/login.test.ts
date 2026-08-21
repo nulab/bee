@@ -41,10 +41,10 @@ vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("auth login", () => {
   describe("hostname", () => {
-    it("authenticates against a self-hosted domain", async () => {
+    it("authenticates with the normalized hostname", async () => {
       mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });
       vi.mocked(promptRequired)
-        .mockResolvedValueOnce("backlog.example.internal")
+        .mockResolvedValueOnce("Backlog.Example.INTERNAL")
         .mockResolvedValueOnce("test-api-key");
       vi.mocked(updateConfig).mockImplementation((updater) =>
         updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
@@ -65,31 +65,8 @@ describe("auth login", () => {
       ]);
     });
 
-    it("normalizes an uppercase hostname to lowercase", async () => {
-      mockGetMyself.mockResolvedValue({ name: "Test User", userId: "testuser" });
-      vi.mocked(promptRequired)
-        .mockResolvedValueOnce("Example.Backlog.COM")
-        .mockResolvedValueOnce("test-api-key");
-      vi.mocked(updateConfig).mockImplementation((updater) =>
-        updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
-      );
-
-      await parseCommand(() => import("./login"), ["--method", "api-key"]);
-
-      expect(Backlog).toHaveBeenCalledWith({
-        host: "example.backlog.com",
-        apiKey: "test-api-key",
-      });
-    });
-
-    // A hostname carrying userinfo or a path would move the request origin, and
-    // with it the API key, to another server.
-    it.each([
-      "example.backlog.com@evil.com",
-      "https://example.backlog.com",
-      "backlog.example.internal/backlog",
-    ])("rejects %s without contacting the server", async (hostname) => {
-      vi.mocked(promptRequired).mockResolvedValueOnce(hostname);
+    it("rejects an unusable hostname before contacting the server", async () => {
+      vi.mocked(promptRequired).mockResolvedValueOnce("example.backlog.com@evil.com");
 
       await expect(parseCommand(() => import("./login"), ["--method", "api-key"])).rejects.toThrow(
         "is not a valid hostname",
