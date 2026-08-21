@@ -1,11 +1,11 @@
 import consola from "consola";
-import { installHttpLogger } from "@repo/backlog-utils";
+import { installHttpDispatcher } from "@repo/backlog-utils";
 import { BeeCommand } from "./lib/bee-command";
 import { handleError } from "./lib/error";
 import pkg from "../package.json" with { type: "json" };
 
 consola.options.formatOptions.date = false;
-installHttpLogger();
+installHttpDispatcher();
 
 const program = new BeeCommand("bee").version(pkg.version).description(pkg.description ?? "");
 

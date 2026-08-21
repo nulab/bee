@@ -1,5 +1,5 @@
 import consola from "consola";
-import { Agent, type Dispatcher, setGlobalDispatcher } from "undici";
+import { type Dispatcher } from "undici";
 
 type Interceptor = (dispatch: Dispatcher["dispatch"]) => Dispatcher["dispatch"];
 
@@ -65,10 +65,4 @@ const createLoggingInterceptor = (): Interceptor => {
   };
 };
 
-/** Installs the logging interceptor as the global fetch dispatcher. */
-const installHttpLogger = (): void => {
-  const agent = new Agent().compose(createLoggingInterceptor());
-  setGlobalDispatcher(agent);
-};
-
-export { createLoggingInterceptor, installHttpLogger };
+export { createLoggingInterceptor };
