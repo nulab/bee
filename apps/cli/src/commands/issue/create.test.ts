@@ -1,6 +1,6 @@
 import { promptRequired } from "@repo/cli-utils";
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
 const { mockClient, host } = setupCommandTest({
@@ -19,6 +19,23 @@ vi.mock("@repo/cli-utils", async (importOriginal) => ({
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("issue create", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("reads project from the BACKLOG_PROJECT environment variable", async () => {
+    vi.stubEnv("BACKLOG_PROJECT", "PROJECT");
+    mockClient.postIssue.mockResolvedValue({ issueKey: "TEST-1", summary: "Fix bug" });
+
+    await parseCommand(
+      () => import("./create"),
+      ["--title", "Fix bug", "--type", "1", "--priority", "normal"],
+    );
+
+    expect(promptRequired).toHaveBeenCalledWith("Project:", "PROJECT");
+    expect(mockClient.postIssue).toHaveBeenCalledWith(expect.objectContaining({ projectId: 100 }));
+  });
+
   it("creates an issue with provided fields", async () => {
     vi.mocked(promptRequired)
       .mockResolvedValueOnce("100")

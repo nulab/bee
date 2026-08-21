@@ -1,5 +1,5 @@
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
 const { mockClient, host } = setupCommandTest({ getIssuesCount: vi.fn() });
@@ -13,6 +13,21 @@ vi.mock("@repo/backlog-utils", async (importOriginal) => ({
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("issue count", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("reads project from the BACKLOG_PROJECT environment variable", async () => {
+    vi.stubEnv("BACKLOG_PROJECT", "ENVPROJ");
+    mockClient.getIssuesCount.mockResolvedValue({ count: 7 });
+
+    await parseCommand(() => import("./count"), []);
+
+    expect(mockClient.getIssuesCount).toHaveBeenCalledWith(
+      expect.objectContaining({ projectId: ["ENVPROJ"] }),
+    );
+  });
+
   it("outputs issue count", async () => {
     mockClient.getIssuesCount.mockResolvedValue({ count: 42 });
 
