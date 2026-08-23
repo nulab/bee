@@ -20,9 +20,6 @@ overrides:
   picomatch@^2: ^2.3.2
   picomatch@^4: ^4.0.5
   smol-toml: ^1.6.1
-  # rollup-plugin-dts (via unbuild) uses the JS compiler API that typescript 7
-  # removed; pin its typescript to 6.x so `unbuild` can still emit .d.ts files.
-  rollup-plugin-dts>typescript: ^6.0.3
 
 catalog:
   "@astrojs/starlight": ^0.41.7
@@ -51,9 +48,7 @@ catalog:
   string-width: ^8.2.2
   tsx: ^4.23.12
   turbo: ^2.10.11
-  # typescript 7 (tsgo) drops the JS compiler API that rollup-plugin-dts
-  # (via unbuild) relies on: `ts.sys` is undefined and dts bundling crashes.
-  typescript: ^6.0.3
+  typescript: ^7.0.2
   unbuild: ^3.6.1
   undici: ^7.29.0
   valibot: ^1.4.2
