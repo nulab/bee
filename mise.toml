@@ -1,4 +1,8 @@
 [tools]
+# Development Node.js. `devEngines.runtime` in package.json is the source of
+# truth for the range the project supports (>=20.18) and pnpm enforces it on
+# install; mise cannot read that field, so this pins the single version
+# contributors get. Keep it inside the devEngines range.
 node = "24"
 
 [hooks]

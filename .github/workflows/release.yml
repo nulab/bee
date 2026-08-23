@@ -123,9 +123,12 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
+      # Only here for `registry-url`, which writes the .npmrc that `pnpm publish`
+      # needs for auth and provenance. The Node version is deliberately not
+      # pinned: mise-action runs after this and puts the mise.toml Node on PATH,
+      # so a `node-version` here would be shadowed anyway.
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: 24
           registry-url: https://registry.npmjs.org
 
       - uses: jdx/mise-action@c1ecc8f748cd28cdeabf76dab3cccde4ce692fe4 # v4.0.0.6.4.0.0
