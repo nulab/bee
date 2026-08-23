@@ -8,6 +8,22 @@ onlyBuiltDependencies:
   - sharp
   - turbo
 
+overrides:
+  postcss: ^8.5.26
+  nanoid@^3: ^3.3.18
+  js-yaml@^4: ^4.3.1
+  svgo: ^4.0.2
+  vite: ^8.2.2
+  esbuild@^0.27: ^0.28.2
+  qs: ^6.15.3
+  defu: ^6.1.7
+  picomatch@^2: ^2.3.2
+  picomatch@^4: ^4.0.5
+  smol-toml: ^1.6.1
+  # rollup-plugin-dts (via unbuild) uses the JS compiler API that typescript 7
+  # removed; pin its typescript to 6.x so `unbuild` can still emit .d.ts files.
+  rollup-plugin-dts>typescript: ^6.0.3
+
 catalog:
   "@astrojs/starlight": ^0.41.7
   "@tsconfig/node-lts": ^24.0.1
