@@ -2,11 +2,11 @@ packages:
   - "apps/*"
   - "packages/*"
 
-onlyBuiltDependencies:
-  - esbuild
-  - lefthook
-  - sharp
-  - turbo
+allowBuilds:
+  esbuild: true
+  lefthook: true
+  sharp: true
+  turbo: true
 
 overrides:
   postcss: ^8.5.26
