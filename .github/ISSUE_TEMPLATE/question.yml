@@ -1,0 +1,44 @@
+name: Question
+description: Ask how to do something with bee
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Issues are accepted in **English or Japanese** — please use whichever you prefer.
+        **英語・日本語のどちらでも**受け付けています。書きやすい方でご記入ください。
+
+        Please do not include API keys, OAuth tokens, or other credentials in this issue.
+        すべての出力から API キーや OAuth トークンなどの認証情報を取り除いてください。
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you start
+      options:
+        - label: I checked the [documentation site](https://nulab.github.io/bee) and the [command reference](https://nulab.github.io/bee/commands/).
+          required: true
+        - label: I searched [existing issues](https://github.com/nulab/bee/issues?q=is%3Aissue) and did not find an answer.
+          required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What are you trying to do, and where did you get stuck?
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you have tried
+      description: Commands you ran and what happened, with credentials removed.
+      render: shell
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: bee version
+      description: Output of `bee --version`.
+      placeholder: e.g. 0.1.0
+    validations:
+      required: false

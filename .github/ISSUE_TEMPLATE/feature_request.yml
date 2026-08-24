@@ -1,15 +1,54 @@
 name: Feature request
-description: Suggest a feature
+description: Suggest a new command, flag, or behavior
 labels: [enhancement]
 body:
   - type: markdown
     attributes:
       value: |
-        You can write in English or Japanese. / 英語または日本語で記述できます。
+        Issues are accepted in **English or Japanese** — please use whichever you prefer.
+        **英語・日本語のどちらでも**受け付けています。書きやすい方でご記入ください。
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you start
+      options:
+        - label: I searched [existing issues](https://github.com/nulab/bee/issues?q=is%3Aissue) and did not find a duplicate.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe the workflow that is difficult today, not the solution you have in mind.
+      placeholder: When I review pull requests from the terminal, I cannot ...
+    validations:
+      required: true
   - type: textarea
     id: description
     attributes:
-      label: Description
-      description: What would you like to see?
+      label: Proposed solution
+      description: What should bee do? If it is a new command or flag, show how you would invoke it.
+      placeholder: |
+        bee pr review PROJECT/repo 123 --approve
     validations:
       required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      description: Other commands, scripts, or workarounds you tried.
+    validations:
+      required: false
+  - type: input
+    id: api
+    attributes:
+      label: Related Backlog API
+      description: If you know which [Backlog API](https://developer.nulab.com/docs/backlog/) this needs, link it here.
+    validations:
+      required: false
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to open a pull request for this.
+          required: false

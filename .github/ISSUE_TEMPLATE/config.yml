@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://nulab.github.io/bee
+    about: Command reference and guides for bee. / bee のコマンドリファレンスとガイド。
+  - name: Backlog support
+    url: https://support.backlog.com/
+    about: For questions about Backlog itself rather than the bee CLI. / bee CLI ではなく Backlog 自体に関する問い合わせ先。
+  - name: Backlog API documentation
+    url: https://developer.nulab.com/docs/backlog/
+    about: Reference for the Backlog API that bee calls. / bee が呼び出す Backlog API のリファレンス。

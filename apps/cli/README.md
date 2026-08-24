@@ -2,8 +2,6 @@
 
 Bring [Backlog](https://backlog.com/) to your command line.
 
-**Note:** This is not an officially supported Nulab product. It is maintained by volunteers.
-
 ## Install
 
 ```sh
@@ -34,6 +32,11 @@ See the [documentation site](https://nulab.github.io/bee) for the full command r
 
 See the [repository root README](https://github.com/nulab/bee) for development setup and contributing instructions.
 
+## Support
+
+Bug reports, feature requests, and questions are handled via [GitHub Issues](https://github.com/nulab/bee/issues/new/choose).
+You can write in English or Japanese.
+
 ## License
 
-MIT
+This project is licensed under the [MIT License](https://github.com/nulab/bee/blob/main/LICENSE).

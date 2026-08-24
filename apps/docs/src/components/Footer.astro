@@ -5,7 +5,11 @@ import Default from "@astrojs/starlight/components/Footer.astro";
 <Default><slot /></Default>
 
 <footer class="site-footer">
-  <p>This is not an officially supported Nulab product. It is maintained by volunteers.</p>
+  <p>
+    ご質問・不具合報告・機能要望は
+    <a href="https://github.com/nulab/bee/issues/new/choose">GitHub Issues</a>
+    で英語・日本語のどちらでも受け付けています。
+  </p>
 </footer>
 
 <style>
@@ -15,5 +19,9 @@ import Default from "@astrojs/starlight/components/Footer.astro";
     border-top: 1px solid var(--sl-color-hairline-light);
     font-size: var(--sl-text-xs);
     color: var(--sl-color-gray-3);
+  }
+
+  .site-footer a {
+    color: inherit;
   }
 </style>

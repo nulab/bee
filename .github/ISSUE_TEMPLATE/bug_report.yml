@@ -1,24 +1,92 @@
 name: Bug report
-description: Report a bug
+description: Report something that does not work as documented
 labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
-        You can write in English or Japanese. / 英語または日本語で記述できます。
+        Issues are accepted in **English or Japanese** — please use whichever you prefer.
+        **英語・日本語のどちらでも**受け付けています。書きやすい方でご記入ください。
+
+        Please do not include API keys, OAuth tokens, or other credentials in this issue.
+        すべての出力から API キーや OAuth トークンなどの認証情報を取り除いてください。
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you start
+      options:
+        - label: I searched [existing issues](https://github.com/nulab/bee/issues?q=is%3Aissue) and did not find a duplicate.
+          required: true
+        - label: I am running the latest version of bee (`npm install -g @nulab/bee`).
+          required: false
   - type: textarea
     id: description
     attributes:
-      label: Description
-      description: What happened? What did you expect?
+      label: What happened?
+      description: Describe the actual behavior, including any error message.
+      placeholder: Running `bee issue list` exits with ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
       label: Steps to reproduce
+      description: The exact commands you ran, with credentials removed.
+      placeholder: |
+        1. bee auth login
+        2. bee issue list --project ...
+        3. See error
+      render: shell
+    validations:
+      required: true
   - type: input
     id: version
     attributes:
       label: bee version
+      description: Output of `bee --version`.
       placeholder: e.g. 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js version
+      description: Output of `node --version`.
+      placeholder: e.g. v24.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Linux
+        - Windows
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: auth
+    attributes:
+      label: Authentication method
+      options:
+        - API key
+        - OAuth
+        - Not sure / not relevant
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or additional context
+      description: Anything else that helps — full output, screenshots, related issues. Remove credentials first.
+      render: shell
+    validations:
+      required: false
