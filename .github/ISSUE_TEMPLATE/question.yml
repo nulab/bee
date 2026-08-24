@@ -8,8 +8,10 @@ body:
         Issues are accepted in **English or Japanese** — please use whichever you prefer.
         **英語・日本語のどちらでも**受け付けています。書きやすい方でご記入ください。
 
-        Please do not include API keys, OAuth tokens, or other credentials in this issue.
-        すべての出力から API キーや OAuth トークンなどの認証情報を取り除いてください。
+        Issues are public. Please do not include credentials, personal information, or confidential data
+        (API keys, OAuth tokens, space URLs, user names) — replace them with placeholders.
+        issue は公開されます。認証情報・個人情報・機密情報（API キー、OAuth トークン、スペース URL、
+        ユーザー名など）は含めず、ダミー値に置き換えてください。
   - type: checkboxes
     id: checks
     attributes:
@@ -30,7 +32,7 @@ body:
     id: tried
     attributes:
       label: What you have tried
-      description: Commands you ran and what happened, with credentials removed.
+      description: Commands you ran and what happened, with any sensitive values replaced.
       render: shell
     validations:
       required: false

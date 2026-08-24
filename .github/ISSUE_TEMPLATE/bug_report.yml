@@ -8,8 +8,10 @@ body:
         Issues are accepted in **English or Japanese** — please use whichever you prefer.
         **英語・日本語のどちらでも**受け付けています。書きやすい方でご記入ください。
 
-        Please do not include API keys, OAuth tokens, or other credentials in this issue.
-        すべての出力から API キーや OAuth トークンなどの認証情報を取り除いてください。
+        Issues are public. Please do not include credentials, personal information, or confidential data
+        (API keys, OAuth tokens, space URLs, user names) — replace them with placeholders.
+        issue は公開されます。認証情報・個人情報・機密情報（API キー、OAuth トークン、スペース URL、
+        ユーザー名など）は含めず、ダミー値に置き換えてください。
   - type: checkboxes
     id: checks
     attributes:
@@ -37,7 +39,7 @@ body:
     id: steps
     attributes:
       label: Steps to reproduce
-      description: The exact commands you ran, with credentials removed.
+      description: The exact commands you ran, with any sensitive values replaced.
       placeholder: |
         1. bee auth login
         2. bee issue list --project ...
@@ -86,7 +88,7 @@ body:
     id: logs
     attributes:
       label: Logs or additional context
-      description: Anything else that helps — full output, screenshots, related issues. Remove credentials first.
+      description: Anything else that helps — full output, screenshots, related issues. Redact sensitive values first.
       render: shell
     validations:
       required: false
