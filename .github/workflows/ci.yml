@@ -41,6 +41,33 @@ jobs:
         if: always() && github.event_name == 'pull_request' && matrix.node-version == 24
         uses: davelosert/vitest-coverage-report-action@3c50566c523e04813df28de8f7c48dd97d663f1c # v2
 
+  build:
+    runs-on: ubuntu-latest
+
+    name: Build
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: jdx/mise-action@c1ecc8f748cd28cdeabf76dab3cccde4ce692fe4 # v4.0.0.6.4.0.0
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      # `unbuild` exits 0 for a bundle that cannot actually run, so the built
+      # artifact is executed here rather than only being produced. A top-level
+      # await deadlock between the entry and its lazily imported command chunks
+      # shipped undetected precisely because nothing ran the output.
+      - name: Smoke test the built CLI
+        run: |
+          version=$(node apps/cli/bin/cli.mjs --version)
+          echo "bee --version -> ${version}"
+          test -n "$version"
+          node apps/cli/bin/cli.mjs --help > /dev/null
+          node apps/cli/bin/cli.mjs issue --help > /dev/null
+
   lint:
     runs-on: ubuntu-latest
 
