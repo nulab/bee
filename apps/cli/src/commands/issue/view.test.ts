@@ -119,6 +119,49 @@ describe("issue view", () => {
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Unknown"));
   });
 
+  it("omits estimated and actual hours rows when they are unset", async () => {
+    mockClient.getIssue.mockResolvedValue({
+      ...sampleIssue,
+      estimatedHours: null,
+      actualHours: null,
+    });
+
+    await parseCommand(() => import("./view"), ["PROJ-1"]);
+
+    const allCalls = vi.mocked(consola.log).mock.calls.map((c) => String(c[0]));
+    expect(allCalls.every((c) => !c.includes("null"))).toBe(true);
+    expect(allCalls.every((c) => !c.includes("Estimated"))).toBe(true);
+    expect(allCalls.every((c) => !c.includes("Actual"))).toBe(true);
+  });
+
+  it("shows the row for whichever of estimated or actual hours is set", async () => {
+    mockClient.getIssue.mockResolvedValue({
+      ...sampleIssue,
+      estimatedHours: null,
+      actualHours: 8,
+    });
+
+    await parseCommand(() => import("./view"), ["PROJ-1"]);
+
+    const allCalls = vi.mocked(consola.log).mock.calls.map((c) => String(c[0]));
+    expect(allCalls.every((c) => !c.includes("Estimated"))).toBe(true);
+    expect(allCalls.some((c) => c.includes("Actual") && c.includes("8h"))).toBe(true);
+  });
+
+  it("shows zero hours instead of omitting the row", async () => {
+    mockClient.getIssue.mockResolvedValue({
+      ...sampleIssue,
+      estimatedHours: 0,
+      actualHours: 0,
+    });
+
+    await parseCommand(() => import("./view"), ["PROJ-1"]);
+
+    const allCalls = vi.mocked(consola.log).mock.calls.map((c) => String(c[0]));
+    expect(allCalls.some((c) => c.includes("Estimated") && c.includes("0h"))).toBe(true);
+    expect(allCalls.some((c) => c.includes("Actual") && c.includes("0h"))).toBe(true);
+  });
+
   it("handles null startDate and dueDate gracefully", async () => {
     mockClient.getIssue.mockResolvedValue({
       ...sampleIssue,

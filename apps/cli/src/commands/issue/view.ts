@@ -4,6 +4,9 @@ import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
+const formatHours = (hours: number | null | undefined): string | undefined =>
+  hours === null || hours === undefined ? undefined : `${hours}h`;
+
 const view = new BeeCommand("view")
   .summary("View an issue")
   .description(`Use \`--comments\` to include comments. Use \`--web\` to open in the browser.`)
@@ -47,8 +50,8 @@ const view = new BeeCommand("view")
         ["Updated", formatDate(data.updated)],
         ["Start Date", data.startDate ? formatDate(data.startDate) : undefined],
         ["Due Date", data.dueDate ? formatDate(data.dueDate) : undefined],
-        ["Estimated", data.estimatedHours === undefined ? undefined : `${data.estimatedHours}h`],
-        ["Actual", data.actualHours === undefined ? undefined : `${data.actualHours}h`],
+        ["Estimated", formatHours(data.estimatedHours)],
+        ["Actual", formatHours(data.actualHours)],
         [
           "Categories",
           data.category.length > 0 ? data.category.map((c) => c.name).join(", ") : undefined,
