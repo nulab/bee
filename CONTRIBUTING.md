@@ -2,6 +2,12 @@
 
 Thank you for your interest in contributing to bee! This guide covers environment setup, development workflow, and release process. For coding conventions, architecture, and command patterns, see [AGENTS.md](AGENTS.md).
 
+## Questions and Bug Reports
+
+Bug reports, feature requests, and questions are handled via [GitHub Issues](https://github.com/nulab/bee/issues/new/choose) — you can write in English or Japanese.
+
+Issues are public. Before you post, remove any credentials, personal information, or confidential data — API keys, OAuth tokens, space URLs, issue keys, user names, and anything else you would not publish. Replace them with placeholders in commands, logs, and screenshots.
+
 ## Prerequisites
 
 - [mise](https://mise.jdx.dev/) (manages Node.js version)

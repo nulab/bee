@@ -10,9 +10,6 @@
 
 Bring [Backlog](https://backlog.com/) to your command line.
 
-> [!NOTE]
-> This is not an officially supported Nulab product. It is maintained by volunteers.
-
 **Looking to install and use bee?** See the [CLI package README](apps/cli/README.md) or the [documentation site](https://nulab.github.io/bee).
 
 ## Development
@@ -31,6 +28,11 @@ This is a pnpm workspace monorepo managed with [Turborepo](https://turbo.build/)
 
 For setup instructions, scripts, and contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Support
+
+Bug reports, feature requests, and questions are handled via [GitHub Issues](https://github.com/nulab/bee/issues/new/choose).
+You can write in English or Japanese.
+
 ## License
 
-MIT
+This project is licensed under the [MIT License](LICENSE).
