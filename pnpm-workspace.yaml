@@ -9,19 +9,15 @@ onlyBuiltDependencies:
   - turbo
 
 overrides:
-  postcss: ^8.5.26
-  nanoid@^3: ^3.3.18
-  js-yaml@^4: ^4.3.1
-  svgo: ^4.0.2
-  vite: ^8.2.2
-  esbuild@^0.27: ^0.28.2
-  qs: ^6.15.3
-  defu: ^6.1.7
-  picomatch@^2: ^2.3.2
-  picomatch@^4: ^4.0.5
-  smol-toml: ^1.6.1
-  # rollup-plugin-dts (via unbuild) uses the JS compiler API that typescript 7
-  # removed; pin its typescript to 6.x so `unbuild` can still emit .d.ts files.
+  # The only override still doing work. Without it, rollup-plugin-dts resolves
+  # its own `typescript` peer to 7.x, which ships no JS compiler API, and
+  # `pnpm build` dies in dts bundling with `ts.sys` undefined -- while
+  # typecheck and tests stay green. The catalog pin above only constrains the
+  # workspace's direct typescript, not this transitive one.
+  #
+  # Removable once unbuild's `rollup-plugin-dts: ^6.2.1` resolves to >=6.5.0,
+  # which falls back to @typescript/typescript6 instead of crashing. pnpm 10
+  # resolves that range to 6.3.0; pnpm 11 picks 6.5.1 and makes this obsolete.
   rollup-plugin-dts>typescript: ^6.0.3
 
 catalog:
