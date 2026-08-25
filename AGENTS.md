@@ -51,7 +51,7 @@ TypeScript is configured with `module: "preserve"` / `moduleResolution: "bundler
 ## Architecture
 
 ```
-apps/cli             — CLI entry point (citty framework, consola logging)
+apps/cli             — CLI entry point (commander.js, consola logging)
 apps/docs            — Astro Starlight documentation site
 packages/backlog-utils — Backlog API client wrapper (backlog-js, OAuth auto-refresh, rate-limit handling)
 packages/cli-utils   — Shared CLI utilities (output formatting, table, splitArg, prompts)
@@ -62,9 +62,15 @@ packages/tsconfigs   — Shared TypeScript base config
 
 ### Documentation site (`apps/docs`)
 
-Command reference pages are **auto-generated** from CLI source code — do NOT create `.md` files under `apps/docs/src/content/docs/commands/`. The dynamic route `apps/docs/src/pages/commands/[...slug].astro` uses `loadCommands()` (in `apps/docs/src/lib/commands.ts`) to import each command's `commandUsage` and `defineCommand` metadata at build time and render documentation pages automatically.
+Command reference pages are **auto-generated** from CLI source code — do NOT create `.md` files under `apps/docs/src/content/docs/commands/`. The dynamic route `apps/docs/src/pages/commands/[...slug].astro` uses `loadCommands()` (in `apps/docs/src/lib/commands.ts`) to import each command's `BeeCommand` metadata at build time and render documentation pages automatically.
 
-**When adding or removing CLI commands**, also update the command table in `skills/using-bee/SKILL.md` to keep the Skill in sync with the CLI.
+**When adding or removing CLI commands**, regenerate the Skill's command table so it stays in sync with the CLI:
+
+```sh
+pnpm --filter @nulab/bee generate:skill
+```
+
+The region between the `BEGIN/END GENERATED COMMAND TABLE` markers in `skills/using-bee/SKILL.md` is generated from `apps/cli/src/commands/registry.ts` — do not hand-edit it. CI runs `generate:skill:check` and fails when the committed table differs from the generated one.
 
 ### Skills (`skills/`)
 
@@ -141,103 +147,82 @@ All internal links in documentation content (`apps/docs/src/content/docs/`) must
 
 `@repo/backlog-utils` exposes `getClient()` which returns a `backlog-js` `Backlog` instance with OAuth 401 auto-refresh (via Proxy) and rate-limit error handling. Commands call `client.getIssues()`, `client.getProjects()`, etc. directly.
 
-`@nulab/bee` uses citty's `defineCommand` / `runMain` with subcommand registration and a custom help system (see below).
+`@nulab/bee` builds its command tree from `commander`, via a `BeeCommand` subclass that adds a custom help system (see below).
 
 ## Command Help System
 
-CLI commands use a **single-source help system** inspired by gh CLI. Each command defines a `CommandUsage` object that drives both `--help` output and documentation generation from the same data.
+CLI commands use a **single-source help system** inspired by gh CLI. Each command is a `BeeCommand` (a `commander` `Command` subclass) whose metadata drives `--help` output, the generated docs pages, and the generated Skill command table from the same data.
 
 ### How it works
 
-1. Each command file exports `commandUsage: CommandUsage` alongside the command definition
-2. The command is wrapped with `withUsage(defineCommand({ ... }), commandUsage)` to attach the usage data
-3. `runMain` receives `showCommandUsage` as a custom `showUsage` handler, which renders gh-cli style help for commands with attached usage and falls back to citty's default for others
+1. Each command file builds a `BeeCommand` and exports it as the **default export**
+2. `BeeCommand` extends commander's help with `EXAMPLES` and `ENVIRONMENT VARIABLES` sections, populated by `.examples()` and `.envVars()` plus any option bound with `.env()`
+3. `apps/cli/src/commands/registry.ts` lists every top-level command; `src/index.ts` and the generators all read that one list
 
-### Adding help to a command
+### Adding a command
 
 ```ts
-import { defineCommand } from "citty";
-import { type CommandUsage, withUsage } from "./lib/command-usage";
+import { BeeCommand } from "../lib/bee-command";
+import * as opt from "../lib/common-options";
 
-export const commandUsage: CommandUsage = {
-  long: "Detailed multi-line description of the command.",
-  examples: [{ description: "Do something", command: "bee foo bar" }],
-  annotations: {
-    environment: [["ENV_VAR_NAME", "Description of what it does"]],
-  },
-};
+const bar = new BeeCommand("bar")
+  .summary("Short one-liner")
+  .description(`Detailed multi-line description of the command.`)
+  .argument("<target>", "What to act on")
+  .addOption(opt.project())
+  .option("-m, --method <method>", "The authentication method to use", "api-key")
+  .envVars([["ENV_VAR_NAME", "Description of what it does"]])
+  .examples([{ description: "Do something", command: "bee foo bar" }])
+  .action(async (target, opts) => {
+    /* ... */
+  });
 
-export const myCommand = withUsage(
-  defineCommand({
-    meta: { name: "bar", description: "Short one-liner" },
-    args: {/* ... */},
-    async run({ args }) {
-      /* ... */
-    },
-  }),
-  commandUsage,
-);
+export default bar;
 ```
+
+Register it in its group's `index.ts` (or in `registry.ts` for a top-level command).
 
 ### Writing help content
 
-- **Every new command must have `commandUsage`** — all commands export `commandUsage: CommandUsage` and wrap with `withUsage`.
+- **Every command needs `.summary()`** — it is the short description shown in parent help, the docs index, and the Skill command table.
 - **Reference `gh <command> --help`** for tone and structure — run the corresponding gh CLI help (e.g., `gh auth login --help`) and adapt the content to Backlog's context.
-- **`long`**: Multi-paragraph description. First line is a standalone summary. Subsequent paragraphs explain behavior, caveats, and related commands.
-- **`examples`**: 2–4 practical examples covering common use cases (interactive, flags, piping).
-- **`annotations.environment`**: `[string, string][]` — list relevant environment variables as `[key, description]` pairs. Columns are auto-aligned.
+- **`.description()`**: Multi-paragraph long text explaining behavior, caveats, and related commands. Omit it when `.summary()` already says everything.
+- **`.examples()`**: 2–4 practical examples covering common use cases (interactive, flags, piping).
+- **`.envVars()`**: `[string, string][]` — environment variables as `[key, description]` pairs, for vars not already bound to an option via `.env()`. Columns are auto-aligned.
 
 ### Writing argument descriptions
 
-Follow gh CLI conventions for `args` description strings:
+Follow gh CLI conventions for option and argument description strings:
 
 - **`description` is pure prose** — keep it a short, human-readable explanation. Do not embed format hints, examples, or choice lists in the description.
-- **Use `valueHint` for supplementary value information** — choices, formats, examples, and type hints go in the `valueHint` property, not in `description`. `valueHint` is rendered in `--help` (flag column / arguments section), docs, and interactive prompts automatically.
-- **Same-meaning arguments share the same description across commands** — if `--space` means the same thing in `auth login` and `auth logout`, use the identical description string. Do not vary wording per command context.
+- **Put value information in the flags string or `.choices()`** — the value placeholder (`<id>`, `<yyyy-MM-dd>`) belongs in the flags string, and fixed choice sets belong in `.choices()`. Both are rendered in `--help` and in the generated docs automatically.
+- **Same-meaning arguments share the same description across commands** — if `--space` means the same thing in `auth login` and `auth logout`, use the identical description string. Do not vary wording per command context. Prefer a shared factory from `src/lib/common-options.ts`.
 - **Edit/update flags signal intent in the description** — in `edit` / `update` commands, descriptions must make it clear the flag sets a new value:
   - String flags: `"New X of the Y"` (e.g., `"New name of the project"`)
   - Boolean toggles: `"Change whether X"` (e.g., `"Change whether the chart is enabled"`)
-  - Enum flags: `"Change X"` with `valueHint: "{a|b}"` (e.g., `description: "Change text formatting rule"`, `valueHint: "{backlog|markdown}"`)
+  - Enum flags: `"Change X"` plus `.choices([...])` (e.g., `description: "Change text formatting rule"`, `.choices(["backlog", "markdown"])`)
 
-### `valueHint` conventions
+### Value placeholder conventions
 
-`valueHint` provides machine-readable value metadata that is displayed across `--help`, docs, and prompts. Use it for any argument where users need guidance on what values to enter.
+The placeholder in an option's flags string is machine-readable value metadata, displayed in `--help`, the docs, and prompts. Use one for any option that takes a value.
 
-| Pattern       | `valueHint`      | Example                                  |
-| ------------- | ---------------- | ---------------------------------------- |
-| Fixed choices | `"{x\|y\|z}"`    | `"{api-key\|oauth}"`, `"{asc\|desc}"`    |
-| Date format   | `"<yyyy-MM-dd>"` | Date fields                              |
-| Example value | `"<example>"`    | `"<PROJECT-123>"`, `"<xxx.backlog.com>"` |
-| Numeric range | `"<min-max>"`    | `"<1-100>"`                              |
-| Type hint     | `"<type>"`       | `"<number>"`                             |
+| Pattern       | Placeholder    | Example                              |
+| ------------- | -------------- | ------------------------------------ |
+| Date format   | `<yyyy-MM-dd>` | Date fields                          |
+| Example value | `<example>`    | `<PROJECT-123>`, `<xxx.backlog.com>` |
+| Numeric range | `<min-max>`    | `<1-100>`                            |
+| Type hint     | `<type>`       | `<n>`, `<id>`, `<name>`              |
+
+Fixed choice sets use `.choices()` rather than a placeholder listing them:
 
 ```ts
-// Choices
-method: {
-  type: "string",
-  description: "The authentication method to use",
-  valueHint: "{api-key|oauth}",
-},
+// Choices — commander validates the value and renders the set in help
+.option("--order <dir>", "Sort order").choices(["asc", "desc"])
 // Date format
-"start-date": {
-  type: "string",
-  description: "Start date",
-  valueHint: "<yyyy-MM-dd>",
-},
+.option("--start-date <yyyy-MM-dd>", "Start date")
 // Example value (positional)
-issue: {
-  type: "positional",
-  description: "Issue ID or issue key",
-  valueHint: "<PROJECT-123>",
-},
+.argument("<issue>", "Issue ID or issue key")
 ```
-
-Where `valueHint` is rendered:
-
-- **`--help` flags**: after the flag name (e.g., `--sort {issueType|category|...}`)
-- **`--help` arguments**: after the description text
-- **Docs**: as `<code>` next to the description
-- **`promptRequired`**: appended to the prompt label (e.g., `Priority {high|normal|low}:`)
 
 ### Short flag aliases
 
@@ -249,27 +234,25 @@ Following gh CLI conventions, only assign single-letter aliases (`-n`, `-d`, etc
 
 When two flags in the same command would collide on the same letter, one (or both) must stay long-form. Prefer giving the alias to the more frequently used flag.
 
-### Environment variable defaults for arguments
+### Environment variable defaults for options
 
-When a command argument can be provided via an environment variable (e.g., `BACKLOG_PROJECT`), use citty's `default` property instead of runtime fallback logic:
+When an option can be provided via an environment variable (e.g., `BACKLOG_PROJECT`), bind it with commander's `.env()` instead of runtime fallback logic:
 
 ```ts
-project: {
-  type: "positional",
-  description: "Project ID or project key",
-  required: true,
-  default: process.env.BACKLOG_PROJECT,
-},
+new Option("-p, --project <id>", "Project ID or project key").env("BACKLOG_PROJECT");
 ```
 
-citty skips the `required` check when `default` is not `undefined`, so this naturally makes the argument optional when the env var is set and required when it is not. No runtime fallback code (`||` / `??`) is needed.
+commander reads the env var when the flag is absent, so no runtime fallback code (`||` / `??`) is needed. `.env()`-bound vars are collected into the `ENVIRONMENT VARIABLES` help section automatically — do not also list them in `.envVars()`.
 
-Also add the env var to `commandUsage.annotations.environment` so it appears in `--help` output.
+For options that must have a value, use `RequiredOption` (`src/lib/required-option.ts`), which prompts interactively when the value is still missing after env resolution.
 
 ### Key files
 
-- `apps/cli/src/lib/command-usage.ts` — `CommandUsage` type, `withUsage`, `renderCommandUsage`, `showCommandUsage`
-- `apps/cli/src/index.ts` — wires `showCommandUsage` into `runMain`
+- `apps/cli/src/lib/bee-command.ts` — `BeeCommand`, `.examples()`, `.envVars()`, help rendering, shared `ENV_*` constants
+- `apps/cli/src/lib/common-options.ts` — shared option factories (`project()`, `json()`, `count()`, …)
+- `apps/cli/src/lib/required-option.ts` — `RequiredOption` and `resolveOptions`
+- `apps/cli/src/commands/registry.ts` — the one list of top-level commands
+- `apps/cli/src/index.ts` — builds the root program from the registry
 
 ## Command Implementation Patterns
 
@@ -377,7 +360,7 @@ Following [CLI Guidelines (clig.dev)](https://clig.dev/), command tests should f
 
 **DO NOT test (library/framework responsibility):**
 
-- citty/Commander option parsing (e.g., `--keyword "x"` → `keyword: "x"`)
+- commander option parsing (e.g., `--keyword "x"` → `keyword: "x"`)
 - `splitArg` / `collect` / `collectNum` array collection behavior
 - Boolean flag parsing (`--archived` → `true`)
 - Simple option forwarding where the handler passes the parsed value to the API unchanged

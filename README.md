@@ -18,7 +18,7 @@ This is a pnpm workspace monorepo managed with [Turborepo](https://turbo.build/)
 
 | Package               | Path                     | Description                                       |
 | --------------------- | ------------------------ | ------------------------------------------------- |
-| `@nulab/bee`          | `apps/cli`               | CLI entry point (citty + consola)                 |
+| `@nulab/bee`          | `apps/cli`               | CLI entry point (commander + consola)             |
 | `@repo/docs`          | `apps/docs`              | Documentation site (Astro Starlight)              |
 | `@repo/backlog-utils` | `packages/backlog-utils` | Backlog API client wrapper                        |
 | `@repo/cli-utils`     | `packages/cli-utils`     | Shared CLI utilities (output formatting, prompts) |

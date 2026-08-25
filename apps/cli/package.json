@@ -33,6 +33,8 @@
   "scripts": {
     "build": "unbuild",
     "dev": "tsx --env-file=.env.development src/index.ts",
+    "generate:skill": "tsx src/scripts/generate-skill.ts",
+    "generate:skill:check": "tsx src/scripts/generate-skill.ts --check",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
