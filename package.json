@@ -25,5 +25,12 @@
     "typescript": "catalog:",
     "vitest": "catalog:"
   },
-  "packageManager": "pnpm@10.30.3"
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=20.18",
+      "onFail": "error"
+    }
+  },
+  "packageManager": "pnpm@11.24.0"
 }

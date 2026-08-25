@@ -28,14 +28,28 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      # pnpm 11 requires Node >=22.13 and crashes on Node 20 with
+      # "No such built-in module: node:sqlite", so it cannot run on every
+      # version in the matrix. mise installs the toolchain Node from mise.toml
+      # (used to run pnpm) alongside the version under test.
       - uses: jdx/mise-action@c1ecc8f748cd28cdeabf76dab3cccde4ce692fe4 # v4.0.0.6.4.0.0
         with:
           install_args: node@${{ matrix.node-version }}
 
-      - run: pnpm install --frozen-lockfile
+      # Runs on the mise.toml Node, not the matrix one, so pnpm always has a
+      # version it supports.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
+      # `mise exec node@<version>` is required to select the matrix Node:
+      # mise.toml pins node = "24", so a bare `node` would resolve to 24 and
+      # every matrix leg would silently test the same version. Vitest is
+      # invoked directly rather than through `pnpm exec`, which would put pnpm
+      # back onto the Node under test and crash it on Node 20.
       - name: Test
-        run: pnpm exec vitest run --coverage.enabled
+        run: >-
+          mise exec node@${{ matrix.node-version }} --
+          node node_modules/vitest/vitest.mjs run --coverage.enabled
 
       - name: Report coverage
         if: always() && github.event_name == 'pull_request' && matrix.node-version == 24
