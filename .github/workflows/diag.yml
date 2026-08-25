@@ -13,8 +13,14 @@ jobs:
           node -e "console.log('report:',JSON.stringify(process.report.getReport().header.glibcVersionRuntime))"
           ldd --version | head -2
           getconf GNU_LIBC_VERSION || true
-      - name: install then inspect
+      - name: install with 11.24.0
         run: |
-          pnpm install --frozen-lockfile
-          echo "--- glibc-gated packages present? ---"
-          ls node_modules/.pnpm | grep -E "linux-x64" || echo "NONE"
+          corepack pnpm@11.24.0 install --frozen-lockfile
+          echo "=== the four packages that pnpm 11.23.0 skipped ==="
+          for p in oxlint oxfmt rolldown astrojs; do
+            printf "%-10s " "$p"
+            ls node_modules/.pnpm | grep -i "$p.*linux-x64-gnu" || echo MISSING
+          done
+          echo "=== can the tools actually run? ==="
+          node node_modules/vitest/vitest.mjs --version || echo "vitest FAILED"
+          pnpm exec oxlint --version || echo "oxlint FAILED"
