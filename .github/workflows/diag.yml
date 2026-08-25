@@ -1,0 +1,18 @@
+name: diag
+on: workflow_dispatch
+jobs:
+  d:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: jdx/mise-action@c1ecc8f748cd28cdeabf76dab3cccde4ce692fe4
+      - name: env
+        run: |
+          node -e "console.log('report:',JSON.stringify(process.report.getReport().header.glibcVersionRuntime))"
+          ldd --version | head -2
+          getconf GNU_LIBC_VERSION || true
+      - name: install then inspect
+        run: |
+          pnpm install --frozen-lockfile
+          echo "--- glibc-gated packages present? ---"
+          ls node_modules/.pnpm | grep -E "linux-x64" || echo "NONE"
