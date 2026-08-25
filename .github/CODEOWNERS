@@ -1,0 +1,7 @@
+# Requesting a review requires write access, so contributors from outside the
+# organization cannot pick a reviewer for their own pull request. Without an
+# owner listed here, nobody is notified and those pull requests go unread.
+#
+# Patterns are last-match-wins, so a single catch-all covers the repository.
+
+* @lollipop-onl
