@@ -15,7 +15,7 @@ jobs:
           getconf GNU_LIBC_VERSION || true
       - name: install with 11.24.0
         run: |
-          corepack pnpm@11.24.0 install --frozen-lockfile
+          pnpm install --frozen-lockfile
           echo "=== the four packages that pnpm 11.23.0 skipped ==="
           for p in oxlint oxfmt rolldown astrojs; do
             printf "%-10s " "$p"
