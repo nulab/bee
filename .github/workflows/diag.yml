@@ -1,5 +1,7 @@
 name: diag
-on: workflow_dispatch
+on:
+  push:
+    branches: [claude/toolchain-pnpm-11-devengines]
 jobs:
   d:
     runs-on: ubuntu-latest
