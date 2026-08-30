@@ -18,13 +18,13 @@ overrides:
   # Removable once unbuild's `rollup-plugin-dts: ^6.2.1` resolves to >=6.5.0,
   # which falls back to @typescript/typescript6 instead of crashing. pnpm 10
   # resolves that range to 6.3.0; pnpm 11 picks 6.5.1 and makes this obsolete.
-  rollup-plugin-dts>typescript: ^6.0.3
+  rollup-plugin-dts>typescript: ^7.0.2
 
 catalog:
   "@astrojs/starlight": ^0.41.7
   "@tsconfig/node-lts": ^24.0.1
   "@tsconfig/node-ts": ^23.6.4
-  "@types/node": ^25.9.5
+  "@types/node": ^26.1.2
   "@vitest/coverage-v8": ^4.1.11
   astro: ^7.2.4
   backlog-js: ^0.19.1
@@ -33,7 +33,7 @@ catalog:
   # would break installs for Node 20 users, so this is a release decision, not
   # a mechanical bump. Node 20 reached EOL on 2026-04-30; both can go up in the
   # same change that drops Node 20 from engines and the CI matrix.
-  commander: ^14.0.3
+  commander: ^15.0.0
   consola: ^3.4.2
   is-unicode-supported: ^2.1.0
   jiti: ^2.7.0
@@ -54,9 +54,9 @@ catalog:
   # (via unbuild) relies on: `ts.sys` is undefined and dts bundling crashes.
   # unbuild pins rollup-plugin-dts ^6.2.1 and pnpm 10 resolves that to 6.3.0,
   # which predates the typescript 7 fallback added in 6.5.0.
-  typescript: ^6.0.3
+  typescript: ^7.0.2
   unbuild: ^3.6.1
   # Held at 7 for the same Node 20 reason as commander above.
-  undici: ^7.29.0
+  undici: ^8.9.0
   valibot: ^1.4.2
   vitest: ^4.1.11
