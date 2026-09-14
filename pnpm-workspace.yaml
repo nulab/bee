@@ -18,6 +18,13 @@ peerDependencyRules:
     vite: "*"
     vitest: "*"
 
+  # fetch-socks depends on undici with the unpinned range `>=7`, so without
+  # this it resolves its own undici@8.x alongside the workspace's undici@7.x
+  # -- two structurally incompatible `Dispatcher` types make
+  # `.compose()`/`setGlobalDispatcher()` fail to typecheck. Pin it to the same
+  # major as the catalog's `undici` entry above; remove both together.
+  fetch-socks>undici: ^7.29.0
+
 catalog:
   "@astrojs/starlight": ^0.41.7
   "@tsconfig/node-lts": ^24.0.1
@@ -33,6 +40,7 @@ catalog:
   # same change that drops Node 20 from engines and the CI matrix.
   commander: ^14.0.3
   consola: ^3.4.2
+  fetch-socks: ^1.3.3
   is-unicode-supported: ^2.1.0
   jiti: ^2.7.0
   marked: ^18.0.10
