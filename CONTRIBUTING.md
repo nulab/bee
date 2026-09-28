@@ -10,8 +10,7 @@ Issues are public. Before you post, remove any credentials, personal information
 
 ## Prerequisites
 
-- [mise](https://mise.jdx.dev/) (manages Node.js version)
-- [pnpm](https://pnpm.io/) (enabled via Corepack)
+- [Vite+](https://viteplus.dev/guide/) (`vp`) — manages the Node.js version (from `.node-version`) and pnpm (from `packageManager`), and runs every build, test, lint, and format task
 
 ## Getting Started
 
@@ -20,42 +19,42 @@ Issues are public. Before you post, remove any credentials, personal information
 git clone https://github.com/nulab/bee.git
 cd bee
 
-# Install the correct Node.js version and enable corepack
-mise install
+# Install vp (once per machine)
+curl -fsSL https://vite.plus | bash
 
-# Install dependencies
-pnpm install
+# Install dependencies (also installs the pre-commit hook)
+vp install
 ```
 
-`mise install` will set up Node.js 24 and enable Corepack (which provides pnpm). If you don't use mise, ensure you have Node.js 24+ installed and run `corepack enable` manually.
+`vp` delegates to the `vite-plus` version pinned in this repository, so the global install only needs to exist. If you already manage Node.js 24 and pnpm yourself, `pnpm install` works too; run the commands below as `pnpm exec vp ...`.
 
 ## Development Workflow
 
 ### Running the CLI locally
 
 ```sh
-pnpm --filter @nulab/bee dev
+vp run --filter @nulab/bee dev
 ```
 
 ### Verifying changes
 
 ```sh
-pnpm run typecheck   # Type check all packages (tsc via turbo)
-pnpm run test        # Run all tests (vitest)
+vp check   # Format, lint, and type check
+vp test    # Run all tests
 ```
 
-You do **not** need to run lint or format manually — [lefthook](https://github.com/evilmartians/lefthook) runs `oxlint --fix` and `oxfmt` automatically on staged files at commit time.
+You do **not** need to fix formatting or lint issues by hand — the pre-commit hook runs `vp check --fix` on staged files at commit time.
 
 ### Running a single test file
 
 ```sh
-pnpm --filter @repo/backlog-utils exec vitest run src/client.test.ts
+vp test packages/backlog-utils/src/client.test.ts
 ```
 
 ### Building
 
 ```sh
-pnpm --filter @nulab/bee build
+vp run --filter @nulab/bee build
 ```
 
 ## Pull Requests
@@ -63,7 +62,7 @@ pnpm --filter @nulab/bee build
 - Create a feature branch from `main`.
 - Keep commits in English, following [Conventional Commits](https://www.conventionalcommits.org/) (`feat`, `fix`, `chore`, `refactor`, `docs`, `test`, etc.).
 - PR titles and descriptions should be in English.
-- CI runs tests on Node.js 20, 22, and 24, plus type checking, linting, and format checking.
+- CI runs tests on Node.js 22 and 24, type checking, linting, and format checking, and installs the packed CLI on Node.js 20, 22, and 24 to smoke test it.
 
 ## Release Process
 
@@ -100,7 +99,7 @@ Dry-run mode publishes with `--dry-run` and skips git tag/push, so it's safe to 
 The documentation site (`apps/docs`) uses Astro Starlight. Command reference pages are auto-generated from CLI source code — do not create markdown files under `apps/docs/src/content/docs/commands/`. See [CLAUDE.md](CLAUDE.md#documentation-site-appsdocs) for details.
 
 ```sh
-pnpm --filter @repo/docs dev    # Local dev server
+vp run --filter @repo/docs dev    # Local dev server
 ```
 
 ## License

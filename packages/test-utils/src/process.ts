@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { vi } from "vite-plus/test";
 
 export const spyOnProcessExit = () =>
   // eslint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- process.exit returns `never`; mocking requires `as never`

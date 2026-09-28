@@ -1,5 +1,5 @@
 import { type Backlog } from "backlog-js";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { resolveProjectIds } from "./resolve-project";
 
 const createMockClient = (projects: { id: number; projectKey: string }[]) =>

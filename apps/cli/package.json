@@ -31,12 +31,10 @@
     "access": "public"
   },
   "scripts": {
-    "build": "unbuild",
+    "build": "vp pack",
     "dev": "tsx --env-file=.env.development src/index.ts",
     "generate:skill": "tsx src/scripts/generate-skill.ts",
-    "generate:skill:check": "tsx src/scripts/generate-skill.ts --check",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "generate:skill:check": "tsx src/scripts/generate-skill.ts --check"
   },
   "dependencies": {
     "backlog-js": "catalog:",
@@ -52,9 +50,7 @@
     "@repo/config": "workspace:*",
     "@repo/test-utils": "workspace:*",
     "@repo/tsconfigs": "workspace:*",
-    "tsx": "catalog:",
-    "unbuild": "catalog:",
-    "vitest": "catalog:"
+    "tsx": "catalog:"
   },
   "engines": {
     "node": ">=20.18"

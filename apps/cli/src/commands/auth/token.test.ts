@@ -1,5 +1,5 @@
 import { findSpace, loadConfig } from "@repo/config";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { parseCommand } from "@repo/test-utils";
 
 vi.mock("@repo/config", () => ({

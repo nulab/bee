@@ -3,27 +3,14 @@
   "license": "MIT",
   "repository": "nulab/bee",
   "scripts": {
-    "postinstall": "lefthook install",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "typecheck": "turbo run typecheck",
-    "clean": "turbo run clean",
-    "format": "oxfmt",
-    "format:check": "oxfmt --check",
-    "test": "vitest run"
+    "prepare": "vp config",
+    "build": "vp run -r build",
+    "dev": "vp run -r --parallel dev"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "@vitest/coverage-v8": "catalog:",
-    "lefthook": "catalog:",
-    "oxfmt": "catalog:",
-    "oxlint": "catalog:",
-    "oxlint-tsgolint": "catalog:",
-    "turbo": "catalog:",
-    "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vite-plus": "catalog:"
   },
   "packageManager": "pnpm@10.30.3"
 }

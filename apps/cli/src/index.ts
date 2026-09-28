@@ -12,7 +12,7 @@ const program = new BeeCommand("bee").version(pkg.version).description(pkg.descr
 
 program.exitOverride();
 
-// Kept out of module scope: unbuild bundles the lazily imported command chunks
+// Kept out of module scope: the bundler emits the lazily imported command chunks
 // alongside this entry, and those chunks import shared values back from it. A
 // top-level `await` here would leave the entry mid-evaluation while they wait
 // on it, deadlocking the cycle -- Node reports `unsettled top-level await` and

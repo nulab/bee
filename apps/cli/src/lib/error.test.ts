@@ -1,6 +1,6 @@
 import { CommanderError } from "commander";
 import consola from "consola";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { UserError } from "@repo/cli-utils";
 import { handleError } from "./error";
 

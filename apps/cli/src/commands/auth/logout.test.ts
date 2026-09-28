@@ -1,6 +1,6 @@
 import { loadConfig, removeAllSpaces, removeSpace } from "@repo/config";
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { parseCommand } from "@repo/test-utils";
 
 vi.mock("@repo/config", () => ({

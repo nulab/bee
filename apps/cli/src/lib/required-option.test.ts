@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { RequiredOption, resolveOptions } from "./required-option";
 
 vi.mock("@repo/cli-utils", async (importOriginal) => ({

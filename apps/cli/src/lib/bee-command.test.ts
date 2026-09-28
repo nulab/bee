@@ -1,5 +1,5 @@
 import { Command, Option } from "commander";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { BeeCommand } from "./bee-command";
 
 describe("BeeCommand", () => {

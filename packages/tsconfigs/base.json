@@ -6,6 +6,5 @@
     "moduleResolution": "bundler",
     "rewriteRelativeImportExtensions": false,
     "types": ["node"]
-  },
-  "files": ["globals.d.ts"]
+  }
 }

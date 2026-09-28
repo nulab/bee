@@ -1,5 +1,5 @@
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 
 const mockClient = {
   removeStar: vi.fn(),

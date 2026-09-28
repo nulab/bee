@@ -22,6 +22,9 @@ const parseConfig = (raw: unknown): Rc => {
 const loadConfig = (): Rc => parseConfig(readUser(CONFIG_FILE_NAME));
 
 const configFilePath = (): string =>
+  // The XDG Base Directory spec treats an empty XDG_CONFIG_HOME as unset, so
+  // `??` would wrongly resolve the config file relative to the cwd.
+  // oxlint-disable-next-line typescript/prefer-nullish-coalescing
   resolve(process.env.XDG_CONFIG_HOME || homedir(), CONFIG_FILE_NAME);
 
 /**

@@ -142,15 +142,11 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Turborepo
-.turbo
-
 # Claude Code plans
 .claude/plans/
 
 # Git worktrees
 .worktrees/
 
-# Lefthook local overrides
-lefthook-local.yml
-
+# Vitest
+.vitest/

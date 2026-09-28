@@ -14,7 +14,7 @@ Bring [Backlog](https://backlog.com/) to your command line.
 
 ## Development
 
-This is a pnpm workspace monorepo managed with [Turborepo](https://turbo.build/).
+This is a pnpm workspace monorepo built with [Vite+](https://viteplus.dev/) (`vp`).
 
 | Package               | Path                     | Description                                       |
 | --------------------- | ------------------------ | ------------------------------------------------- |

@@ -2,7 +2,7 @@ import { refreshAccessToken } from "@repo/backlog-utils";
 import { findSpace, loadConfig, updateSpaceAuth } from "@repo/config";
 import { Backlog } from "backlog-js";
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { parseCommand } from "@repo/test-utils";
 
 const mockGetMyself = vi.fn();

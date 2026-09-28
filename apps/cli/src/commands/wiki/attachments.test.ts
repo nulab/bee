@@ -1,6 +1,6 @@
 import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { expectStdoutContaining } from "@repo/test-utils";
 
 const mockClient = {

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import * as v from "valibot";
 import consola from "consola";
 import { handleValidationError } from "./validation-error";

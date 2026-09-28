@@ -46,7 +46,7 @@ const pickFields = (obj: unknown, fields: string[]): Record<string, unknown> => 
  * Filters data to include only the specified fields.
  * Works on both single objects and arrays.
  */
-const filterFields = <T>(data: T, fields: string[]): unknown => {
+const filterFields = (data: unknown, fields: string[]): unknown => {
   if (Array.isArray(data)) {
     return data.map((item) => pickFields(item, fields));
   }

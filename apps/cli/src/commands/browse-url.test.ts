@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { type GitInfo, isFilePath, resolveUrl } from "./browse-url";
 
 const HOST = "example.backlog.com";

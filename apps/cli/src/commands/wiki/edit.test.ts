@@ -1,6 +1,6 @@
 import { resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
 const { mockClient, host } = setupCommandTest({ patchWiki: vi.fn() });

@@ -1,6 +1,6 @@
 import { promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { itOutputsJson, mockGetClient, parseCommand, setupCommandTest } from "@repo/test-utils";
 
 const { mockClient, host } = setupCommandTest({

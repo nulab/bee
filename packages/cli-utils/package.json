@@ -4,10 +4,6 @@
   "private": true,
   "type": "module",
   "exports": "./src/index.ts",
-  "scripts": {
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit"
-  },
   "dependencies": {
     "consola": "catalog:",
     "string-width": "catalog:",
@@ -15,7 +11,6 @@
   },
   "devDependencies": {
     "@repo/test-utils": "workspace:*",
-    "@repo/tsconfigs": "workspace:*",
-    "vitest": "catalog:"
+    "@repo/tsconfigs": "workspace:*"
   }
 }

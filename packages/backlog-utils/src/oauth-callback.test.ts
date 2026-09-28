@@ -1,5 +1,5 @@
 import { type CallbackServer, startCallbackServer } from "./oauth-callback";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vite-plus/test";
 
 describe("startCallbackServer", () => {
   let server: CallbackServer;

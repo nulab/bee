@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { getClient } from "./client";
 import { Backlog } from "backlog-js";
 import { findSpace, loadConfig } from "@repo/config";

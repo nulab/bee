@@ -3,7 +3,7 @@ import { promptRequired } from "@repo/cli-utils";
 import { updateConfig } from "@repo/config";
 import { Backlog, OAuth2 } from "backlog-js";
 import consola from "consola";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { parseCommand } from "@repo/test-utils";
 
 const mockGetMyself = vi.fn();
@@ -38,6 +38,32 @@ vi.mock("@repo/config", async (importOriginal) => ({
 }));
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
+
+const setupOAuthMocks = () => {
+  process.env.BACKLOG_OAUTH_CLIENT_ID = "my-client-id";
+  process.env.BACKLOG_OAUTH_CLIENT_SECRET = "my-client-secret";
+
+  mockGetMyself.mockResolvedValue({ name: "OAuth User", userId: "oauthuser" });
+  vi.mocked(updateConfig).mockImplementation((updater) =>
+    updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
+  );
+  vi.mocked(exchangeAuthorizationCode).mockResolvedValue({
+    access_token: "new-access-token",
+    token_type: "Bearer",
+    expires_in: 3600,
+    refresh_token: "new-refresh-token",
+  });
+
+  const mockStop = vi.fn();
+  const mockWaitForCallback = vi.fn().mockResolvedValue("auth-code-123");
+  vi.mocked(startCallbackServer).mockReturnValue({
+    port: 5033,
+    waitForCallback: mockWaitForCallback,
+    stop: mockStop,
+  });
+
+  return { mockStop, mockWaitForCallback };
+};
 
 describe("auth login", () => {
   describe("hostname", () => {
@@ -153,32 +179,6 @@ describe("auth login", () => {
   });
 
   describe("oauth", () => {
-    const setupOAuthMocks = () => {
-      process.env.BACKLOG_OAUTH_CLIENT_ID = "my-client-id";
-      process.env.BACKLOG_OAUTH_CLIENT_SECRET = "my-client-secret";
-
-      mockGetMyself.mockResolvedValue({ name: "OAuth User", userId: "oauthuser" });
-      vi.mocked(updateConfig).mockImplementation((updater) =>
-        updater({ spaces: [], defaultSpace: undefined, aliases: {} }),
-      );
-      vi.mocked(exchangeAuthorizationCode).mockResolvedValue({
-        access_token: "new-access-token",
-        token_type: "Bearer",
-        expires_in: 3600,
-        refresh_token: "new-refresh-token",
-      });
-
-      const mockStop = vi.fn();
-      const mockWaitForCallback = vi.fn().mockResolvedValue("auth-code-123");
-      vi.mocked(startCallbackServer).mockReturnValue({
-        port: 5033,
-        waitForCallback: mockWaitForCallback,
-        stop: mockStop,
-      });
-
-      return { mockStop, mockWaitForCallback };
-    };
-
     afterEach(() => {
       delete process.env.BACKLOG_OAUTH_CLIENT_ID;
       delete process.env.BACKLOG_OAUTH_CLIENT_SECRET;

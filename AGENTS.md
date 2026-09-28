@@ -9,29 +9,22 @@ bee (`bee`) — a CLI for the Backlog project management service. pnpm workspace
 ## Commands
 
 ```sh
-# Install
-pnpm install
+# Install (also installs the pre-commit hook via `vp config`)
+vp install
 
-# Lint (oxlint, NOT ESLint)
-pnpm run lint
-pnpm run lint:fix
-
-# Type check (tsc --noEmit per package via turbo)
-pnpm run typecheck
-
-# Format (oxfmt)
-pnpm run format
-pnpm run format:check
+# Format + lint + type check (oxfmt, oxlint, tsgolint — NOT ESLint / tsc)
+vp check
+vp check --fix
 
 # Test
-pnpm run test                                              # all tests
-pnpm --filter @repo/backlog-utils exec vitest run src/client.test.ts # single file
+vp test                                              # all tests
+vp test packages/backlog-utils/src/client.test.ts    # single file
 
 # Build
-pnpm --filter @nulab/bee build
+vp run --filter @nulab/bee build
 
 # Dev (CLI)
-pnpm --filter @nulab/bee dev
+vp run --filter @nulab/bee dev
 ```
 
 ## Module Resolution: bundler
@@ -56,7 +49,7 @@ apps/docs            — Astro Starlight documentation site
 packages/backlog-utils — Backlog API client wrapper (backlog-js, OAuth auto-refresh, rate-limit handling)
 packages/cli-utils   — Shared CLI utilities (output formatting, table, splitArg, prompts)
 packages/config      — CLI configuration management (~/.config/bee RC file, space/auth resolution)
-packages/test-utils  — Shared test helpers (mock client, mock consola, process.exit spy, vi.clearAllMocks setup)
+packages/test-utils  — Shared test helpers (mock client, mock consola, process.exit spy)
 packages/tsconfigs   — Shared TypeScript base config
 ```
 
@@ -67,7 +60,7 @@ Command reference pages are **auto-generated** from CLI source code — do NOT c
 **When adding or removing CLI commands**, regenerate the Skill's command table so it stays in sync with the CLI:
 
 ```sh
-pnpm --filter @nulab/bee generate:skill
+vp run --filter @nulab/bee generate:skill
 ```
 
 The region between the `BEGIN/END GENERATED COMMAND TABLE` markers in `skills/using-bee/SKILL.md` is generated from `apps/cli/src/commands/registry.ts` — do not hand-edit it. CI runs `generate:skill:check` and fails when the committed table differs from the generated one.
@@ -419,20 +412,20 @@ validation, internal library code) where a `ValiError` is the appropriate error 
 
 ## Tooling
 
-- **Runtime**: Node.js 24 (managed by mise)
-- **Package manager**: pnpm (corepack-enabled). External dependency versions are managed via [pnpm catalog](https://pnpm.io/catalogs) in `pnpm-workspace.yaml`. When adding dependencies, use `pnpm add --save-catalog <pkg>` (or `pnpm add --save-catalog -D <pkg>` for devDependencies) — this automatically adds the version to the catalog in `pnpm-workspace.yaml` and writes `"catalog:"` in `package.json`. Do not write version ranges directly in `package.json`.
-- **Linter**: oxlint (with plugins: import, typescript, unicorn)
-- **Formatter**: oxfmt
-- **Type checker**: `tsc --noEmit` per package (via Turborepo)
-- **Test runner**: Vitest
-- **Build**: unbuild
-- **Git hooks**: lefthook (pre-commit: oxlint --fix + oxfmt)
+- **Toolchain**: [Vite+](https://viteplus.dev/) (`vp`). All tool configuration (lint, fmt, test, staged) lives in the root `vite.config.ts`; `apps/cli/vite.config.ts` holds only the `pack` build.
+- **Runtime**: Node.js 24 (`.node-version`, managed by `vp`)
+- **Package manager**: pnpm (version from `packageManager`, managed by `vp`). External dependency versions are managed via [pnpm catalog](https://pnpm.io/catalogs) in `pnpm-workspace.yaml`. When adding dependencies, use `pnpm add --save-catalog <pkg>` (or `pnpm add --save-catalog -D <pkg>` for devDependencies) — this automatically adds the version to the catalog in `pnpm-workspace.yaml` and writes `"catalog:"` in `package.json`. Do not write version ranges directly in `package.json`.
+- **Linter**: oxlint via `vp lint` (with plugins: import, typescript, unicorn)
+- **Formatter**: oxfmt via `vp fmt`
+- **Type checker**: tsgolint (TypeScript 7) via `lint.options.typeCheck` — runs as part of `vp check` / `vp lint`; there is no separate `tsc` step
+- **Test runner**: Vitest 5 via `vp test`. Import test APIs from `vite-plus/test`, not `vitest`. `clearMocks` is on by default, so tests never need a manual `vi.clearAllMocks()`
+- **Build**: tsdown via `vp pack`
+- **Task runner**: `vp run` (`-r` for every package in dependency order, `--filter` for one)
+- **Git hooks**: `.vite-hooks/pre-commit` runs `vp staged` (`vp check --fix` on staged files)
 
 ## Workflow
 
-Do NOT manually run lint or format during development. The pre-commit hook (lefthook) automatically runs `oxlint --fix` and `oxfmt` on staged files at commit time. Only `typecheck` and `test` need to be run manually when verifying changes.
-
-**`lint` vs `typecheck`**: `lint` uses oxlint for fast static analysis. `typecheck` runs `tsc --noEmit` in each package via Turborepo for full TypeScript type checking. They are independent — run both when verifying changes. `lint` exists for the fast pre-commit hook.
+Do NOT manually fix formatting or lint issues during development. The pre-commit hook runs `vp check --fix` on staged files at commit time. When verifying changes, run `vp check` (format, lint, and type check in one pass) and `vp test`.
 
 Plan files (implementation plans, design docs, etc.) go in `.claude/plans/`.
 

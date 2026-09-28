@@ -1,4 +1,4 @@
-import { vi, expect } from "vitest";
+import { vi, expect } from "vite-plus/test";
 
 /**
  * Captures stdout.write calls during the callback and asserts the output

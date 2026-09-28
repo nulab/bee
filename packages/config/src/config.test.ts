@@ -1,6 +1,6 @@
 import { chmodSync } from "node:fs";
 import { readUser, writeUser } from "rc9";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 
 vi.mock("node:fs", () => ({
   chmodSync: vi.fn(),

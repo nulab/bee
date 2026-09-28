@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import consola from "consola";
 
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));

@@ -5,6 +5,6 @@ Documentation site for bee, built with [Astro Starlight](https://starlight.astro
 Command reference pages are auto-generated from CLI source code. See the [repository root README](../../README.md) for development setup.
 
 ```sh
-pnpm --filter @repo/docs dev       # Start dev server
-pnpm --filter @repo/docs build     # Build for production
+vp run --filter @repo/docs dev     # Start dev server
+vp run --filter @repo/docs build   # Build for production
 ```

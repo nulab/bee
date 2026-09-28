@@ -1,4 +1,4 @@
-import { type Mock, vi } from "vitest";
+import { type Mock, vi } from "vite-plus/test";
 
 // Since Vitest 4.1, a bare `vi.fn()` is typed `Mock<Procedure | Constructable>`,
 // which has no call signature and is not assignable to `Mock`. Inputs accept

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { BeeCommand } from "./bee-command";
 import { SUPPORTED_SHELLS, isSupportedShell, renderCompletionScript } from "./completion-script";
 

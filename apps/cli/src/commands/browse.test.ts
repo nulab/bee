@@ -1,6 +1,6 @@
 import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { parseCommand } from "@repo/test-utils";
 
 vi.mock("@repo/backlog-utils", () => ({

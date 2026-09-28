@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { BeeCommand } from "./bee-command";
 import { MARKER_BEGIN, MARKER_END, applyCommandTable, renderCommandTable } from "./command-table";
 

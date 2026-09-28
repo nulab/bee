@@ -21,21 +21,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20, 22, 24]
+        node-version: [22, 24]
 
     name: Test (Node ${{ matrix.node-version }})
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4.2.5.6.4.2.5
+      - uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
         with:
-          install_args: node@${{ matrix.node-version }}
-
-      - run: pnpm install --frozen-lockfile
+          node-version: ${{ matrix.node-version }}
+          cache: true
 
       - name: Test
-        run: pnpm exec vitest run --coverage.enabled
+        run: vp test --coverage.enabled
 
       - name: Report coverage
         if: always() && github.event_name == 'pull_request' && matrix.node-version == 24
@@ -49,43 +48,76 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4.2.5.6.4.2.5
-
-      - run: pnpm install --frozen-lockfile
+      - uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
+        with:
+          node-version-file: .node-version
+          cache: true
 
       - name: Build
-        run: pnpm build
+        run: vp run -r build
 
-      # `unbuild` exits 0 for a bundle that cannot actually run, so the built
-      # artifact is executed here rather than only being produced. A top-level
-      # await deadlock between the entry and its lazily imported command chunks
-      # shipped undetected precisely because nothing ran the output.
-      - name: Smoke test the built CLI
+      - name: Pack the CLI
+        working-directory: apps/cli
+        run: vp pm pack --pack-destination "$RUNNER_TEMP/pack"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cli-tarball
+          path: ${{ runner.temp }}/pack/*.tgz
+
+  smoke:
+    needs: build
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Node 20 stays here although the test job dropped it: Vite+ cannot run
+        # on Node 20, but `engines.node` still promises it to users, so the
+        # packed CLI is what proves that promise holds.
+        node-version: [20, 22, 24]
+
+    name: Smoke test (Node ${{ matrix.node-version }})
+
+    steps:
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: cli-tarball
+
+      # The bundler exits 0 for a bundle that cannot actually run, so the
+      # packed artifact is installed and executed here rather than only being
+      # produced. A top-level await deadlock between the entry and its lazily
+      # imported command chunks shipped undetected precisely because nothing
+      # ran the output.
+      - name: Install and run the packed CLI
         run: |
-          version=$(node apps/cli/bin/cli.mjs --version)
+          npm install --global ./nulab-bee-*.tgz
+          version=$(bee --version)
           echo "bee --version -> ${version}"
           test -n "$version"
-          node apps/cli/bin/cli.mjs --help > /dev/null
-          node apps/cli/bin/cli.mjs issue --help > /dev/null
+          bee --help > /dev/null
+          bee issue --help > /dev/null
 
-  lint:
+  check:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4.2.5.6.4.2.5
-
-      - run: pnpm install --frozen-lockfile
-
-      - name: Type check
-        run: pnpm run typecheck
-
-      - name: Lint
-        run: pnpm exec oxlint --ignore-pattern 'apps/docs' --max-warnings 0
+      - uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
+        with:
+          node-version-file: .node-version
+          cache: true
 
       - name: Format check
-        run: pnpm run format:check
+        run: vp fmt --check
+
+      - name: Lint and type check
+        run: vp lint --max-warnings 0
 
       - name: Check generated Skill is up to date
-        run: pnpm --filter @nulab/bee generate:skill:check
+        run: vp run --filter @nulab/bee generate:skill:check
