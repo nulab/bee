@@ -23,29 +23,29 @@ Set these environment variables to avoid repeating common flags:
 
 <!-- BEGIN GENERATED COMMAND TABLE -->
 
-| Command            | Subcommands                                                                                                |
-| ------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `bee auth`         | `login`, `logout`, `status`, `token`, `refresh`, `switch`                                                  |
-| `bee project`      | `list`, `view`, `create`, `edit`, `delete`, `users`, `activities`, `add-user`, `remove-user`               |
-| `bee issue`        | `list`, `view`, `status`, `create`, `edit`, `close`, `reopen`, `attachments`, `comment`, `count`, `delete` |
-| `bee document`     | `list`, `view`, `tree`, `attachments`, `comments`, `count`, `create`, `add-tag`, `remove-tag`, `delete`    |
-| `bee notification` | `list`, `count`, `read`, `read-all`                                                                        |
-| `bee pr`           | `list`, `view`, `comments`, `status`, `create`, `edit`, `comment`, `count`                                 |
-| `bee repo`         | `list`, `view`, `clone`                                                                                    |
-| `bee team`         | `list`, `view`                                                                                             |
-| `bee user`         | `list`, `view`, `me`, `activities`                                                                         |
-| `bee wiki`         | `list`, `view`, `count`, `tags`, `history`, `attachments`, `create`, `edit`, `delete`                      |
-| `bee category`     | `list`, `create`, `edit`, `delete`                                                                         |
-| `bee milestone`    | `list`, `create`, `edit`, `delete`                                                                         |
-| `bee issue-type`   | `list`, `create`, `edit`, `delete`                                                                         |
-| `bee space`        | `activities`                                                                                               |
-| `bee status`       | `list`, `create`, `edit`, `delete`                                                                         |
-| `bee star`         | `add`, `list`, `count`, `remove`                                                                           |
-| `bee watching`     | `list`, `add`, `view`, `delete`, `read`                                                                    |
-| `bee dashboard`    | Show a summary of your Backlog activity                                                                    |
-| `bee browse`       | Open a Backlog page in the browser                                                                         |
-| `bee api`          | Make an authenticated API request                                                                          |
-| `bee completion`   | Generate shell completion scripts                                                                          |
+| Command            | Subcommands                                                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `bee auth`         | `login`, `logout`, `status`, `token`, `refresh`, `switch`                                                                                              |
+| `bee project`      | `list`, `view`, `create`, `edit`, `delete`, `users`, `activities`, `add-user`, `remove-user`                                                           |
+| `bee issue`        | `list`, `view`, `status`, `create`, `edit`, `close`, `reopen`, `attachments`, `comment`, `related`, `add-related`, `remove-related`, `count`, `delete` |
+| `bee document`     | `list`, `view`, `tree`, `attachments`, `comments`, `count`, `create`, `add-tag`, `remove-tag`, `delete`                                                |
+| `bee notification` | `list`, `count`, `read`, `read-all`                                                                                                                    |
+| `bee pr`           | `list`, `view`, `comments`, `status`, `create`, `edit`, `comment`, `count`                                                                             |
+| `bee repo`         | `list`, `view`, `clone`                                                                                                                                |
+| `bee team`         | `list`, `view`                                                                                                                                         |
+| `bee user`         | `list`, `view`, `me`, `activities`                                                                                                                     |
+| `bee wiki`         | `list`, `view`, `count`, `tags`, `history`, `attachments`, `create`, `edit`, `delete`                                                                  |
+| `bee category`     | `list`, `create`, `edit`, `delete`                                                                                                                     |
+| `bee milestone`    | `list`, `create`, `edit`, `delete`                                                                                                                     |
+| `bee issue-type`   | `list`, `create`, `edit`, `delete`                                                                                                                     |
+| `bee space`        | `activities`                                                                                                                                           |
+| `bee status`       | `list`, `create`, `edit`, `delete`                                                                                                                     |
+| `bee star`         | `add`, `list`, `count`, `remove`                                                                                                                       |
+| `bee watching`     | `list`, `add`, `view`, `delete`, `read`                                                                                                                |
+| `bee dashboard`    | Show a summary of your Backlog activity                                                                                                                |
+| `bee browse`       | Open a Backlog page in the browser                                                                                                                     |
+| `bee api`          | Make an authenticated API request                                                                                                                      |
+| `bee completion`   | Generate shell completion scripts                                                                                                                      |
 
 <!-- END GENERATED COMMAND TABLE -->
 

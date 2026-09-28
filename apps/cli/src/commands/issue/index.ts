@@ -12,6 +12,9 @@ await issue.addCommands([
   import("./reopen.js"),
   import("./attachments.js"),
   import("./comment.js"),
+  import("./related.js"),
+  import("./add-related.js"),
+  import("./remove-related.js"),
   import("./count.js"),
   import("./delete.js"),
 ]);

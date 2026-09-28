@@ -19,6 +19,7 @@ export {
 export { NOTIFICATION_REASON_LABELS } from "./notification-reason-labels";
 export { PR_STATUS_NAMES, PrStatusId, PrStatusName } from "./pr-constants";
 export { resolveProjectIds } from "./resolve-project";
+export { resolveIssueId } from "./resolve-issue";
 export { resolveUserId } from "./resolve-user";
 export { ROLE_LABELS } from "./role-labels";
 export { getClient } from "./client";
