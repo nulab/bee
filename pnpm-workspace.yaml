@@ -25,7 +25,7 @@ catalog:
   "@types/node": ^25.9.5
   "@vitest/coverage-v8": 5.0.1
   astro: ^7.2.4
-  backlog-js: ^0.19.1
+  backlog-js: ^0.20.1
   # Held one major back: commander >=15 needs Node >=22.12 and undici >=8 needs
   # >=22.19, but @nulab/bee publishes `engines.node: ">=20.18"`. Raising either
   # would break installs for Node 20 users, so this is a release decision, not
