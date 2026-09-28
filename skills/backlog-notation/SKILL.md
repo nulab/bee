@@ -1,59 +1,62 @@
 ---
 name: backlog-notation
-description: Syntax reference for Backlog notation (Backlog記法), one of the two per-project text formatting rules on Nulab Backlog — the other, and the default for new projects, is Markdown. Use when posting or editing formatted text on Backlog — issue descriptions (課題の説明), comments (コメント), wiki pages, pull requests — via the bee CLI or Backlog API; when converting Markdown to Backlog notation (Markdown から Backlog記法への変換); when asked how to write headings, bold, tables (表), checklists, colored text, links, or code blocks in Backlog記法; or when the project's rule is unknown (this skill shows how to check textFormattingRule first — text posted in the wrong rule renders as literal characters). Do not use for projects confirmed to use Markdown, for Markdown files outside Backlog, or for Backlog operations with no text to format (status changes, assignees, listing data).
+description: Syntax reference for Backlog notation (Backlog記法), the non-Markdown text format that a Nulab Backlog project can be set to. Use it only when the target project is known to use Backlog notation, which means the user or the project instructions (AGENTS.md, CLAUDE.md) say so, or `textFormattingRule` is `backlog`. Also use it when the user asks about Backlog記法 syntax, or asks to convert between Markdown and Backlog記法 in either direction (Markdown から Backlog記法への変換). It is not the default: new projects use Markdown, and documents (ドキュメント) always use Markdown. So do not use this skill just because text is going to Backlog, and do not use it while the project's format is still unknown. Find the format first (the using-bee skill shows how).
 ---
 
 # backlog-notation
 
-Backlog notation (Backlog記法) syntax reference.
+A syntax guide for Backlog notation (Backlog記法).
 
-## When this applies
+## Before You Use This
 
-Every Backlog project is set to one text formatting rule: **Markdown** (the default for new projects) or **Backlog notation**. This reference covers Backlog notation only. It is not a Backlog-wide standard, and it does not apply to Markdown projects — in those, write plain Markdown and ignore everything below.
+Each Backlog project uses one text format: **Markdown** or **Backlog notation**. New projects use Markdown by default. This guide covers only Backlog notation. Backlog notation is one of two choices. It is not the format for all Backlog text.
 
-Backlog renders text strictly by the project's rule: Backlog notation posted to a Markdown project (or vice versa) is not converted — it shows up as literal characters like `''bold''` or `**bold**`. Determine the rule like this:
+Use the syntax below only when both points are true:
 
-1. **The user or project instructions (AGENTS.md, CLAUDE.md) already state the rule** — the usual case. Follow what is stated; do not spend an API call re-verifying it.
-2. **The rule is not stated anywhere** — check it once before posting:
+1. **The text is for an issue description, a comment, a wiki page, or a pull request.** Documents (ドキュメント) always use Markdown, even when the project uses Backlog notation.
+2. **You know that the project uses Backlog notation.** The user or the project instructions say so, or this check returned `backlog`. If the user called this skill by name for a post, that counts as the user saying so:
 
    ```sh
    bee project view -p PROJECT_KEY --json textFormattingRule
    # {"textFormattingRule":"backlog"}   -> use this reference
-   # {"textFormattingRule":"markdown"}  -> use Markdown instead
+   # {"textFormattingRule":"markdown"}  -> write Markdown instead
    ```
 
-   If you cannot run bee (e.g. this skill is installed without it), fetch `/api/v2/projects/PROJECT_KEY` from the Backlog API and read `textFormattingRule`, or ask the user.
+   If bee is not available, read `textFormattingRule` from `GET /api/v2/projects/PROJECT_KEY`. You can also ask the user.
 
-Backlog notation is **not Markdown** — never mix the two syntaxes in one text.
+If either point is false, or you do not know the format, do not use this syntax. Backlog shows text written in the wrong format as plain characters. For example, a Markdown project shows `''bold''` as written.
+
+Backlog notation is **not Markdown**. Do not mix the two formats in the same text.
 
 ## Quick Reference
 
-| Feature            | Syntax                                                |
-| ------------------ | ----------------------------------------------------- |
-| Heading            | `* H1` / `** H2` / `*** H3` / `**** H4`               |
-| Bold               | `''text''`                                            |
-| Italic             | `'''text'''`                                          |
-| Strikethrough      | `%%text%%`                                            |
-| Color              | `&color(red) { text }`                                |
-| Color + background | `&color(#fff, #333) { text }`                         |
-| Bullet list        | `- item` (nest with `--`)                             |
-| Numbered list      | `+ item` (nest with `++`)                             |
-| Checklist          | `- [ ] todo` / `- [x] done` (issue descriptions only) |
-| Link               | `[[https://example.com]]`                             |
-| Labeled link       | `[[label>https://example.com]]`                       |
-| Issue link         | `PROJECT-123` (auto-linked)                           |
-| Quote              | `> text` or `{quote}...{/quote}`                      |
-| Code block         | `{code}...{/code}`                                    |
-| Code (lang)        | `{code:java}...{/code}`                               |
-| Image              | `#image(URL or filename)`                             |
-| Thumbnail          | `#thumbnail(URL or filename)` (< 200KB)               |
-| Table of contents  | `#contents`                                           |
-| Line break         | `&br;`                                                |
-| Escape             | `\` before special characters                         |
+| Feature            | Syntax                                                                    |
+| ------------------ | ------------------------------------------------------------------------- |
+| Heading            | `* H1` / `** H2` / `*** H3` / `**** H4`                                   |
+| Bold               | `''text''`                                                                |
+| Italic             | `'''text'''`                                                              |
+| Strikethrough      | `%%text%%`                                                                |
+| Color              | `&color(red) { text }`                                                    |
+| Color + background | `&color(#fff, #333) { text }`                                             |
+| Bullet list        | `- item` (use `--` for nested items)                                      |
+| Numbered list      | `+ item` (use `++` for nested items)                                      |
+| Checklist          | `- [ ] todo` / `- [x] done` (issue descriptions only)                     |
+| Link               | `[[https://example.com]]`                                                 |
+| Labeled link       | `[[label>https://example.com]]`                                           |
+| Issue link         | `PROJECT-123` (linked automatically)                                      |
+| Mention            | `<@U12345>` (numeric user ID, same as in Markdown; `@Name` is plain text) |
+| Quote              | `> text` or `{quote}...{/quote}`                                          |
+| Code block         | `{code}...{/code}`                                                        |
+| Code with language | `{code:java}...{/code}`                                                   |
+| Image              | `#image(URL or filename)`                                                 |
+| Thumbnail          | `#thumbnail(URL or filename)` (< 200KB)                                   |
+| Table of contents  | `#contents`                                                               |
+| Line break         | `&br;`                                                                    |
+| Escape             | Put `\` before special characters                                         |
 
 ## Tables
 
-Separate cells with `|`. End a row with `h` for a header row. Prefix a cell with `~` for a row header. Use `>` to merge a cell with the one to its left.
+Use `|` to separate cells. Put `h` at the end of a header row. Put `~` at the start of a row header cell. Use `>` to join a cell with the cell on its left.
 
 ```
 |Name|Value|Note|h
@@ -78,7 +81,7 @@ Separate cells with `|`. End a row with `h` for a header row. Prefix a cell with
 
 ## Complete Example
 
-A realistic issue description combining the elements above:
+This example shows a realistic issue description that uses the features above:
 
 ```
 * 障害報告: 画像アップロードが失敗する
@@ -110,7 +113,7 @@ curl -F "file=@large.png" https://xxx.backlog.com/api/v2/...
 
 ## Gotchas
 
-- No inline code syntax — only block-level `{code}...{/code}`
-- `{quote}` blocks cannot be nested
-- Checklists work only in issue descriptions, not in comments or wikis
-- Supported code languages: `java`, `cs`, `js`, `python`, `ruby`, `perl`, `php`, `sql`, `html`, `xml`, `css`, `shell`, etc.
+- There is no inline code syntax. Use only block-level `{code}...{/code}`.
+- You cannot put a `{quote}` block inside another `{quote}` block.
+- Checklists work only in issue descriptions. They do not work in comments or wikis.
+- Supported code languages include `java`, `cs`, `js`, `python`, `ruby`, `perl`, `php`, `sql`, `html`, `xml`, `css`, `shell`, etc.
