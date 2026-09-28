@@ -12,5 +12,16 @@
     "@vitest/coverage-v8": "catalog:",
     "vite-plus": "catalog:"
   },
-  "packageManager": "pnpm@10.30.3"
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "10.30.3",
+      "onFail": "error"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "^22.18.0 || ^24.11.0",
+      "onFail": "error"
+    }
+  }
 }

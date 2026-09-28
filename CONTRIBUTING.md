@@ -10,7 +10,7 @@ Issues are public. Before you post, remove any credentials, personal information
 
 ## Prerequisites
 
-- [Vite+](https://viteplus.dev/guide/) (`vp`) — manages the Node.js version (from `.node-version`) and pnpm (from `packageManager`), and runs every build, test, lint, and format task
+- [Vite+](https://viteplus.dev/guide/) (`vp`) — manages the Node.js and pnpm versions declared in `devEngines` in `package.json`, and runs every build, test, lint, and format task
 
 ## Getting Started
 

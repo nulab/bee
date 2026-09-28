@@ -52,6 +52,13 @@
     "@repo/tsconfigs": "workspace:*",
     "tsx": "catalog:"
   },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^22.18.0 || ^24.11.0",
+      "onFail": "error"
+    }
+  },
   "engines": {
     "node": ">=20.18"
   }

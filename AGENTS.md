@@ -413,8 +413,8 @@ validation, internal library code) where a `ValiError` is the appropriate error 
 ## Tooling
 
 - **Toolchain**: [Vite+](https://viteplus.dev/) (`vp`). All tool configuration (lint, fmt, test, staged) lives in the root `vite.config.ts`; `apps/cli/vite.config.ts` holds only the `pack` build.
-- **Runtime**: Node.js 24 (`.node-version`, managed by `vp`)
-- **Package manager**: pnpm (version from `packageManager`, managed by `vp`). External dependency versions are managed via [pnpm catalog](https://pnpm.io/catalogs) in `pnpm-workspace.yaml`. When adding dependencies, use `pnpm add --save-catalog <pkg>` (or `pnpm add --save-catalog -D <pkg>` for devDependencies) — this automatically adds the version to the catalog in `pnpm-workspace.yaml` and writes `"catalog:"` in `package.json`. Do not write version ranges directly in `package.json`.
+- **Runtime**: Node.js 24 (`devEngines.runtime` in `package.json`, managed by `vp`). `apps/cli/package.json` repeats it because `vp` resolves the nearest `package.json` first, and its `engines.node` (the published support range) would otherwise pick the dev runtime
+- **Package manager**: pnpm (`devEngines.packageManager` in `package.json`, managed by `vp`). External dependency versions are managed via [pnpm catalog](https://pnpm.io/catalogs) in `pnpm-workspace.yaml`. When adding dependencies, use `pnpm add --save-catalog <pkg>` (or `pnpm add --save-catalog -D <pkg>` for devDependencies) — this automatically adds the version to the catalog in `pnpm-workspace.yaml` and writes `"catalog:"` in `package.json`. Do not write version ranges directly in `package.json`.
 - **Linter**: oxlint via `vp lint` (with plugins: import, typescript, unicorn)
 - **Formatter**: oxfmt via `vp fmt`
 - **Type checker**: tsgolint (TypeScript 7) via `lint.options.typeCheck` — runs as part of `vp check` / `vp lint`; there is no separate `tsc` step

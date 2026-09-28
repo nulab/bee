@@ -58,7 +58,6 @@ jobs:
 
       - uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
         with:
-          node-version-file: .node-version
           cache: true
 
       - name: Get the latest tag
@@ -126,7 +125,6 @@ jobs:
 
       - uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
         with:
-          node-version-file: .node-version
           cache: true
           registry-url: https://registry.npmjs.org
 
