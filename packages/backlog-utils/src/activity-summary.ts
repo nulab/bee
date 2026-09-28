@@ -16,6 +16,12 @@ const getActivitySummary = (activity: { type: number; content: ActivityContent }
   if ("summary" in content && content.summary) {
     return content.summary;
   }
+  if ("title" in content && content.title) {
+    return content.title;
+  }
+  if ("documents" in content) {
+    return content.documents.map((document) => document.title).join(", ");
+  }
   if ("link" in content && content.link.length > 0) {
     return content.link
       .map((item) => (item.key_id ? `#${item.key_id}` : (item.title ?? "")))
