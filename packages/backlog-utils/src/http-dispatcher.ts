@@ -18,7 +18,7 @@ const SOCKS_PROXY_TYPES: Record<string, SocksProxyOptions["type"]> = {
 };
 
 const readProxyEnv = (name: string): string | undefined =>
-  process.env[name] || process.env[name.toLowerCase()];
+  process.env[name] ?? process.env[name.toLowerCase()];
 
 /**
  * Parses HTTPS_PROXY / HTTP_PROXY / ALL_PROXY into SOCKS proxy options, if

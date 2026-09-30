@@ -9,6 +9,12 @@ onlyBuiltDependencies:
 overrides:
   vite@*: "catalog:"
   vitest@*: "catalog:"
+  # fetch-socks depends on undici with the unpinned range `>=7`, so without
+  # this it resolves its own undici@8.x alongside the workspace's undici@7.x
+  # -- two structurally incompatible `Dispatcher` types make
+  # `.compose()`/`setGlobalDispatcher()` fail to typecheck. Pin it to the same
+  # major as the catalog's `undici` entry below; remove both together.
+  fetch-socks>undici: ^7.29.0
 
 peerDependencyRules:
   allowAny:
@@ -17,13 +23,6 @@ peerDependencyRules:
   allowedVersions:
     vite: "*"
     vitest: "*"
-
-  # fetch-socks depends on undici with the unpinned range `>=7`, so without
-  # this it resolves its own undici@8.x alongside the workspace's undici@7.x
-  # -- two structurally incompatible `Dispatcher` types make
-  # `.compose()`/`setGlobalDispatcher()` fail to typecheck. Pin it to the same
-  # major as the catalog's `undici` entry above; remove both together.
-  fetch-socks>undici: ^7.29.0
 
 catalog:
   "@astrojs/starlight": ^0.41.7

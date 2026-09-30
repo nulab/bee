@@ -35,7 +35,6 @@ describe("installHttpDispatcher", () => {
   const originalEnv: Record<string, string | undefined> = {};
 
   beforeEach(() => {
-    vi.clearAllMocks();
     for (const name of PROXY_ENV_VARS) {
       originalEnv[name] = process.env[name];
       delete process.env[name];
