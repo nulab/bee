@@ -34,10 +34,13 @@ description: |-
 : OAuth 認証で使用するコールバックサーバーのポート番号。デフォルトは `5033`。別のアプリケーションとポートが競合する場合に変更できます。
 
 `HTTPS_PROXY` / `HTTP_PROXY`
-: アウトバウンドの HTTPS / HTTP リクエストを指定したプロキシ経由でルーティングします（例: `http://proxy.corp.example.com:8080`）。社内プロキシ環境や制限されたネットワークでの利用に必要です。
+: アウトバウンドの HTTPS / HTTP リクエストを指定したプロキシ経由でルーティングします（例: `http://proxy.corp.example.com:8080`）。社内プロキシ環境や制限されたネットワークでの利用に必要です。`socks5://`（`socks5h`/`socks4`/`socks4a` も可）の URL を指定すると、SOCKS プロキシ経由でルーティングします（例: `socks5://user:pass@127.0.0.1:1080`）。
+
+`ALL_PROXY`
+: `HTTPS_PROXY` / `HTTP_PROXY` が未設定のときに使われるプロキシ（主に SOCKS プロキシ用）。スキームは `HTTPS_PROXY` / `HTTP_PROXY` と同じです。
 
 `NO_PROXY`
-: プロキシをバイパスするホストをカンマ区切りで指定します（例: `internal.example.com,localhost`）。サブドメイン（`.example.com`）、ポート指定（`example.com:8080`）、ワイルドカード（`*`）にも対応しています。
+: プロキシをバイパスするホストをカンマ区切りで指定します（例: `internal.example.com,localhost`）。サブドメイン（`.example.com`）、ポート指定（`example.com:8080`）、ワイルドカード（`*`）にも対応しています。SOCKS プロキシには適用されません。
 
 ## よく使うパターン
 
@@ -69,6 +72,15 @@ export BACKLOG_PROJECT=YOUR_PROJECT
 [env]
 BACKLOG_SPACE = "your-space.backlog.com"
 BACKLOG_PROJECT = "YOUR_PROJECT"
+```
+
+### SOCKS5 プロキシ経由での利用
+
+SSH トンネルなどで立てた SOCKS5 プロキシ経由で bee を使う場合は、`HTTPS_PROXY` に `socks5://` の URL を指定します。
+
+```sh
+export HTTPS_PROXY=socks5://127.0.0.1:1080
+bee issue list
 ```
 
 ### CI/CD での利用

@@ -9,6 +9,7 @@
     "@repo/config": "workspace:*",
     "backlog-js": "catalog:",
     "consola": "catalog:",
+    "fetch-socks": "catalog:",
     "open": "catalog:",
     "undici": "catalog:",
     "valibot": "catalog:"
