@@ -38,7 +38,7 @@ jobs:
 
       - name: Report coverage
         if: always() && github.event_name == 'pull_request' && matrix.node-version == 24
-        uses: davelosert/vitest-coverage-report-action@3c50566c523e04813df28de8f7c48dd97d663f1c # v2
+        uses: davelosert/vitest-coverage-report-action@c4bbc33a89b7ace0e63d35f1f7d4bcee31155a73 # v2
 
   build:
     runs-on: ubuntu-latest
