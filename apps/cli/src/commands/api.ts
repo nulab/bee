@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { text } from "node:stream/consumers";
+import { pipeline } from "node:stream/promises";
 import { type BacklogClient, getClient } from "@repo/backlog-utils";
 import { UserError, outputResult, vFiniteNumber } from "@repo/cli-utils";
 import * as v from "valibot";
@@ -19,7 +20,9 @@ const api = new BeeCommand("api")
 
 If a \`-f\` value starts with \`@\`, the rest of the value is interpreted as a filename to read the value from. Pass \`-\` to read from standard input (e.g. \`-f 'key=@-'\`). File and stdin content is always sent as a string, without type inference.
 
-For GET, fields are query parameters. For POST/PUT/PATCH/DELETE, fields are the request body.`,
+For GET, fields are query parameters. For POST/PUT/PATCH/DELETE, fields are the request body.
+
+JSON responses are formatted as JSON. Other response bodies are written unchanged to standard output. Redirect the output to a file to download attachments. \`--json\` is only supported for JSON responses.`,
   )
   .argument("<endpoint>", "API endpoint path")
   .option("-X, --method <method>", "HTTP method", "GET")
@@ -66,6 +69,10 @@ For GET, fields are query parameters. For POST/PUT/PATCH/DELETE, fields are the 
       description: "Select specific fields",
       command: "bee api users/myself --json id,name,mailAddress",
     },
+    {
+      description: "Download an issue attachment",
+      command: "bee api issues/PROJECT-1/attachments/123 > image.png",
+    },
   ])
   .action(async (endpoint: string, opts) => {
     const { client } = await getClient(opts.space);
@@ -75,16 +82,33 @@ For GET, fields are query parameters. For POST/PUT/PATCH/DELETE, fields are the 
 
     const params = await buildParams(opts.field, opts.rawField);
 
-    const data = await makeRequest(client, method, normalizedEndpoint, params);
+    const response = await makeRequest(client, method, normalizedEndpoint, params);
 
     if (opts.silent) {
+      await response.body?.cancel();
       return;
     }
 
-    // Default to JSON output (api always returns JSON).
-    // --json with field names filters the output via outputResult.
-    const jsonVal = typeof opts.json === "string" ? opts.json : "";
-    outputResult(data, { json: jsonVal }, () => {});
+    if (!response.body || response.headers.get("Content-Length") === "0") {
+      return;
+    }
+
+    const contentType = response.headers.get("Content-Type")?.split(";")[0]?.trim().toLowerCase();
+    const isJson = contentType === "application/json" || contentType?.endsWith("+json");
+
+    if (isJson) {
+      const data: unknown = await response.json();
+      const jsonVal = typeof opts.json === "string" ? opts.json : "";
+      outputResult(data, { json: jsonVal }, () => {});
+      return;
+    }
+
+    if (opts.json !== undefined) {
+      await response.body.cancel();
+      throw new UserError("--json is only supported for JSON responses.");
+    }
+
+    await pipeline(response.body, process.stdout, { end: false });
   });
 
 /**
@@ -208,27 +232,23 @@ const makeRequest = async (
   method: string,
   endpoint: string,
   params: Params,
-): Promise<unknown> => {
-  switch (method) {
-    case "GET": {
-      return client.get(endpoint, params);
-    }
-    case "POST": {
-      return client.post(endpoint, params);
-    }
-    case "PUT": {
-      return client.put(endpoint, params);
-    }
-    case "PATCH": {
-      return client.patch(endpoint, params);
-    }
-    case "DELETE": {
-      return client.delete(endpoint, params);
-    }
-    default: {
-      throw new UserError(`Unsupported HTTP method: ${method}`);
+): Promise<Response> => {
+  if (!["GET", "POST", "PUT", "PATCH", "DELETE"].includes(method)) {
+    throw new UserError(`Unsupported HTTP method: ${method}`);
+  }
+
+  const requestParams: Record<string, string | number | string[]> = {};
+  for (const [key, value] of Object.entries(params)) {
+    if (Array.isArray(value)) {
+      requestParams[key] = value.map(String);
+    } else if (typeof value === "boolean") {
+      requestParams[key] = String(value);
+    } else {
+      requestParams[key] = value;
     }
   }
+
+  return client.request({ method, path: endpoint, params: requestParams });
 };
 
 export default api;
