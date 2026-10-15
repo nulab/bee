@@ -1,5 +1,5 @@
 import { type RcAuth, loadConfig } from "@repo/config";
-import { type Entity, Backlog } from "backlog-js";
+import { type Entity, getMyself, createClient } from "backlog-js";
 import consola from "consola";
 import { printDefinitionList } from "@repo/cli-utils";
 import { BeeCommand } from "../../lib/bee-command";
@@ -48,9 +48,9 @@ const status = new BeeCommand("status")
       try {
         const client =
           space.auth.method === "api-key"
-            ? new Backlog({ host: space.host, apiKey: space.auth.apiKey })
-            : new Backlog({ host: space.host, accessToken: space.auth.accessToken });
-        user = await client.getMyself();
+            ? createClient({ host: space.host, apiKey: space.auth.apiKey })
+            : createClient({ host: space.host, accessToken: space.auth.accessToken });
+        user = await getMyself(client);
       } catch (error) {
         consola.debug("Token verification failed:", error);
       }

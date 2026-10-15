@@ -1,3 +1,4 @@
+import { postProjectStatus } from "backlog-js";
 import { getClient, statusUrl } from "@repo/backlog-utils";
 import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
@@ -33,7 +34,7 @@ const create = new BeeCommand("create")
 
     const name = await promptRequired("Status name:", opts.name);
 
-    const status = await client.postProjectStatus(opts.project, {
+    const status = await postProjectStatus(client, opts.project, {
       name,
       color: opts.color as never,
     });

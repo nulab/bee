@@ -1,3 +1,4 @@
+import { getProject } from "backlog-js";
 import { getClient, openOrPrintUrl, projectUrl } from "@repo/backlog-utils";
 import { outputResult, printDefinitionList } from "@repo/cli-utils";
 import consola from "consola";
@@ -29,7 +30,7 @@ const view = new BeeCommand("view")
       return;
     }
 
-    const projectData = await client.getProject(opts.project);
+    const projectData = await getProject(client, opts.project);
 
     const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(projectData, { ...opts, json: jsonArg }, (data) => {

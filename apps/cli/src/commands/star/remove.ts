@@ -1,3 +1,4 @@
+import { removeStar } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -13,7 +14,7 @@ const remove = new BeeCommand("remove")
   .examples([{ description: "Remove a star", command: "bee star remove 12345" }])
   .action(async (star, opts) => {
     const { client } = await getClient(opts.space);
-    await client.removeStar(parseArg(vInteger, star, "star"));
+    await removeStar(client, parseArg(vInteger, star, "star"));
     consola.success(`Removed star ${star}.`);
   });
 

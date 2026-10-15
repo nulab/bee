@@ -1,3 +1,4 @@
+import { patchIssue } from "backlog-js";
 import { PRIORITY_NAMES, PriorityId, getClient, resolveUserId } from "@repo/backlog-utils";
 import { outputResult, parseArg, vFiniteNumber, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -63,7 +64,7 @@ const edit = new BeeCommand("edit")
       }
     }
 
-    const issueData = await client.patchIssue(issue, {
+    const issueData = await patchIssue(client, issue, {
       summary: opts.title,
       description: opts.description,
       statusId: parseArg(v.optional(vInteger), opts.status, "--status"),

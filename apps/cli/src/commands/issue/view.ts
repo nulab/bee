@@ -1,3 +1,4 @@
+import { getIssue, getIssueComments } from "backlog-js";
 import { getClient, issueUrl, openOrPrintUrl } from "@repo/backlog-utils";
 import { formatDate, outputResult, printDefinitionList } from "@repo/cli-utils";
 import consola from "consola";
@@ -32,9 +33,9 @@ const view = new BeeCommand("view")
       return;
     }
 
-    const issueData = await client.getIssue(issue);
+    const issueData = await getIssue(client, issue);
 
-    const comments = opts.comments ? await client.getIssueComments(issue, { order: "asc" }) : [];
+    const comments = opts.comments ? await getIssueComments(client, issue, { order: "asc" }) : [];
 
     outputResult(issueData, opts as { json?: string }, (data) => {
       consola.log("");

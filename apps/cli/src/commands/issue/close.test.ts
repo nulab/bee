@@ -11,6 +11,7 @@ vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   getClient: vi.fn(() => Promise.resolve({ client: mockClient, host: "example.backlog.com" })),
 }));
 
+vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("issue close", () => {

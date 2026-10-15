@@ -19,6 +19,7 @@ vi.mock("@repo/cli-utils", async (importOriginal) => ({
   printTable: vi.fn(),
 }));
 
+vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("issue comment", () => {

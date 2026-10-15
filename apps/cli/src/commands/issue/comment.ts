@@ -1,3 +1,10 @@
+import {
+  deleteIssueComment,
+  getIssueComments,
+  getMyself,
+  patchIssueComment,
+  postIssueComments,
+} from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import {
   type Row,
@@ -51,7 +58,7 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
     const { client } = await getClient(opts.space);
 
     if (opts.list) {
-      const comments = await client.getIssueComments(issue, { order: "asc" });
+      const comments = await getIssueComments(client, issue, { order: "asc" });
 
       outputResult(comments, opts as { json?: string }, (data) => {
         const filtered = data.filter((c) => c.content);
@@ -73,8 +80,8 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
     }
 
     if (opts.editLast) {
-      const myself = await client.getMyself();
-      const comments = await client.getIssueComments(issue, { order: "desc" });
+      const myself = await getMyself(client);
+      const comments = await getIssueComments(client, issue, { order: "desc" });
       const myComment = comments.find((c) => c.createdUser.id === myself.id);
 
       if (!myComment) {
@@ -88,7 +95,7 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
         return;
       }
 
-      const result = await client.patchIssueComment(issue, myComment.id, { content });
+      const result = await patchIssueComment(client, issue, myComment.id, { content });
 
       outputResult(result, opts as { json?: string }, () => {
         consola.success(`Updated comment on ${issue}`);
@@ -97,8 +104,8 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
     }
 
     if (opts.deleteLast) {
-      const myself = await client.getMyself();
-      const comments = await client.getIssueComments(issue, { order: "desc" });
+      const myself = await getMyself(client);
+      const comments = await getIssueComments(client, issue, { order: "desc" });
       const myComment = comments.find((c) => c.createdUser.id === myself.id);
 
       if (!myComment) {
@@ -114,7 +121,7 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
         return;
       }
 
-      const result = await client.deleteIssueComment(issue, myComment.id);
+      const result = await deleteIssueComment(client, issue, myComment.id);
 
       outputResult(result, opts as { json?: string }, () => {
         consola.success(`Deleted comment on ${issue}`);
@@ -131,7 +138,7 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
     const notifiedUserId = opts.notify ?? [];
     const attachmentId = opts.attachment ?? [];
 
-    const result = await client.postIssueComments(issue, {
+    const result = await postIssueComments(client, issue, {
       content,
       notifiedUserId,
       attachmentId,

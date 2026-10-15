@@ -1,3 +1,4 @@
+import { postWiki } from "backlog-js";
 import { getClient, resolveProjectIds, wikiUrl } from "@repo/backlog-utils";
 import { outputResult, promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
@@ -37,7 +38,7 @@ const create = new BeeCommand("create")
 
     const [projectId] = await resolveProjectIds(client, [project]);
 
-    const wiki = await client.postWiki({
+    const wiki = await postWiki(client, {
       projectId,
       name,
       content: body,

@@ -10,6 +10,7 @@ vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   resolveProjectIds: vi.fn((_: unknown, ids: string[]) => Promise.resolve(ids)),
 }));
 
+vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("issue count", () => {

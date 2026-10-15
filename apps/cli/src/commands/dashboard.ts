@@ -1,3 +1,4 @@
+import { getIssues, getMyself, getNotificationsCount, getProjects } from "backlog-js";
 import { dashboardUrl, getClient, openOrPrintUrl } from "@repo/backlog-utils";
 import { type Row, formatDate, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
@@ -29,16 +30,16 @@ const dashboard = new BeeCommand("dashboard")
     }
 
     const [myself, notifications, issues, projects] = await Promise.all([
-      client.getMyself(),
-      client.getNotificationsCount({ alreadyRead: false, resourceAlreadyRead: false }),
-      client.getIssues({
+      getMyself(client),
+      getNotificationsCount(client, { alreadyRead: false, resourceAlreadyRead: false }),
+      getIssues(client, {
         assigneeId: [-1],
         statusId: [1, 2, 3],
         count: 20,
         sort: "dueDate",
         order: "asc",
       }),
-      client.getProjects({ all: false }),
+      getProjects(client, { all: false }),
     ]);
 
     const result = { myself, notifications, issues, projects };

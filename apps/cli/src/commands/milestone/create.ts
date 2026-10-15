@@ -1,3 +1,4 @@
+import { postVersions } from "backlog-js";
 import { getClient, milestoneUrl } from "@repo/backlog-utils";
 import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
@@ -30,7 +31,7 @@ const create = new BeeCommand("create")
 
     const name = await promptRequired("Milestone name:", opts.name);
 
-    const milestone = await client.postVersions(opts.project, {
+    const milestone = await postVersions(client, opts.project, {
       name,
       description: opts.description,
       startDate: opts.startDate,

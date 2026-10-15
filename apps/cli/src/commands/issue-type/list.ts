@@ -1,3 +1,4 @@
+import { getIssueTypes } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
@@ -20,7 +21,7 @@ const list = new BeeCommand("list")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const issueTypes = await client.getIssueTypes(opts.project);
+    const issueTypes = await getIssueTypes(client, opts.project);
 
     outputResult(issueTypes, opts, (data) => {
       if (data.length === 0) {

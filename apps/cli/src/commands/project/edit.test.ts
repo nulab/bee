@@ -11,6 +11,7 @@ vi.mock("@repo/cli-utils", async (importOriginal) => ({
   promptRequired: vi.fn((_label: string, val?: string) => Promise.resolve(val)),
 }));
 
+vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("project edit", () => {

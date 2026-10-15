@@ -1,3 +1,4 @@
+import { getTeams } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { type Row, outputResult, parseArg, printTable, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -26,7 +27,7 @@ const list = new BeeCommand("list")
     const offset = parseArg(v.optional(vInteger), opts.offset, "--offset");
     const count = parseArg(v.optional(vInteger), opts.count, "--count");
 
-    const teams = await client.getTeams({ order, offset, count });
+    const teams = await getTeams(client, { order, offset, count });
 
     outputResult(teams, opts, (data) => {
       if (data.length === 0) {

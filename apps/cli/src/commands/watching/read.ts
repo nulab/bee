@@ -1,3 +1,4 @@
+import { resetWatchingListItemAsRead } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -14,7 +15,7 @@ const read = new BeeCommand("read")
   .action(async (watching, opts) => {
     const { client } = await getClient(opts.space);
 
-    await client.resetWatchingListItemAsRead(parseArg(vInteger, watching, "watching"));
+    await resetWatchingListItemAsRead(client, parseArg(vInteger, watching, "watching"));
 
     consola.success(`Marked watching ${watching} as read.`);
   });

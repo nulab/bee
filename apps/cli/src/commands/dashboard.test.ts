@@ -16,6 +16,7 @@ vi.mock("@repo/backlog-utils", () => ({
   dashboardUrl: vi.fn((host: string) => `https://${host}/dashboard`),
 }));
 
+vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleMyself = {

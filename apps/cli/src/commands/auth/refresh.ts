@@ -1,7 +1,7 @@
 import { refreshAccessToken } from "@repo/backlog-utils";
 import { UserError } from "@repo/cli-utils";
 import { findSpace, loadConfig, updateSpaceAuth } from "@repo/config";
-import { Backlog } from "backlog-js";
+import { getMyself, createClient } from "backlog-js";
 import consola from "consola";
 import { BeeCommand } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -58,8 +58,8 @@ const refresh = new BeeCommand("refresh")
 
     let user;
     try {
-      const client = new Backlog({ host: space.host, accessToken: tokenResponse.access_token });
-      user = await client.getMyself();
+      const client = createClient({ host: space.host, accessToken: tokenResponse.access_token });
+      user = await getMyself(client);
     } catch {
       throw new UserError("Token verification failed after refresh.");
     }

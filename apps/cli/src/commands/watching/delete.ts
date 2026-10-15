@@ -1,3 +1,4 @@
+import { deletehWatchingListItem } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { confirmOrExit, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -35,7 +36,7 @@ const deleteWatching = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const result = await client.deletehWatchingListItem(parseArg(vInteger, watching, "watching"));
+    const result = await deletehWatchingListItem(client, parseArg(vInteger, watching, "watching"));
 
     outputResult(result, opts, (data) => {
       consola.success(`Deleted watching ${data.id}.`);

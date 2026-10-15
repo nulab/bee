@@ -1,3 +1,4 @@
+import { getMyself, getUserStars } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import {
   type Row,
@@ -30,11 +31,11 @@ const list = new BeeCommand("list")
     if (user) {
       userId = parseArg(vInteger, user, "user");
     } else {
-      const myself = await client.getMyself();
+      const myself = await getMyself(client);
       userId = myself.id;
     }
 
-    const stars = await client.getUserStars(userId, {});
+    const stars = await getUserStars(client, userId, {});
 
     outputResult(stars, opts, (data) => {
       if (data.length === 0) {

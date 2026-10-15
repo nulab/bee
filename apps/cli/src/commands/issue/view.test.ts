@@ -15,6 +15,7 @@ vi.mock("@repo/backlog-utils", () => ({
   issueUrl: vi.fn((host: string, key: string) => `https://${host}/view/${key}`),
 }));
 
+vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleIssue = {

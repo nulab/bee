@@ -1,3 +1,4 @@
+import { getPullRequestComments } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { formatDate, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -32,7 +33,7 @@ const comments = new BeeCommand("comments")
 
     const prNumber = parseArg(vInteger, number, "number");
 
-    const prComments = await client.getPullRequestComments(opts.project, opts.repo, prNumber, {
+    const prComments = await getPullRequestComments(client, opts.project, opts.repo, prNumber, {
       minId: parseArg(v.optional(vInteger), opts.minId, "--min-id"),
       maxId: parseArg(v.optional(vInteger), opts.maxId, "--max-id"),
       order: opts.order ?? "asc",

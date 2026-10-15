@@ -1,3 +1,4 @@
+import { patchVersions } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -36,7 +37,8 @@ const edit = new BeeCommand("edit")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const result = await client.patchVersions(
+    const result = await patchVersions(
+      client,
       opts.project,
       parseArg(vInteger, milestone, "milestone"),
       {

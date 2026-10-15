@@ -1,3 +1,4 @@
+import { markAsReadNotification } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -16,7 +17,7 @@ const read = new BeeCommand("read")
   .action(async (id, opts) => {
     const { client } = await getClient(opts.space);
 
-    await client.markAsReadNotification(parseArg(vInteger, id, "id"));
+    await markAsReadNotification(client, parseArg(vInteger, id, "id"));
 
     consola.success(`Marked notification ${id} as read.`);
   });

@@ -1,3 +1,4 @@
+import { getWiki } from "backlog-js";
 import { getClient, openOrPrintUrl, wikiUrl } from "@repo/backlog-utils";
 import { formatDate, outputResult, parseArg, printDefinitionList, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -27,7 +28,7 @@ const view = new BeeCommand("view")
       return;
     }
 
-    const wikiData = await client.getWiki(parseArg(vInteger, wiki, "wiki"));
+    const wikiData = await getWiki(client, parseArg(vInteger, wiki, "wiki"));
 
     outputResult(wikiData, opts, (data) => {
       consola.log("");

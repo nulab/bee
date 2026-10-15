@@ -1,3 +1,4 @@
+import { deleteProject as deleteProjectApi } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { confirmOrExit, outputResult } from "@repo/cli-utils";
 import consola from "consola";
@@ -35,7 +36,7 @@ const deleteProject = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const projectData = await client.deleteProject(opts.project);
+    const projectData = await deleteProjectApi(client, opts.project);
 
     const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(projectData, { ...opts, json: jsonArg }, (data) => {

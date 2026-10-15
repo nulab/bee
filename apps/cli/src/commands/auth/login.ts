@@ -1,7 +1,7 @@
 import { exchangeAuthorizationCode, openUrl, startCallbackServer } from "@repo/backlog-utils";
 import { UserError, promptRequired, readStdin } from "@repo/cli-utils";
 import { type RcAuth, RcHostSchema, updateConfig } from "@repo/config";
-import { Backlog, OAuth2 } from "backlog-js";
+import { OAuth2, getMyself, createClient } from "backlog-js";
 import consola from "consola";
 import * as v from "valibot";
 import { BeeCommand } from "../../lib/bee-command";
@@ -73,8 +73,8 @@ const loginWithApiKey = async (hostname: string, opts: { withToken?: boolean }):
 
   let user;
   try {
-    const client = new Backlog({ host: hostname, apiKey });
-    user = await client.getMyself();
+    const client = createClient({ host: hostname, apiKey });
+    user = await getMyself(client);
   } catch {
     throw new UserError(
       `Authentication failed. Could not connect to ${hostname} with the provided API key.`,
@@ -138,8 +138,8 @@ const loginWithOAuth = async (hostname: string): Promise<void> => {
 
   let user;
   try {
-    const client = new Backlog({ host: hostname, accessToken: tokenResponse.access_token });
-    user = await client.getMyself();
+    const client = createClient({ host: hostname, accessToken: tokenResponse.access_token });
+    user = await getMyself(client);
   } catch {
     throw new UserError("Authentication verification failed.");
   }

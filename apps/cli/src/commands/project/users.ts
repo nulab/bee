@@ -1,3 +1,4 @@
+import { getProjectUsers } from "backlog-js";
 import { ROLE_LABELS, getClient } from "@repo/backlog-utils";
 import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
@@ -20,7 +21,7 @@ const users = new BeeCommand("users")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const members = await client.getProjectUsers(opts.project);
+    const members = await getProjectUsers(client, opts.project);
 
     const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(members, { ...opts, json: jsonArg }, (data) => {

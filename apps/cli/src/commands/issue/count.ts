@@ -1,3 +1,4 @@
+import { getIssuesCount } from "backlog-js";
 import {
   PRIORITY_NAMES,
   PriorityId,
@@ -63,7 +64,7 @@ const count = new BeeCommand("count")
     const statusId: number[] = opts.status;
     const priorityId = opts.priority.length > 0 ? resolvePriorityIds(opts.priority) : [];
 
-    const result = await client.getIssuesCount({
+    const result = await getIssuesCount(client, {
       projectId,
       assigneeId,
       statusId,

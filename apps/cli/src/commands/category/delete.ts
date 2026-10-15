@@ -1,3 +1,4 @@
+import { deleteCategories } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { confirmOrExit, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -36,7 +37,8 @@ const deleteCategory = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const result = await client.deleteCategories(
+    const result = await deleteCategories(
+      client,
       opts.project,
       parseArg(vInteger, category, "category"),
     );

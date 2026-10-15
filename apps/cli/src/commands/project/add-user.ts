@@ -1,3 +1,4 @@
+import { postProjectUser } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -26,7 +27,7 @@ const addUser = new BeeCommand("add-user")
 
     const { client } = await getClient(opts.space);
 
-    const user = await client.postProjectUser(opts.project, String(userId));
+    const user = await postProjectUser(client, opts.project, String(userId));
 
     const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(user, { ...opts, json: jsonArg }, (data) => {

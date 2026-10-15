@@ -1,3 +1,9 @@
+import {
+  getMyself,
+  getPullRequestComments,
+  patchPullRequestComments,
+  postPullRequestComments,
+} from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import {
   type Row,
@@ -53,7 +59,7 @@ Use \`--list\` or \`--edit-last\` for other comment operations.`,
     const json = opts.json === true ? "" : opts.json;
 
     if (opts.list) {
-      const comments = await client.getPullRequestComments(opts.project, opts.repo, prNumber, {
+      const comments = await getPullRequestComments(client, opts.project, opts.repo, prNumber, {
         order: "asc",
       });
 
@@ -77,8 +83,8 @@ Use \`--list\` or \`--edit-last\` for other comment operations.`,
     }
 
     if (opts.editLast) {
-      const myself = await client.getMyself();
-      const comments = await client.getPullRequestComments(opts.project, opts.repo, prNumber, {
+      const myself = await getMyself(client);
+      const comments = await getPullRequestComments(client, opts.project, opts.repo, prNumber, {
         order: "desc",
       });
       const myComment = comments.find((c) => c.createdUser.id === myself.id);
@@ -94,7 +100,8 @@ Use \`--list\` or \`--edit-last\` for other comment operations.`,
         return;
       }
 
-      const result = await client.patchPullRequestComments(
+      const result = await patchPullRequestComments(
+        client,
         opts.project,
         opts.repo,
         prNumber,
@@ -116,7 +123,7 @@ Use \`--list\` or \`--edit-last\` for other comment operations.`,
     }
     const notifiedUserId = opts.notify ?? [];
 
-    const result = await client.postPullRequestComments(opts.project, opts.repo, prNumber, {
+    const result = await postPullRequestComments(client, opts.project, opts.repo, prNumber, {
       content,
       notifiedUserId,
     });

@@ -7,6 +7,7 @@ const { mockClient, host } = setupCommandTest({
 });
 
 vi.mock("@repo/backlog-utils", () => mockGetClient(mockClient, host));
+vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleStars = [

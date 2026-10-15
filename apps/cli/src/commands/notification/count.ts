@@ -1,3 +1,4 @@
+import { getNotificationsCount } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
@@ -57,8 +58,9 @@ https://developer.nulab.com/docs/backlog/api/2/count-notification/`,
     }
 
     // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- backlog-js types require both fields but API accepts partial params
-    const result = await client.getNotificationsCount(
-      params as unknown as Parameters<typeof client.getNotificationsCount>[0],
+    const result = await getNotificationsCount(
+      client,
+      params as unknown as Parameters<typeof getNotificationsCount>[1],
     );
 
     outputResult(result, opts, (data) => {

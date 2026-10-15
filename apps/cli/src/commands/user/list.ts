@@ -1,3 +1,4 @@
+import { getUsers } from "backlog-js";
 import { ROLE_LABELS, getClient } from "@repo/backlog-utils";
 import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
@@ -17,7 +18,7 @@ const list = new BeeCommand("list")
   .action(async (opts) => {
     const { client } = await getClient(opts.space);
 
-    const users = await client.getUsers();
+    const users = await getUsers(client);
 
     outputResult(users, opts, (data) => {
       if (data.length === 0) {

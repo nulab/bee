@@ -1,3 +1,4 @@
+import { deleteIssueType as deleteIssueTypeApi } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { confirmOrExit, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -42,7 +43,8 @@ const deleteIssueType = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const result = await client.deleteIssueType(
+    const result = await deleteIssueTypeApi(
+      client,
       opts.project,
       parseArg(vInteger, issueType, "issueType"),
       {

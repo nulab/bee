@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { getClient } from "./client";
-import { Backlog } from "backlog-js";
+import { createClient } from "backlog-js";
 import { findSpace, loadConfig } from "@repo/config";
 
 vi.mock("@repo/config", () => ({
@@ -10,9 +10,7 @@ vi.mock("@repo/config", () => ({
 }));
 
 vi.mock("backlog-js", () => ({
-  Backlog: vi.fn(function () {
-    return { getMyself: vi.fn() };
-  }),
+  createClient: vi.fn(() => ({ getMyself: vi.fn() })),
   Error: {
     BacklogApiError: class extends globalThis.Error {
       status = 0;
@@ -45,7 +43,7 @@ describe("getClient", () => {
 
     const result = await getClient("example.backlog.com");
 
-    expect(Backlog).toHaveBeenCalledWith({
+    expect(createClient).toHaveBeenCalledWith({
       host: "example.backlog.com",
       apiKey: "test-key",
     });
@@ -68,7 +66,7 @@ describe("getClient", () => {
 
     const result = await getClient("example.backlog.com");
 
-    expect(Backlog).toHaveBeenCalledWith({
+    expect(createClient).toHaveBeenCalledWith({
       host: "example.backlog.com",
       accessToken: "access-token",
     });
@@ -124,7 +122,7 @@ describe("getClient", () => {
 
     const result = await getClient();
 
-    expect(Backlog).toHaveBeenCalledWith({
+    expect(createClient).toHaveBeenCalledWith({
       host: "env.backlog.com",
       apiKey: "env-key",
     });
@@ -141,7 +139,7 @@ describe("getClient", () => {
 
     const result = await getClient("flag.backlog.com");
 
-    expect(Backlog).toHaveBeenCalledWith({
+    expect(createClient).toHaveBeenCalledWith({
       host: "flag.backlog.com",
       apiKey: "env-key",
     });
@@ -162,7 +160,7 @@ describe("getClient", () => {
 
     const result = await getClient();
 
-    expect(Backlog).toHaveBeenCalledWith({
+    expect(createClient).toHaveBeenCalledWith({
       host: "example.backlog.com",
       apiKey: "config-key",
     });

@@ -1,5 +1,5 @@
 import { loadConfig } from "@repo/config";
-import { Backlog } from "backlog-js";
+import { createClient } from "backlog-js";
 import consola from "consola";
 import { describe, expect, it, vi } from "vite-plus/test";
 import { parseCommand } from "@repo/test-utils";
@@ -7,9 +7,8 @@ import { parseCommand } from "@repo/test-utils";
 const mockGetMyself = vi.fn();
 
 vi.mock("backlog-js", () => ({
-  Backlog: vi.fn(function () {
-    return { getMyself: mockGetMyself };
-  }),
+  createClient: vi.fn(() => ({})),
+  getMyself: (...args: unknown[]) => mockGetMyself(...args),
 }));
 
 vi.mock("@repo/config", () => ({ loadConfig: vi.fn() }));
@@ -32,7 +31,7 @@ describe("auth status", () => {
 
     await parseCommand(() => import("./status"));
 
-    expect(Backlog).toHaveBeenCalledWith({ host: "example.backlog.com", apiKey: "key" });
+    expect(createClient).toHaveBeenCalledWith({ host: "example.backlog.com", apiKey: "key" });
     expect(mockGetMyself).toHaveBeenCalled();
     expect(consola.log).toHaveBeenCalledWith("  example.backlog.com (default)");
     expect(consola.log).toHaveBeenCalledWith("    Method  api-key");
@@ -133,7 +132,7 @@ describe("auth status", () => {
 
     await parseCommand(() => import("./status"));
 
-    expect(Backlog).toHaveBeenCalledWith({
+    expect(createClient).toHaveBeenCalledWith({
       host: "example.backlog.com",
       accessToken: "oauth-access-token",
     });

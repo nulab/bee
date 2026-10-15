@@ -1,3 +1,4 @@
+import { postIssue } from "backlog-js";
 import {
   PRIORITY_NAMES,
   PriorityId,
@@ -77,7 +78,7 @@ const create = new BeeCommand("create")
     const notifiedUserId = opts.notify ?? [];
     const attachmentId = opts.attachment ?? [];
 
-    const issue = await client.postIssue({
+    const issue = await postIssue(client, {
       projectId,
       summary: title,
       issueTypeId: parseArg(vInteger, issueTypeId, "issueTypeId"),
