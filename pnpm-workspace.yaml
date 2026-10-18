@@ -19,35 +19,35 @@ peerDependencyRules:
     vitest: "*"
 
 catalog:
-  "@astrojs/starlight": ^0.41.7
+  "@astrojs/starlight": ^0.42.6
   "@tsconfig/node-lts": ^24.0.1
   "@tsconfig/node-ts": ^23.6.4
-  "@types/node": ^25.9.5
-  "@vitest/coverage-v8": 5.0.1
-  astro: ^7.2.4
+  "@types/node": ^26.6.1
+  "@vitest/coverage-v8": 5.0.3
+  astro: ^7.3.8
   backlog-js: ^0.20.1
   # Held one major back: commander >=15 needs Node >=22.12 and undici >=8 needs
   # >=22.19, but @nulab/bee publishes `engines.node: ">=20.18"`. Raising either
   # would break installs for Node 20 users, so this is a release decision, not
   # a mechanical bump. Node 20 reached EOL on 2026-04-30; both can go up in the
   # same change that drops Node 20 from engines and the CI matrix.
-  commander: ^14.0.3
+  commander: ^15.0.0
   consola: ^3.4.2
   is-unicode-supported: ^2.1.0
   jiti: ^2.7.0
-  marked: ^18.0.10
-  open: ^11.0.1
-  rc9: ^3.0.1
-  remark-definition-list: ^2.0.0
-  sharp: ^0.35.3
-  starlight-links-validator: ^0.25.3
-  string-width: ^8.2.2
-  tsx: ^4.23.12
+  marked: ^18.1.0
+  open: ^11.0.4
+  rc9: ^3.1.0
+  remark-definition-list: ^2.0.1
+  sharp: ^0.35.5
+  starlight-links-validator: ^0.27.0
+  string-width: ^8.3.0
+  tsx: ^4.23.15
   # Held at 7 for the same Node 20 reason as commander above.
-  undici: ^7.29.0
-  valibot: ^1.4.2
+  undici: ^8.10.2
+  valibot: ^1.5.0
   # Vite+ ships Vite as its own core package; the `vite@*` override points every
   # consumer (including Astro) at it so the workspace runs a single Vite.
   vite: npm:@voidzero-dev/vite-plus-core@1.0.0
-  vite-plus: 1.0.0
-  vitest: 5.0.1
+  vite-plus: 1.1.0
+  vitest: 5.0.3
