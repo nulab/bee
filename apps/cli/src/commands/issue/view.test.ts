@@ -1,7 +1,7 @@
 import { openOrPrintUrl } from "@repo/backlog-utils";
 import consola from "consola";
 import { describe, expect, it, vi } from "vite-plus/test";
-import { itOutputsJson, parseCommand } from "@repo/test-utils";
+import { parseCommand } from "@repo/test-utils";
 
 const mockClient = vi.hoisted(() => ({
   getIssue: vi.fn(),
@@ -99,17 +99,61 @@ describe("issue view", () => {
     expect(mockClient.getIssue).not.toHaveBeenCalled();
   });
 
-  it(
-    "outputs JSON when --json flag is set",
-    itOutputsJson(
-      () => import("./view"),
-      ["PROJ-1", "--json"],
-      "PROJ-1",
-      () => {
-        mockClient.getIssue.mockResolvedValue(sampleIssue);
-      },
-    ),
+  it.each(["", "comments"])(
+    "includes raw comments in JSON when --comments is set with --json %s",
+    async (fields) => {
+      const comments = [
+        {
+          id: 10,
+          content: "A comment",
+          createdUser: { name: "Charlie" },
+          created: "2025-01-03T00:00:00Z",
+        },
+        { id: 11, content: null, changeLog: [{ field: "status", newValue: "2" }] },
+      ];
+      mockClient.getIssue.mockResolvedValue(sampleIssue);
+      mockClient.getIssueComments.mockResolvedValue(comments);
+      const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+      try {
+        await parseCommand(() => import("./view"), ["PROJ-1", "--comments", "--json", fields]);
+
+        const expected = fields ? { comments } : { ...sampleIssue, comments };
+        expect(JSON.parse(writeSpy.mock.calls[0][0] as string)).toEqual(expected);
+        expect(consola.log).not.toHaveBeenCalled();
+      } finally {
+        writeSpy.mockRestore();
+      }
+    },
   );
+
+  it("includes an empty comments array in JSON when the issue has no comments", async () => {
+    mockClient.getIssue.mockResolvedValue(sampleIssue);
+    mockClient.getIssueComments.mockResolvedValue([]);
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    try {
+      await parseCommand(() => import("./view"), ["PROJ-1", "--comments", "--json"]);
+
+      expect(JSON.parse(writeSpy.mock.calls[0][0] as string)).toEqual({
+        ...sampleIssue,
+        comments: [],
+      });
+    } finally {
+      writeSpy.mockRestore();
+    }
+  });
+
+  it("preserves issue JSON without fetching comments when --comments is absent", async () => {
+    mockClient.getIssue.mockResolvedValue(sampleIssue);
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    try {
+      await parseCommand(() => import("./view"), ["PROJ-1", "--json"]);
+
+      expect(JSON.parse(writeSpy.mock.calls[0][0] as string)).toEqual(sampleIssue);
+      expect(mockClient.getIssueComments).not.toHaveBeenCalled();
+    } finally {
+      writeSpy.mockRestore();
+    }
+  });
 
   it("handles null createdUser gracefully", async () => {
     mockClient.getIssue.mockResolvedValue({ ...sampleIssue, createdUser: null });
