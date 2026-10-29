@@ -82,10 +82,40 @@ describe("issue view", () => {
 
     await parseCommand(() => import("./view"), ["PROJ-1", "--comments"]);
 
-    expect(mockClient.getIssueComments).toHaveBeenCalledWith("PROJ-1", { order: "asc" });
+    expect(mockClient.getIssueComments).toHaveBeenCalledWith("PROJ-1", {
+      order: "asc",
+      count: 100,
+    });
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Comments"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Charlie"));
     expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("A comment"));
+  });
+
+  it("fetches every page of comments with --comments flag", async () => {
+    const firstPage = Array.from({ length: 100 }, (_, index) => ({
+      id: index + 1,
+      content: `Comment ${index + 1}`,
+      createdUser: { name: "Charlie" },
+      created: "2025-01-03T00:00:00Z",
+    }));
+    mockClient.getIssue.mockResolvedValue(sampleIssue);
+    mockClient.getIssueComments.mockResolvedValueOnce(firstPage).mockResolvedValueOnce([
+      {
+        id: 101,
+        content: "Newest comment",
+        createdUser: { name: "Dana" },
+        created: "2025-01-04T00:00:00Z",
+      },
+    ]);
+
+    await parseCommand(() => import("./view"), ["PROJ-1", "--comments"]);
+
+    expect(mockClient.getIssueComments).toHaveBeenLastCalledWith("PROJ-1", {
+      order: "asc",
+      count: 100,
+      minId: 100,
+    });
+    expect(consola.log).toHaveBeenCalledWith(expect.stringContaining("Newest comment"));
   });
 
   it("opens browser with --web flag", async () => {

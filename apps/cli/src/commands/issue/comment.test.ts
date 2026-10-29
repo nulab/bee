@@ -103,6 +103,22 @@ describe("issue comment", () => {
     expect(printTable).toHaveBeenCalled();
   });
 
+  it("passes paging options to the API with --list", async () => {
+    mockClient.getIssueComments.mockResolvedValue([]);
+
+    await parseCommand(
+      () => import("./comment"),
+      ["TEST-1", "--list", "--order", "desc", "--count", "5", "--min-id", "10", "--max-id", "20"],
+    );
+
+    expect(mockClient.getIssueComments).toHaveBeenCalledWith("TEST-1", {
+      order: "desc",
+      count: 5,
+      minId: 10,
+      maxId: 20,
+    });
+  });
+
   it("shows message when no comments found with --list", async () => {
     mockClient.getIssueComments.mockResolvedValue([]);
 

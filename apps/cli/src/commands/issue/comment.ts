@@ -4,10 +4,13 @@ import {
   confirmOrExit,
   formatDate,
   outputResult,
+  parseArg,
   printTable,
   resolveStdinArg,
+  vInteger,
 } from "@repo/cli-utils";
 import consola from "consola";
+import * as v from "valibot";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
 
@@ -16,13 +19,19 @@ const comment = new BeeCommand("comment")
   .description(
     `When input is piped, it is used as the body automatically.
 
-Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operations.`,
+Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operations.
+
+\`--list\` returns the 20 oldest comments by default. Use \`--order desc\` to list the newest comments first, and \`--min-id\` / \`--max-id\` for cursor-based pagination.`,
   )
   .argument("<issue>", "Issue ID or issue key")
   .option("-b, --body <text>", "Comment body")
   .addOption(opt.notify())
   .addOption(opt.attachment())
   .option("--list", "List comments on the issue")
+  .addOption(opt.minId())
+  .addOption(opt.maxId())
+  .addOption(opt.count())
+  .addOption(opt.order())
   .option("--edit-last", "Edit your most recent comment")
   .option("--delete-last", "Delete your most recent comment")
   .addOption(opt.json())
@@ -37,7 +46,11 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
       description: "Add a comment from stdin",
       command: 'echo "Comment body" | bee issue comment PROJECT-123',
     },
-    { description: "List all comments", command: "bee issue comment PROJECT-123 --list" },
+    { description: "List comments", command: "bee issue comment PROJECT-123 --list" },
+    {
+      description: "List the 5 newest comments",
+      command: "bee issue comment PROJECT-123 --list --order desc -L 5",
+    },
     {
       description: "Edit your last comment",
       command: 'bee issue comment PROJECT-123 --edit-last -b "Updated text"',
@@ -51,7 +64,12 @@ Use \`--list\`, \`--edit-last\`, or \`--delete-last\` for other comment operatio
     const { client } = await getClient(opts.space);
 
     if (opts.list) {
-      const comments = await client.getIssueComments(issue, { order: "asc" });
+      const comments = await client.getIssueComments(issue, {
+        minId: parseArg(v.optional(vInteger), opts.minId, "--min-id"),
+        maxId: parseArg(v.optional(vInteger), opts.maxId, "--max-id"),
+        count: parseArg(v.optional(vInteger), opts.count, "--count"),
+        order: opts.order ?? "asc",
+      });
 
       outputResult(comments, opts as { json?: string }, (data) => {
         const filtered = data.filter((c) => c.content);

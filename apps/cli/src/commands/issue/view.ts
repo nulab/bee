@@ -1,5 +1,6 @@
-import { getClient, issueUrl, openOrPrintUrl } from "@repo/backlog-utils";
+import { type BacklogClient, getClient, issueUrl, openOrPrintUrl } from "@repo/backlog-utils";
 import { formatDate, outputResult, printDefinitionList } from "@repo/cli-utils";
+import { type Entity } from "backlog-js";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -7,9 +8,29 @@ import * as opt from "../../lib/common-options";
 const formatHours = (hours: number | null | undefined): string | undefined =>
   hours === null || hours === undefined ? undefined : `${hours}h`;
 
+// The API returns at most 100 comments per request, so page through them by ID.
+const COMMENTS_PAGE_SIZE = 100;
+
+const getAllIssueComments = async (
+  client: BacklogClient,
+  issue: string,
+): Promise<Entity.Issue.Comment[]> => {
+  const comments: Entity.Issue.Comment[] = [];
+  let page: Entity.Issue.Comment[];
+  do {
+    page = await client.getIssueComments(issue, {
+      order: "asc",
+      count: COMMENTS_PAGE_SIZE,
+      minId: comments.at(-1)?.id,
+    });
+    comments.push(...page);
+  } while (page.length === COMMENTS_PAGE_SIZE);
+  return comments;
+};
+
 const view = new BeeCommand("view")
   .summary("View an issue")
-  .description(`Use \`--comments\` to include comments. Use \`--web\` to open in the browser.`)
+  .description(`Use \`--comments\` to include all comments. Use \`--web\` to open in the browser.`)
   .argument("<issue>", "Issue ID or issue key")
   .option("--comments", "Include comments")
   .addOption(opt.web("issue"))
@@ -34,7 +55,7 @@ const view = new BeeCommand("view")
 
     const issueData = await client.getIssue(issue);
 
-    const comments = opts.comments ? await client.getIssueComments(issue, { order: "asc" }) : [];
+    const comments = opts.comments ? await getAllIssueComments(client, issue) : [];
 
     outputResult(issueData, opts as { json?: string }, (data) => {
       consola.log("");
