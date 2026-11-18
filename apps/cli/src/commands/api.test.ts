@@ -54,6 +54,35 @@ describe("api", () => {
     writeSpy.mockRestore();
   });
 
+  it("sends a query string in a GET endpoint together with -f fields", async () => {
+    mockClient.get.mockResolvedValue([]);
+
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await parseCommand(
+      () => import("./api"),
+      ["issues?projectId[]=1&count=2", "-f", "projectId[]=3", "-f", "order=desc"],
+    );
+
+    expect(mockClient.get).toHaveBeenCalledWith("issues", {
+      projectId: ["1", 3],
+      count: "2",
+      order: "desc",
+    });
+    writeSpy.mockRestore();
+  });
+
+  it("keeps the query string in the endpoint for POST", async () => {
+    mockClient.post.mockResolvedValue({ id: 1 });
+
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await parseCommand(() => import("./api"), ["issues?notify=1", "-X", "POST", "-f", "summary=x"]);
+
+    expect(mockClient.post).toHaveBeenCalledWith("issues?notify=1", { summary: "x" });
+    writeSpy.mockRestore();
+  });
+
   it("makes POST request with --method POST", async () => {
     mockClient.post.mockResolvedValue({ id: 1 });
 
