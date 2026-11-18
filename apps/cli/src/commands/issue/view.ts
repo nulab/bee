@@ -37,7 +37,9 @@ const view = new BeeCommand("view")
 
     const comments = opts.comments ? await getIssueComments(client, issue, { order: "asc" }) : [];
 
-    outputResult(issueData, opts as { json?: string }, (data) => {
+    const result = opts.comments ? { ...issueData, comments } : issueData;
+
+    outputResult(result, opts as { json?: string }, (data) => {
       consola.log("");
       consola.log(`  ${data.issueKey}: ${data.summary}`);
       consola.log("");
