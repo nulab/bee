@@ -1,3 +1,4 @@
+import { deleteProjectStatus } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { confirmOrExit, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -39,7 +40,8 @@ const deleteStatus = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const result = await client.deleteProjectStatus(
+    const result = await deleteProjectStatus(
+      client,
       opts.project,
       parseArg(vInteger, status, "status"),
       parseArg(vInteger, opts.substituteStatusId, "--substitute-status-id"),

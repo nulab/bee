@@ -1,3 +1,4 @@
+import { getNotifications } from "backlog-js";
 import { NOTIFICATION_REASON_LABELS, getClient } from "@repo/backlog-utils";
 import {
   type Row,
@@ -36,7 +37,7 @@ const list = new BeeCommand("list")
   .action(async (opts) => {
     const { client } = await getClient(opts.space);
 
-    const notifications = await client.getNotifications({
+    const notifications = await getNotifications(client, {
       count: parseArg(v.optional(vInteger), opts.count, "--count"),
       minId: parseArg(v.optional(vInteger), opts.minId, "--min-id"),
       maxId: parseArg(v.optional(vInteger), opts.maxId, "--max-id"),

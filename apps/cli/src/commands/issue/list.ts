@@ -1,3 +1,4 @@
+import { getIssues } from "backlog-js";
 import {
   PRIORITY_NAMES,
   PriorityId,
@@ -85,7 +86,7 @@ const list = new BeeCommand("list")
     const resolutionId: number[] = opts.resolution;
     const parentIssueId: number[] = opts.parentIssue;
 
-    const issues = await client.getIssues({
+    const issues = await getIssues(client, {
       projectId,
       assigneeId,
       statusId,

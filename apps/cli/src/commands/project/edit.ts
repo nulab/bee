@@ -1,3 +1,4 @@
+import { patchProject } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
@@ -40,7 +41,7 @@ const edit = new BeeCommand("edit")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const projectData = await client.patchProject(opts.project, {
+    const projectData = await patchProject(client, opts.project, {
       name: opts.name,
       key: opts.key,
       chartEnabled: opts.chartEnabled,

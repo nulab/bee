@@ -1,6 +1,6 @@
 import { refreshAccessToken } from "@repo/backlog-utils";
 import { findSpace, loadConfig, updateSpaceAuth } from "@repo/config";
-import { Backlog } from "backlog-js";
+import { createClient } from "backlog-js";
 import consola from "consola";
 import { describe, expect, it, vi } from "vite-plus/test";
 import { parseCommand } from "@repo/test-utils";
@@ -8,9 +8,8 @@ import { parseCommand } from "@repo/test-utils";
 const mockGetMyself = vi.fn();
 
 vi.mock("backlog-js", () => ({
-  Backlog: vi.fn(function () {
-    return { getMyself: mockGetMyself };
-  }),
+  createClient: vi.fn(() => ({})),
+  getMyself: (...args: unknown[]) => mockGetMyself(...args),
 }));
 
 vi.mock("@repo/backlog-utils", () => ({
@@ -95,7 +94,7 @@ describe("auth refresh", () => {
       clientId: "client-id",
       clientSecret: "client-secret",
     });
-    expect(Backlog).toHaveBeenCalledWith({
+    expect(createClient).toHaveBeenCalledWith({
       host: "example.backlog.com",
       accessToken: "new-access",
     });

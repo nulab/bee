@@ -1,3 +1,4 @@
+import { getMyself } from "backlog-js";
 import { ROLE_LABELS, getClient } from "@repo/backlog-utils";
 import { formatDate, outputResult, printDefinitionList } from "@repo/cli-utils";
 import consola from "consola";
@@ -17,7 +18,7 @@ const me = new BeeCommand("me")
   .action(async (opts) => {
     const { client } = await getClient(opts.space);
 
-    const myself = await client.getMyself();
+    const myself = await getMyself(client);
 
     outputResult(myself, opts, (data) => {
       consola.log("");

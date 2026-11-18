@@ -1,3 +1,4 @@
+import { getIssues, getMyself } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
@@ -19,9 +20,9 @@ const status = new BeeCommand("status")
   .action(async (opts) => {
     const { client } = await getClient(opts.space);
 
-    const me = await client.getMyself();
+    const me = await getMyself(client);
 
-    const issues = await client.getIssues({
+    const issues = await getIssues(client, {
       assigneeId: [me.id],
       count: 100,
     });

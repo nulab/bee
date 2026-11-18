@@ -1,3 +1,4 @@
+import { postCategories } from "backlog-js";
 import { categoryUrl, getClient } from "@repo/backlog-utils";
 import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
@@ -23,7 +24,7 @@ const create = new BeeCommand("create")
 
     const name = await promptRequired("Category name:", opts.name);
 
-    const category = await client.postCategories(opts.project, { name });
+    const category = await postCategories(client, opts.project, { name });
 
     outputResult(category, opts, (data) => {
       consola.success(`Created category ${data.name} (ID: ${data.id})`);

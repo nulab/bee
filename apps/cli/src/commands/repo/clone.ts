@@ -1,3 +1,4 @@
+import { getGitRepository } from "backlog-js";
 import { spawn } from "node:child_process";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
@@ -43,7 +44,7 @@ const clone = new BeeCommand("clone")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const repo = await client.getGitRepository(opts.project, repository);
+    const repo = await getGitRepository(client, opts.project, repository);
 
     if (opts.json !== undefined) {
       outputResult(repo, opts, () => {});

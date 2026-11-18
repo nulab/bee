@@ -1,11 +1,13 @@
-import { type Backlog } from "backlog-js";
-import { describe, expect, it, vi } from "vite-plus/test";
+import { type Client } from "backlog-js";
+import { type Mock, describe, expect, it, vi } from "vite-plus/test";
 import { resolveProjectIds } from "./resolve-project";
+
+vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 
 const createMockClient = (projects: { id: number; projectKey: string }[]) =>
   ({
     getProjects: vi.fn().mockResolvedValue(projects),
-  }) as unknown as Backlog;
+  }) as unknown as Client & { getProjects: Mock };
 
 describe("resolveProjectIds", () => {
   const projects = [

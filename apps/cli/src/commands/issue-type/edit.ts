@@ -1,3 +1,4 @@
+import { patchIssueType } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -32,7 +33,8 @@ const edit = new BeeCommand("edit")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const result = await client.patchIssueType(
+    const result = await patchIssueType(
+      client,
       opts.project,
       parseArg(vInteger, issueType, "issueType"),
       {

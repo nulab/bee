@@ -1,3 +1,4 @@
+import { deleteIssue as deleteIssueApi } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { confirmOrExit, outputResult } from "@repo/cli-utils";
 import consola from "consola";
@@ -33,7 +34,7 @@ const deleteIssue = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const issueData = await client.deleteIssue(issue);
+    const issueData = await deleteIssueApi(client, issue);
 
     outputResult(issueData, opts as { json?: string }, (data) => {
       consola.success(`Deleted issue ${data.issueKey}: ${data.summary}`);

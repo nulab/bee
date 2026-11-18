@@ -1,3 +1,4 @@
+import { getDocument } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { type Row, formatDate, formatSize, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
@@ -18,7 +19,7 @@ const attachments = new BeeCommand("attachments")
   .action(async (document, opts) => {
     const { client } = await getClient(opts.space);
 
-    const doc = await client.getDocument(document);
+    const doc = await getDocument(client, document);
 
     outputResult(doc.attachments, opts, (data) => {
       if (data.length === 0) {

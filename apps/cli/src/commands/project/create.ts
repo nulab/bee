@@ -1,3 +1,4 @@
+import { postProject } from "backlog-js";
 import { getClient, projectUrl } from "@repo/backlog-utils";
 import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
@@ -42,7 +43,7 @@ const create = new BeeCommand("create")
     const key = await promptRequired("Project key:", opts.key);
     const name = await promptRequired("Project name:", opts.name);
 
-    const project = await client.postProject({
+    const project = await postProject(client, {
       key,
       name,
       chartEnabled: opts.chartEnabled ?? false,

@@ -1,3 +1,4 @@
+import { getMyself, getPullRequests } from "backlog-js";
 import { PrStatusId, getClient } from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
@@ -24,9 +25,9 @@ const status = new BeeCommand("status")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const me = await client.getMyself();
+    const me = await getMyself(client);
 
-    const pullRequests = await client.getPullRequests(opts.project, opts.repo, {
+    const pullRequests = await getPullRequests(client, opts.project, opts.repo, {
       assigneeId: [me.id],
       statusId: [PrStatusId.Open, PrStatusId.Closed, PrStatusId.Merged],
       count: 100,

@@ -1,3 +1,4 @@
+import { postIssueType } from "backlog-js";
 import { getClient, issueTypeUrl } from "@repo/backlog-utils";
 import { outputResult, promptRequired } from "@repo/cli-utils";
 import consola from "consola";
@@ -33,7 +34,7 @@ const create = new BeeCommand("create")
 
     const name = await promptRequired("Issue type name:", opts.name);
 
-    const issueType = await client.postIssueType(opts.project, {
+    const issueType = await postIssueType(client, opts.project, {
       name,
       color: opts.color as never,
     });

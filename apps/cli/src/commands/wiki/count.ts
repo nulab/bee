@@ -1,3 +1,4 @@
+import { getWikisCount } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
@@ -20,7 +21,7 @@ const count = new BeeCommand("count")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const result = await client.getWikisCount(opts.project);
+    const result = await getWikisCount(client, opts.project);
 
     const json = opts.json === true ? "" : opts.json;
     outputResult(result, { json }, (data) => {

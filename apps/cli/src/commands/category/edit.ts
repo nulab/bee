@@ -1,3 +1,4 @@
+import { patchCategories } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult, parseArg, promptRequired, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -26,7 +27,8 @@ const edit = new BeeCommand("edit")
 
     const name = await promptRequired("Category name:", opts.name);
 
-    const result = await client.patchCategories(
+    const result = await patchCategories(
+      client,
       opts.project,
       parseArg(vInteger, category, "category"),
       {

@@ -1,3 +1,4 @@
+import { getIssue, postPullRequest } from "backlog-js";
 import { getClient, pullRequestUrl, resolveUserId } from "@repo/backlog-utils";
 import { outputResult, promptRequired, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -58,12 +59,12 @@ const create = new BeeCommand("create")
       if (parsed.success) {
         issueId = parsed.output;
       } else {
-        const issue = await client.getIssue(opts.issue);
+        const issue = await getIssue(client, opts.issue);
         issueId = issue.id;
       }
     }
 
-    const pullRequest = await client.postPullRequest(opts.project, opts.repo, {
+    const pullRequest = await postPullRequest(client, opts.project, opts.repo, {
       summary,
       description,
       base,

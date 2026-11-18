@@ -14,6 +14,7 @@ vi.mock("@repo/backlog-utils", () => ({
   wikiUrl: vi.fn((host: string, id: number) => `https://${host}/alias/wiki/${id}`),
 }));
 
+vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 const sampleWiki = {

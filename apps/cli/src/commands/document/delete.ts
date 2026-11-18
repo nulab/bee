@@ -1,3 +1,4 @@
+import { deleteDocument as deleteDocumentApi } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { confirmOrExit, outputResult } from "@repo/cli-utils";
 import consola from "consola";
@@ -33,7 +34,7 @@ const deleteDocument = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const doc = await client.deleteDocument(document);
+    const doc = await deleteDocumentApi(client, document);
 
     outputResult(doc, opts, (data) => {
       consola.success(`Deleted document ${data.title} (ID: ${data.id})`);

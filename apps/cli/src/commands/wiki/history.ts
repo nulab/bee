@@ -1,3 +1,4 @@
+import { getWikisHistory } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import {
   type Row,
@@ -34,7 +35,7 @@ const history = new BeeCommand("history")
   .action(async (wiki, opts) => {
     const { client } = await getClient(opts.space);
 
-    const histories = await client.getWikisHistory(parseArg(vInteger, wiki, "wiki"), {
+    const histories = await getWikisHistory(client, parseArg(vInteger, wiki, "wiki"), {
       minId: parseArg(v.optional(vInteger), opts.minId, "--min-id"),
       maxId: parseArg(v.optional(vInteger), opts.maxId, "--max-id"),
       count: parseArg(v.optional(vInteger), opts.count, "--count"),

@@ -1,3 +1,4 @@
+import { getDocuments } from "backlog-js";
 import { getClient, resolveProjectIds } from "@repo/backlog-utils";
 import {
   type Row,
@@ -40,7 +41,7 @@ const list = new BeeCommand("list")
 
     const projectId = await resolveProjectIds(client, splitArg(opts.project, v.string()));
 
-    const documents = await client.getDocuments({
+    const documents = await getDocuments(client, {
       projectId,
       keyword: opts.keyword,
       sort: opts.sort,

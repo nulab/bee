@@ -1,3 +1,4 @@
+import { patchWiki } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult, parseArg, resolveStdinArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -35,7 +36,7 @@ const edit = new BeeCommand("edit")
 
     const content = await resolveStdinArg(opts.body);
 
-    const wikiData = await client.patchWiki(parseArg(vInteger, wiki, "wiki"), {
+    const wikiData = await patchWiki(client, parseArg(vInteger, wiki, "wiki"), {
       name: opts.name,
       content,
       mailNotify: opts.mailNotify,

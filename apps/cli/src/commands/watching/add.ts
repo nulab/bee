@@ -1,3 +1,4 @@
+import { postWatchingListItem } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
@@ -22,7 +23,7 @@ const add = new BeeCommand("add")
   .action(async (opts) => {
     const { client } = await getClient(opts.space);
 
-    const result = await client.postWatchingListItem({
+    const result = await postWatchingListItem(client, {
       issueIdOrKey: opts.issue,
       note: opts.note ?? "",
     });

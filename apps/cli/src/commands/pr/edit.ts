@@ -1,3 +1,4 @@
+import { getIssue, patchPullRequest } from "backlog-js";
 import { getClient, resolveUserId } from "@repo/backlog-utils";
 import { outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -48,12 +49,12 @@ const edit = new BeeCommand("edit")
       if (parsed.success) {
         issueId = parsed.output;
       } else {
-        const issue = await client.getIssue(opts.issue);
+        const issue = await getIssue(client, opts.issue);
         issueId = issue.id;
       }
     }
 
-    const pullRequest = await client.patchPullRequest(opts.project, opts.repo, prNumber, {
+    const pullRequest = await patchPullRequest(client, opts.project, opts.repo, prNumber, {
       summary: opts.title,
       description: opts.body,
       issueId,

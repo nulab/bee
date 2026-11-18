@@ -1,3 +1,4 @@
+import { getGitRepository } from "backlog-js";
 import { getClient, openOrPrintUrl, repositoryUrl } from "@repo/backlog-utils";
 import { formatDate, outputResult, printDefinitionList } from "@repo/cli-utils";
 import consola from "consola";
@@ -36,7 +37,7 @@ const view = new BeeCommand("view")
       return;
     }
 
-    const repo = await client.getGitRepository(opts.project, repository);
+    const repo = await getGitRepository(client, opts.project, repository);
 
     outputResult(repo, opts, (data) => {
       consola.log("");

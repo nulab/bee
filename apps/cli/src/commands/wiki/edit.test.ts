@@ -12,6 +12,7 @@ vi.mock("@repo/cli-utils", async (importOriginal) => ({
   resolveStdinArg: vi.fn((v: string | undefined) => Promise.resolve(v)),
 }));
 
+vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("wiki edit", () => {

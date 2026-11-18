@@ -1,3 +1,4 @@
+import { getPullRequestsCount } from "backlog-js";
 import { PR_STATUS_NAMES, PrStatusName, getClient, resolveUserId } from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
 import consola from "consola";
@@ -46,7 +47,7 @@ const count = new BeeCommand("count")
     const issueId: number[] = opts.issue;
     const createdUserId: number[] = opts.createdUser;
 
-    const result = await client.getPullRequestsCount(opts.project, opts.repo, {
+    const result = await getPullRequestsCount(client, opts.project, opts.repo, {
       statusId,
       assigneeId: assigneeId.length > 0 ? assigneeId : undefined,
       issueId: issueId.length > 0 ? issueId : undefined,

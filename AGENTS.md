@@ -138,7 +138,7 @@ All internal links in documentation content (`apps/docs/src/content/docs/`) must
 },
 ```
 
-`@repo/backlog-utils` exposes `getClient()` which returns a `backlog-js` `Backlog` instance with OAuth 401 auto-refresh (via Proxy) and rate-limit error handling. Commands call `client.getIssues()`, `client.getProjects()`, etc. directly.
+`@repo/backlog-utils` exposes `getClient()` which returns a `backlog-js` client with OAuth 401 auto-refresh (via Proxy) and rate-limit error handling. Commands pass it to the `backlog-js` standalone functions: `getIssues(client, params)`, `getProjects(client)`, etc. In tests, `vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default))` forwards those functions to methods of the same name on the mock client.
 
 `@nulab/bee` builds its command tree from `commander`, via a `BeeCommand` subclass that adds a custom help system (see below).
 

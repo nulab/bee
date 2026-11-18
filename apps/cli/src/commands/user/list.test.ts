@@ -8,6 +8,7 @@ vi.mock("@repo/backlog-utils", async (importOriginal) => ({
   ...(await importOriginal()),
   ...mockGetClient(mockClient, host),
 }));
+vi.mock("backlog-js", () => import("@repo/test-utils/mock-backlog-js").then((m) => m.default));
 vi.mock("consola", () => import("@repo/test-utils/mock-consola"));
 
 describe("user list", () => {

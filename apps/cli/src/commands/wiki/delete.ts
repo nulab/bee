@@ -1,3 +1,4 @@
+import { deleteWiki as deleteWikiApi } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { confirmOrExit, outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -34,7 +35,8 @@ const deleteWiki = new BeeCommand("delete")
 
     const { client } = await getClient(opts.space);
 
-    const wikiData = await client.deleteWiki(
+    const wikiData = await deleteWikiApi(
+      client,
       parseArg(vInteger, wiki, "wiki"),
       opts.mailNotify ?? false,
     );

@@ -1,3 +1,4 @@
+import { getProjects } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
@@ -23,7 +24,7 @@ const list = new BeeCommand("list")
   .action(async (opts) => {
     const { client } = await getClient(opts.space);
 
-    const projects = await client.getProjects({
+    const projects = await getProjects(client, {
       archived: opts.archived,
       all: opts.all,
     });

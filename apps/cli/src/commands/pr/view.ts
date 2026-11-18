@@ -1,3 +1,4 @@
+import { getPullRequest } from "backlog-js";
 import { getClient, openOrPrintUrl, pullRequestUrl } from "@repo/backlog-utils";
 import { formatDate, outputResult, parseArg, printDefinitionList, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -36,7 +37,7 @@ const view = new BeeCommand("view")
       return;
     }
 
-    const pullRequest = await client.getPullRequest(opts.project, opts.repo, prNumber);
+    const pullRequest = await getPullRequest(client, opts.project, opts.repo, prNumber);
 
     const json = opts.json === true ? "" : opts.json;
     outputResult(pullRequest, { json }, (data) => {

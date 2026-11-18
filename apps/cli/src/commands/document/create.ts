@@ -1,3 +1,4 @@
+import { addDocument } from "backlog-js";
 import { documentUrl, getClient, resolveProjectIds } from "@repo/backlog-utils";
 import { outputResult, promptRequired, resolveStdinArg } from "@repo/cli-utils";
 import consola from "consola";
@@ -46,7 +47,7 @@ const create = new BeeCommand("create")
 
     const body = await resolveStdinArg(opts.body);
 
-    const doc = await client.addDocument({
+    const doc = await addDocument(client, {
       projectId,
       title,
       content: body,

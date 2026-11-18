@@ -1,3 +1,4 @@
+import { getWikisAttachments } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import {
   type Row,
@@ -25,7 +26,7 @@ const attachments = new BeeCommand("attachments")
   .action(async (wiki, opts) => {
     const { client } = await getClient(opts.space);
 
-    const files = await client.getWikisAttachments(parseArg(vInteger, wiki, "wiki"));
+    const files = await getWikisAttachments(client, parseArg(vInteger, wiki, "wiki"));
 
     outputResult(files, opts, (data) => {
       if (data.length === 0) {

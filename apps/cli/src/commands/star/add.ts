@@ -1,3 +1,4 @@
+import { getIssue, postStar } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { UserError, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -44,18 +45,18 @@ const add = new BeeCommand("add")
     if (opts.issue) {
       const issue = /^\d+$/.test(opts.issue)
         ? { id: parseArg(vInteger, opts.issue, "--issue") }
-        : await client.getIssue(opts.issue);
+        : await getIssue(client, opts.issue);
       const issueId = issue.id;
-      await client.postStar({ issueId });
+      await postStar(client, { issueId });
       consola.success(`Starred issue ${opts.issue}.`);
     } else if (opts.comment) {
-      await client.postStar({ commentId: parseArg(vInteger, opts.comment, "--comment") });
+      await postStar(client, { commentId: parseArg(vInteger, opts.comment, "--comment") });
       consola.success(`Starred comment ${opts.comment}.`);
     } else if (opts.wiki) {
-      await client.postStar({ wikiId: parseArg(vInteger, opts.wiki, "--wiki") });
+      await postStar(client, { wikiId: parseArg(vInteger, opts.wiki, "--wiki") });
       consola.success(`Starred wiki ${opts.wiki}.`);
     } else if (opts.prComment) {
-      await client.postStar({
+      await postStar(client, {
         pullRequestCommentId: parseArg(vInteger, opts.prComment, "--pr-comment"),
       });
       consola.success(`Starred pull request comment ${opts.prComment}.`);

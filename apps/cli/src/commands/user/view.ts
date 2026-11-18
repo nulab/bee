@@ -1,3 +1,4 @@
+import { getUser } from "backlog-js";
 import { ROLE_LABELS, getClient } from "@repo/backlog-utils";
 import { formatDate, outputResult, parseArg, printDefinitionList, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -18,7 +19,7 @@ const view = new BeeCommand("view")
   .action(async (user, opts) => {
     const { client } = await getClient(opts.space);
 
-    const userData = await client.getUser(parseArg(vInteger, user, "user"));
+    const userData = await getUser(client, parseArg(vInteger, user, "user"));
 
     outputResult(userData, opts, (data) => {
       consola.log("");

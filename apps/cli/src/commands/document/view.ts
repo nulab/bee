@@ -1,3 +1,4 @@
+import { getDocument } from "backlog-js";
 import { documentUrl, getClient, openOrPrintUrl } from "@repo/backlog-utils";
 import { UserError, formatDate, outputResult, printDefinitionList } from "@repo/cli-utils";
 import consola from "consola";
@@ -34,7 +35,7 @@ const view = new BeeCommand("view")
       return;
     }
 
-    const doc = await client.getDocument(document);
+    const doc = await getDocument(client, document);
 
     outputResult(doc, opts, (data) => {
       consola.log("");

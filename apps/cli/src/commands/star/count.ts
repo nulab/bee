@@ -1,3 +1,4 @@
+import { getMyself, getUserStarsCount } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -29,7 +30,7 @@ const count = new BeeCommand("count")
     if (user) {
       userId = parseArg(vInteger, user, "user");
     } else {
-      const myself = await client.getMyself();
+      const myself = await getMyself(client);
       userId = myself.id;
     }
 
@@ -41,7 +42,7 @@ const count = new BeeCommand("count")
       params.until = opts.until;
     }
 
-    const result = await client.getUserStarsCount(userId, params);
+    const result = await getUserStarsCount(client, userId, params);
 
     outputResult(result, opts, (data) => {
       consola.log(String(data.count));

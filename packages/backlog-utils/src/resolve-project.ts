@@ -1,13 +1,13 @@
 import { vInteger } from "@repo/cli-utils";
-import { type Backlog } from "backlog-js";
+import { type Client, getProjects } from "backlog-js";
 import * as v from "valibot";
 
-export const resolveProjectIds = async (client: Backlog, values: string[]): Promise<number[]> => {
+export const resolveProjectIds = async (client: Client, values: string[]): Promise<number[]> => {
   if (values.length === 0) {
     return [];
   }
 
-  const projects = await client.getProjects();
+  const projects = await getProjects(client);
 
   return values.map((value) => {
     const numResult = v.safeParse(vInteger, value);

@@ -1,6 +1,6 @@
 import { getClient } from "@repo/backlog-utils";
 import { outputResult } from "@repo/cli-utils";
-import { type Entity } from "backlog-js";
+import { type Entity, getDocumentTree } from "backlog-js";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH, ENV_PROJECT } from "../../lib/bee-command";
 import * as opt from "../../lib/common-options";
@@ -49,7 +49,7 @@ const tree = new BeeCommand("tree")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const docTree = await client.getDocumentTree(opts.project);
+    const docTree = await getDocumentTree(client, opts.project);
 
     outputResult(docTree, opts, (data) => {
       if (!data.activeTree || data.activeTree.children.length === 0) {

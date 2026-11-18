@@ -1,3 +1,4 @@
+import { getTeam } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult, parseArg, printDefinitionList, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -18,7 +19,7 @@ const view = new BeeCommand("view")
   .action(async (team, opts) => {
     const { client } = await getClient(opts.space);
 
-    const t = await client.getTeam(parseArg(vInteger, team, "team"));
+    const t = await getTeam(client, parseArg(vInteger, team, "team"));
 
     outputResult(t, opts, (data) => {
       consola.log("");

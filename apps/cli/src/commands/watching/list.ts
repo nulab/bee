@@ -1,3 +1,4 @@
+import { getMyself, getWatchingListItems } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
@@ -17,8 +18,8 @@ const list = new BeeCommand("list")
   .action(async (opts) => {
     const { client } = await getClient(opts.space);
 
-    const myself = await client.getMyself();
-    const watchings = await client.getWatchingListItems(myself.id);
+    const myself = await getMyself(client);
+    const watchings = await getWatchingListItems(client, myself.id);
 
     outputResult(watchings, opts, (data) => {
       if (data.length === 0) {

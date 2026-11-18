@@ -1,3 +1,4 @@
+import { resetNotificationsMarkAsRead } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import consola from "consola";
 import { BeeCommand, ENV_AUTH } from "../../lib/bee-command";
@@ -14,7 +15,7 @@ const readAll = new BeeCommand("read-all")
   .action(async (opts) => {
     const { client } = await getClient(opts.space);
 
-    await client.resetNotificationsMarkAsRead();
+    await resetNotificationsMarkAsRead(client);
 
     consola.success("Marked all notifications as read.");
   });

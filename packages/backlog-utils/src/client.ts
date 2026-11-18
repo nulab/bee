@@ -1,5 +1,5 @@
 import { UserError, vFiniteNumber } from "@repo/cli-utils";
-import { Backlog } from "backlog-js";
+import { type Client, createClient } from "backlog-js";
 import * as v from "valibot";
 import { refreshAccessToken } from "./oauth";
 import { formatResetTime } from "./rate-limit";
@@ -7,7 +7,7 @@ import { findSpace, loadConfig, updateSpaceAuth } from "@repo/config";
 import consola from "consola";
 
 /** The type of the authenticated API client. */
-type BacklogClient = Backlog;
+type BacklogClient = Client;
 
 /**
  * Resolves the active space and creates an authenticated API client.
@@ -40,7 +40,7 @@ const getClient = async (
 
   if (!resolved) {
     if (envApiKey) {
-      const client = new Backlog({ host: resolvedHost, apiKey: envApiKey });
+      const client = createClient({ host: resolvedHost, apiKey: envApiKey });
       return { client, host: resolvedHost };
     }
 
@@ -50,7 +50,7 @@ const getClient = async (
   }
 
   if (resolved.auth.method === "api-key") {
-    const client = new Backlog({
+    const client = createClient({
       host: resolved.host,
       apiKey: resolved.auth.apiKey,
     });
@@ -78,8 +78,8 @@ const createOAuthClient = (
     clientId?: string;
     clientSecret?: string;
   },
-): Backlog => {
-  let currentClient = new Backlog({ host, accessToken: oauthAuth.accessToken });
+): BacklogClient => {
+  let currentClient = createClient({ host, accessToken: oauthAuth.accessToken });
   let refreshPromise: Promise<boolean> | null = null;
 
   const refreshTokenIfNeeded = async (): Promise<void> => {
@@ -110,7 +110,7 @@ const createOAuthClient = (
           refreshToken,
         });
 
-        currentClient = new Backlog({
+        currentClient = createClient({
           host,
           accessToken: tokenResponse.access_token,
         });

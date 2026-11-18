@@ -1,3 +1,4 @@
+import { getProjectStatuses } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
@@ -20,7 +21,7 @@ const list = new BeeCommand("list")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const statuses = await client.getProjectStatuses(opts.project);
+    const statuses = await getProjectStatuses(client, opts.project);
 
     outputResult(statuses, opts, (data) => {
       if (data.length === 0) {

@@ -1,7 +1,7 @@
 import { exchangeAuthorizationCode, startCallbackServer } from "@repo/backlog-utils";
 import { promptRequired } from "@repo/cli-utils";
 import { updateConfig } from "@repo/config";
-import { Backlog, OAuth2 } from "backlog-js";
+import { createClient, OAuth2 } from "backlog-js";
 import consola from "consola";
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { parseCommand } from "@repo/test-utils";
@@ -12,9 +12,8 @@ const mockGetAuthorizationURL = vi.fn(
 );
 
 vi.mock("backlog-js", () => ({
-  Backlog: vi.fn(function () {
-    return { getMyself: mockGetMyself };
-  }),
+  createClient: vi.fn(() => ({})),
+  getMyself: (...args: unknown[]) => mockGetMyself(...args),
   OAuth2: vi.fn(function () {
     return { getAuthorizationURL: mockGetAuthorizationURL };
   }),
@@ -78,7 +77,7 @@ describe("auth login", () => {
 
       await parseCommand(() => import("./login"), ["--method", "api-key"]);
 
-      expect(Backlog).toHaveBeenCalledWith({
+      expect(createClient).toHaveBeenCalledWith({
         host: "backlog.example.internal",
         apiKey: "test-api-key",
       });
@@ -98,7 +97,7 @@ describe("auth login", () => {
         "is not a valid hostname",
       );
 
-      expect(Backlog).not.toHaveBeenCalled();
+      expect(createClient).not.toHaveBeenCalled();
       expect(updateConfig).not.toHaveBeenCalled();
     });
   });
@@ -115,7 +114,10 @@ describe("auth login", () => {
 
       await parseCommand(() => import("./login"), ["--method", "api-key"]);
 
-      expect(Backlog).toHaveBeenCalledWith({ host: "example.backlog.com", apiKey: "test-api-key" });
+      expect(createClient).toHaveBeenCalledWith({
+        host: "example.backlog.com",
+        apiKey: "test-api-key",
+      });
       expect(mockGetMyself).toHaveBeenCalled();
       const result = vi.mocked(updateConfig).mock.results[0]?.value;
       expect(result.spaces).toEqual([
@@ -214,7 +216,7 @@ describe("auth login", () => {
         clientSecret: "my-client-secret",
         redirectUri: "http://localhost:5033/callback",
       });
-      expect(Backlog).toHaveBeenCalledWith({
+      expect(createClient).toHaveBeenCalledWith({
         host: "example.backlog.com",
         accessToken: "new-access-token",
       });

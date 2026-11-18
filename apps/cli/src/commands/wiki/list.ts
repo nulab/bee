@@ -1,3 +1,4 @@
+import { getWikis } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { type Row, outputResult, printTable } from "@repo/cli-utils";
 import consola from "consola";
@@ -25,7 +26,7 @@ const list = new BeeCommand("list")
     await resolveOptions(cmd);
     const { client } = await getClient(opts.space);
 
-    const wikis = await client.getWikis({
+    const wikis = await getWikis(client, {
       projectIdOrKey: opts.project,
       keyword: opts.keyword,
     });

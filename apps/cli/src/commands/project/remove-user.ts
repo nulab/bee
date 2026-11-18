@@ -1,3 +1,4 @@
+import { deleteProjectUsers } from "backlog-js";
 import { getClient } from "@repo/backlog-utils";
 import { outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -26,7 +27,7 @@ const removeUser = new BeeCommand("remove-user")
 
     const { client } = await getClient(opts.space);
 
-    const user = await client.deleteProjectUsers(opts.project, { userId });
+    const user = await deleteProjectUsers(client, opts.project, { userId });
 
     const jsonArg = opts.json === true ? "" : opts.json;
     outputResult(user, { ...opts, json: jsonArg }, (data) => {

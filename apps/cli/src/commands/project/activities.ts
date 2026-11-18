@@ -1,3 +1,4 @@
+import { getProjectActivities } from "backlog-js";
 import { ACTIVITY_LABELS, getActivitySummary, getClient } from "@repo/backlog-utils";
 import {
   type Row,
@@ -56,7 +57,7 @@ https://developer.nulab.com/docs/backlog/api/2/get-project-recent-updates/#respo
 
     const activityTypeId: number[] = opts.activityType;
 
-    const activityList = await client.getProjectActivities(opts.project, {
+    const activityList = await getProjectActivities(client, opts.project, {
       activityTypeId,
       count: parseArg(v.optional(vInteger), opts.count, "--count"),
       order: opts.order,

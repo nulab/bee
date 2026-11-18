@@ -1,3 +1,4 @@
+import { patchIssue } from "backlog-js";
 import { IssueStatusId, ResolutionId, getClient } from "@repo/backlog-utils";
 import { outputResult, parseArg, vInteger } from "@repo/cli-utils";
 import consola from "consola";
@@ -36,7 +37,7 @@ const close = new BeeCommand("close")
 
     const notifiedUserId = opts.notify ?? [];
 
-    const issueData = await client.patchIssue(issue, {
+    const issueData = await patchIssue(client, issue, {
       statusId: IssueStatusId.Closed,
       resolutionId,
       comment: opts.comment,
