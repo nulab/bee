@@ -25,8 +25,8 @@ catalogs:
       specifier: ^7.2.4
       version: 7.2.4
     backlog-js:
-      specifier: ^1.0.0
-      version: 1.0.0
+      specifier: ^1.1.0
+      version: 1.1.0
     commander:
       specifier: ^14.0.3
       version: 14.0.3
@@ -95,7 +95,7 @@ importers:
     dependencies:
       backlog-js:
         specifier: 'catalog:'
-        version: 1.0.0
+        version: 1.1.0
       commander:
         specifier: 'catalog:'
         version: 14.0.3
@@ -169,7 +169,7 @@ importers:
         version: link:../config
       backlog-js:
         specifier: 'catalog:'
-        version: 1.0.0
+        version: 1.1.0
       consola:
         specifier: 'catalog:'
         version: 3.4.2
@@ -238,7 +238,7 @@ importers:
         version: link:../tsconfigs
       backlog-js:
         specifier: 'catalog:'
-        version: 1.0.0
+        version: 1.1.0
 
   packages/tsconfigs:
     dependencies:
@@ -1832,8 +1832,8 @@ packages:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
     engines: {node: '>= 0.4'}
 
-  backlog-js@1.0.0:
-    resolution: {integrity: sha512-qCxMPLRnx6iqWa4AQb0AezeMvtTRIep9XnTyIqZOr6Hi9rxJH1hvzptZVkJainGEdK0qM+C4O5hlVRFIyqwoiQ==}
+  backlog-js@1.1.0:
+    resolution: {integrity: sha512-hatRpChp5cJHNyzJexGkvYEN95uw0dGvFMs3Vo30dGSzme64/dtGSjEg1vNu2IHrSA1dr/a31xJfS/vrYPpF0A==}
 
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
@@ -4701,7 +4701,7 @@ snapshots:
 
   axobject-query@4.1.0: {}
 
-  backlog-js@1.0.0:
+  backlog-js@1.1.0:
     dependencies:
       qs: 6.15.3
 
