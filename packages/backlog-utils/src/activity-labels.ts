@@ -27,7 +27,22 @@ const ACTIVITY_LABELS: Record<number, string> = {
   26: "Project Team Deleted",
   34: "Status Deleted",
   35: "Issues Dates Updated",
+  36: "Document Created",
+  37: "Document Deleted",
+  38: "Document Title Updated",
+  39: "Document Updated",
+  40: "Document Commented",
+  41: "Document Comment Updated",
+  42: "Document Comment Deleted",
+  43: "Document Comment Replied",
+  44: "Document Comment Reply Updated",
+  45: "Document Comment Reply Deleted",
+  46: "Document Attachment Added",
   47: "Issue Multi-Created",
+  48: "Document Multi-Created",
+  49: "Document Mentioned",
+  50: "Related Issue Added",
+  51: "Related Issue Removed",
 };
 
 export { ACTIVITY_LABELS };

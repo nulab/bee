@@ -10,10 +10,11 @@ const NOTIFICATION_REASON_LABELS: Record<number, string> = {
   11: "Pull request commented",
   12: "Pull request added",
   13: "Pull request updated",
-  14: "Comment mentioned",
-  15: "Pull request comment mentioned",
-  16: "Team mentioned",
-  17: "Team mentioned in PR",
+  14: "Document commented",
+  15: "Document comment replied",
+  16: "Issues bulk-added (assigned)",
+  17: "Document mentioned",
+  18: "Issues bulk-added (notified)",
 };
 
 export { NOTIFICATION_REASON_LABELS };
