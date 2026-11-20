@@ -7,7 +7,11 @@ await document.addCommands([
   import("./view.js"),
   import("./tree.js"),
   import("./attachments.js"),
+  import("./comments.js"),
+  import("./count.js"),
   import("./create.js"),
+  import("./add-tag.js"),
+  import("./remove-tag.js"),
   import("./delete.js"),
 ]);
 

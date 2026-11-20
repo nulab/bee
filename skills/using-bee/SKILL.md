@@ -28,7 +28,7 @@ Set these environment variables to avoid repeating common flags:
 | `bee auth`         | `login`, `logout`, `status`, `token`, `refresh`, `switch`                                                  |
 | `bee project`      | `list`, `view`, `create`, `edit`, `delete`, `users`, `activities`, `add-user`, `remove-user`               |
 | `bee issue`        | `list`, `view`, `status`, `create`, `edit`, `close`, `reopen`, `attachments`, `comment`, `count`, `delete` |
-| `bee document`     | `list`, `view`, `tree`, `attachments`, `create`, `delete`                                                  |
+| `bee document`     | `list`, `view`, `tree`, `attachments`, `comments`, `count`, `create`, `add-tag`, `remove-tag`, `delete`    |
 | `bee notification` | `list`, `count`, `read`, `read-all`                                                                        |
 | `bee pr`           | `list`, `view`, `comments`, `status`, `create`, `edit`, `comment`, `count`                                 |
 | `bee repo`         | `list`, `view`, `clone`                                                                                    |

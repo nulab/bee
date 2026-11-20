@@ -3,6 +3,13 @@ export type { BacklogErrorResponse } from "./api-error";
 export { ACTIVITY_LABELS } from "./activity-labels";
 export { getActivitySummary } from "./activity-summary";
 export {
+  addDocumentTags,
+  getDocumentComments,
+  getDocumentsCount,
+  removeDocumentTags,
+} from "./document-api";
+export type { DocumentComment, DocumentCommentEntry, DocumentCommentReply } from "./document-api";
+export {
   IssueStatusId,
   PRIORITY_NAMES,
   PriorityId,
